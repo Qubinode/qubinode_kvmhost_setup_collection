@@ -1,5 +1,6 @@
 # Qubinode kvmhost Setup Collection for Ansible
 This Ansible Collection for Virtual Machines Setup provides a set of roles for configuring and managing KVM hosts in baremetal servers using RHEL-based Linux operating systems. This collection can help to simplify the process of deploying and managing virtual machines by automating the setup process.
+
 ![Build Status](https://github.com/tosin2013/qubinode_kvmhost_setup_collection/actions/workflows/ansible-test.yml/badge.svg)
 ![Extra docsite and links](https://github.com/tosin2013/qubinode_kvmhost_setup_collection/actions/workflows/extra-docs-linting.yml/badge.svg)
 
