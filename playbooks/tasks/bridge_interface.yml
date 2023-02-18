@@ -5,17 +5,23 @@
   when:
     - libvirt_host_networks[type_idx].bridge_device |length == 0
     - libvirt_host_networks[type_idx].mode == 'bridge'
-    
+
+#- name: delete any previous failed attempts to configure bridge interface
+#  file:
+#    path: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
+#    state: absent
+#  with_items: "{{ libvirt_host_networks[type_idx] }}"
+#  when: libvirt_host_networks[type_idx].mode == 'bridge'
 - name: Check _networks[type_idx].bridge_slave_dev variable
   fail: msg="Bailing out. this play requires libvirt_host_networks[type_idx].bridge_slave_dev"
   with_items: "{{ libvirt_host_networks[type_idx] }}"
   when:
     - libvirt_host_networks[type_idx].bridge_slave_dev |length == 0
     - libvirt_host_networks[type_idx].mode == 'bridge'
-- name: Configure bridge fr older systems 
+- name: Configure bridge fr older systems
   block:
     - name: setting bridge name
-      set_fact:
+      ansible.builtin.set_fact:
         bridge_name: "{{ qubinode_bridge_fact }}"
       ignore_errors: true
 
@@ -26,7 +32,7 @@
     - name: setup bridge interface
       vars:
         bridge_idx: "{{ type_idx }}"
-      template:
+      ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
         mode: 0640
@@ -36,7 +42,7 @@
     - name: setup ethernet device interface
       vars:
         bridge_idx: "{{ type_idx }}"
-      template:
+      ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
         mode: 0640
@@ -84,13 +90,13 @@
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
       ignore_errors: yes
-  when: 
+  when:
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
     - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
     - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
 - name: update /etc/resolv.conf
-  template:
+  ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
   when: not bridge_name | bool or bridge_name is undefined
