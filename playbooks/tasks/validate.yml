@@ -22,4 +22,3 @@
       Virtualization Technology (VT) is currently disabled. Please enable VT
       before running this role again.
   when: not libvirt_host_vt_enabled
-

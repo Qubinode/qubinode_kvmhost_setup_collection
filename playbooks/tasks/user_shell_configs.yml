@@ -27,13 +27,6 @@
     group: "wheel"
     mode: 0644
 
-#- name: Check if ~/.vim/autoload/plug.vim exist
-#  become: yes
-#  become_user: "{{ shell_user }}"
-#  stat:
-#    path: "{{ user_homedir }}/.vim/autoload/plug.vim"
-#  register: vim_plug
-
 - name: Install vimplug plugin manager
   #when: vim_plug.stat.exists == False
   become: yes
@@ -106,4 +99,3 @@
       args:
         chdir: "{{ tempdir_kvmhost_path }}/fonts"
         creates: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
-

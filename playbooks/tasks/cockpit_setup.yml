@@ -15,4 +15,3 @@
       service: cockpit
       state: enabled
   when: not cicd_test|bool
-
