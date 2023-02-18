@@ -4,3 +4,4 @@ collections:
   - community.general
   - community.libvirt
   - fedora.linux_system_roles
+  - ansible.netcommon
