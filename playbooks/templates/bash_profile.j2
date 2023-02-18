@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+
+PATH=$PATH:$HOME/bin:{{ user_homedir }}/.local/bin:{{ user_homedir }}/qubinode-installer:{{ user_homedir }}/.cargo/bin
+
+export PATH
+
+echo
+echo "Have a nice day!"
+echo

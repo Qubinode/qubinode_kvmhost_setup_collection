@@ -14,7 +14,8 @@ collection/
 │   │   └── module1.py
 │   ├── inventory/
 │   └── .../
-├── README.md├── roles/
+├── README.md
+├── roles/
 │   ├── role1/
 │   ├── role2/
 │   └── .../
