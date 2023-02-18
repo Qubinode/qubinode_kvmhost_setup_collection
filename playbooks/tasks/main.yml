@@ -1,6 +1,6 @@
 ---
 - name: Display all variables/facts known for a host
-  debug:
+  ansible.builtin.debug:
     var: libvirt_host_networks
   register: myresults
 
@@ -9,14 +9,14 @@
 
 - name: ensure required packages are installed
   ansible.builtin.shell: >
-    rpm -q "{{ item }}" || dnf install -y "{{ item }}" && echo yes
+    rpm -q "{{ item }}" || yum install -y "{{ item }}" && echo yes
   loop: "{{ required_rpm_pakcages }}"
 
 
 - name: Install required python libraries
   become: yes
   become_user: "{{ admin_user }}"
-  pip:
+  ansible.builtin.pip:
     name: openshift
     extra_args: --user
 

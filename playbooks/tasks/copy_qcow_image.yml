@@ -1,6 +1,6 @@
 ---
 - name: "Confirm that  {{ qcow_rhel_name }} exists under the {{ project_dir }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ project_dir }}/{{ os_qcow_image_name }}"
   register: main_qcow_check
   ignore_errors: yes
@@ -10,13 +10,13 @@
   when: not main_qcow_check.stat.exists or main_qcow_check is undefined
 
 - name: "Confirm that  {{ qcow_rhel_name }} exists under the {{ project_dir }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ kvm_host_libvirt_dir }}/{{ os_qcow_image_name }}"
   register: kvm_qcow_check
   ignore_errors: yes
 
 - name: "Copy  {{ qcow_rhel_name }}  to {{ kvm_host_libvirt_dir }}"
-  copy:
+  ansible.builtin.copy:
     src:  "{{ project_dir }}/{{ os_qcow_image_name }}"
     dest: "{{ kvm_host_libvirt_dir }}/{{ os_qcow_image_name }}"
   delegate_to: localhost

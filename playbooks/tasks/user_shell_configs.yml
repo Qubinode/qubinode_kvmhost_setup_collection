@@ -1,26 +1,26 @@
 ---
 - name: Ensure {{ user_homedir }}/.config exist
   become: yes
-  file:
+  ansible.builtin.file:
     path: "{{ user_homedir }}/.config"
     state: directory
     owner: "{{ shell_user }}"
-    group: "wheel"   
+    group: "wheel"
 
-- name: Deploy startship config for {{ shell_user }} 
+- name: Deploy startship config for {{ shell_user }}
   become: yes
   become_user: "{{ shell_user }}"
-  template:
+  ansible.builtin.template:
     src: starship.toml.j2
     dest: "{{ user_homedir }}/.config/starship.toml"
     owner: "{{ shell_user }}"
     group: "wheel"
     mode: 0644
 
-- name: Deploy bash_profile for {{ shell_user }} 
+- name: Deploy bash_profile for {{ shell_user }}
   become: yes
   become_user: "{{ shell_user }}"
-  template:
+  ansible.builtin.template:
     src: bash_profile.j2
     dest: "{{ user_homedir }}/.bash_profile"
     owner: "{{ shell_user }}"
@@ -43,33 +43,33 @@
   shell: curl -fLo ~/.vim/autoload/plug.vim --create-dirs {{ plug_url }}
   args:
     creates: "{{ user_homedir }}/.vim/autoload/plug.vim"
-  
-- name: Deploy bashrc for {{ shell_user }} 
+
+- name: Deploy bashrc for {{ shell_user }}
   become: yes
   become_user: "{{ shell_user }}"
   vars:
     synth_shell_dir: "{{ user_homedir }}/.config"
-  template:
+  ansible.builtin.template:
     src: bashrc.j2
     dest: "{{ user_homedir }}/.bashrc"
     owner: "{{ shell_user }}"
     group: "wheel"
-    mode: 0644    
+    mode: 0644
 
-- name: Deploy vimrc for {{ shell_user }} 
+- name: Deploy vimrc for {{ shell_user }}
   become: yes
   become_user: "{{ shell_user }}"
-  template:
+  ansible.builtin.template:
     src: vimrc.j2
     dest: "{{ user_homedir }}/.vimrc"
     owner: "{{ shell_user }}"
     group: "wheel"
-    mode: 0644    
-    
+    mode: 0644
+
 - name: Extract .vim
   become: yes
   become_user: "{{ shell_user }}"
-  unarchive:
+  ansible.builtin.unarchive:
     src: vim.zip
     dest: "{{ user_homedir }}"
     owner: "{{ shell_user }}"
@@ -78,7 +78,7 @@
 - name: check if powerline font is installed
   become: yes
   become_user: "{{ shell_user }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
   register: powerline_font
 
@@ -88,21 +88,22 @@
   become_user: "{{ shell_user }}"
   block:
     - name: Ensure {{ user_homedir }}/.config/fontconfig/conf.d
-      file:
+      ansible.builtin.file:
         path: "{{ user_homedir }}/.config/fontconfig/conf.d"
         state: directory
         mode: '0755'
     - name: Download powerline fonts
-      git:
+      ansible.builtin.git:
         repo: 'https://github.com/powerline/fonts.git'
         dest: "{{ tempdir_kvmhost_path }}/fonts"
         depth: 1
     - name: Download powerline fontconfig
-      get_url:
+      ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/powerline/fonts/master/fontconfig/50-enable-terminess-powerline.conf
         dest: "{{ user_homedir }}/.config/fontconfig/conf.d/50-enable-terminess-powerline.conf"
     - name: Run powerline fonts install.sh
       shell: "{{ tempdir_kvmhost_path }}/fonts/install.sh"
       args:
         chdir: "{{ tempdir_kvmhost_path }}/fonts"
-        creates: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz" 
+        creates: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
+

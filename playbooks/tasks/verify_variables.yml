@@ -40,14 +40,14 @@
   when: qubinode_bridge_name |length == 0
 
 - name: get the index of a dict
-  debug:
+  ansible.builtin.debug:
     msg: "{{ item.mac }}"
   loop: "{{ libvirt_host_networks }}"
 
 
 # TODO: this section might need to be replaced
 - name: ensureing the libvirt_host_networks values are not empty if defined
-  assert:
+  ansible.builtin.assert:
     that:
       - item.mac |length != 0
       - item.name |length != 0

@@ -6,19 +6,20 @@
   register: result
 
 - name: Set a fact about whether Virtualization Technology (VT) is enabled
-  set_fact:
+  ansible.builtin.set_fact:
     libvirt_host_vt_enabled: "{{ result.rc == 0 }}"
 
 - name: Notify if Virtualization Technology (VT) is disabled
-  debug:
+  ansible.builtin.debug:
     msg: >
       Virtualization Technology (VT) is currently disabled. Please enable VT
       before running this role again.
   when: not libvirt_host_vt_enabled
 
 - name: Fail if Virtualization Technology (VT) is disabled
-  fail:
+  ansible.builtin.fail:
     msg: >
       Virtualization Technology (VT) is currently disabled. Please enable VT
       before running this role again.
   when: not libvirt_host_vt_enabled
+

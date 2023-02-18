@@ -4,7 +4,7 @@
   when: not cicd_test|bool
 
 - name: enable libvirt services
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: yes
     state: started
@@ -17,16 +17,16 @@
   changed_when: start_tuned.rc != 0
   args:
     executable: /bin/bash
-    
+
 - name: Return bridge status
   ansible.builtin.command: "ifconfig {{ qubinode_bridge_device }}"
   register: bridge_interface
   ignore_errors: true
-  
+
 - name: Get Bridge Status
   ansible.builtin.set_fact:
     bridge_interface_status: "{{ bridge_interface }}"
-    
+
 - name: Print the bridge info
   ansible.builtin.debug:
     msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
@@ -53,22 +53,21 @@
           address:
           - "{{ kvm_host_ip }}/{{ kvm_host_mask_prefix }}"
       - name: eno1
-        state: up 
+        state: up
         type: ethernet
         interface_name: "{{ kvm_host_interface }}"
         controller: "{{ qubinode_bridge_device }}"
         port_type: bridge
 
-  when: (ansible_distribution == "Fedora" and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == "" and configure_bridge == true) or 
-        (ansible_distribution == "Fedora" and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == "" and configure_bridge == true) or 
-        (ansible_distribution == "CentOS" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == "" and configure_bridge == true) or 
-        (ansible_distribution == "RedHat" and ansible_distribution_major_version == '8' and bridge_interface_status.stdout  == "" and configure_bridge == true) or 
+  when: (ansible_distribution == "Fedora" and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == "" and configure_bridge == true) or
+        (ansible_distribution == "Fedora" and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == "" and configure_bridge == true) or
+        (ansible_distribution == "CentOS" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == "" and configure_bridge == true) or
+        (ansible_distribution == "RedHat" and ansible_distribution_major_version == '8' and bridge_interface_status.stdout  == "" and configure_bridge == true) or
         (ansible_distribution == "RedHat" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout  == "" and configure_bridge == true)
 
 
 - name: configure bridge interface for libvirt
   include_tasks: bridge_interface.yml
-  #when: bridge_interface_status is undefined
   loop: "{{ libvirt_host_networks }}"
   loop_control:
     index_var: type_idx

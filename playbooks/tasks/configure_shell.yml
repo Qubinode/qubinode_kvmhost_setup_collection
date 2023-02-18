@@ -1,63 +1,63 @@
 ---
 - name: Define temp dir
-  set_fact:
+  ansible.builtin.set_fact:
     tempdir_kvmhost_path: /tmp/kvmhost_setup
 
 - name: Create temp directory
-  file:
+  ansible.builtin.file:
     path: "{{ tempdir_kvmhost_path }}"
     state: directory
     mode: '0777'
-    
+
 - name: Extract synth-shell
-  unarchive:
+  ansible.builtin.unarchive:
     src: synth-shell.zip
     dest: "/etc"
 
 - name: Deploy qubinode global bashrc
-  template:
+  ansible.builtin.template:
     src: bashrc.j2
     dest: "/etc/profile.d/qubinode.sh"
-    mode: 0644    
+    mode: 0644
 
 - name: Download startship
-  unarchive:
+  ansible.builtin.unarchive:
     src: https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-musl.tar.gz
     remote_src: yes
     dest: /usr/local/sbin
 
 - name: Download k9s
-  unarchive:
+  ansible.builtin.unarchive:
     src: https://github.com/derailed/k9s/releases/download/v0.24.2/k9s_Linux_x86_64.tar.gz
     remote_src: yes
     dest: /usr/local/sbin
     creates: /usr/local/sbin/k9s
 
 - name: check if z cli tool is present
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/z.sh
   register: z_cli
 
 - name: Install z cli tool
   when: z_cli.stat.exists == False
   block:
-    - name: Download the z cli tool 
-      git:
+    - name: Download the z cli tool
+      ansible.builtin.git:
         repo: https://github.com/rupa/z
         dest: "{{ tempdir_kvmhost_path }}/z"
-    
+
     - name: Copy z man page
-      copy:
+      ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.1"
         dest: /usr/local/share/man/man1/z.1
-    
+
     - name: Copy z cli tool to /usr/local/bin
-      copy:
+      ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.sh"
         dest: /usr/local/bin/z.sh
 
 - name: Install additional cli tools via python
-  pip:
+  ansible.builtin.pip:
     name:
       - httpie
       - tldr
@@ -70,7 +70,7 @@
     loop_var: shell_user
 
 - name: Remove temp directory
-  file:
+  ansible.builtin.file:
     path: "{{ tempdir_kvmhost_path }}"
     state: absent
   when: tempdir_kvmhost_path is defined
