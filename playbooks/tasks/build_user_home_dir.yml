@@ -1,0 +1,17 @@
+---
+- name: Get home directory for {{ shell_user }}
+  set_fact:
+    current_user_homedir: "{{ lookup('env','HOME') }}"
+  become: true
+  become_user: "{{ shell_user }}"
+  when: shell_user != 'root'
+
+- name: Set root user homedir
+  set_fact:
+    current_user_homedir: '/root'
+  when: shell_user == 'root'
+
+- name: User shell configuration files
+  vars:
+    user_homedir: "{{ current_user_homedir }}"
+  include_tasks: user_shell_configs.yml

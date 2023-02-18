@@ -1,0 +1,20 @@
+---
+- name: ensure libvirt pool is defined
+  virt_pool:
+    command: define
+    name: "{{ item.name }}"
+    xml: '{{ (lookup("template", "libvirt_pool.xml.j2")) }}'
+  with_items: "{{ libvirt_host_storage_pools }}"
+  become: True
+
+- name: ensure libvirt storage pool is active
+  virt_pool:
+    state: "{{ item.state }}"
+    name: "{{ item.name }}"
+  with_items: "{{ libvirt_host_storage_pools }}"
+
+- name: ensure storage pool is started at boot
+  virt_pool:
+    autostart: "{{ item.autostart }}"
+    name: "{{ item.name }}"
+  with_items: "{{ libvirt_host_storage_pools }}"

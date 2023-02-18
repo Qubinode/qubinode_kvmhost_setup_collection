@@ -1,0 +1,108 @@
+---
+- name: Ensure {{ user_homedir }}/.config exist
+  become: yes
+  file:
+    path: "{{ user_homedir }}/.config"
+    state: directory
+    owner: "{{ shell_user }}"
+    group: "wheel"   
+
+- name: Deploy startship config for {{ shell_user }} 
+  become: yes
+  become_user: "{{ shell_user }}"
+  template:
+    src: starship.toml.j2
+    dest: "{{ user_homedir }}/.config/starship.toml"
+    owner: "{{ shell_user }}"
+    group: "wheel"
+    mode: 0644
+
+- name: Deploy bash_profile for {{ shell_user }} 
+  become: yes
+  become_user: "{{ shell_user }}"
+  template:
+    src: bash_profile.j2
+    dest: "{{ user_homedir }}/.bash_profile"
+    owner: "{{ shell_user }}"
+    group: "wheel"
+    mode: 0644
+
+#- name: Check if ~/.vim/autoload/plug.vim exist
+#  become: yes
+#  become_user: "{{ shell_user }}"
+#  stat:
+#    path: "{{ user_homedir }}/.vim/autoload/plug.vim"
+#  register: vim_plug
+
+- name: Install vimplug plugin manager
+  #when: vim_plug.stat.exists == False
+  become: yes
+  become_user: "{{ shell_user }}"
+  vars:
+    plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  shell: curl -fLo ~/.vim/autoload/plug.vim --create-dirs {{ plug_url }}
+  args:
+    creates: "{{ user_homedir }}/.vim/autoload/plug.vim"
+  
+- name: Deploy bashrc for {{ shell_user }} 
+  become: yes
+  become_user: "{{ shell_user }}"
+  vars:
+    synth_shell_dir: "{{ user_homedir }}/.config"
+  template:
+    src: bashrc.j2
+    dest: "{{ user_homedir }}/.bashrc"
+    owner: "{{ shell_user }}"
+    group: "wheel"
+    mode: 0644    
+
+- name: Deploy vimrc for {{ shell_user }} 
+  become: yes
+  become_user: "{{ shell_user }}"
+  template:
+    src: vimrc.j2
+    dest: "{{ user_homedir }}/.vimrc"
+    owner: "{{ shell_user }}"
+    group: "wheel"
+    mode: 0644    
+    
+- name: Extract .vim
+  become: yes
+  become_user: "{{ shell_user }}"
+  unarchive:
+    src: vim.zip
+    dest: "{{ user_homedir }}"
+    owner: "{{ shell_user }}"
+    group: "wheel"
+
+- name: check if powerline font is installed
+  become: yes
+  become_user: "{{ shell_user }}"
+  stat:
+    path: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
+  register: powerline_font
+
+- name: Install powerline fonts
+  when: powerline_font.stat.exists == False
+  become: yes
+  become_user: "{{ shell_user }}"
+  block:
+    - name: Ensure {{ user_homedir }}/.config/fontconfig/conf.d
+      file:
+        path: "{{ user_homedir }}/.config/fontconfig/conf.d"
+        state: directory
+        mode: '0755'
+    - name: Download powerline fonts
+      git:
+        repo: 'https://github.com/powerline/fonts.git'
+        dest: "{{ tempdir_kvmhost_path }}/fonts"
+        depth: 1
+    - name: Download powerline fontconfig
+      get_url:
+        url: https://raw.githubusercontent.com/powerline/fonts/master/fontconfig/50-enable-terminess-powerline.conf
+        dest: "{{ user_homedir }}/.config/fontconfig/conf.d/50-enable-terminess-powerline.conf"
+    - name: Run powerline fonts install.sh
+      shell: "{{ tempdir_kvmhost_path }}/fonts/install.sh"
+      args:
+        chdir: "{{ tempdir_kvmhost_path }}/fonts"
+        creates: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz" 

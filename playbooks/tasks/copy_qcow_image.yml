@@ -1,0 +1,23 @@
+---
+- name: "Confirm that  {{ qcow_rhel_name }} exists under the {{ project_dir }}"
+  stat:
+    path: "{{ project_dir }}/{{ os_qcow_image_name }}"
+  register: main_qcow_check
+  ignore_errors: yes
+
+- name: Fail when {{ project_dir }}/{{ os_qcow_image_name }} does not exist
+  fail: msg="Bailing out. {{ project_dir }}/{{ os_qcow_image_name }} does not exist"
+  when: not main_qcow_check.stat.exists or main_qcow_check is undefined
+
+- name: "Confirm that  {{ qcow_rhel_name }} exists under the {{ project_dir }}"
+  stat:
+    path: "{{ kvm_host_libvirt_dir }}/{{ os_qcow_image_name }}"
+  register: kvm_qcow_check
+  ignore_errors: yes
+
+- name: "Copy  {{ qcow_rhel_name }}  to {{ kvm_host_libvirt_dir }}"
+  copy:
+    src:  "{{ project_dir }}/{{ os_qcow_image_name }}"
+    dest: "{{ kvm_host_libvirt_dir }}/{{ os_qcow_image_name }}"
+  delegate_to: localhost
+  when: not kvm_qcow_check.stat.exists or kvm_qcow_check is undefined

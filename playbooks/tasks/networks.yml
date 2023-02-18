@@ -1,0 +1,28 @@
+---
+- name: get list of libvirt networks
+  virt_net:
+    command: list_nets
+  register: libvirt_nets
+
+- name: ensure libvirt networks are setup
+  vars:
+    net_name: "{{ libvirt_host_networks[libvirt_idx].name }}"
+    net_mode: "{{ libvirt_host_networks[libvirt_idx].mode }}"
+    net_create: "{{ libvirt_host_networks[libvirt_idx].create }}"
+  when: net_name in libvirt_nets.list_nets
+  block:
+    - name: Ensure libvirt nat network {{ net_name }} is defined
+      virt_net:
+        name: "{{ net_name }}"
+        command: define
+        xml: '{{ (lookup("templates", "nat_network.xml.j2")) }}'
+      when: net_mode == 'nat' and net_create|bool
+    - name: ensure {{ net_name }} is active
+      virt_net:
+        name: "{{ net_name }}"
+        state: active
+
+    - name: ensure {{ net_name }} is started on boot
+      virt_net:
+        name: "{{ net_name }}"
+        autostart: yes

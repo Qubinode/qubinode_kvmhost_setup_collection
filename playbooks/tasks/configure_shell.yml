@@ -1,0 +1,77 @@
+---
+- name: Define temp dir
+  set_fact:
+    tempdir_kvmhost_path: /tmp/kvmhost_setup
+
+- name: Create temp directory
+  file:
+    path: "{{ tempdir_kvmhost_path }}"
+    state: directory
+    mode: '0777'
+    
+- name: Extract synth-shell
+  unarchive:
+    src: synth-shell.zip
+    dest: "/etc"
+
+- name: Deploy qubinode global bashrc
+  template:
+    src: bashrc.j2
+    dest: "/etc/profile.d/qubinode.sh"
+    mode: 0644    
+
+- name: Download startship
+  unarchive:
+    src: https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-musl.tar.gz
+    remote_src: yes
+    dest: /usr/local/sbin
+
+- name: Download k9s
+  unarchive:
+    src: https://github.com/derailed/k9s/releases/download/v0.24.2/k9s_Linux_x86_64.tar.gz
+    remote_src: yes
+    dest: /usr/local/sbin
+    creates: /usr/local/sbin/k9s
+
+- name: check if z cli tool is present
+  stat:
+    path: /usr/local/bin/z.sh
+  register: z_cli
+
+- name: Install z cli tool
+  when: z_cli.stat.exists == False
+  block:
+    - name: Download the z cli tool 
+      git:
+        repo: https://github.com/rupa/z
+        dest: "{{ tempdir_kvmhost_path }}/z"
+    
+    - name: Copy z man page
+      copy:
+        src: "{{ tempdir_kvmhost_path }}/z/z.1"
+        dest: /usr/local/share/man/man1/z.1
+    
+    - name: Copy z cli tool to /usr/local/bin
+      copy:
+        src: "{{ tempdir_kvmhost_path }}/z/z.sh"
+        dest: /usr/local/bin/z.sh
+
+- name: Install additional cli tools via python
+  pip:
+    name:
+      - httpie
+      - tldr
+      - kube-shell
+
+- name: Build user homedir var
+  include_tasks: build_user_home_dir.yml
+  loop: "{{ shell_users }}"
+  loop_control:
+    loop_var: shell_user
+
+- name: Remove temp directory
+  file:
+    path: "{{ tempdir_kvmhost_path }}"
+    state: absent
+  when: tempdir_kvmhost_path is defined
+  changed_when: False

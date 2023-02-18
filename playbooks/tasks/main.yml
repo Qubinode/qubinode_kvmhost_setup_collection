@@ -1,0 +1,32 @@
+---
+- name: Display all variables/facts known for a host
+  debug:
+    var: libvirt_host_networks
+  register: myresults
+
+- name: validate variables are defined
+  include_tasks: verify_variables.yml
+
+- name: ensure required packages are installed
+  ansible.builtin.shell: >
+    rpm -q "{{ item }}" || dnf install -y "{{ item }}" && echo yes
+  loop: "{{ required_rpm_pakcages }}"
+
+
+- name: Install required python libraries
+  become: yes
+  become_user: "{{ admin_user }}"
+  pip:
+    name: openshift
+    extra_args: --user
+
+- name: configure shell extras
+  include_tasks: configure_shell.yml
+  when: configure_shell|bool
+
+- name: Setup Libvirt
+  include_tasks: libvirt_setup.yml
+
+- name: Setup Cockpit
+  include_tasks: cockpit_setup.yml
+  when: enable_cockpit|bool

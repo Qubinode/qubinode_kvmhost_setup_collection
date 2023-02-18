@@ -1,0 +1,108 @@
+---
+- name: Checking libvirt_host_networks[type_idx].bridge_device variable
+  fail: msg="Bailing out. this play requires libvirt_host_networks[type_idx].bridge_device"
+  with_items: "{{ libvirt_host_networks[type_idx] }}"
+  when:
+    - libvirt_host_networks[type_idx].bridge_device |length == 0
+    - libvirt_host_networks[type_idx].mode == 'bridge'
+    
+- name: Check _networks[type_idx].bridge_slave_dev variable
+  fail: msg="Bailing out. this play requires libvirt_host_networks[type_idx].bridge_slave_dev"
+  with_items: "{{ libvirt_host_networks[type_idx] }}"
+  when:
+    - libvirt_host_networks[type_idx].bridge_slave_dev |length == 0
+    - libvirt_host_networks[type_idx].mode == 'bridge'
+- name: Configure bridge fr older systems 
+  block:
+    - name: setting bridge name
+      set_fact:
+        bridge_name: "{{ qubinode_bridge_fact }}"
+      ignore_errors: true
+
+    - name: Configure bridge
+      command:  echo "we need to configure the bridge."
+      when: not bridge_name | bool or bridge_name is undefined
+
+    - name: setup bridge interface
+      vars:
+        bridge_idx: "{{ type_idx }}"
+      template:
+        src: templates/ifcfg_bridge_template.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
+        mode: 0640
+      with_items: "{{ libvirt_host_networks[type_idx] }}"
+      when: not bridge_name | bool or bridge_name is undefined
+
+    - name: setup ethernet device interface
+      vars:
+        bridge_idx: "{{ type_idx }}"
+      template:
+        src: templates/ifcfg_device_template.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
+        mode: 0640
+      with_items: "{{ libvirt_host_networks[type_idx] }}"
+      register: create_slave_device
+      when: not bridge_name | bool or bridge_name is undefined
+
+    # Using the systemd module to restart networking seems to not properly panos_restart
+    # the networking subsystem, further debugging is required to find root issue.
+    # The command module gives us the behaviour we expect which is network restart without loosing
+    # connectivity and the bridge interface comes up.
+
+    - name: restart network service
+      command: "systemctl restart {{ item }}"
+      args:
+        warn: no
+      changed_when: false
+      with_items:
+        - network
+        - NetworkManager
+        - libvirtd
+      when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is undefined))
+
+    - name: restart network service
+      command: "systemctl restart {{ item }}"
+      args:
+        warn: no
+      changed_when: false
+      with_items:
+        - NetworkManager
+        - libvirtd
+      when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
+
+    - name: active bridge connection
+      command: "nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}"
+      args:
+        warn: no
+      changed_when: false
+      when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
+
+    - name: diable old connection
+      command: "sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}"
+      args:
+        warn: no
+      changed_when: false
+      when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
+      ignore_errors: yes
+  when: 
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
+    - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
+    - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
+- name: update /etc/resolv.conf
+  template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+  when: not bridge_name | bool or bridge_name is undefined
+
+- name: Ensure libvirt bridge network is defined
+  vars:
+    net_name: "{{ libvirt_host_networks[type_idx].name }}"
+    net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
+    net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
+    net_create: "{{ libvirt_host_networks[type_idx].create }}"
+  virt_net:
+    name: "{{ net_name }}"
+    command: define
+    xml: '{{ (lookup("template", "br_network.xml.j2")) }}'
+  when: net_create|bool

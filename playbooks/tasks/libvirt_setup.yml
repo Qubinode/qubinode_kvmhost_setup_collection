@@ -1,0 +1,91 @@
+---
+- name: validate virtualization extensions are available to this host
+  include_tasks: validate.yml
+  when: not cicd_test|bool
+
+- name: enable libvirt services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ libvirt_services }}"
+
+- name: start tuned profile virtual-host
+  shell: |
+   set -o pipefail &&  tuned-adm profile virtual-host
+  register: start_tuned
+  changed_when: start_tuned.rc != 0
+  args:
+    executable: /bin/bash
+    
+- name: Return bridge status
+  ansible.builtin.command: "ifconfig {{ qubinode_bridge_device }}"
+  register: bridge_interface
+  ignore_errors: true
+  
+- name: Get Bridge Status
+  ansible.builtin.set_fact:
+    bridge_interface_status: "{{ bridge_interface }}"
+    
+- name: Print the bridge info
+  ansible.builtin.debug:
+    msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
+
+- name: configure bridge interface for libvirt
+  ansible.builtin.import_role:
+    name: linux-system-roles.network
+  vars:
+    network_provider: nm
+    network_connections:
+      - name: "{{ qubinode_bridge_device }}"
+        type: bridge
+        state: up
+        ip:
+          route_metric4: 100
+          dhcp4: no
+          #dhcp4_send_hostname: no
+          gateway4: "{{ kvm_host_gw }}"
+          dns:
+            - "{{ primary_dns_server }}"
+            - "{{ dns_forwarder }}"
+          dns_search:
+            - "{{ domain }}"
+          address:
+          - "{{ kvm_host_ip }}/{{ kvm_host_mask_prefix }}"
+      - name: eno1
+        state: up 
+        type: ethernet
+        interface_name: "{{ kvm_host_interface }}"
+        controller: "{{ qubinode_bridge_device }}"
+        port_type: bridge
+
+  when: (ansible_distribution == "Fedora" and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == "" and configure_bridge == true) or 
+        (ansible_distribution == "Fedora" and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == "" and configure_bridge == true) or 
+        (ansible_distribution == "CentOS" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == "" and configure_bridge == true) or 
+        (ansible_distribution == "RedHat" and ansible_distribution_major_version == '8' and bridge_interface_status.stdout  == "" and configure_bridge == true) or 
+        (ansible_distribution == "RedHat" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout  == "" and configure_bridge == true)
+
+
+- name: configure bridge interface for libvirt
+  include_tasks: bridge_interface.yml
+  #when: bridge_interface_status is undefined
+  loop: "{{ libvirt_host_networks }}"
+  loop_control:
+    index_var: type_idx
+    loop_var: bridge_item
+
+- name: configure libvirt network
+  loop: "{{ libvirt_host_networks }}"
+  loop_control:
+    index_var: libvirt_idx
+    loop_var: libvirt_item
+  include_tasks: networks.yml
+  when: not cicd_test|bool
+
+- name: configure libvirt storage pool
+  include_tasks: storage_pool.yml
+  when: not cicd_test|bool
+
+- name: Make libvirt accessible by non-root user
+  include_tasks: validate.yml
+  when: enable_libvirt_admin_user|bool
