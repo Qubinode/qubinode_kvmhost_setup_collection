@@ -42,6 +42,12 @@ jobs:
       - name: Build Ansible Collection
         run: ansible-galaxy collection build build/src --force
 
+      - name: Show Build information
+        run: |
+          ls -lath .
+          ls -lath ./build
+          ls -R build
+
       - name: Create Release
         id: create_release
         uses:  ncipollo/release-action@v1
