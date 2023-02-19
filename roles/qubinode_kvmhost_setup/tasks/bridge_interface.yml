@@ -26,7 +26,7 @@
       command:  echo "we need to configure the bridge."
       when: not bridge_name | bool or bridge_name is undefined
 
-    - name: setup bridge interface
+    - name: Setup bridge interface
       vars:
         bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
@@ -36,7 +36,7 @@
       with_items: "{{ libvirt_host_networks[type_idx] }}"
       when: not bridge_name | bool or bridge_name is undefined
 
-    - name: setup ethernet device interface
+    - name: Setup ethernet device interface
       vars:
         bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
@@ -52,7 +52,7 @@
     # The command module gives us the behaviour we expect which is network restart without loosing
     # connectivity and the bridge interface comes up.
 
-    - name: restart network service
+    - name: Restart network service
       command: "systemctl restart {{ item }}"
       args:
         warn: no
@@ -63,7 +63,7 @@
         - libvirtd
       when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is undefined))
 
-    - name: restart network service
+    - name: Restart network service
       command: "systemctl restart {{ item }}"
       args:
         warn: no
@@ -73,29 +73,31 @@
         - libvirtd
       when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
 
-    - name: active bridge connection
+    - name: Active bridge connection
       command: "nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}"
       args:
         warn: no
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
 
-    - name: diable old connection
+    - name: Disable old connection
       command: "sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}"
       args:
         warn: no
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
-      ignore_errors: yes
+      ignore_errors: true
   when:
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
     - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
     - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
-- name: update /etc/resolv.conf
+
+- name: Update /etc/resolv.conf
   ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
+    mode: '0644'
   when: not bridge_name | bool or bridge_name is undefined
 
 - name: Ensure libvirt bridge network is defined
