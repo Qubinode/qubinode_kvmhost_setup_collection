@@ -16,6 +16,11 @@
     - libvirt_host_networks[type_idx].mode == 'bridge'
 
 - name: Configure bridge fr older systems
+  when:
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
+    - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
+    - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
   block:
     - name: setting bridge name
       ansible.builtin.set_fact:
@@ -87,11 +92,6 @@
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
       ignore_errors: true
-  when:
-    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
-    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
-    - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
-    - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
 
 - name: Update /etc/resolv.conf
   ansible.builtin.template:
