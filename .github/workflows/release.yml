@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Get current version
         id: cversion
@@ -54,7 +54,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
-          files: qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+          files: ./qubinode_kvmhost_setup_collection-0.1.0.tar.gz
           body: |
             # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
             ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/workflows/ReleaseBuildCollection/badge.svg)
