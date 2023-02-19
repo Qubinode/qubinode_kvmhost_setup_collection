@@ -50,12 +50,12 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses:  ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          RELEASE_VERSION: 0.1.0
+          RELEASE_VERSION: ${{ steps.cversion.outputs.version }}
         with:
-          artifacts: qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+          artifacts: qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz
           body: |
             # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
             ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/workflows/ReleaseBuildCollection/badge.svg)
@@ -67,10 +67,11 @@ jobs:
             ```yaml
             ---
             collections:
-                - https://github.com/Qubinode/qubinode_kvmhost_setup_collection/releases/download/v$RELEASE_VERSION/qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+                - https://github.com/Qubinode/qubinode_kvmhost_setup_collection/releases/download/v${{ steps.cversion.outputs.version }}/qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz
             ```
           draft: false
           prerelease: false
+
 
       - name: Upload Release Asset
         id: upload-release-asset
