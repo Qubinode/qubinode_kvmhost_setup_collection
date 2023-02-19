@@ -50,6 +50,7 @@ jobs:
           ls -lath .
           ls -lath ./build
           ls -R build
+          pwd
 
       - name: Create Release
         id: create_release
