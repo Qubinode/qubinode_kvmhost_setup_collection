@@ -1,8 +1,43 @@
 # Qubinode kvmhost Setup Collection for Ansible
 This Ansible Collection for Virtual Machines Setup provides a set of roles for configuring and managing KVM hosts in baremetal servers using RHEL-based Linux operating systems. This collection can help to simplify the process of deploying and managing virtual machines by automating the setup process.
 
-![Build Status](https://github.com/tosin2013/qubinode_kvmhost_setup_collection/actions/workflows/ansible-test.yml/badge.svg)
-![Extra docsite and links](https://github.com/tosin2013/qubinode_kvmhost_setup_collection/actions/workflows/extra-docs-linting.yml/badge.svg)
+![Build Status](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/ansible-test.yml/badge.svg)
+![Extra docsite and links](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/extra-docs-linting.yml/badge.svg)
+
+
+Role Variables
+--------------
+
+| variable  | definition |
+| ------------- | ------------- |
+| project_dir | location of code and qcow iamge | 
+| required_rpm_pakcages | list of packages that will be installed |
+| libvirt_services | libvirt services |
+| libvirt_host_networks | dictionary variable that creates libvirt network xml file. must set the name, mode, and bridge key |
+| libvirt_host_pool | Content Cell  |
+| kvm_host_ipaddr | default value is ansible_default_ipv4.address  |
+| kvm_host_ip | default value is ansible_default_ipv4.address |
+| kvm_host_interface | default value is ansible_default_ipv4.interface |
+| kvm_host_gw | default value is ansible_default_ipv4.gateway |
+| kvm_host_macaddr | default value is ansible_default_ipv4.mac |
+| kvm_host_netmask | default value is ansible_default_ipv4.netmask |
+| kvm_host_mask_prefix | default value is ansible_default_ipv4.gateway |
+| kvm_host_bootproto | default value is dhcp |
+| kvm_bridge_type | default value is Bridge |
+| storage_nic | default value is false |
+| libvirt_disk | default value is false |
+| qubinode_bridge_name | default qubibr0 name of bridge network |
+| qubinode_bridge_fact | name of bridge to check ansible_qubibr0.active for active status |
+| qcow_rhel_name | name of default qcow image |
+| admin_user | ssh username for kvm server |
+| kvm_host_domain | default value is "lab.example" |
+| kvm_host_dns_server | default value is  "1.1.1.1"  |
+| dns_servers | default value is"{{ dns_server }}" and 8.8.8.8 |
+| kvm_host_libvirt_dir | default value is /var/lib/libvirt/images |
+| configure_bridge | set to false to skip creating a bridge interface |
+| configure_shell | Configure the user bash shell login prompt |
+| cockpit_packages | default packages for cockpit |
+| cicd_test | set to true to test in container |
 
 # Collection directories and files Reference 
 https://docs.ansible.com/ansible/latest/dev_guide/developing_collections_structure.html#collection-directories-and-files

@@ -25,7 +25,7 @@ edit_on_github:
 
 extra_links:
   - description: Report an issue
-    url: https://github.com/tosin2013/qubinode_kvmhost_setup_collection/issues
+    url: https://github.com/Qubinode/qubinode_kvmhost_setup_collection/issues
 
 # Specify communication channels for your collection. We suggest to not specify more
 # than one place for communication per communication tool to avoid confusion.
