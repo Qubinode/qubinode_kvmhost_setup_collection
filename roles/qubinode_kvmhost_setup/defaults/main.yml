@@ -4,7 +4,7 @@
 ###
 
 # Set to true when host is virtual or running in a container
-cicd_test: false  
+cicd_test: false
 
 # Libvirt network and storage
 # ---------------------------
@@ -21,11 +21,11 @@ libvirt_networks:
 libvirt_host_storage_pools:
   - name: default
     state: active
-    autostart: yes
+    autostart: true
     path: "{{ kvm_host_libvirt_dir }}"
 
 # Set to yes to add the admin_user to the libvirt group
-# and change libvirt to be accessible user 
+# and change libvirt to be accessible user
 enable_libvirt_admin_user: no
 
 # The actual libvirt group, users added to this group will have admin access to KVM
@@ -37,7 +37,7 @@ admin_user: ""
 
 # Configure the user bash shell login prompt
 # This will overwrite your existing .bashrc, .vimrc and other terminal configuration files
-configure_shell: no
+configure_shell: true
 
 # users whose shell will be configured
 shell_users:
@@ -57,38 +57,38 @@ synth_shell_dir: /etc
 # Required RPM packages
 # ---------------------
 required_rpm_pakcages:
-   - virt-install
-   - libvirt-daemon-config-network
-   - libvirt-daemon-kvm
-   - libguestfs-tools
-   - libvirt-client
-   - qemu-kvm
-   - nfs-utils
-   - libvirt-daemon
-   - libvirt-client
-   - virt-top
-   - tuned
-   - openssh-server
-   - wget
-   - bc
-   - git
-   - net-tools
-   - bind-utils
-   - yum-utils
-   - iptables-services
-   - bash-completion
-   - kexec-tools
-   - sos
-   - psacct
-   - vim
-   - device-mapper-event-libs
-   - device-mapper-libs
-   - httpd-tools
-   - java-1.8.0-openjdk-devel.x86_64
-   - tmux
-   - python3-dns
-   - python3-pip
-   - python3-lxml
-   - cargo
-   - lm_sensors
-   - python3-netaddr
+  - virt-install
+  - libvirt-daemon-config-network
+  - libvirt-daemon-kvm
+  - libguestfs-tools
+  - libvirt-client
+  - qemu-kvm
+  - nfs-utils
+  - libvirt-daemon
+  - libvirt-client
+  - virt-top
+  - tuned
+  - openssh-server
+  - wget
+  - bc
+  - git
+  - net-tools
+  - bind-utils
+  - yum-utils
+  - iptables-services
+  - bash-completion
+  - kexec-tools
+  - sos
+  - psacct
+  - vim
+  - device-mapper-event-libs
+  - device-mapper-libs
+  - httpd-tools
+  - java-1.8.0-openjdk-devel.x86_64
+  - tmux
+  - python3-dns
+  - python3-pip
+  - python3-lxml
+  - cargo
+  - lm_sensors
+  - python3-netaddr
