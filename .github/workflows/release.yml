@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           RELEASE_VERSION: 0.1.0
         with:
-          artifacts: qubinode_kvmhost_setup_collection-$RELEASE_VERSION.tar.gz
+          artifacts: qubinode_kvmhost_setup_collection-0.1.0.tar.gz
           body: |
             # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
             ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/workflows/ReleaseBuildCollection/badge.svg)
@@ -61,7 +61,7 @@ jobs:
             ```yaml
             ---
             collections:
-                - https://github.com/Qubinode/qubinode_kvmhost_setup_collection/releases/download/v$RELEASE_VERSION/qubinode_kvmhost_setup_collection-$RELEASE_VERSION.tar.gz
+                - https://github.com/Qubinode/qubinode_kvmhost_setup_collection/releases/download/v$RELEASE_VERSION/qubinode_kvmhost_setup_collection-0.1.0.tar.gz
             ```
           draft: false
           prerelease: false
@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz
+          asset_path: /home/runner/work/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection-0.1.0.tar.gz
           asset_name: qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz
           asset_content_type: application/tar+gzip
 
