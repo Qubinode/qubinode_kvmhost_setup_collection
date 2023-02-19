@@ -1,16 +1,18 @@
 ---
 - name: Checking libvirt_host_networks[type_idx].bridge_device variable
-  ansible.builtin.fail: msg="Bailing out. this play requires libvirt_host_networks[type_idx].bridge_device"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires libvirt_host_networks[type_idx].bridge_device"
   with_items: "{{ libvirt_host_networks[type_idx] }}"
   when:
-    - libvirt_host_networks[type_idx].bridge_device |length == 0
+    - libvirt_host_networks[type_idx].bridge_device | length == 0
     - libvirt_host_networks[type_idx].mode == 'bridge'
 
 - name: Check _networks[type_idx].bridge_slave_dev variable
-  ansible.builtin.fail: msg="Bailing out. this play requires libvirt_host_networks[type_idx].bridge_slave_dev"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires libvirt_host_networks[type_idx].bridge_slave_dev"
   with_items: "{{ libvirt_host_networks[type_idx] }}"
   when:
-    - libvirt_host_networks[type_idx].bridge_slave_dev |length == 0
+    - libvirt_host_networks[type_idx].bridge_slave_dev | length == 0
     - libvirt_host_networks[type_idx].mode == 'bridge'
 
 - name: Configure bridge fr older systems
