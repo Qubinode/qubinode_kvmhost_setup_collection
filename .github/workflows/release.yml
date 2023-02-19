@@ -82,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+          asset_path: ./qubinode_kvmhost_setup_collection-0.1.0.tar.gz
           asset_name: qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz
           asset_content_type: application/tar+gzip
 
