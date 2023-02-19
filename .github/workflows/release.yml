@@ -89,4 +89,4 @@ jobs:
           asset_content_type: application/tar+gzip
 
       - name: Deploy Ansible collection to Galaxy
-        run: ansible-galaxy collection publish qubinode-qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
+        run: ansible-galaxy collection publish qubinode-qubinode_kvmhost_setup_collection-0.1.0.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
