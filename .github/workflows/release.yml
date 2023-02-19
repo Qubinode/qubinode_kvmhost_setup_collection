@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/setup-python@v2
+        uses: actions/checkout@main
 
       - name: Get current version
         id: cversion
