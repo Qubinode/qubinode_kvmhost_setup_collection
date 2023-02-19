@@ -15,20 +15,20 @@
     - libvirt_host_networks[type_idx].bridge_slave_dev | length == 0
     - libvirt_host_networks[type_idx].mode == 'bridge'
 
-- name: Configure bridge fr older systems
+- name: Configure bridge for older systems
   when:
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
     - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
     - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
   block:
-    - name: setting bridge name
+    - name: Setting bridge name
       ansible.builtin.set_fact:
         bridge_name: "{{ qubinode_bridge_fact }}"
-      ignore_errors: true
+      failed_when: false
 
     - name: Configure bridge
-      command:  echo "we need to configure the bridge."
+      ansible.builtin.command: echo "we need to configure the bridge."
       when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup bridge interface
@@ -58,7 +58,7 @@
     # connectivity and the bridge interface comes up.
 
     - name: Restart network service
-      command: "systemctl restart {{ item }}"
+      ansible.builtin.command: "systemctl restart {{ item }}"
       args:
         warn: no
       changed_when: false
@@ -69,7 +69,7 @@
       when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is undefined))
 
     - name: Restart network service
-      command: "systemctl restart {{ item }}"
+      ansible.builtin.command: "systemctl restart {{ item }}"
       args:
         warn: no
       changed_when: false
@@ -79,14 +79,14 @@
       when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
 
     - name: Active bridge connection
-      command: "nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}"
+      ansible.builtin.command: "nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}"
       args:
         warn: no
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
 
     - name: Disable old connection
-      command: "sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}"
+      ansible.builtin.command: "sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}"
       args:
         warn: no
       changed_when: false
