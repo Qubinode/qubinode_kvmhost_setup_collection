@@ -17,7 +17,7 @@ jobs:
 
       - name: Get current version
         id: cversion
-        run: echo "::set-output name=version::$(grep version galaxy.yml | awk -F'"' '{ print $2 }')"
+        run: echo "::set-output name=version::$(grep version galaxy.yml | awk '{ print $2 }')"
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -51,7 +51,7 @@ jobs:
           tag_name: v${{ steps.cversion.outputs.version }}
           release_name: Release v${{ steps.cversion.outputs.version }}
           body: |
-            # Ansible Collection: imjoseangel.common
+            # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
             ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/workflows/ReleaseBuildCollection/badge.svg)
 
             Install with:
