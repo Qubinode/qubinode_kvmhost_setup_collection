@@ -47,7 +47,7 @@ jobs:
         uses:  ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          RELEASE_VERSION: ${{ steps.cversion.outputs.version }}
+          RELEASE_VERSION: 0.1.0
         with:
           artifacts: qubinode_kvmhost_setup_collection-$RELEASE_VERSION.tar.gz
           body: |
