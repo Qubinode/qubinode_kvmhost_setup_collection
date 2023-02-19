@@ -17,7 +17,7 @@ jobs:
 
       - name: Get current version
         id: cversion
-        run: echo "::set-output name=version::$(grep version galaxy.yml | awk '{ print $2 }')"
+        run: echo "{name}={version::$(grep version galaxy.yml | awk '{ print $2 }')}"  >> $GITHUB_STATE
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -47,8 +47,9 @@ jobs:
         uses:  ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          RELEASE_VERSION: ${{ steps.cversion.outputs.version }}
         with:
-          artifacts: qubinode_kvmhost_setup_collection-${{ steps.cversion.outputs.version }}.tar.gz
+          artifacts: qubinode_kvmhost_setup_collection-$RELEASE_VERSION.tar.gz
           body: |
             # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
             ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/workflows/ReleaseBuildCollection/badge.svg)
