@@ -9,7 +9,7 @@ jobs:
     if: github.repository == 'Qubinode/qubinode_kvmhost_setup_collection'
     strategy:
       matrix:
-        python-version: [3.10]
+        python-version: [3.11]
 
     steps:
       - name: Checkout code
