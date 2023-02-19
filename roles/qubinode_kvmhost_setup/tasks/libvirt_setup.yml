@@ -1,16 +1,16 @@
 ---
-- name: validate virtualization extensions are available to this host
+- name: Validate virtualization extensions are available to this host
   include_tasks: validate.yml
   when: not cicd_test|bool
 
-- name: enable libvirt services
+- name: Enable libvirt services
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: yes
+    enabled: true
     state: started
   with_items: "{{ libvirt_services }}"
 
-- name: start tuned profile virtual-host
+- name: Start tuned profile virtual-host
   shell: |
    set -o pipefail &&  tuned-adm profile virtual-host
   register: start_tuned
@@ -31,7 +31,7 @@
   ansible.builtin.debug:
     msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
 
-- name: configure bridge interface for libvirt
+- name: Configure bridge interface for libvirt
   ansible.builtin.import_role:
     name: linux-system-roles.network
   vars:
@@ -66,14 +66,14 @@
         (ansible_distribution == "RedHat" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout  == "" and configure_bridge == true)
 
 
-- name: configure bridge interface for libvirt
+- name: Configure bridge interface for libvirt
   include_tasks: bridge_interface.yml
   loop: "{{ libvirt_host_networks }}"
   loop_control:
     index_var: type_idx
     loop_var: bridge_item
 
-- name: configure libvirt network
+- name: Configure libvirt network
   loop: "{{ libvirt_host_networks }}"
   loop_control:
     index_var: libvirt_idx
@@ -81,7 +81,7 @@
   include_tasks: networks.yml
   when: not cicd_test|bool
 
-- name: configure libvirt storage pool
+- name: Configure libvirt storage pool
   include_tasks: storage_pool.yml
   when: not cicd_test|bool
 

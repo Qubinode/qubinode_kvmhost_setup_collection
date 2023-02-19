@@ -3,7 +3,7 @@
   ansible.builtin.user:
     name: "{{ admin_user }}"
     groups: libvirt,qemu
-    append: yes
+    append: true
 
 - name: Allow non-root users to libvirt unix_sock_group
   ansible.builtin.lineinfile:

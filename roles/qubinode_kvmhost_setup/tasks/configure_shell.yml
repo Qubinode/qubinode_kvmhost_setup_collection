@@ -23,17 +23,17 @@
 - name: Download startship
   ansible.builtin.unarchive:
     src: https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-musl.tar.gz
-    remote_src: yes
+    remote_src: true
     dest: /usr/local/sbin
 
 - name: Download k9s
   ansible.builtin.unarchive:
     src: https://github.com/derailed/k9s/releases/download/v0.24.2/k9s_Linux_x86_64.tar.gz
-    remote_src: yes
+    remote_src: true
     dest: /usr/local/sbin
     creates: /usr/local/sbin/k9s
 
-- name: check if z cli tool is present
+- name: Check if z cli tool is present
   ansible.builtin.stat:
     path: /usr/local/bin/z.sh
   register: z_cli

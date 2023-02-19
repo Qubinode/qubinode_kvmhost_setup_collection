@@ -4,23 +4,23 @@
     var: libvirt_host_networks
   register: myresults
 
-- name: validate variables are defined
+- name: Validate variables are defined
   include_tasks: verify_variables.yml
 
-- name: ensure required packages are installed
+- name: Ensure required packages are installed
   ansible.builtin.shell: >
-    rpm -q "{{ item }}" || yum install -y "{{ item }}" && echo yes
+    rpm -q "{{ item }}" || yum install -y "{{ item }}" && echo true
   loop: "{{ required_rpm_pakcages }}"
 
 
 - name: Install required python libraries
-  become: yes
+  become: true
   become_user: "{{ admin_user }}"
   ansible.builtin.pip:
     name: openshift
     extra_args: --user
 
-- name: configure shell extras
+- name: Configure shell extras
   include_tasks: configure_shell.yml
   when: configure_shell|bool
 

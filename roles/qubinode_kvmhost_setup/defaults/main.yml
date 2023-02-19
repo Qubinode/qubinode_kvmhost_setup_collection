@@ -26,7 +26,7 @@ libvirt_host_storage_pools:
 
 # Set to yes to add the admin_user to the libvirt group
 # and change libvirt to be accessible user
-enable_libvirt_admin_user: no
+enable_libvirt_admin_user: true
 
 # The actual libvirt group, users added to this group will have admin access to KVM
 # when enable_libvirt_admin_user is set

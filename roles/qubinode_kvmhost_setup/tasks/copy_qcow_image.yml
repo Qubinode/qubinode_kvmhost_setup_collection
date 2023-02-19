@@ -3,7 +3,7 @@
   ansible.builtin.stat:
     path: "{{ project_dir }}/{{ os_qcow_image_name }}"
   register: main_qcow_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Fail when {{ project_dir }}/{{ os_qcow_image_name }} does not exist
   fail: msg="Bailing out. {{ project_dir }}/{{ os_qcow_image_name }} does not exist"
@@ -13,7 +13,7 @@
   ansible.builtin.stat:
     path: "{{ kvm_host_libvirt_dir }}/{{ os_qcow_image_name }}"
   register: kvm_qcow_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: "Copy  {{ qcow_rhel_name }}  to {{ kvm_host_libvirt_dir }}"
   ansible.builtin.copy:
