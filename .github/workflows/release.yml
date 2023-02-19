@@ -32,6 +32,7 @@ jobs:
 
       - name: Copy files and directories to source
         run: |
+          ls -lath .
           mkdir -p build/src
           cp $files build/src
           cp -rf $directories build/src
