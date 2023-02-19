@@ -39,7 +39,6 @@ jobs:
           cp $files build/src
           cp -rf $directories build/src
           mkdir -p release/
-          cp qubinode-qubinode_kvmhost_setup_collection-*.tar.gz release/
         env:
           files: "README.md LICENSE ansible.cfg galaxy.yml"
           directories: "inventories roles"
@@ -53,6 +52,7 @@ jobs:
           ls -lath ./build
           ls -R build
           pwd
+          cp qubinode-qubinode_kvmhost_setup_collection-*.tar.gz release/
 
       - name: Create Release
         id: create_release
