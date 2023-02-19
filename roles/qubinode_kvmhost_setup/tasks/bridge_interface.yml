@@ -91,7 +91,7 @@
         warn: false
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
-      ignore_errors: true
+      failed_when: true
 
 - name: Update /etc/resolv.conf
   ansible.builtin.template:
