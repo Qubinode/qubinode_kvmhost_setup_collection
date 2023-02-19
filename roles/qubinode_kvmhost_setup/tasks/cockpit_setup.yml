@@ -3,8 +3,6 @@
   ansible.builtin.include_role:
     name: linux-system-roles.cockpit
   vars:
-    #cockpit_packages: default
-    #cockpit_packages: minimal
     cockpit_packages: full
 
 - name: Configure Firewall for Web Console
