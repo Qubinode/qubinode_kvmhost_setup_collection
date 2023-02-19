@@ -8,7 +8,7 @@ on:
 jobs:
   releaseanddeploy:
     runs-on: ubuntu-latest
-    if: github.repository == 'Qubinode/qubinode_kvmhost_setup_collection'
+    if: github.repository == 'Qubinode/qubinode-kvmhost-setup-collection'
     strategy:
       matrix:
         python-version: [3.11]
@@ -59,10 +59,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
-          files: tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+          files: tosin2013-qubinode-kvmhost-setup-collection-0.1.0.tar.gz
           body: |
-            # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
-            ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/release.yml/badge.svg)
+            # Ansible Collection: qubinode.qubinode-kvmhost-setup-collection
+            ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode-kvmhost-setup-collection/actions/workflows/release.yml/badge.svg)
             Install with:
             ```sh
             ansible-galaxy collection install -r requirements.yml -f
@@ -71,7 +71,7 @@ jobs:
             ```yaml
             ---
             collections:
-                - https://github.com/Qubinode/qubinode_kvmhost_setup_collection/releases/download/v0.1.0/qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+                - https://github.com/Qubinode/qubinode-kvmhost-setup-collection/releases/download/v0.1.0/qubinode-kvmhost-setup-collection-0.1.0.tar.gz
             ```
           draft: false
           prerelease: false
@@ -84,9 +84,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz
-          asset_name: tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+          asset_path: tosin2013-qubinode-kvmhost-setup-collection-0.1.0.tar.gz
+          asset_name: tosin2013-qubinode-kvmhost-setup-collection-0.1.0.tar.gz
           asset_content_type: application/tar+gzip
 
       - name: Deploy Ansible collection to Galaxy
-        run: ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
+        run: ansible-galaxy collection publish tosin2013-qubinode-kvmhost-setup-collection-0.1.0.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
