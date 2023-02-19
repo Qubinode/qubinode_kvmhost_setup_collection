@@ -17,10 +17,10 @@
 
 - name: Configure bridge for older systems
   when:
-    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge == true
-    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge == true
-    - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge == true
-    - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge == true
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge
+    - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge
+    - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge
   block:
     - name: Setting bridge name
       ansible.builtin.set_fact:
@@ -60,7 +60,7 @@
     - name: Restart network service
       ansible.builtin.command: "systemctl restart {{ item }}"
       args:
-        warn: no
+        warn: false
       changed_when: false
       with_items:
         - network
@@ -71,7 +71,7 @@
     - name: Restart network service
       ansible.builtin.command: "systemctl restart {{ item }}"
       args:
-        warn: no
+        warn: false
       changed_when: false
       with_items:
         - NetworkManager
@@ -81,14 +81,14 @@
     - name: Active bridge connection
       ansible.builtin.command: "nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}"
       args:
-        warn: no
+        warn: false
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
 
     - name: Disable old connection
       ansible.builtin.command: "sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}"
       args:
-        warn: no
+        warn: false
       changed_when: false
       when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
       ignore_errors: true
