@@ -31,14 +31,17 @@ galaxy_info:
   # Below are all platforms currently available. Just uncomment
   # the ones that apply to your role. If you don't see your
   # platform on this list, let us know and we'll get it added!
+  # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms:
     - name: EL
       versions:
-        - any
+        - 8
+        - 9
     - name: Fedora
       versions:
-        - any
+        - 36
+        - 35
 
   galaxy_tags: []
     # List tags for your role here, one per line. A tag is
