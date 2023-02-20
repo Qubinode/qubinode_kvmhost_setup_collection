@@ -41,7 +41,7 @@ jobs:
           mkdir -p release/
         env:
           files: "README.md LICENSE ansible.cfg galaxy.yml"
-          directories: "inventories roles"
+          directories: "inventories roles meta"
 
       - name: Build Ansible Collection
         run: ansible-galaxy collection build build/src --force
