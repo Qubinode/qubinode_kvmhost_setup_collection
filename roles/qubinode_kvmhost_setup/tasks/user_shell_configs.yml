@@ -28,7 +28,6 @@
     mode: 0644
 
 - name: Install vimplug plugin manager
-  #when: vim_plug.stat.exists == False
   become: true
   become_user: "{{ shell_user }}"
   vars:

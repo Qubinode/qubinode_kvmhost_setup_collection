@@ -4,4 +4,3 @@ pip_packages:
   - tldr
   - kube-shell
   - openshift
-  

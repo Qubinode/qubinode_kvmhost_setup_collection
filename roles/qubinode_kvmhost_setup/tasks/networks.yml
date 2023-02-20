@@ -24,5 +24,5 @@
 
     - name: Ensure {{ net_name }} is started on boot
       virt_net:
-        name: "{{ net_name }}"
+        name: "Start {{ net_name }} on boot"
         autostart: true
