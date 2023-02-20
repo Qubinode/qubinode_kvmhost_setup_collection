@@ -36,8 +36,7 @@
   ansible.builtin.get_url:
     url: "{{ plug_url }}"
     dest: "{{ user_homedir }}/.vim/autoload/plug.vim"
-  args:
-    creates: "{{ user_homedir }}/.vim/autoload/plug.vim"
+    mode: 0644
 
 - name: Deploy bashrc for {{ shell_user }}
   become: true
@@ -100,9 +99,14 @@
         mode: "0644"
       become: true
       become_user: "{{ ansible_user }}"
-      
+
+    - name: Set executable bit on powerline fonts install.sh script
+      ansible.builtin.file:
+        path: "{{ lookup('file', tempdir_kvmhost_path + '/fonts/install.sh') }}"
+        mode: u+x
+
     - name: Run powerline fonts install.sh
-      ansible.builtin.shell: "{{ tempdir_kvmhost_path }}/fonts/install.sh"
+      ansible.builtin.command: "{{ tempdir_kvmhost_path }}/fonts/install.sh"
       args:
         chdir: "{{ tempdir_kvmhost_path }}/fonts"
         creates: "{{ user_homedir }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
