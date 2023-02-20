@@ -23,6 +23,7 @@
   register: bridge_interface
   ignore_errors: true
   check_mode: true
+  changed_when: false
 
 - name: Get Bridge Status
   ansible.builtin.set_fact:
@@ -101,7 +102,7 @@
           dns_search:
             - "{{ domain }}"
           address:
-          - "{{ kvm_host_ip }}/{{ kvm_host_mask_prefix }}"
+            - "{{ kvm_host_ip }}/{{ kvm_host_mask_prefix }}"
       - name: eno1
         state: up
         type: ethernet
@@ -109,7 +110,6 @@
         controller: "{{ qubinode_bridge_device }}"
         port_type: bridge
   when: is_fedora_36 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9
-
 
 - name: Configure bridge interface for libvirt
   ansible.builtin.include_tasks: bridge_interface.yml
