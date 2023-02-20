@@ -6,9 +6,17 @@
   ignore_errors: true
 
 - name: Fail when {{ project_dir }}/{{ os_qcow_image_name }} does not exist
-  fail: msg="Bailing out. {{ project_dir }}/{{ os_qcow_image_name }} does not exist"
+  ansible.builtin.fail:
+    msg: "Bailing out. {{ project_dir }}/{{ os_qcow_image_name }} does not exist"
   when: not main_qcow_check.stat.exists or main_qcow_check is undefined
 
+- name: Set permissions for {{ kvm_host_libvirt_dir }}
+  ansible.builtin.file:
+    path: "{{ kvm_host_libvirt_dir }}"
+    mode: "0755"
+  become: true
+  become_user: root
+  
 - name: "Confirm that  {{ qcow_rhel_name }} exists under the {{ project_dir }}"
   ansible.builtin.stat:
     path: "{{ kvm_host_libvirt_dir }}/{{ os_qcow_image_name }}"

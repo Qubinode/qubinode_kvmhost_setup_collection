@@ -68,7 +68,7 @@
     owner: "{{ shell_user }}"
     group: "wheel"
 
-- name: check if powerline font is installed
+- name: Check if powerline font is installed
   become: true
   become_user: "{{ shell_user }}"
   ansible.builtin.stat:
