@@ -51,13 +51,13 @@
       ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.1"
         dest: /usr/local/share/man/man1/z.1
-      mode: "0644"
+        mode: "0644"
 
     - name: Copy z cli tool to /usr/local/bin
       ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.sh"
         dest: /usr/local/bin/z.sh
-      mode: "0644"
+        mode: "0644"
 
 - name: Install additional cli tools via python
   ansible.builtin.pip:

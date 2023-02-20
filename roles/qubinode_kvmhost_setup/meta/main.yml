@@ -7,7 +7,7 @@ galaxy_info:
      Linux operating systems. The collection includes roles for setting up the
      KVM environment, installing and configuring guest VMs, managing VM disks
      and networks, and more. Whether you are a system administrator, DevOps
-     engineer, or cloud architect, this collection can help you automate your 
+     engineer, or cloud architect, this collection can help you automate your
      KVM host setup and management tasks, and improve the reliability and
      security of your virtualized environment.
   company: Red Hat
