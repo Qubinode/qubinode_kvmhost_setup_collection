@@ -6,6 +6,7 @@
     state: directory
     owner: "{{ shell_user }}"
     group: "wheel"
+    mode: "0755"
 
 - name: Deploy startship config for {{ shell_user }}
   become: true
@@ -32,7 +33,9 @@
   become_user: "{{ shell_user }}"
   vars:
     plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  ansible.builtin.shell: curl -fLo ~/.vim/autoload/plug.vim --create-dirs {{ plug_url }}
+  ansible.builtin.get_url:
+    url: "{{ plug_url }}"
+    dest: "{{ user_homedir }}/.vim/autoload/plug.vim"
   args:
     creates: "{{ user_homedir }}/.vim/autoload/plug.vim"
 
@@ -75,7 +78,7 @@
   register: powerline_font
 
 - name: Install powerline fonts
-  when: powerline_font.stat.exists == False
+  when: powerline_font.stat.exists
   become: true
   become_user: "{{ shell_user }}"
   block:
