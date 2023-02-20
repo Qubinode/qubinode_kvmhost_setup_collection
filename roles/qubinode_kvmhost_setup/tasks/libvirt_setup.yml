@@ -44,19 +44,43 @@
 
 - name: Set flag for Fedora 37
   ansible.builtin.set_fact:
-    is_fedora_37: "{{ ansible_distribution == 'Fedora' and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == '' and configure_bridge }}"
+    is_fedora_37: >-
+      {{
+        ansible_distribution == 'Fedora'
+        and ansible_distribution_major_version == '37'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge
+      }}
 
 - name: Set flag for CentOS 9
   ansible.builtin.set_fact:
-    is_centos_9: "{{ ansible_distribution == 'CentOS' and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == '' and configure_bridge }}"
+    is_centos_9: >-
+      {{
+        ansible_distribution == 'CentOS'
+        and ansible_distribution_major_version == '9'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge
+      }}
 
 - name: Set flag for RedHat 8
   ansible.builtin.set_fact:
-    is_redhat_8: "{{ ansible_distribution == 'RedHat' and ansible_distribution_major_version == '8' and bridge_interface_status.stdout == '' and configure_bridge }}"
+    is_redhat_8:  >-
+      {{
+        ansible_distribution == 'RedHat'
+        and ansible_distribution_major_version == '8'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge
+      }}
 
 - name: Set flag for RedHat 9
   ansible.builtin.set_fact:
-    is_redhat_9: "{{ ansible_distribution == 'RedHat' and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == '' and configure_bridge }}"
+    is_redhat_9:   >-
+      {{
+        ansible_distribution == 'RedHat'
+        and ansible_distribution_major_version == '9'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge
+      }}
 
 - name: Configure bridge interface for libvirt
   ansible.builtin.import_role:
