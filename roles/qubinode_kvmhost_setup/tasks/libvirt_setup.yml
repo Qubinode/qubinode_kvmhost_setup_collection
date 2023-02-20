@@ -67,7 +67,7 @@
 
 
 - name: Configure bridge interface for libvirt
-  include_tasks: bridge_interface.yml
+  ansible.builtin.include_tasks: bridge_interface.yml
   loop: "{{ libvirt_host_networks }}"
   loop_control:
     index_var: type_idx
@@ -78,13 +78,13 @@
   loop_control:
     index_var: libvirt_idx
     loop_var: libvirt_item
-  include_tasks: networks.yml
+  ansible.builtin.include_tasks: networks.yml
   when: not cicd_test|bool
 
 - name: Configure libvirt storage pool
-  include_tasks: storage_pool.yml
+  ansible.builtin.include_tasks: storage_pool.yml
   when: not cicd_test|bool
 
 - name: Make libvirt accessible by non-root user
-  include_tasks: validate.yml
+  ansible.builtin.include_tasks: validate.yml
   when: enable_libvirt_admin_user|bool

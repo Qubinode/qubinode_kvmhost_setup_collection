@@ -5,7 +5,7 @@
   register: myresults
 
 - name: Validate variables are defined
-  include_tasks: verify_variables.yml
+  ansible.builtin.include_tasks: verify_variables.yml
 
 - name: Ensure required packages are installed
   ansible.builtin.shell: >
@@ -21,12 +21,12 @@
     extra_args: --user
 
 - name: Configure shell extras
-  include_tasks: configure_shell.yml
+  ansible.builtin.include_tasks: configure_shell.yml
   when: configure_shell|bool
 
 - name: Setup Libvirt
-  include_tasks: libvirt_setup.yml
+  ansible.builtin.include_tasks: libvirt_setup.yml
 
 - name: Setup Cockpit
-  include_tasks: cockpit_setup.yml
+  ansible.builtin.include_tasks: cockpit_setup.yml
   when: enable_cockpit|bool

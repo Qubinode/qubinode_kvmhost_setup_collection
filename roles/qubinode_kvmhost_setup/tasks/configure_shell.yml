@@ -39,22 +39,25 @@
   register: z_cli
 
 - name: Install z cli tool
-  when: z_cli.stat.exists == False
+  when: z_cli.stat.exists
   block:
     - name: Download the z cli tool
       ansible.builtin.git:
         repo: https://github.com/rupa/z
         dest: "{{ tempdir_kvmhost_path }}/z"
+        update: yes
 
     - name: Copy z man page
       ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.1"
         dest: /usr/local/share/man/man1/z.1
+      mode: "0644"
 
     - name: Copy z cli tool to /usr/local/bin
       ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.sh"
         dest: /usr/local/bin/z.sh
+      mode: "0644"
 
 - name: Install additional cli tools via python
   ansible.builtin.pip:
@@ -64,7 +67,7 @@
       - kube-shell
 
 - name: Build user homedir var
-  include_tasks: build_user_home_dir.yml
+  ansible.builtin.include_tasks: build_user_home_dir.yml
   loop: "{{ shell_users }}"
   loop_control:
     loop_var: shell_user
