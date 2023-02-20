@@ -11,7 +11,7 @@
   with_items: "{{ libvirt_services }}"
 
 - name: Start tuned profile virtual-host
-  shell: |
+  ansible.builtin.shell: |
    set -o pipefail &&  tuned-adm profile virtual-host
   register: start_tuned
   changed_when: start_tuned.rc != 0
@@ -22,6 +22,7 @@
   ansible.builtin.command: "ifconfig {{ qubinode_bridge_device }}"
   register: bridge_interface
   ignore_errors: true
+  check_mode: yes
 
 - name: Get Bridge Status
   ansible.builtin.set_fact:
@@ -33,23 +34,23 @@
 
 
 - name: Set flag for Fedora 36
-  set_fact:
+  ansible.builtin.set_fact:
     is_fedora_36: "{{ ansible_distribution == 'Fedora' and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == '' and configure_bridge }}"
 
 - name: Set flag for Fedora 37
-  set_fact:
+  ansible.builtin.set_fact:
     is_fedora_37: "{{ ansible_distribution == 'Fedora' and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == '' and configure_bridge }}"
 
 - name: Set flag for CentOS 9
-  set_fact:
+  ansible.builtin.set_fact:
     is_centos_9: "{{ ansible_distribution == 'CentOS' and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == '' and configure_bridge }}"
 
 - name: Set flag for RedHat 8
-  set_fact:
+  ansible.builtin.set_fact:
     is_redhat_8: "{{ ansible_distribution == 'RedHat' and ansible_distribution_major_version == '8' and bridge_interface_status.stdout == '' and configure_bridge }}"
 
 - name: Set flag for RedHat 9
-  set_fact:
+  ansible.builtin.set_fact:
     is_redhat_9: "{{ ansible_distribution == 'RedHat' and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == '' and configure_bridge }}"
 
 - name: Configure bridge interface for libvirt
