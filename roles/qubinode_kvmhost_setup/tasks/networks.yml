@@ -10,6 +10,7 @@
     net_mode: "{{ libvirt_host_networks[libvirt_idx].mode }}"
     net_create: "{{ libvirt_host_networks[libvirt_idx].create }}"
   when: net_name in libvirt_nets.list_nets
+
   block:
     - name: Ensure libvirt nat network {{ net_name }} is defined
       virt_net:
@@ -17,7 +18,7 @@
         command: define
         xml: '{{ lookup("templates", "nat_network.xml.j2") }}'
       when: net_mode == 'nat' and net_create|bool
-      
+
     - name: Ensure {{ net_name }} is active
       virt_net:
         name: "{{ net_name }}"
