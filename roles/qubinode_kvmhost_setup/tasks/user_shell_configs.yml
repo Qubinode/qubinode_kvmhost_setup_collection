@@ -81,11 +81,12 @@
   become: true
   become_user: "{{ shell_user }}"
   block:
-    - name: Ensure {{ user_homedir }}/.config/fontconfig/conf.d
+    - name: Ensure ~/.config/fontconfig/conf.d
       ansible.builtin.file:
         path: "{{ user_homedir }}/.config/fontconfig/conf.d"
         state: directory
         mode: '0755'
+        
     - name: Download powerline fonts
       ansible.builtin.git:
         repo: 'https://github.com/powerline/fonts.git'
