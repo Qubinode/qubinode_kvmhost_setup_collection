@@ -45,7 +45,6 @@
       ansible.builtin.git:
         repo: https://github.com/rupa/z
         dest: "{{ tempdir_kvmhost_path }}/z"
-        update: yes
 
     - name: Copy z man page
       ansible.builtin.copy:

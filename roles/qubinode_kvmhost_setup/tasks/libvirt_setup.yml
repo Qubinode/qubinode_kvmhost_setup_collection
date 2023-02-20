@@ -1,6 +1,6 @@
 ---
 - name: Validate virtualization extensions are available to this host
-  include_tasks: validate.yml
+  ansible.builtin.include_tasks`: validate.yml
   when: not cicd_test|bool
 
 - name: Enable libvirt services

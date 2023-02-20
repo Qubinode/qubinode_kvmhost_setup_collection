@@ -8,10 +8,10 @@
   ansible.builtin.include_tasks: verify_variables.yml
 
 - name: Ensure required packages are installed
-  ansible.builtin.shell: >
-    rpm -q "{{ item }}" || yum install -y "{{ item }}" && echo true
-  loop: "{{ required_rpm_pakcages }}"
-
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: latest
+  loop: "{{ required_rpm_packages }}"
 
 - name: Install required python libraries
   become: true

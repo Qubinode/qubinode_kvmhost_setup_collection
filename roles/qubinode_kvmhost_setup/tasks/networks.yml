@@ -15,8 +15,9 @@
       virt_net:
         name: "{{ net_name }}"
         command: define
-        xml: '{{ (lookup("templates", "nat_network.xml.j2")) }}'
+        xml: '{{ lookup("templates", "nat_network.xml.j2") }}'
       when: net_mode == 'nat' and net_create|bool
+      
     - name: Ensure {{ net_name }} is active
       virt_net:
         name: "{{ net_name }}"

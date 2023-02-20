@@ -89,13 +89,15 @@
         repo: 'https://github.com/powerline/fonts.git'
         dest: "{{ tempdir_kvmhost_path }}/fonts"
         depth: 1
+
     - name: Download powerline fontconfig
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/powerline/fonts/master/fontconfig/50-enable-terminess-powerline.conf
         dest: "{{ user_homedir }}/.config/fontconfig/conf.d/50-enable-terminess-powerline.conf"
+        mode: "0644"
       become: true
       become_user: "{{ ansible_user }}"
-      mode: "0644"
+      
     - name: Run powerline fonts install.sh
       ansible.builtin.shell: "{{ tempdir_kvmhost_path }}/fonts/install.sh"
       args:
