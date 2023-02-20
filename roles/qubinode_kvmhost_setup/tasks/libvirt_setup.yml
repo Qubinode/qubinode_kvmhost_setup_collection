@@ -22,7 +22,7 @@
   ansible.builtin.command: "ifconfig {{ qubinode_bridge_device }}"
   register: bridge_interface
   ignore_errors: true
-  check_mode: yes
+  check_mode: true
 
 - name: Get Bridge Status
   ansible.builtin.set_fact:
@@ -64,7 +64,7 @@
 
 - name: Set flag for RedHat 8
   ansible.builtin.set_fact:
-    is_redhat_8:  >-
+    is_redhat_8: >-
       {{
         ansible_distribution == 'RedHat'
         and ansible_distribution_major_version == '8'
@@ -74,7 +74,7 @@
 
 - name: Set flag for RedHat 9
   ansible.builtin.set_fact:
-    is_redhat_9:   >-
+    is_redhat_9: >-
       {{
         ansible_distribution == 'RedHat'
         and ansible_distribution_major_version == '9'
@@ -93,8 +93,7 @@
         state: up
         ip:
           route_metric4: 100
-          dhcp4: no
-          #dhcp4_send_hostname: no
+          dhcp4: true
           gateway4: "{{ kvm_host_gw }}"
           dns:
             - "{{ primary_dns_server }}"

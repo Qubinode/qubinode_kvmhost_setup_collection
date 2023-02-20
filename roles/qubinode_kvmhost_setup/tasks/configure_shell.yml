@@ -77,4 +77,4 @@
     path: "{{ tempdir_kvmhost_path }}"
     state: absent
   when: tempdir_kvmhost_path is defined
-  changed_when: False
+  changed_when: false
