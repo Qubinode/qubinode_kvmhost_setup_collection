@@ -32,11 +32,13 @@ galaxy_info:
   # the ones that apply to your role. If you don't see your
   # platform on this list, let us know and we'll get it added!
   #
-  # platforms:
-  #  - name: EPEL
-  #    versions:
-  #      - 9
-  #      - 8
+  platforms:
+    - name: EPEL
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
 
   galaxy_tags: []
     # List tags for your role here, one per line. A tag is

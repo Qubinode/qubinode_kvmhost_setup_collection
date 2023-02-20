@@ -1,5 +1,5 @@
 ---
-- name: Ensure {{ user_homedir }}/.config exist
+- name: Ensure ~/.config exist
   become: true
   ansible.builtin.file:
     path: "{{ user_homedir }}/.config"
@@ -8,7 +8,7 @@
     group: "wheel"
     mode: "0755"
 
-- name: Deploy startship config for {{ shell_user }}
+- name: Deploy startship config for current user
   become: true
   become_user: "{{ shell_user }}"
   ansible.builtin.template:
@@ -18,7 +18,7 @@
     group: "wheel"
     mode: 0644
 
-- name: Deploy bash_profile for {{ shell_user }}
+- name: Deploy bash_profile for current user
   become: true
   become_user: "{{ shell_user }}"
   ansible.builtin.template:
@@ -38,7 +38,7 @@
     dest: "{{ user_homedir }}/.vim/autoload/plug.vim"
     mode: 0644
 
-- name: Deploy bashrc for {{ shell_user }}
+- name: Deploy bashrc for current user
   become: true
   become_user: "{{ shell_user }}"
   vars:
@@ -50,7 +50,7 @@
     group: "wheel"
     mode: 0644
 
-- name: Deploy vimrc for {{ shell_user }}
+- name: Deploy vimrc for current user
   become: true
   become_user: "{{ shell_user }}"
   ansible.builtin.template:

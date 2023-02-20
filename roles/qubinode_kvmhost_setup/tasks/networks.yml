@@ -12,19 +12,19 @@
   when: net_name in libvirt_nets.list_nets
 
   block:
-    - name: Ensure libvirt nat network {{ net_name }} is defined
+    - name: Ensure libvirt nat network libvirt network is defined
       virt_net:
         name: "{{ net_name }}"
         command: define
         xml: '{{ lookup("templates", "nat_network.xml.j2") }}'
       when: net_mode == 'nat' and net_create|bool
 
-    - name: Ensure {{ net_name }} is active
+    - name: Ensure libvirt network  is active
       virt_net:
         name: "{{ net_name }}"
         state: active
 
-    - name: Ensure {{ net_name }} is started on boot
+    - name: Ensure libvirt network  is started on boot
       virt_net:
         name: "Start {{ net_name }} on boot"
         autostart: true
