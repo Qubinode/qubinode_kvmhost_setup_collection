@@ -32,10 +32,15 @@
   ansible.builtin.debug:
     msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
 
-
 - name: Set flag for Fedora 36
   ansible.builtin.set_fact:
-    is_fedora_36: "{{ ansible_distribution == 'Fedora' and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == '' and configure_bridge }}"
+    is_fedora_36: >-
+      {{
+        ansible_distribution == 'Fedora'
+        and ansible_distribution_major_version == '36'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge
+      }}
 
 - name: Set flag for Fedora 37
   ansible.builtin.set_fact:
