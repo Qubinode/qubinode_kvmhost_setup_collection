@@ -31,6 +31,27 @@
   ansible.builtin.debug:
     msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
 
+
+- name: Set flag for Fedora 36
+  set_fact:
+    is_fedora_36: "{{ ansible_distribution == 'Fedora' and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == '' and configure_bridge }}"
+
+- name: Set flag for Fedora 37
+  set_fact:
+    is_fedora_37: "{{ ansible_distribution == 'Fedora' and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == '' and configure_bridge }}"
+
+- name: Set flag for CentOS 9
+  set_fact:
+    is_centos_9: "{{ ansible_distribution == 'CentOS' and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == '' and configure_bridge }}"
+
+- name: Set flag for RedHat 8
+  set_fact:
+    is_redhat_8: "{{ ansible_distribution == 'RedHat' and ansible_distribution_major_version == '8' and bridge_interface_status.stdout == '' and configure_bridge }}"
+
+- name: Set flag for RedHat 9
+  set_fact:
+    is_redhat_9: "{{ ansible_distribution == 'RedHat' and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == '' and configure_bridge }}"
+
 - name: Configure bridge interface for libvirt
   ansible.builtin.import_role:
     name: linux-system-roles.network
@@ -58,12 +79,7 @@
         interface_name: "{{ kvm_host_interface }}"
         controller: "{{ qubinode_bridge_device }}"
         port_type: bridge
-
-  when: (ansible_distribution == "Fedora" and ansible_distribution_major_version == '36' and bridge_interface_status.stdout == "" and configure_bridge == true) or
-        (ansible_distribution == "Fedora" and ansible_distribution_major_version == '37' and bridge_interface_status.stdout == "" and configure_bridge == true) or
-        (ansible_distribution == "CentOS" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout == "" and configure_bridge == true) or
-        (ansible_distribution == "RedHat" and ansible_distribution_major_version == '8' and bridge_interface_status.stdout  == "" and configure_bridge == true) or
-        (ansible_distribution == "RedHat" and ansible_distribution_major_version == '9' and bridge_interface_status.stdout  == "" and configure_bridge == true)
+  when: is_fedora_36 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9
 
 
 - name: Configure bridge interface for libvirt
