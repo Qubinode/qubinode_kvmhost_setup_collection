@@ -1,49 +1,58 @@
 ---
 - name: Testing 'kvm_host_ip' KVM host ip
-  fail: msg="Bailing out. this play requires 'kvm_host_ip' KVM host ip"
+  ansible.builtin.fail: 
+    msg: "Bailing out. this play requires 'kvm_host_ip' KVM host ip"
   when: kvm_host_ip |length == 0
 
 - name: Testing 'kvm_host_interface' KVM host interface
-  fail: msg="Bailing out. this play requires 'kvm_host_interface' KVM host interface"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_host_interface' KVM host interface"
   when: kvm_host_interface |length == 0
 
 - name: Testing 'kvm_host_mask_prefix' KVM subnet mask prefix"
-  fail: msg="Bailing out. this play requires 'kvm_host_mask_prefix' KVM subnet mask prefix"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_host_mask_prefix' KVM subnet mask prefix"
   when: kvm_host_mask_prefix is undefined
 
 - name: Testing 'kvm_host_gw' KVM host kvm host gateway"
-  fail: msg="Bailing out. this play requires 'kvm_host_gw' KVM host kvm host gateway"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_host_gw' KVM host kvm host gateway"
   when: kvm_host_gw |length == 0
 
 - name: Testing 'admin_user' ssh username"
-  fail: msg="Bailing out. this play requires 'admin_user' ssh username"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'admin_user' ssh username"
   when: admin_user |length == 0
 
 - name: Testing 'kvm_host_domain' kvm host domain
-  fail: msg="Bailing out. this play requires 'kvm_host_domain' kvm host domain"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_host_domain' kvm host domain"
   when: kvm_host_domain |length == 0
 
 - name: Testing 'kvm_host_dns_server' kvm host dns server
-  fail: msg="Bailing out. this play requires 'kvm_host_dns_server' kvm host dns server"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_host_dns_server' kvm host dns server"
   when: kvm_host_dns_server |length == 0
 
 - name: Testing 'kvm_host_bootproto' KVM host bootproto
-  fail: msg="Bailing out. this play requires 'kvm_host_bootproto' KVM host bootproto"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_host_bootproto' KVM host bootproto"
   when: kvm_host_bootproto |length == 0
 
 - name: Testing 'kvm_bridge_type' KVM  bridge type
-  fail: msg="Bailing out. this play requires 'kvm_bridge_type' KVM  bridge type"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'kvm_bridge_type' KVM  bridge type"
   when: kvm_bridge_type |length == 0
 
 - name: Testing 'qubinode_bridge_name' qubinode bridge name
-  fail: msg="Bailing out. this play requires 'qubinode_bridge_name' qubinode bridge name"
+  ansible.builtin.fail:
+    msg: "Bailing out. this play requires 'qubinode_bridge_name' qubinode bridge name"
   when: qubinode_bridge_name |length == 0
 
 - name: get the index of a dict
   ansible.builtin.debug:
     msg: "{{ item.mac }}"
   loop: "{{ libvirt_host_networks }}"
-
 
 # TODO: this section might need to be replaced
 - name: ensureing the libvirt_host_networks values are not empty if defined
