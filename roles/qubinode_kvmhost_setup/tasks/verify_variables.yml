@@ -1,6 +1,6 @@
 ---
 - name: Testing 'kvm_host_ip' KVM host ip
-  ansible.builtin.fail: 
+  ansible.builtin.fail:
     msg: "Bailing out. this play requires 'kvm_host_ip' KVM host ip"
   when: kvm_host_ip |length == 0
 
@@ -49,13 +49,13 @@
     msg: "Bailing out. this play requires 'qubinode_bridge_name' qubinode bridge name"
   when: qubinode_bridge_name |length == 0
 
-- name: get the index of a dict
+- name: Get the index of a dict
   ansible.builtin.debug:
     msg: "{{ item.mac }}"
   loop: "{{ libvirt_host_networks }}"
 
 # TODO: this section might need to be replaced
-- name: ensureing the libvirt_host_networks values are not empty if defined
+- name: Ensureing the libvirt_host_networks values are not empty if defined
   ansible.builtin.assert:
     that:
       - item.mac |length != 0
