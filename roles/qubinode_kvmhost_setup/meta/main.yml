@@ -38,10 +38,6 @@ galaxy_info:
       versions:
         - "8"
         - "9"
-    - name: Fedora
-      versions:
-        - 36
-        - 35
 
   galaxy_tags: []
     # List tags for your role here, one per line. A tag is

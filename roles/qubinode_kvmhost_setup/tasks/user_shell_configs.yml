@@ -86,12 +86,12 @@
         path: "{{ user_homedir }}/.config/fontconfig/conf.d"
         state: directory
         mode: '0755'
-        
+
     - name: Download powerline fonts
       ansible.builtin.git:
         repo: 'https://github.com/powerline/fonts.git'
         dest: "{{ tempdir_kvmhost_path }}/fonts"
-        depth: 1
+        version: master
 
     - name: Download powerline fontconfig
       ansible.builtin.get_url:

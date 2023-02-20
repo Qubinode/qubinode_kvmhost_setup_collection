@@ -47,6 +47,7 @@
         dest: "{{ tempdir_kvmhost_path }}/z"
         force: true
         update: false
+        version: 'master'
 
     - name: Copy z man page
       ansible.builtin.copy:
