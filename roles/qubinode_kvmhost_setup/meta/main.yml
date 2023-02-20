@@ -2,14 +2,14 @@
 galaxy_info:
   author: Tosin Akinosho
   description: |
-    This Ansible Collection for Virtual Machines Setup provides a set of roles 
-    for configuring and managing KVM hosts in baremetal servers using RHEL-based 
-    Linux operating systems. The collection includes roles for setting up the 
-    KVM environment, installing and configuring guest VMs, managing VM disks 
-    and networks, and more. Whether you are a system administrator, DevOps 
-    engineer, or cloud architect, this collection can help you automate your 
-    KVM host setup and management tasks, and improve the reliability and 
-    security of your virtualized environment.
+    This Ansible Collection for Virtual Machines Setup provides a set of roles
+     for configuring and managing KVM hosts in baremetal servers using RHEL-based
+     Linux operating systems. The collection includes roles for setting up the
+     KVM environment, installing and configuring guest VMs, managing VM disks
+     and networks, and more. Whether you are a system administrator, DevOps
+     engineer, or cloud architect, this collection can help you automate your 
+     KVM host setup and management tasks, and improve the reliability and
+     security of your virtualized environment.
   company: Red Hat
 
   # If the issue tracker for your role is not on github, uncomment the
@@ -37,6 +37,10 @@ galaxy_info:
       versions:
         - 37
         - 36
+    - name: CentOS
+      versions:
+        - 9
+        - 8
     - name: EPEL
       versions:
         - 9
