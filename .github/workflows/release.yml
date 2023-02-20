@@ -77,4 +77,6 @@ jobs:
           prerelease: false
 
       - name: Deploy Ansible collection to Galaxy
-        run: ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
+        run: |
+          ls -lath . 
+          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
