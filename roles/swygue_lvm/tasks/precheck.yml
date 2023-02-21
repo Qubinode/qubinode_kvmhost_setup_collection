@@ -1,12 +1,13 @@
 ---
 - name: Ensure lvm2 is installed
-  ansible.builtin.shell: >
-    rpm -q lvm2 || yum install -y lvm2 && echo yes
+  ansible.builtin.yum:
+    name: lvm2
+    state: present
   tags:
     - pkgs
 
 - name: Checking if  host_device exist
-  community.general.parted: 
+  community.general.parted:
     device: "/dev/{{ host_device }}"
     unit: MiB
   register: device_info
@@ -16,9 +17,9 @@
 - name: Fail if the device does not exist
   ansible.builtin.fail:
     msg: |
-       Could not find the device /dev/{{ host_device }} 
-       please ensure the variable host_device is set to the device
-       you want to use.
+       Could not find the device /dev/{{ host_device }}
+         please ensure the variable host_device is set to the device
+         you want to use.
   when: device_info.failed|bool
 
 - name: Set LVM Facts
@@ -43,6 +44,7 @@
 
 - name: Check if the vg_name exist
   ansible.builtin.shell: |
+    set -o pipefail
     vgs -o vg_name,pv_name --noheadings --nameprefixes --unquoted| awk '/{{ vg_name }}/ {print $1}'
   register: vg_info
   changed_when: vg_info.stdout != vg_name_check
@@ -59,8 +61,8 @@
   ansible.builtin.fail:
     msg: |
       The {{ vg_name }} exist but not on device /dev/{{ host_device }}
-      please resolve and rerun the play. Either update the host_device variable or
-      change the vg_name variable value to something else.
+        please resolve and rerun the play. Either update the host_device variable or
+        change the vg_name variable value to something else.
   when: vg_exist and vg_not_on_pv
 
 - name: Set the fact if the vg_name will be created
@@ -70,4 +72,4 @@
 - name: Print the vg_name will be created
   ansible.builtin.debug:
     msg: "{{ vg_name }} will be created on /dev/{{ host_device }}"
-  when: create_vg|bool 
+  when: create_vg|bool
