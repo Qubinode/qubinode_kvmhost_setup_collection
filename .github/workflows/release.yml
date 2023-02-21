@@ -83,6 +83,14 @@ jobs:
             collections:
                 - tosin2013.qubinode_kvmhost_setup_collection
             ```
+            For Development use the below command:
+            ```sh
+            ---
+            collections:
+              - name: https://github.com/Qubinode/qubinode_kvmhost_setup_collection.git
+                type: git
+                version: main
+            ```
           draft: false
           prerelease: false
 

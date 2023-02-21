@@ -11,7 +11,8 @@
 
 - name: Extract synth-shell
   ansible.builtin.unarchive:
-    src: synth-shell.zip
+    src: https://github.com/andresgongora/synth-shell/archive/refs/tags/v2.4.zip
+    remote_src: true
     dest: "/etc"
 
 - name: Deploy qubinode global bashrc
@@ -28,7 +29,7 @@
 
 - name: Download k9s
   ansible.builtin.unarchive:
-    src: https://github.com/derailed/k9s/releases/download/v0.24.2/k9s_Linux_x86_64.tar.gz
+    src: https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz
     remote_src: true
     dest: /usr/local/sbin
     creates: /usr/local/sbin/k9s
