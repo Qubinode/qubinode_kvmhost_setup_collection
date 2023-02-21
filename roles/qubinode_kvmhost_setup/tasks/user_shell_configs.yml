@@ -72,7 +72,8 @@
 - name: Generate and install Vim configuration
   ansible.builtin.shell: |
     set -o pipefail
-    "curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > $HOME/.vimrc"
+    curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > /root/.vimrc
+    curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > /home/{{ admin_user }}/.vimrc
 
 - name: Check if powerline font is installed
   become: true
