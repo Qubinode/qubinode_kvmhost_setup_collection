@@ -72,7 +72,7 @@
 - name: Generate and install Vim configuration
   ansible.builtin.uri:
     url: 'https://vim-bootstrap.com/generate.vim'
-    method: POST
+    method: GET
     body_format: form-urlencoded
     body:
       editor: vim
