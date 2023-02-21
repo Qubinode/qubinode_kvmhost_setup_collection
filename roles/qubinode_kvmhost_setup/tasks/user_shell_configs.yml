@@ -28,6 +28,15 @@
     group: "wheel"
     mode: 0644
 
+- name: Create ~/.vim/autoload directory if it doesn't exist
+  ansible.builtin.file:
+    path: "{{ user_homedir }}/.vim/autoload"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: true
+  
 - name: Install vimplug plugin manager
   become: true
   become_user: "{{ shell_user }}"
