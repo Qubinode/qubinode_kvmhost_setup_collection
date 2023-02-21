@@ -1,4 +1,4 @@
 ---
 logical_volumes: []
-host_device: "" 
+host_device: ""
 vg_name: ""
