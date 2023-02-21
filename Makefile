@@ -1,4 +1,4 @@
-TAG=0.2.0
+TAG=0.3.0
 
 create-release:
 	git tag -a v${TAG} -m "Creating v${TAG} release"
