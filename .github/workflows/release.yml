@@ -61,9 +61,13 @@ jobs:
         with:
           files: tosin2013-qubinode_kvmhost_setup_collection-0.1.0.tar.gz
           body: |
-            # Ansible Collection: qubinode.qubinode_kvmhost_setup_collection
+            # Ansible Collection: tosin2013.qubinode_kvmhost_setup_collection
             ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/release.yml/badge.svg)
-            Install with:
+            To install without requirements.yml file:
+            ```sh
+            ansible-galaxy collection install tosin2013.qubinode_kvmhost_setup_collection
+            ```
+            Install with requirements.yml file:
             ```sh
             ansible-galaxy collection install -r requirements.yml -f
             ```
@@ -71,7 +75,7 @@ jobs:
             ```yaml
             ---
             collections:
-                - https://github.com/Qubinode/qubinode_kvmhost_setup_collection/releases/download/v0.1.0/qubinode_kvmhost_setup_collection-0.1.0.tar.gz
+                - tosin2013.qubinode_kvmhost_setup_collection
             ```
           draft: false
           prerelease: false
