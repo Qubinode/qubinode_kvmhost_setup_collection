@@ -69,14 +69,29 @@
     group: "wheel"
     mode: 0644
 
-- name: Extract .vim
+- name: Generate and install Vim configuration
+  ansible.builtin.uri:
+    url: 'https://vim-bootstrap.com/generate.vim'
+    method: POST
+    body_format: form-urlencoded
+    body:
+      editor: vim
+      langs:
+        - javascript
+        - go
+        - html
+        - ruby
+        - python
+  register: vim_config
+
+- name: Write Vim configuration to ~/.vimrc
+  ansible.builtin.copy:
+    content: "{{ vim_config.content }}"
+    dest: "{{ user_homedir }}/.vimrc"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
   become: true
-  become_user: "{{ shell_user }}"
-  ansible.builtin.unarchive:
-    src: vim.zip
-    dest: "{{ user_homedir }}"
-    owner: "{{ shell_user }}"
-    group: "wheel"
 
 - name: Check if powerline font is installed
   become: true

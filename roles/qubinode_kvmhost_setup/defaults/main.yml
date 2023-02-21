@@ -84,7 +84,6 @@ required_rpm_pakcages:
   - device-mapper-event-libs
   - device-mapper-libs
   - httpd-tools
-  - java-1.8.0-openjdk-devel.x86_64
   - tmux
   - python3-dns
   - python3-pip
@@ -92,3 +91,8 @@ required_rpm_pakcages:
   - cargo
   - lm_sensors
   - python3-netaddr
+   - cockpit-machines
+   - bc 
+   - nmap
+   - ncurses-devel
+   - curl
