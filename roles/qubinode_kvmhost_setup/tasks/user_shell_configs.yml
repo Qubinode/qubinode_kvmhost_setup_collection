@@ -78,19 +78,24 @@
   ansible.builtin.shell: |
     set -o pipefail
     curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > /root/.vimrc
-  when: root_vimrc_file.stat.exists == false
+  when: not root_vimrc_file.stat.exists
+
+- name: Check if .vimrc file exists for root user
+  ansible.builtin.stat:
+    path: "/home/{{ admin_user }}/.vimrc"
+  register: admin_user_fact
 
 - name: Check if .vimrc file exists for admin user
   ansible.builtin.stat:
     path: "/home/{{ admin_user }}/.vimrc"
   register: admin_vimrc_file
-  when: admin_user is defined
+  when: admin_user_fact is defined
 
 - name: Generate and install Vim configuration for admin user
   ansible.builtin.shell: |
     set -o pipefail
     curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > "/home/{{ admin_user }}/.vimrc"
-  when: admin_vimrc_file.stat.exists == false and admin_user is defined
+  when: not admin_vimrc_file.stat.exists and admin_user_fact is defined
 
 - name: Copy Vim configuration to admin user's home directory
   ansible.builtin.copy:
@@ -98,7 +103,7 @@
     dest: "/home/{{ admin_user }}/.vimrc"
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
-  when: admin_vimrc_file.stat.exists == false and admin_user is defined
+  when: not admin_vimrc_file.stat.exists and admin_user_fact is defined
 
 - name: Check if powerline font is installed
   become: true
