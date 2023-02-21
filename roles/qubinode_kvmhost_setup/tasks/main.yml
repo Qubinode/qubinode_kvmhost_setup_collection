@@ -13,13 +13,6 @@
     state: present
   loop: "{{ required_rpm_packages }}"
 
-- name: Install required python libraries
-  become: true
-  become_user: "{{ admin_user }}"
-  ansible.builtin.pip:
-    name: openshift
-    extra_args: --user
-
 - name: Configure shell extras
   ansible.builtin.include_tasks: configure_shell.yml
   when: configure_shell|bool

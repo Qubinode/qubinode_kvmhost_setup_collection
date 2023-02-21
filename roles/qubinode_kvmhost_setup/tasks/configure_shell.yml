@@ -1,6 +1,6 @@
 ---
 - name: Define temp dir
-  community.general.set_fact:
+  ansible.builtin.set_fact:
     tempdir_kvmhost_path: /tmp/kvmhost_setup
 
 - name: Create temp directory
