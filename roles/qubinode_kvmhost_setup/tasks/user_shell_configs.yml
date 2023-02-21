@@ -61,49 +61,47 @@
 
 - name: Deploy vimrc for current user
   become: true
-  become_user: "{{ shell_user }}"
+  ansible.builtin.shell: |
+    echo "{{ ansible_user_id }}"
+  register: current_user
+
+- name: Deploy vimrc for admin user
   ansible.builtin.template:
     src: vimrc.j2
-    dest: "{{ user_homedir }}/.vimrc"
-    owner: "{{ shell_user }}"
-    group: "wheel"
-    mode: 0644
-
-- name: Check if .vimrc file exists for root user
-  ansible.builtin.stat:
-    path: /root/.vimrc
-  register: root_vimrc_file
-
-- name: Generate and install Vim configuration for root user
-  ansible.builtin.shell: |
-    set -o pipefail
-    curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > /root/.vimrc
-  when: not root_vimrc_file.stat.exists
-
-- name: Check if .vimrc file exists for root user
-  ansible.builtin.stat:
-    path: "/home/{{ admin_user }}/.vimrc"
-  register: admin_user_fact
-
-- name: Check if .vimrc file exists for admin user
-  ansible.builtin.stat:
-    path: "/home/{{ admin_user }}/.vimrc"
-  register: admin_vimrc_file
-  when: admin_user_fact is defined
-
-- name: Generate and install Vim configuration for admin user
-  ansible.builtin.shell: |
-    set -o pipefail
-    curl -s 'https://vim-bootstrap.com/generate.vim' --data 'editor=vim&langs=javascript&langs=go&langs=html&langs=ruby&langs=python' > "/home/{{ admin_user }}/.vimrc"
-  when: not admin_vimrc_file.stat.exists and admin_user_fact is defined
-
-- name: Copy Vim configuration to admin user's home directory
-  ansible.builtin.copy:
-    src: /root/.vimrc
     dest: "/home/{{ admin_user }}/.vimrc"
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
-  when: not admin_vimrc_file.stat.exists and admin_user_fact is defined
+    mode: 0644
+  when: current_user.stdout != admin_user
+
+- name: Extract .vim for admin user
+  become: true
+  become_user: "{{ admin_user }}"
+  unarchive:
+    src: vim.zip
+    dest: "{{ user_homedir }}"
+    owner: "{{ admin_user }}"
+    group: "wheel"
+  when: current_user.stdout != admin_user 
+
+- name: Deploy vimrc for root user
+  ansible.builtin.template:
+    src: vimrc.j2
+    dest: "/root/.vimrc"
+    owner: root
+    group: "wheel"
+    mode: 0644
+  when: current_user.stdout == admin_user
+
+- name: Extract .vim for admin user
+  become: true
+  become_user: "/root/"
+  unarchive:
+    src: vim.zip
+    dest: "/root/"
+    owner: "/root"
+    group: "wheel"
+  when: current_user.stdout == admin_user 
 
 - name: Check if powerline font is installed
   become: true
