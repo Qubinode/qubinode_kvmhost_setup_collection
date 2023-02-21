@@ -2,10 +2,10 @@
 - name: Create Volume Group
   community.general.lvg:
     vg: "{{ vg_name }}"
-    force: yes
+    force: true
     pvs: /dev/{{ host_device }}
-  when: create_vg|bool 
-  become: True
+  when: create_vg|bool
+  become: true
 
 - name: Create custom logical volumes
   community.general.lvol:
@@ -14,8 +14,8 @@
     state: present
     size: "{{ item.size }}"
   with_items: "{{ logical_volumes }}"
-  when: create_vg|bool 
-  become: True
+  when: create_vg|bool
+  become: true
 
 - name: Ensure filesystems are created
   community.general.filesystem:
@@ -23,16 +23,20 @@
     dev: "/dev/mapper/{{ vg_name }}-lv_{{ item.name }}"
     opts: "-L {{ item.name }}"
   with_items: "{{ logical_volumes }}"
-  when: create_vg|bool 
-  become: True
+  when: create_vg|bool
+  become: true
 
 - name: Ensure mount points are created
   ansible.builtin.file:
     path: "{{ item.mount_dir }}"
     state: directory
+    mode: '0755'
+    owner: root
+    group: wheel
   with_items: "{{ logical_volumes }}"
   when: create_vg|bool
-  become: True
+  become: true
+
 
 - name: Config mount points in fstab
   ansible.posix.mount:
@@ -44,7 +48,7 @@
     opts: defaults
     state: mounted
   with_items: "{{ logical_volumes }}"
-  become: True
+  become: true
 
 - name: Show device info
   ansible.builtin.debug:
@@ -52,4 +56,4 @@
     verbosity: 1
   with_items: "{{ logical_volumes }}"
   when: create_vg|bool
-  become: True
+  become: true

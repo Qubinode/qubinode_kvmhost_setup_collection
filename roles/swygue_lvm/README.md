@@ -34,14 +34,16 @@ Example Playbook
 
     - hosts: servers
       roles:
-         - { role: swygue-lvm }
+         - { role: swygue_lvm }
 
 License
 -------
 
-BSD
+GPLv2
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+* Tosin Akinosho - [tosin2013](https://github.com/tosin2013)
+* Rodrique Heron - [flyemsafe](https://github.com/flyemsafe)
+* Abnerson Malivert - [amalivert](https://github.com/amalivert)
