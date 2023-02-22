@@ -41,6 +41,12 @@ libvirt_host_networks:
     subnet: "not currently in use"
     mac: "{{ kvm_host_macaddr }}"
 
+# The the primary dns server to the dns_forwarder
+primary_dns_server: "{{ dns_forwarder | default('1.1.1.1') }}"
+kvm_host_dns_server: "{{ primary_dns_server | default('1.1.1.1') }}"
+search_domains:
+  - "{{ domain }}"
+
 libvirt_networks:
   - name: "vmnetbr0"
     create: true
