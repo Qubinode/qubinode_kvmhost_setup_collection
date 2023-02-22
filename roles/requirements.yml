@@ -1,0 +1,4 @@
+---
+- src: linux-system-roles.cockpit
+- src: linux-system-roles.firewall
+- src: linux-system-roles.network
