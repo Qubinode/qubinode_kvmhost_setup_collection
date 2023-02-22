@@ -6,6 +6,16 @@
 # Set to true when host is virtual or running in a container
 cicd_test: false
 
+# Set to true to enable libvirt and kvm
+lib_virt_setup: true 
+
+# Set to true to enable cockpit
+enable_cockpit: true 
+
+# Configure the user bash shell login prompt
+# This will overwrite your existing .bashrc, .vimrc and other terminal configuration files
+configure_shell: true
+
 # Libvirt network and storage
 # ---------------------------
 kvm_host_libvirt_dir: /var/lib/libvirt/images
@@ -64,10 +74,6 @@ kvm_host_group: libvirt
 
 # User to get regular access to libvirt
 admin_user: ""
-
-# Configure the user bash shell login prompt
-# This will overwrite your existing .bashrc, .vimrc and other terminal configuration files
-configure_shell: true
 
 # users whose shell will be configured
 shell_users:
