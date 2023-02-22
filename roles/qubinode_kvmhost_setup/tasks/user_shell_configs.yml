@@ -112,7 +112,7 @@
     dest: "/root/"
     owner: "/root"
     group: "wheel"
-  when: current_user.stdout == admin_user 
+  when: current_user.stdout == admin_user
 
 - name: Check if powerline font is installed
   become: true
