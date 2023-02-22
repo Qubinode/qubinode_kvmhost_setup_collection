@@ -1,0 +1,11 @@
+- name: "Validate packages are installed"
+  ansible.builtin.yum:
+    list: "{{ item }}"
+  with_items: "{{ libvirt_pkgs }}"
+  register: installed_pkg
+  become: true
+  ignore_errors: true
+  failed_when: not installed_pkg
+  tags:
+    - validate
+    - validate_pkgs

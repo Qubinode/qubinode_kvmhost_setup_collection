@@ -1,0 +1,24 @@
+- name: Validate libirt install dir exists
+  ansible.builtin.stat:
+    path: "{{ libvirt_install_dir }}"
+  register: lvm_path
+  become: True 
+  ignore_errors: true
+  failed_when: lvm_path.stat.isdir == false and lvm_path.stat.exists == false
+  tags:
+    - validate
+    - validate_fs
+
+- name: Validate libirt install dir is mounted
+  ansible.builtin.lineinfile: 
+    dest: '/etc/fstab'
+    regexp: '(^.*libvirt.*$)'
+    state: present
+    check_mode: true
+  register: libvirt_path
+  become: True 
+  ignore_errors: true
+  failed_when: libvirt_path.changed
+  tags:
+    - validate
+    - validate_fs
