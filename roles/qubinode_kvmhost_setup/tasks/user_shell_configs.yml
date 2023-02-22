@@ -74,15 +74,26 @@
     mode: 0644
   when: current_user.stdout != admin_user
 
-- name: Extract .vim for admin user
-  become: true
-  become_user: "{{ admin_user }}"
-  unarchive:
-    src: vim.zip
-    dest: "{{ user_homedir }}"
+- name: Download vim.zip
+  ansible.builtin.get_url:
+    url: "{{ download_vim_url }}"
+    dest: "{{ admin_user_home }}/vim.zip"
+  when: current_user.stdout != admin_user
+
+- name: Extract vim.zip
+  ansible.builtin.unarchive:
+    src: "{{ admin_user_home }}/vim.zip"
+    dest: "{{ admin_user_home }}/"
     owner: "{{ admin_user }}"
     group: "wheel"
-  when: current_user.stdout != admin_user 
+    mode: "0755"
+  when: current_user.stdout != admin_user
+
+- name: Download vim.zip
+  ansible.builtin.get_url:
+    url: "{{ download_vim_url }}"
+    dest: "/root/vim.zip"
+  when: current_user.stdout == admin_user
 
 - name: Deploy vimrc for root user
   ansible.builtin.template:

@@ -96,3 +96,6 @@ required_rpm_pakcages:
   - nmap
   - ncurses-devel
   - curl
+
+
+ download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"
