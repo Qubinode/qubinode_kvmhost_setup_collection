@@ -19,7 +19,7 @@
     executable: /bin/bash
 
 - name: Return bridge status
-  ansible.builtin.command: "ifconfig {{ qubinode_bridge_device }}"
+  ansible.builtin.command: "ifconfig {{ qubinode_bridge_name }}"
   register: bridge_interface
   ignore_errors: true
   check_mode: true
@@ -89,7 +89,7 @@
   vars:
     network_provider: nm
     network_connections:
-      - name: "{{ qubinode_bridge_device }}"
+      - name: "{{ qubinode_bridge_name }}"
         type: bridge
         state: up
         ip:
@@ -107,7 +107,7 @@
         state: up
         type: ethernet
         interface_name: "{{ kvm_host_interface }}"
-        controller: "{{ qubinode_bridge_device }}"
+        controller: "{{ qubinode_bridge_name }}"
         port_type: bridge
   when: is_fedora_36 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9
 
