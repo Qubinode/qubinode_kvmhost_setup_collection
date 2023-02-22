@@ -14,7 +14,6 @@
     dest: '/etc/fstab'
     regexp: '(^.*libvirt.*$)'
     state: present
-    check_mode: true
   register: libvirt_path
   become: true
   ignore_errors: true
