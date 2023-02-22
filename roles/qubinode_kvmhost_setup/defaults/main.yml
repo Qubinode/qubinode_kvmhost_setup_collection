@@ -7,10 +7,10 @@
 cicd_test: false
 
 # Set to true to enable libvirt and kvm
-lib_virt_setup: true 
+lib_virt_setup: true
 
 # Set to true to enable cockpit
-enable_cockpit: true 
+enable_cockpit: true
 
 # Configure the user bash shell login prompt
 # This will overwrite your existing .bashrc, .vimrc and other terminal configuration files

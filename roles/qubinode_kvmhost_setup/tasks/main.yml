@@ -23,4 +23,5 @@
 
 - name: Setup Libvirt
   ansible.builtin.include_tasks: libvirt_setup.yml
+  when: lib_virt_setup|bool
 
