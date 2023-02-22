@@ -64,6 +64,7 @@
   ansible.builtin.shell: |
     echo "{{ ansible_user_id }}"
   register: current_user
+  changed_when: false
 
 - name: Deploy vimrc for admin user
   ansible.builtin.template:
@@ -78,6 +79,7 @@
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
     dest: "{{ admin_user_home }}/vim.zip"
+    mode: "0775"
   when: current_user.stdout != admin_user
 
 - name: Extract vim.zip
@@ -93,6 +95,7 @@
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
     dest: "/root/vim.zip"
+    mode: "0775"
   when: current_user.stdout == admin_user
 
 - name: Deploy vimrc for root user
