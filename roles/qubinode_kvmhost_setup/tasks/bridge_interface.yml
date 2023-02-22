@@ -109,5 +109,5 @@
   virt_net:
     name: "{{ net_name }}"
     command: define
-    xml: '{{ (lookup("template", "br_network.xml.j2")) }}'
+    xml: '{{ (lookup("template", "libvirt_net_bridge.xml.j2")) }}'
   when: net_create|bool
