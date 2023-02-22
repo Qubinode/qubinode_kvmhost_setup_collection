@@ -1,2 +1,6 @@
 ---
 # tasks file for edge_hosts_validate
+- include_tasks: validate_rhsm.yml
+  when: ansible_distribution == 'RedHat'
+- include_tasks: validate_pkgs.yml
+- include_tasks: validate_fs.yml
