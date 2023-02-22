@@ -13,7 +13,7 @@ kvmhost_bridge_device: vmbr0
 kvm_host_domain: example.com
 qubinode_bridge_name: qubibr0
 
-##*****************************
+## *****************************
 ## Optional User Configurations
 ## dictionary of libvirt networks to create
 libvirt_host_networks:
