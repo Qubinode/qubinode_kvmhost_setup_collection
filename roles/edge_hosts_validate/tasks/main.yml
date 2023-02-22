@@ -1,9 +1,9 @@
 ---
 # tasks file for edge_hosts_validate
 - name: Validate system is registered to Red Hat
-  include_tasks: validate_rhsm.yml
+  ansible.builtin.include_tasks: validate_rhsm.yml
   when: ansible_distribution == 'RedHat'
 - name: Validate Packages are isntalled
-  include_tasks: validate_pkgs.yml
+  ansible.builtin.include_tasks: validate_pkgs.yml
 - name: Validate Filesystem
-  include_tasks: validate_fs.yml
+  ansible.builtin.include_tasks: validate_fs.yml
