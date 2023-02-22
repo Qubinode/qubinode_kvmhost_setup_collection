@@ -15,7 +15,7 @@ qubinode_bridge_name: qubibr0
 
 ##*****************************
 ## Optional User Configurations
-# dictionary of libvirt networks to create
+## dictionary of libvirt networks to create
 libvirt_host_networks:
   - name: "{{ vm_libvirt_net | default(qubinet) }}"
     create: true
@@ -48,7 +48,7 @@ libvirt_host_storage_pools:
 ## Libvirt Storage
 ##
 ## Set to no if you don't want to configure libvirt storage
-create_libvirt_storage: yes
+create_libvirt_storage: true
 ## Where to store libvirt VMs disk images
 libvirt_images_dir: /var/lib/libvirt/images
 ## Libvirt pool name
