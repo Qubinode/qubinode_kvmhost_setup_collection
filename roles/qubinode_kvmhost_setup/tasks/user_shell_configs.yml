@@ -110,7 +110,7 @@
 - name: Extract .vim for admin user
   become: true
   become_user: "/root/"
-  unarchive:
+  ansible.builtin.unarchive:
     src: vim.zip
     dest: "/root/"
     owner: "/root"
