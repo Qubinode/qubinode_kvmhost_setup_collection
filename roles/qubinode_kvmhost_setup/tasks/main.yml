@@ -17,9 +17,11 @@
   ansible.builtin.include_tasks: configure_shell.yml
   when: configure_shell|bool
 
-- name: Setup Libvirt
-  ansible.builtin.include_tasks: libvirt_setup.yml
-
 - name: Setup Cockpit
   ansible.builtin.include_tasks: cockpit_setup.yml
   when: enable_cockpit|bool
+  
+- name: Setup Libvirt
+  ansible.builtin.include_tasks: libvirt_setup.yml
+
+
