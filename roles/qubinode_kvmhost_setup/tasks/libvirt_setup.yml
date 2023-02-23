@@ -94,7 +94,7 @@
         state: up
         ip:
           route_metric4: 100
-          dhcp4: true
+          dhcp4: false
           gateway4: "{{ kvm_host_gw }}"
           dns:
             - "{{ primary_dns_server }}"
