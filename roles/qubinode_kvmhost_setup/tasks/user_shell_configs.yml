@@ -78,13 +78,13 @@
 - name: Download vim.zip
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
-    dest: "/home/{{ admin_user }}/vim.zip"
+    dest: "/tmp/vim.zip"
     mode: "0775"
   when: current_user.stdout != admin_user
 
 - name: Extract vim.zip
   ansible.builtin.unarchive:
-    src: "/home/{{ admin_user }}/vim.zip"
+    src: "/tmp/vim.zip"
     dest: "/home/{{ admin_user }}/"
     owner: "{{ admin_user }}"
     group: "wheel"
