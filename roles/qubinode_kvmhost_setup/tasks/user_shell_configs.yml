@@ -85,7 +85,7 @@
 - name: Extract vim.zip
   ansible.builtin.unarchive:
     src: "/home/{{ admin_user }}/vim.zip"
-    dest: "{{ user_homedir }}/"
+    dest: "/home/{{ admin_user }}/"
     owner: "{{ admin_user }}"
     group: "wheel"
     mode: "0755"
