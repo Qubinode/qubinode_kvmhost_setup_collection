@@ -1,4 +1,44 @@
 ---
+- name: Install EPEL repository
+  dnf:
+    name: epel-release
+    state: present
+  become: true
+
+- name: Update all packages
+  dnf:
+    name: '*'
+    state: latest
+    update_cache: yes
+  become: true
+
+- name: Install Server with GUI group
+  dnf:
+    name: "@^Server with GUI"
+    state: present
+  become: true
+
+- name: Install xrdp package
+  dnf:
+    name: xrdp
+    state: present
+  become: true
+
+- name: Enable and start xrdp service
+  systemd:
+    name: xrdp
+    enabled: yes
+    state: started
+  become: true
+
+- name: Configure firewall
+  firewalld:
+    port: 3389/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+  become: true
+
 - name: Install RHEL/Fedora Web Console (Cockpit)
   ansible.builtin.include_role:
     name: linux-system-roles.cockpit
