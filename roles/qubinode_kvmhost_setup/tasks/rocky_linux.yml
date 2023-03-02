@@ -42,16 +42,13 @@
 - name: Install RHEL/Fedora Web Console (Cockpit)
   ansible.builtin.include_role:
     name: linux-system-roles.cockpit
-  ignore_errors: true
   vars:
     cockpit_packages: full
 
 - name: Configure Firewall for Web Console
-  ansible.builtin.include_role:
-    name: linux-system-roles.firewall
-  vars:
-    firewall:
-      service: cockpit
-      state: enabled
-  ignore_errors: true
-  when: not cicd_test|bool
+  ansible.posix.firewalld:
+    port: 9090/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true
