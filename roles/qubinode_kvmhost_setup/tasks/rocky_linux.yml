@@ -1,38 +1,38 @@
 ---
 - name: Install EPEL repository
-  dnf:
+  ansible.builtin.dnf:
     name: epel-release
     state: present
   become: true
 
 - name: Update all packages
-  dnf:
+  ansible.builtin.dnf:
     name: '*'
     state: latest
     update_cache: yes
   become: true
 
 - name: Install Server with GUI group
-  dnf:
-    name: "@^Server with GUI"
+  ansible.builtin.dnf:
+    name: "@Server with GUI"
     state: present
   become: true
 
 - name: Install xrdp package
-  dnf:
+  ansible.builtin.dnf:
     name: xrdp
     state: present
   become: true
 
 - name: Enable and start xrdp service
-  systemd:
+  ansible.builtin.systemd:
     name: xrdp
     enabled: yes
     state: started
   become: true
 
 - name: Configure firewall
-  firewalld:
+  ansible.posix.firewalld:
     port: 3389/tcp
     permanent: yes
     state: enabled
