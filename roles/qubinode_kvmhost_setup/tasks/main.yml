@@ -21,7 +21,7 @@
   ansible.builtin.include_tasks: cockpit_setup.yml
   when: enable_cockpit|bool and ansible_os_family != "Rocky"
 
-- name: Setup Rocky Linux 
+- name: Setup Rocky Linux
   ansible.builtin.include_tasks: rocky_linux.yml
   when: enable_cockpit|bool and ansible_os_family == "Rocky"
 
