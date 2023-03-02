@@ -8,8 +8,8 @@
 - name: Update all packages
   ansible.builtin.dnf:
     name: '*'
-    state: latest
-    update_cache: yes
+    state: present
+    update_cache: true
   become: true
 
 - name: Install Server with GUI group
@@ -27,16 +27,16 @@
 - name: Enable and start xrdp service
   ansible.builtin.systemd:
     name: xrdp
-    enabled: yes
+    enabled: true
     state: started
   become: true
 
 - name: Configure firewall
   ansible.posix.firewalld:
     port: 3389/tcp
-    permanent: yes
+    permanent: true
     state: enabled
-    immediate: yes
+    immediate: true
   become: true
 
 - name: Install RHEL/Fedora Web Console (Cockpit)
