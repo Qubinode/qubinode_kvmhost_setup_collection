@@ -53,4 +53,5 @@
     firewall:
       service: cockpit
       state: enabled
+  ignore_errors: true
   when: not cicd_test|bool
