@@ -2,60 +2,60 @@
 - name: Ensure ~/.config exist
   become: true
   ansible.builtin.file:
-    path: "/home/{{ shell_user }}/.config"
+    path: "/home/{{ admin_user }}/.config"
     state: directory
-    owner: "{{ shell_user }}"
+    owner: "{{ admin_user }}"
     group: "wheel"
     mode: "0755"
 
 - name: Deploy startship config for current user
   become: true
-  become_user: "{{ shell_user }}"
+  become_user: "{{ admin_user }}"
   ansible.builtin.template:
     src: starship.toml.j2
-    dest: "/home/{{ shell_user }}/.config/starship.toml"
-    owner: "{{ shell_user }}"
+    dest: "/home/{{ admin_user }}/.config/starship.toml"
+    owner: "{{ admin_user }}"
     group: "wheel"
     mode: 0644
 
 - name: Deploy bash_profile for current user
   become: true
-  become_user: "{{ shell_user }}"
+  become_user: "{{ admin_user }}"
   ansible.builtin.template:
     src: bash_profile.j2
-    dest: "/home/{{ shell_user }}/.bash_profile"
-    owner: "{{ shell_user }}"
+    dest: "/home/{{ admin_user }}/.bash_profile"
+    owner: "{{ admin_user }}"
     group: "wheel"
     mode: 0644
 
 - name: Create ~/.vim/autoload directory if it doesn't exist
   ansible.builtin.file:
-    path: "/home/{{ shell_user }}/.vim/autoload"
+    path: "/home/{{ admin_user }}/.vim/autoload"
     state: directory
     mode: '0755'
-    owner: "{{ shell_user }}"
+    owner: "{{ admin_user }}"
     group: "wheel"
   become: true
 
 - name: Install vimplug plugin manager
   become: true
-  become_user: "{{ shell_user }}"
+  become_user: "{{ admin_user }}"
   vars:
     plug_url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   ansible.builtin.get_url:
     url: "{{ plug_url }}"
-    dest: "/home/{{ shell_user }}/.vim/autoload/plug.vim"
+    dest: "/home/{{ admin_user }}/.vim/autoload/plug.vim"
     mode: 0644
 
 - name: Deploy bashrc for current user
   become: true
-  become_user: "{{ shell_user }}"
+  become_user: "{{ admin_user }}"
   vars:
-    synth_shell_dir: "/home/{{ shell_user }}/.config"
+    synth_shell_dir: "/home/{{ admin_user }}/.config"
   ansible.builtin.template:
     src: bashrc.j2
-    dest: "/home/{{ shell_user }}/.bashrc"
-    owner: "{{ shell_user }}"
+    dest: "/home/{{ admin_user }}/.bashrc"
+    owner: "{{ admin_user }}"
     group: "wheel"
     mode: 0644
 
@@ -69,28 +69,28 @@
 - name: Deploy vimrc for admin user
   ansible.builtin.template:
     src: vimrc.j2
-    dest: "/home/{{ shell_user }}/.vimrc"
-    owner: "{{ shell_user }}"
+    dest: "/home/{{ admin_user }}/.vimrc"
+    owner: "{{ admin_user }}"
     group: "wheel"
     mode: 0644
-  when: current_user.stdout != shell_user
+  when: current_user.stdout != admin_user
 
 - name: Download vim.zip
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
     dest: "/tmp/vim.zip"
     mode: "0775"
-  when: current_user.stdout != shell_user
+  when: current_user.stdout != admin_user
 
 - name: Extract vim.zip
   ansible.builtin.unarchive:
     src: "/tmp/vim.zip"
-    dest: "/home/{{ shell_user }}/"
-    owner: "{{ shell_user }}"
+    dest: "/home/{{ admin_user }}/"
+    owner: "{{ admin_user }}"
     group: "wheel"
     mode: "0755"
     remote_src: true
-  when: current_user.stdout != shell_user
+  when: current_user.stdout != admin_user
 
 - name: Deploy vimrc for root user
   ansible.builtin.template:
@@ -99,14 +99,14 @@
     owner: root
     group: "wheel"
     mode: 0644
-  when: current_user.stdout == shell_user
+  when: current_user.stdout == admin_user
 
 - name: Download /root/vim.zip
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
     dest: "/root/vim.zip"
     mode: "0775"
-  when: current_user.stdout == shell_user
+  when: current_user.stdout == admin_user
 
 - name: Extract .vim for admin user
   become: true
@@ -116,23 +116,23 @@
     dest: "/root/"
     owner: "/root"
     group: "wheel"
-  when: current_user.stdout == shell_user
+  when: current_user.stdout == admin_user
 
 - name: Check if powerline font is installed
   become: true
-  become_user: "{{ shell_user }}"
+  become_user: "{{ admin_user }}"
   ansible.builtin.stat:
-    path: "/home/{{ shell_user }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
+    path: "/home/{{ admin_user }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
   register: powerline_font
 
 - name: Install powerline fonts
   when: powerline_font.stat.exists
   become: true
-  become_user: "{{ shell_user }}"
+  become_user: "{{ admin_user }}"
   block:
     - name: Ensure ~/.config/fontconfig/conf.d
       ansible.builtin.file:
-        path: "/home/{{ shell_user }}/.config/fontconfig/conf.d"
+        path: "/home/{{ admin_user }}/.config/fontconfig/conf.d"
         state: directory
         mode: '0755'
 
@@ -145,7 +145,7 @@
     - name: Download powerline fontconfig
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/powerline/fonts/master/fontconfig/50-enable-terminess-powerline.conf
-        dest: "/home/{{ shell_user }}/.config/fontconfig/conf.d/50-enable-terminess-powerline.conf"
+        dest: "/home/{{ admin_user }}/.config/fontconfig/conf.d/50-enable-terminess-powerline.conf"
         mode: "0644"
       become: true
       become_user: "{{ ansible_user }}"
@@ -159,4 +159,4 @@
       ansible.builtin.command: "{{ tempdir_kvmhost_path }}/fonts/install.sh"
       args:
         chdir: "{{ tempdir_kvmhost_path }}/fonts"
-        creates: "/home/{{ shell_user }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
+        creates: "/home/{{ admin_user }}/.local/share/fonts/ter-powerline-x12b.pcf.gz"
