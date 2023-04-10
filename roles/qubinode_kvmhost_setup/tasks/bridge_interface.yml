@@ -27,8 +27,9 @@
         bridge_name: "{{ qubinode_bridge_fact }}"
       failed_when: false
 
-    - name: Configure bridge
-      ansible.builtin.command: echo "we need to configure the bridge."
+    - name: Display message when bridge_name is undefined
+      ansible.builtin.debug:
+        msg: "Bridge name is not defined, configuration is required."
       when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup bridge interface
