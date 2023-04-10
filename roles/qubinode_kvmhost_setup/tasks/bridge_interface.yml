@@ -59,7 +59,7 @@
     # connectivity and the bridge interface comes up.
 
     - name: Restart network service for older systems
-      systemd:
+      ansible.builtin.systemd:
         name: "{{ item }}"
         state: restarted
       changed_when: false
@@ -70,7 +70,7 @@
       when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is undefined))
 
     - name: Restart network service
-      systemd:
+      ansible.builtin.systemd:
         name: "{{ item }}"
         state: restarted
       changed_when: false
