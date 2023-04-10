@@ -16,7 +16,7 @@
     dest: "/home/{{ admin_user }}/.config/starship.toml"
     owner: "{{ admin_user }}"
     group: "wheel"
-    mode: 0644
+    mode: "0644"
 
 - name: Deploy bash_profile for current user
   become: true
@@ -26,7 +26,7 @@
     dest: "/home/{{ admin_user }}/.bash_profile"
     owner: "{{ admin_user }}"
     group: "wheel"
-    mode: 0644
+    mode: "0644"
 
 - name: Create ~/.vim/autoload directory if it doesn't exist
   ansible.builtin.file:
@@ -45,7 +45,7 @@
   ansible.builtin.get_url:
     url: "{{ plug_url }}"
     dest: "/home/{{ admin_user }}/.vim/autoload/plug.vim"
-    mode: 0644
+    mode: "0644"
 
 - name: Deploy bashrc for current user
   become: true
@@ -57,7 +57,7 @@
     dest: "/home/{{ admin_user }}/.bashrc"
     owner: "{{ admin_user }}"
     group: "wheel"
-    mode: 0644
+    mode: "0644"
 
 - name: Deploy vimrc for current user
   become: true
@@ -72,7 +72,7 @@
     dest: "/home/{{ admin_user }}/.vimrc"
     owner: "{{ admin_user }}"
     group: "wheel"
-    mode: 0644
+    mode: "0644"
   when: current_user.stdout != admin_user
 
 - name: Download vim.zip
@@ -98,7 +98,7 @@
     dest: "/root/.vimrc"
     owner: root
     group: "wheel"
-    mode: 0644
+    mode: "0644"
   when: current_user.stdout == admin_user
 
 - name: Download /root/vim.zip
