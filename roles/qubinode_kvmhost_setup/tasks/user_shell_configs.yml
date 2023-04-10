@@ -69,28 +69,28 @@
 - name: Deploy vimrc for admin user
   ansible.builtin.template:
     src: vimrc.j2
-    dest: "/home/{{ admin_user }}/.vimrc"
-    owner: "{{ admin_user }}"
-    group: "{{ admin_user }}"
+    dest: "/home/{{ shell_user }}/.vimrc"
+    owner: "{{ shell_user }}"
+    group: "wheel"
     mode: 0644
-  when: current_user.stdout != admin_user
+  when: current_user.stdout != shell_user
 
 - name: Download vim.zip
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
     dest: "/tmp/vim.zip"
     mode: "0775"
-  when: current_user.stdout != admin_user
+  when: current_user.stdout != shell_user
 
 - name: Extract vim.zip
   ansible.builtin.unarchive:
     src: "/tmp/vim.zip"
-    dest: "/home/{{ admin_user }}/"
-    owner: "{{ admin_user }}"
+    dest: "/home/{{ shell_user }}/"
+    owner: "{{ shell_user }}"
     group: "wheel"
     mode: "0755"
     remote_src: true
-  when: current_user.stdout != admin_user
+  when: current_user.stdout != shell_user
 
 - name: Deploy vimrc for root user
   ansible.builtin.template:
@@ -99,14 +99,14 @@
     owner: root
     group: "wheel"
     mode: 0644
-  when: current_user.stdout == admin_user
+  when: current_user.stdout == shell_user
 
 - name: Download /root/vim.zip
   ansible.builtin.get_url:
     url: "{{ download_vim_url }}"
     dest: "/root/vim.zip"
     mode: "0775"
-  when: current_user.stdout == admin_user
+  when: current_user.stdout == shell_user
 
 - name: Extract .vim for admin user
   become: true
@@ -116,7 +116,7 @@
     dest: "/root/"
     owner: "/root"
     group: "wheel"
-  when: current_user.stdout == admin_user
+  when: current_user.stdout == shell_user
 
 - name: Check if powerline font is installed
   become: true
