@@ -33,8 +33,8 @@
     path: "{{ user_homedir }}/.vim/autoload"
     state: directory
     mode: '0755'
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ shell_user }}"
+    group: "wheel"
   become: true
 
 - name: Install vimplug plugin manager
