@@ -37,7 +37,7 @@
       ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
-        mode: 0640
+        mode: '0640'
       with_items: "{{ libvirt_host_networks[type_idx] }}"
       when: not bridge_name | bool or bridge_name is undefined
 
@@ -47,7 +47,7 @@
       ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
-        mode: 0640
+        mode: '0640'
       with_items: "{{ libvirt_host_networks[type_idx] }}"
       register: create_slave_device
       when: not bridge_name | bool or bridge_name is undefined

@@ -19,7 +19,7 @@
   ansible.builtin.template:
     src: bashrc.j2
     dest: "/etc/profile.d/qubinode.sh"
-    mode: 0644
+    mode: "0644"
 
 - name: Download startship
   ansible.builtin.unarchive:
