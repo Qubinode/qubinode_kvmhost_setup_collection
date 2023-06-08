@@ -17,8 +17,8 @@
 
 - name: Configure bridge for older systems
   when:
-    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '36' and configure_bridge
     - ansible_distribution != "Fedora" and ansible_distribution_major_version != '37' and configure_bridge
+    - ansible_distribution != "Fedora" and ansible_distribution_major_version != '38' and configure_bridge
     - ansible_distribution != "Centos" and ansible_distribution_major_version != '9'  and configure_bridge
     - ansible_distribution != "RedHat" and ansible_distribution_major_version != '9' and configure_bridge
   block:

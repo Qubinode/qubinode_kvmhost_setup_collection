@@ -33,12 +33,12 @@
   ansible.builtin.debug:
     msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
 
-- name: Set flag for Fedora 36
+- name: Set flag for Fedora 38
   ansible.builtin.set_fact:
-    is_fedora_36: >-
+    is_fedora_38: >-
       {{
         ansible_distribution == 'Fedora'
-        and ansible_distribution_major_version == '36'
+        and ansible_distribution_major_version == '38'
         and bridge_interface_status.stdout == ''
         and configure_bridge
       }}
@@ -109,7 +109,7 @@
         interface_name: "{{ kvm_host_interface }}"
         controller: "{{ qubinode_bridge_name }}"
         port_type: bridge
-  when: is_fedora_36 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9
+  when: is_fedora_38 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9
 
 - name: Configure bridge interface for libvirt
   ansible.builtin.include_tasks: bridge_interface.yml
