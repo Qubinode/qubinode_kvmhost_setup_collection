@@ -30,7 +30,7 @@
     - name: Display message when bridge_name is undefined
       ansible.builtin.debug:
         msg: "Bridge name is not defined, configuration is required."
-      when: not kvmhost_setup_bridge_name | bool or kvmhost_setup_bridge_name is undefined
+      when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup bridge interface
       vars:
@@ -40,7 +40,7 @@
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
         mode: '0640'
       with_items: "{{ libvirt_host_networks[type_idx] }}"
-      when: not kvmhost_setup_bridge_name | bool or kvmhost_setup_bridge_name is undefined
+      when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup ethernet device interface
       vars:
@@ -50,7 +50,7 @@
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
         mode: '0640'
       with_items: "{{ libvirt_host_networks[type_idx] }}"
-      register: create_slave_device
+      register: kvmhost_setup_create_slave_device
       when: not bridge_name | bool or bridge_name is undefined
 
     # Using the systemd module to restart networking seems to not properly panos_restart
