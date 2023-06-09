@@ -24,7 +24,7 @@
   block:
     - name: Setting bridge name
       ansible.builtin.set_fact:
-        bridge_name: "{{ qubinode_bridge_fact }}"
+        kvmhost_setup_bridge_name: "{{ qubinode_bridge_fact }}"
       failed_when: false
 
     - name: Display message when bridge_name is undefined
@@ -34,7 +34,7 @@
 
     - name: Setup bridge interface
       vars:
-        qubinode_kvmhost_setup_bridge_idx: "{{ type_idx }}"
+        kvmhost_setup_bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
@@ -44,7 +44,7 @@
 
     - name: Setup ethernet device interface
       vars:
-        qubinode_kvmhost_setup_bridge_idx: "{{ type_idx }}"
+        kvmhost_setup_bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
