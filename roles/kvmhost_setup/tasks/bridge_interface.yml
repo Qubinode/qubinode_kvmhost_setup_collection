@@ -100,10 +100,10 @@
 
 - name: Ensure libvirt bridge network is defined
   vars:
-    net_name: "{{ libvirt_host_networks[type_idx].name }}"
-    net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
-    net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
-    net_create: "{{ libvirt_host_networks[type_idx].create }}"
+    kvmhost_setup_net_name: "{{ libvirt_host_networks[type_idx].name }}"
+    kvmhost_setup_net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
+    kvmhost_setup_net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
+    kvmhost_setup_net_create: "{{ libvirt_host_networks[type_idx].create }}"
   virt_net:
     name: "{{ net_name }}"
     command: define
