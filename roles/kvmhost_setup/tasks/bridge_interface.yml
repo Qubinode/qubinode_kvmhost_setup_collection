@@ -44,7 +44,7 @@
 
     - name: Setup ethernet device interface
       vars:
-        bridge_idx: "{{ type_idx }}"
+        kvmhost_setup_bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
