@@ -32,7 +32,7 @@
     path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
     line: "{{ xrdp_remote_user }} ALL=(root) NOPASSWD:ALL"
     create: true
-    mode: 0644
+    mode: "0644"
     validate: "visudo -cf %s"
 
 - name: Set permissions for sudoers file
