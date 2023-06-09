@@ -1,30 +1,30 @@
 ---
 - name: Add remote user to system
   user:
-    name: "{{ remote_user }}"
+    name: "{{ xrdp_remote_user }}"
     state: present
 
 - name: Set remote user password
-  shell: passwd "{{ remote_user }}"
+  shell: passwd "{{ xrdp_remote_user }}"
   args:
-    stdin: "{{ remote_user_password }}"
+    stdin: "{{ xrdp_remote_user_password }}"
 
 - name: Add remote user to wheel group
   user:
-    name: "{{ remote_user }}"
+    name: "{{ xrdp_remote_user }}"
     groups: wheel
     append: yes
 
 - name: Add remote user to sudoers
   lineinfile:
-    path: "/etc/sudoers.d/{{ remote_user }}"
-    line: "{{ remote_user }} ALL=(root) NOPASSWD:ALL"
+    path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
+    line: "{{ xrdp_remote_user }} ALL=(root) NOPASSWD:ALL"
     create: yes
     validate: "visudo -cf %s"
 
 - name: Set permissions for sudoers file
   file:
-    path: "/etc/sudoers.d/{{ remote_user }}"
+    path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
     owner: root
     group: root
     mode: "0440"
