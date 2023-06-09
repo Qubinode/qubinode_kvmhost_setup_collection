@@ -5,12 +5,12 @@
     state: present
 
 - name: Set remote user password
-  ansible.builtin.shell: passwd -S "{{ xrdp_remote_user }}"
+  ansible.builtin.command: passwd -S "{{ xrdp_remote_user }}"
   register: passwd_status
   changed_when: false
 
 - name: Set remote user password if not already set
-  ansible.builtin.shell: passwd "{{ xrdp_remote_user }}"
+  ansible.builtin.command: passwd "{{ xrdp_remote_user }}"
   args:
     stdin: "{{ xrdp_remote_user_password }}"
   changed_when: passwd_status.stdout != "{{ xrdp_remote_user }}"
@@ -18,20 +18,20 @@
 - name: Debug password change
   ansible.builtin.debug:
     msg: "Password changed for remote user"
-  when: passwd_status.stdout != "{{ xrdp_remote_user }} L"
+  when: passwd_status.stdout != "{{ xrdp_remote_user }}"
   no_log: true
 
 - name: Add remote user to wheel group
   ansible.builtin.user:
     name: "{{ xrdp_remote_user }}"
     groups: wheel
-    append: yes
+    append: true
 
 - name: Add remote user to sudoers
   ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
     line: "{{ xrdp_remote_user }} ALL=(root) NOPASSWD:ALL"
-    create: yes
+    create: true
     validate: "visudo -cf %s"
 
 - name: Set permissions for sudoers file
