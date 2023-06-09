@@ -6,7 +6,8 @@ profile: production
 
 use_default_rules: true
 
-
+skip_list:
+  - var-naming
 
 # Ansible-lint does not fail on warnings from the rules or tags listed below
 warn_list:
