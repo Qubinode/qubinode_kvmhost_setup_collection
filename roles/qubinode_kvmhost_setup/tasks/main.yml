@@ -25,6 +25,10 @@
   ansible.builtin.include_tasks: rocky_linux.yml
   when: enable_cockpit|bool and ansible_distribution == "Rocky"
 
+- name: Setup Remote User for XRDP
+  ansible.builtin.include_tasks: configure_remote_user.yml
+  when: enable_cockpit|bool and ansible_distribution == "Rocky"
+
 - name: Setup Libvirt
   ansible.builtin.include_tasks: libvirt_setup.yml
   when: lib_virt_setup|bool

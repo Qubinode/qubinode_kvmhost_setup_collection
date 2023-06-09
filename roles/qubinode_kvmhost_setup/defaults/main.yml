@@ -140,3 +140,8 @@ required_rpm_pakcages:
   - curl
 
 download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"
+
+
+# Remote user for xrdp
+remote_user: "{{ remote_user }}"
+remote_user_password: "{{ remote_user_password }}"
