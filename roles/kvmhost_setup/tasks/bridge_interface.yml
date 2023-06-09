@@ -34,7 +34,7 @@
 
     - name: Setup bridge interface
       vars:
-        kvmhost_setup_bridge_idx: "{{ type_idx }}"
+        kvmhost_setup_bridge_idx: "{{ kvmhost_setup_type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
