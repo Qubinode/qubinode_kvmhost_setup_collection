@@ -24,7 +24,7 @@
   block:
     - name: Setting bridge name
       ansible.builtin.set_fact:
-        bridge_name: "{{ qubinode_bridge_fact }}"
+        kvmhost_setup_bridge_name: "{{ qubinode_bridge_fact }}"
       failed_when: false
 
     - name: Display message when bridge_name is undefined
