@@ -2,10 +2,10 @@
   ansible.builtin.shell: >
     set -o pipefail
     subscription-manager status| grep ^Overall
-  register: subscription_status
+  register: edge_hosts_validate_subscription_status
   become: true
   ignore_errors: true
-  failed_when: "'Current' not in subscription_status.stdout"
+  failed_when: "'Current' not in edge_hosts_validate_subscription_status.stdout"
   changed_when: false
   tags:
     - validate
