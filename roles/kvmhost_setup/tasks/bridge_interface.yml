@@ -24,34 +24,34 @@
   block:
     - name: Setting bridge name
       ansible.builtin.set_fact:
-        kvmhost_setup_bridge_name: "{{ qubinode_bridge_fact }}"
+        bridge_name: "{{ qubinode_bridge_fact }}"
       failed_when: false
 
     - name: Display message when bridge_name is undefined
       ansible.builtin.debug:
         msg: "Bridge name is not defined, configuration is required."
-      when: not  kvmhost_setup_bridge_name | bool or  kvmhost_setup_bridge_name is undefined
+      when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup bridge interface
       vars:
-        kvmhost_setup_bridge_idx: "{{ kvmhost_setup_type_idx }}"
+        bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
         mode: '0640'
       with_items: "{{ libvirt_host_networks[type_idx] }}"
-      when: not  kvmhost_setup_bridge_name | bool or  kvmhost_setup_bridge_name is undefined
+      when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup ethernet device interface
       vars:
-        kvmhost_setup_bridge_idx: "{{ type_idx }}"
+        bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
         mode: '0640'
       with_items: "{{ libvirt_host_networks[type_idx] }}"
-      register: kvmhost_setup_create_slave_device
-      when: not  kvmhost_setup_bridge_name | bool or  kvmhost_setup_bridge_name is undefined
+      register: create_slave_device
+      when: not bridge_name | bool or bridge_name is undefined
 
     # Using the systemd module to restart networking seems to not properly panos_restart
     # the networking subsystem, further debugging is required to find root issue.
@@ -100,10 +100,10 @@
 
 - name: Ensure libvirt bridge network is defined
   vars:
-    qubinode_kvmhost_setup_net_name: "{{ libvirt_host_networks[type_idx].name }}"
-    qubinode_kvmhost_setup_net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
-    qubinode_kvmhost_setup_net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
-    qubinode_kvmhost_setup_net_create: "{{ libvirt_host_networks[type_idx].create }}"
+    net_name: "{{ libvirt_host_networks[type_idx].name }}"
+    net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
+    net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
+    net_create: "{{ libvirt_host_networks[type_idx].create }}"
   virt_net:
     name: "{{ net_name }}"
     command: define
