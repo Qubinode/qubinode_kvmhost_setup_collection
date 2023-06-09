@@ -7,15 +7,16 @@
 - name: Set remote user password
   ansible.builtin.shell: passwd -S "{{ xrdp_remote_user }}"
   register: passwd_status
+  changed_when: false
 
 - name: Set remote user password if not already set
   ansible.builtin.shell: passwd "{{ xrdp_remote_user }}"
   args:
     stdin: "{{ xrdp_remote_user_password }}"
-  changed_when: passwd_status.stdout != "{{ xrdp_remote_user }} L"
+  changed_when: passwd_status.stdout != "{{ xrdp_remote_user }}"
 
 - name: Debug password change
-  debug:
+  ansible.builtin.debug:
     msg: "Password changed for remote user"
   when: passwd_status.stdout != "{{ xrdp_remote_user }} L"
   no_log: true
