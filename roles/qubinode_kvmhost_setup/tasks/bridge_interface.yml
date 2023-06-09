@@ -34,7 +34,7 @@
 
     - name: Setup bridge interface
       vars:
-        bridge_idx: "{{ type_idx }}"
+        qubinode_kvmhost_setup_bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
@@ -44,7 +44,7 @@
 
     - name: Setup ethernet device interface
       vars:
-        bridge_idx: "{{ type_idx }}"
+        qubinode_kvmhost_setup_bridge_idx: "{{ type_idx }}"
       ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
@@ -100,10 +100,10 @@
 
 - name: Ensure libvirt bridge network is defined
   vars:
-    net_name: "{{ libvirt_host_networks[type_idx].name }}"
-    net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
-    net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
-    net_create: "{{ libvirt_host_networks[type_idx].create }}"
+    qubinode_kvmhost_setup_net_name: "{{ libvirt_host_networks[type_idx].name }}"
+    qubinode_kvmhost_setup_net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
+    qubinode_kvmhost_setup_net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
+    qubinode_kvmhost_setup_net_create: "{{ libvirt_host_networks[type_idx].create }}"
   virt_net:
     name: "{{ net_name }}"
     command: define
