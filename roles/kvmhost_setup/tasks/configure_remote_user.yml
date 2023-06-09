@@ -1,29 +1,29 @@
 ---
 - name: Add remote user to system
-  user:
+  ansible.builtin.user:
     name: "{{ xrdp_remote_user }}"
     state: present
 
 - name: Set remote user password
-  shell: passwd "{{ xrdp_remote_user }}"
+  ansible.builtin.shell: passwd "{{ xrdp_remote_user }}"
   args:
     stdin: "{{ xrdp_remote_user_password }}"
 
 - name: Add remote user to wheel group
-  user:
+  ansible.builtin.user:
     name: "{{ xrdp_remote_user }}"
     groups: wheel
     append: yes
 
 - name: Add remote user to sudoers
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
     line: "{{ xrdp_remote_user }} ALL=(root) NOPASSWD:ALL"
     create: yes
     validate: "visudo -cf %s"
 
 - name: Set permissions for sudoers file
-  file:
+  ansible.builtin.file:
     path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
     owner: root
     group: root
