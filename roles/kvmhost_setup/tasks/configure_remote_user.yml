@@ -7,8 +7,9 @@
 - name: Set remote user password if not already set
   ansible.builtin.user:
     name: "{{ xrdp_remote_user }}"
-    password: "{{ xrdp_remote_user_password }}"
+    password: "{{ xrdp_remote_user_password |password_hash('sha512')}}"
     update_password: always
+  register: passwd_status
 
 - name: Debug password change
   ansible.builtin.debug:
