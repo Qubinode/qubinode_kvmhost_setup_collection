@@ -144,4 +144,4 @@ download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhn
 
 # Remote user for xrdp
 xrdp_remote_user: "{{ xrdp_remote_user }}"
-remote_user_password: "{{ remote_user_password }}"
+xrdp_remote_user_password: "{{ xrdp_remote_user_password }}"
