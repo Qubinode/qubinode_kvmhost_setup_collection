@@ -4,17 +4,11 @@
     name: "{{ xrdp_remote_user }}"
     state: present
 
-- name: Set remote user password
-  ansible.builtin.command: passwd -S "{{ xrdp_remote_user }}"
-  register: passwd_status
-  changed_when: false
-
 - name: Set remote user password if not already set
   ansible.builtin.user:
     name: "{{ xrdp_remote_user }}"
     password: "{{ xrdp_remote_user_password }}"
     update_password: always
-  when: passwd_status.stdout == xrdp_remote_user
 
 - name: Debug password change
   ansible.builtin.debug:
