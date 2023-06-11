@@ -11,12 +11,6 @@
     update_password: always
   register: passwd_status
 
-- name: Debug password change
-  ansible.builtin.debug:
-    msg: "Password changed for remote user"
-  when: passwd_status.stdout != xrdp_remote_user
-  no_log: true
-
 - name: Add remote user to wheel group
   ansible.builtin.user:
     name: "{{ xrdp_remote_user }}"
