@@ -26,7 +26,7 @@
   when: enable_cockpit|bool and ansible_distribution == "Rocky"
 
 - name: Check if GUID environment variable is set
-  command: echo $GUID
+  command: echo ${GUID}
   register: guid_result
   changed_when: false
   ignore_errors: true
