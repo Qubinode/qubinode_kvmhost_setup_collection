@@ -6,7 +6,7 @@
   become: true
 
 - name: Install EPEL repository
-  yum:
+  ansible.builtin.yum:
     name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     state: present
   become: true
