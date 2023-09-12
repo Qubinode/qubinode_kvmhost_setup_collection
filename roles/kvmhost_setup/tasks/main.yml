@@ -25,9 +25,24 @@
   ansible.builtin.include_tasks: rocky_linux.yml
   when: enable_cockpit|bool and ansible_distribution == "Rocky"
 
+- name: Check if GUID environment variable is set
+  command: echo $GUID
+  register: guid_result
+  changed_when: false
+  ignore_errors: true
+
+- name: Run the next task if GUID is set
+  debug:
+    msg: "GUID is set and its value is {{ guid_result.stdout }}"
+  when: guid_result.stdout != ""
+
+- name: Setup xRDP on RHPDS
+  ansible.builtin.include_tasks: rhpds_instance.yml
+  when: enable_cockpit|bool and guid_result.stdout != ""
+
 - name: Setup Remote User for XRDP
   ansible.builtin.include_tasks: configure_remote_user.yml
-  when: enable_cockpit|bool and ansible_distribution == "Rocky"
+  when: enable_cockpit|bool and  guid_result.stdout != ""
 
 - name: Setup Libvirt
   ansible.builtin.include_tasks: libvirt_setup.yml
