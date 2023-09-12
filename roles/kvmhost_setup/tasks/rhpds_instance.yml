@@ -1,13 +1,13 @@
 ---
-- name: Install EPEL repository
-  ansible.builtin.dnf:
-    name: epel-release
-    state: present
-  become: true
-
 - name: Install Server with GUI group
   ansible.builtin.dnf:
     name: "@Server with GUI"
+    state: present
+  become: true
+
+- name: Install EPEL repository
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     state: present
   become: true
 
