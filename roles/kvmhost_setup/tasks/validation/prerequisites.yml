@@ -13,7 +13,7 @@
 
 - name: Check OS distribution
   ansible.builtin.assert:
-    that: 
+    that:
       - ansible_distribution in ['RedHat', 'Rocky']
       - ansible_distribution_major_version | int >= 8
     fail_msg: |

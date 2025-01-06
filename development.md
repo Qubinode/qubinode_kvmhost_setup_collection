@@ -348,3 +348,101 @@ We can use the provided inventory file (`../qubinode_navigator/inventories/rhel9
 - ✅ Network setup tests
 - ✅ Storage configuration tests
 - ✅ User permission tests
+
+### Linting Issues and Fixes
+#### Current Violations
+1. Missing Files:
+   - cockpit.yml
+   - remote.yml
+   - Action: Create these files with proper task implementations
+
+2. Command Usage:
+   - Using curl instead of get_url/uri module
+   - Location: roles/kvmhost_setup/tasks/configuration/shell.yml
+   - Action: Replace curl with ansible.builtin.get_url
+
+3. File Permissions:
+   - Missing explicit file permissions
+   - Locations:
+     - roles/kvmhost_setup/tasks/configuration/shell.yml
+     - roles/kvmhost_setup/tasks/setup/libvirt.yml
+   - Action: Add explicit mode parameter to file operations
+
+4. FQCN Violations:
+   - Using short module names instead of FQCN
+   - Locations:
+     - roles/kvmhost_setup/tasks/user_shell_configs.yml
+   - Action: Replace with ansible.builtin.* equivalents
+
+5. YAML Formatting:
+   - Trailing spaces
+   - Missing newlines at EOF
+   - Locations:
+     - roles/kvmhost_setup/tasks/validation/prerequisites.yml
+     - roles/kvmhost_setup/vars/main.yml
+   - Action: Clean up formatting
+
+#### Proposed Fixes
+1. Create missing files:
+```yaml
+# cockpit.yml
+- name: Configure Cockpit
+  ansible.builtin.service:
+    name: cockpit
+    state: started
+    enabled: yes
+
+# remote.yml
+- name: Configure remote access
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PermitRootLogin"
+    line: "PermitRootLogin no"
+```
+
+2. Replace curl with get_url:
+```yaml
+- name: Install starship prompt
+  ansible.builtin.get_url:
+    url: https://starship.rs/install.sh
+    dest: /tmp/starship-install.sh
+    mode: '0755'
+```
+
+3. Add file permissions:
+```yaml
+- name: Add starship to shell configuration
+  ansible.builtin.copy:
+    src: starship.toml
+    dest: /etc/starship.toml
+    owner: root
+    group: root
+    mode: '0644'
+```
+
+4. Use FQCN:
+```yaml
+- name: Configure shell files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: touch
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+```
+
+5. Clean YAML formatting:
+```yaml
+# Remove trailing spaces and ensure newline at EOF
+- name: Validate system prerequisites
+  ansible.builtin.command: echo "Validating system"
+  when: ansible_distribution == "Rocky"
+```
+
+#### Implementation Plan
+1. Create missing task files
+2. Replace curl with get_url
+3. Add explicit file permissions
+4. Convert to FQCN
+5. Clean YAML formatting
+6. Verify fixes with ansible-lint

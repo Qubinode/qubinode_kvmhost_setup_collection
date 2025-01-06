@@ -1,5 +1,5 @@
 - name: Ensure ~/.config exist
-  file:
+  ansible.builtin.file:
     path: "{{ user_homedir }}/.config"
     state: directory
     owner: "{{ item }}"
@@ -7,8 +7,9 @@
     mode: '0755'
   with_items: "{{ users }}"
 
+
 - name: Deploy startship config for current user
-  copy:
+  ansible.builtin.copy:
     src: "{{ starship_config }}"
     dest: "{{ user_homedir }}/.config/starship.toml"
     owner: "{{ item }}"
