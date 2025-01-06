@@ -13,12 +13,12 @@
 
 - name: Update package cache
   ansible.builtin.dnf:
-    update_cache: yes
+    update_cache: true
   become: true
 
 - name: Install tigervnc-server and xrdp packages
   ansible.builtin.dnf:
-    name: 
+    name:
       - tigervnc-server
       - xrdp
     state: present

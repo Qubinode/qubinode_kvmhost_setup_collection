@@ -18,7 +18,7 @@
     dest: "/etc/libvirt/qemu/networks/{{ item.name }}.xml"
     mode: '0644'
   loop: "{{ libvirt_host_networks }}"
-  when: 
+  when:
     - item.create | default(true)
     - bridge_check.rc != 0
   notify: Restart libvirtd
@@ -27,7 +27,7 @@
   ansible.builtin.command: "virsh net-define /etc/libvirt/qemu/networks/{{ item.name }}.xml"
   register: net_define
   changed_when: net_define.rc == 0
-  failed_when: 
+  failed_when:
     - net_define.rc != 0 
     - '"already exists" not in net_define.stderr'
   loop: "{{ libvirt_host_networks }}"

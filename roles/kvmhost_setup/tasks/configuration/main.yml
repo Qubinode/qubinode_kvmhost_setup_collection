@@ -9,6 +9,6 @@
 
 - name: Include remote access configuration tasks
   ansible.builtin.include_tasks: remote.yml
-  when: 
+  when:
     - enable_cockpit | bool
     - lookup('env', 'GUID', default='') != ""
