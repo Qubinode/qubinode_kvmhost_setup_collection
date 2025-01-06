@@ -5,3 +5,7 @@ collections:
   - community.libvirt
   - fedora.linux_system_roles
   - ansible.netcommon
+
+roles:
+  - src: https://github.com/linux-system-roles/network
+    name: linux-system-roles.network

@@ -1,0 +1,22 @@
+---
+- name: Test qubinode_kvmhost_setup_collection
+  hosts: all
+  become: yes
+  pre_tasks:
+    - name: Ensure test-user exists with proper home directory
+      user:
+        name: test-user
+        state: present
+        create_home: yes
+        shell: /bin/bash
+        system: yes
+        generate_ssh_key: yes
+        groups: wheel
+        append: yes
+        home: /home/test-user
+        umask: '0022'
+
+  roles:
+    - role: kvmhost_setup
+    - role: edge_hosts_validate
+    - role: swygue_lvm

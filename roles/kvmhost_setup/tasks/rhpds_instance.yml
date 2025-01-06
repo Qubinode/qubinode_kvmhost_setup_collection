@@ -7,13 +7,20 @@
 
 - name: Install EPEL repository
   ansible.builtin.yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
     state: present
   become: true
 
-- name: Install xrdp package
+- name: Update package cache
   ansible.builtin.dnf:
-    name: xrdp
+    update_cache: yes
+  become: true
+
+- name: Install tigervnc-server and xrdp packages
+  ansible.builtin.dnf:
+    name: 
+      - tigervnc-server
+      - xrdp
     state: present
   become: true
 

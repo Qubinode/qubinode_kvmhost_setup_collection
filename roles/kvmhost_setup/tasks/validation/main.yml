@@ -1,0 +1,6 @@
+---
+- name: Include variable validation tasks
+  ansible.builtin.include_tasks: variables.yml
+
+- name: Include system prerequisites tasks
+  ansible.builtin.include_tasks: prerequisites.yml

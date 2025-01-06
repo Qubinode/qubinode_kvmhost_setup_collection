@@ -5,3 +5,8 @@ kvmhost_pip_packages:
   - tldr    # Simplified man pages
   - kube-shell  # Kubernetes shell
   - openshift   # OpenShift CLI
+
+# Remote user configuration for XRDP
+xrdp_remote_user: "remoteuser"
+xrdp_remote_user_password: "changeme"
+configure_bridge: false 

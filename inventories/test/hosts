@@ -1,0 +1,8 @@
+[all]
+test-host ansible_host=127.0.0.1 ansible_connection=local
+
+[kvm_hosts]
+test-host
+
+[edge_hosts]
+test-host

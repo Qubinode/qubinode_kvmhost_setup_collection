@@ -16,6 +16,9 @@ enable_cockpit: true
 # This will overwrite your existing .bashrc, .vimrc and other terminal configuration files
 configure_shell: true
 
+# Path to starship configuration template
+starship_config: "{{ role_path }}/templates/starship.toml.j2"
+
 # Libvirt network and storage
 # ---------------------------
 kvm_host_libvirt_dir: /var/lib/libvirt/images
@@ -142,8 +145,3 @@ required_rpm_packages:
   - container-selinux
 
 download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"
-
-
-# Remote user for xrdp
-xrdp_remote_user: "{{ xrdp_remote_user }}"
-xrdp_remote_user_password: "{{ xrdp_remote_user_password }}"

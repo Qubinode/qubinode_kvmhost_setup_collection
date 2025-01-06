@@ -1,0 +1,99 @@
+---
+- name: Get network interface facts
+  ansible.builtin.setup:
+    gather_subset:
+      - network
+  register: network_facts
+
+- name: Verify bridge interface doesn't already exist
+  ansible.builtin.command: ip link show {{ item.bridge_device }}
+  register: bridge_check
+  failed_when: false
+  changed_when: false
+  loop: "{{ libvirt_host_networks }}"
+
+- name: Create network bridge interface configuration
+  ansible.builtin.template:
+    src: "libvirt_net_bridge.xml.j2"
+    dest: "/etc/libvirt/qemu/networks/{{ item.name }}.xml"
+    mode: '0644'
+  loop: "{{ libvirt_host_networks }}"
+  when: 
+    - item.create | default(true)
+    - bridge_check.rc != 0
+  notify: Restart libvirtd
+
+- name: Define libvirt networks
+  ansible.builtin.command: "virsh net-define /etc/libvirt/qemu/networks/{{ item.name }}.xml"
+  register: net_define
+  changed_when: net_define.rc == 0
+  failed_when: 
+    - net_define.rc != 0 
+    - '"already exists" not in net_define.stderr'
+  loop: "{{ libvirt_host_networks }}"
+  when: item.create | default(true)
+
+- name: Start libvirt networks
+  ansible.builtin.command: "virsh net-start {{ item.name }}"
+  register: net_start
+  changed_when: net_start.rc == 0
+  failed_when:
+    - net_start.rc != 0
+    - '"already active" not in net_start.stderr'
+  loop: "{{ libvirt_host_networks }}"
+  when: item.create | default(true)
+
+- name: Mark networks for autostart
+  ansible.builtin.command: "virsh net-autostart {{ item.name }}"
+  register: net_autostart
+  changed_when: net_autostart.rc == 0
+  failed_when:
+    - net_autostart.rc != 0
+    - '"network marked as autostarted" not in net_autostart.stderr'
+  loop: "{{ libvirt_host_networks }}"
+  when: item.create | default(true)
+
+- name: Configure network bridge interface
+  ansible.builtin.template:
+    src: "bridge_interface.j2"
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_device }}"
+    mode: '0644'
+  loop: "{{ libvirt_host_networks }}"
+  when: 
+    - item.create | default(true)
+    - item.mode == "bridge"
+  notify: Restart NetworkManager
+
+- name: Configure bridge slave interface
+  ansible.builtin.template:
+    src: "bridge_slave.j2"
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_slave_dev }}"
+    mode: '0644'
+  loop: "{{ libvirt_host_networks }}"
+  when: 
+    - item.create | default(true)
+    - item.mode == "bridge"
+  notify: Restart NetworkManager
+
+- name: Update resolv.conf
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: '0644'
+  when: dns_forwarder is defined
+
+- name: Verify network configuration
+  ansible.builtin.command: "nmcli connection show {{ item.bridge_device }}"
+  register: nmcli_check
+  changed_when: false
+  failed_when: false
+  loop: "{{ libvirt_host_networks }}"
+  when: item.create | default(true)
+
+- name: Assert network configuration is correct
+  ansible.builtin.assert:
+    that: nmcli_check.rc == 0
+    fail_msg: "Network bridge {{ item.bridge_device }} is not properly configured"
+    success_msg: "Network bridge {{ item.bridge_device }} is properly configured"
+  loop: "{{ libvirt_host_networks }}"
+  when: item.create | default(true)
