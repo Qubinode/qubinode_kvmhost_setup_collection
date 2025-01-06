@@ -1,2 +1,17 @@
 ---
-# vars file for edge_hosts_validate
+# Variables for edge host validation
+
+# Filesystem validation parameters
+edgehost_validate_fs:
+  required_mounts: []
+  min_free_space: {}
+
+# Package validation parameters  
+edgehost_validate_pkgs:
+  required_packages: []
+  required_versions: {}
+
+# RHSM validation parameters
+edgehost_validate_rhsm:
+  required_repos: []
+  required_channels: []

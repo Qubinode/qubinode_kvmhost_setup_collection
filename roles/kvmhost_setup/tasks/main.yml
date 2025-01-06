@@ -23,7 +23,7 @@
 
 - name: Setup Rocky Linux
   ansible.builtin.include_tasks: rocky_linux.yml
-  when: enable_cockpit|bool and ansible_distribution == "Rocky"
+  when: enable_cockpit|bool and (ansible_distribution == "Rocky" or ansible_distribution == "RedHat")
 
 - name: Run the next task if GUID is set
   ansible.builtin.debug:

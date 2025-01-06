@@ -98,7 +98,7 @@ synth_shell_dir: /etc
 
 # Required RPM packages
 # ---------------------
-required_rpm_pakcages:
+required_rpm_packages:
   - virt-install
   - libvirt-daemon-config-network
   - libvirt-daemon-kvm
@@ -116,8 +116,8 @@ required_rpm_pakcages:
   - git
   - net-tools
   - bind-utils
-  - yum-utils
-  - iptables-services
+  - dnf-utils
+  - firewalld
   - bash-completion
   - kexec-tools
   - sos
@@ -138,6 +138,8 @@ required_rpm_pakcages:
   - nmap
   - ncurses-devel
   - curl
+  - podman
+  - container-selinux
 
 download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"
 

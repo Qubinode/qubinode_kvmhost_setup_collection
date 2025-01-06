@@ -104,7 +104,7 @@
     net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
     net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
     net_create: "{{ libvirt_host_networks[type_idx].create }}"
-  virt_net:
+  community.libvirt.virt_net:
     name: "{{ net_name }}"
     command: define
     xml: '{{ (lookup("template", "libvirt_net_bridge.xml.j2")) }}'

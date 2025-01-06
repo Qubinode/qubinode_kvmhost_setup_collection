@@ -1,6 +1,7 @@
 ---
-pip_packages:
-  - httpie
-  - tldr
-  - kube-shell
-  - openshift
+# List of Python packages to install on KVM host
+kvmhost_pip_packages:
+  - httpie  # Command line HTTP client
+  - tldr    # Simplified man pages
+  - kube-shell  # Kubernetes shell
+  - openshift   # OpenShift CLI
