@@ -6,7 +6,7 @@ edgehost_validate_fs:
   required_mounts: []
   min_free_space: {}
 
-# Package validation parameters  
+# Package validation parameters
 edgehost_validate_pkgs:
   required_packages: []
   required_versions: {}

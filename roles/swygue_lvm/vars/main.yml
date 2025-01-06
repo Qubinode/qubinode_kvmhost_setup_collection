@@ -7,7 +7,7 @@ swygue_lvm_vg:
   physical_volumes: []
   size: ""
 
-# Logical volume configuration  
+# Logical volume configuration
 swygue_lvm_lv:
   name: ""
   size: ""
