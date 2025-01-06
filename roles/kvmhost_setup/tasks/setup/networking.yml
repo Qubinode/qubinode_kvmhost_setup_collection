@@ -28,7 +28,7 @@
   register: net_define
   changed_when: net_define.rc == 0
   failed_when:
-    - net_define.rc != 0 
+    - net_define.rc != 0
     - '"already exists" not in net_define.stderr'
   loop: "{{ libvirt_host_networks }}"
   when: item.create | default(true)
@@ -59,7 +59,7 @@
     dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_device }}"
     mode: '0644'
   loop: "{{ libvirt_host_networks }}"
-  when: 
+  when:
     - item.create | default(true)
     - item.mode == "bridge"
   notify: Restart NetworkManager
@@ -70,7 +70,7 @@
     dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_slave_dev }}"
     mode: '0644'
   loop: "{{ libvirt_host_networks }}"
-  when: 
+  when:
     - item.create | default(true)
     - item.mode == "bridge"
   notify: Restart NetworkManager

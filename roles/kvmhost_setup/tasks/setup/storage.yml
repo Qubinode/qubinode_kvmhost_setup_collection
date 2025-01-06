@@ -20,7 +20,7 @@
     dest: "/etc/libvirt/storage/{{ item.name }}.xml"
     mode: '0644'
   loop: "{{ libvirt_host_storage_pools }}"
-  when: 
+  when:
     - item.name not in existing_pools.stdout
     - item.state | default('active') != 'absent'
 
@@ -32,7 +32,7 @@
     - pool_define.rc != 0
     - '"already exists" not in pool_define.stderr'
   loop: "{{ libvirt_host_storage_pools }}"
-  when: 
+  when:
     - item.name not in existing_pools.stdout
     - item.state | default('active') != 'absent'
 
@@ -44,7 +44,7 @@
     - pool_start.rc != 0
     - '"already active" not in pool_start.stderr'
   loop: "{{ libvirt_host_storage_pools }}"
-  when: 
+  when:
     - item.state | default('active') == 'active'
     - item.autostart | default(true)
 
@@ -56,7 +56,7 @@
     - pool_autostart.rc != 0
     - '"marked as autostarted" not in pool_autostart.stderr'
   loop: "{{ libvirt_host_storage_pools }}"
-  when: 
+  when:
     - item.autostart | default(true)
     - item.state | default('active') != 'absent'
 
@@ -84,6 +84,6 @@
     setype: virt_image_t
     recurse: true
   loop: "{{ libvirt_host_storage_pools }}"
-  when: 
+  when:
     - item.path is defined
     - ansible_selinux.status == "enabled"
