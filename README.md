@@ -65,7 +65,29 @@ collection/
 │   └── tasks/
 └── tests/
 ```
-
+```mermaid
+graph TD
+    A[KVMHost Setup Collection] --> B[kvmhost_setup]
+    A --> C[edge_hosts_validate]
+    A --> D[swygue_lvm]
+    
+    B --> B1[Libvirt Setup]
+    B --> B2[Network Config]
+    B --> B3[Storage Setup]
+    B --> B4[User Config]
+    
+    C --> C1[FS Validation]
+    C --> C2[Package Validation]
+    C --> C3[RHSM Validation]
+    
+    D --> D1[LVM Precheck]
+    D --> D2[LVM Deploy]
+    
+    B1 --> E[KVM Environment]
+    B2 --> E
+    B3 --> E
+    B4 --> E
+```
 
 <!-- Describe the collection and why a user would want to use it. What does the collection do? -->
 
