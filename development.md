@@ -69,3 +69,25 @@
 - CI pipeline now runs successfully through syntax check phase
 - Molecule tests complete without podman-related errors
 - Consistent Ansible versions between test container and CI
+
+## Molecule Test Improvements - 2025-01-07
+
+**Issue:** Molecule tests failing during instance deletion with "The operation was canceled" error
+
+**Changes Made:**
+1. Added 30-minute timeout to Molecule test job in CI workflow
+2. Added explicit molecule destroy command after test completion
+3. Enabled Molecule debug logging for better troubleshooting
+4. Added --destroy always flag to ensure cleanup
+
+**Implementation Details:**
+- Updated .github/workflows/ansible-test.yml to:
+  - Set timeout-minutes: 30 for Molecule test job
+  - Add molecule destroy command after main test run
+  - Enable MOLECULE_DEBUG environment variable
+  - Add --destroy always flag to ensure proper cleanup
+
+**Expected Results:**
+- More reliable test execution with proper cleanup
+- Better debugging information for future failures
+- Prevent resource leaks from incomplete test cleanup
