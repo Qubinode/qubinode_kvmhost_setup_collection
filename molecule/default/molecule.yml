@@ -2,10 +2,17 @@
 dependency:
   name: galaxy
 driver:
-  name: podman
-  options:
-    podman_binary: /usr/bin/podman
-    podman_extra_args: --log-level=debug
+  # Uncomment below for Podman (default for local development)
+  #name: podman
+  #options:
+  #  podman_binary: /usr/bin/podman
+  #  podman_extra_args: --log-level=debug
+
+  # Uncomment below for Docker (use in CI/CD)
+   name: docker
+   options:
+     docker_binary: /usr/bin/docker
+     docker_extra_args: --log-level=debug
 platforms:
   - name: kvmhost-test
     image: docker.io/rockylinux/rockylinux:9-ubi-init
