@@ -15,9 +15,9 @@ Before running tests, ensure you have:
 2. Ansible 2.13+ installed
 3. Molecule installed:
    ```bash
-   pip install molecule molecule-docker
+   pip install molecule molecule-podman
    ```
-4. Docker installed and running
+4. Podman installed and running
 5. Test user account created:
    ```bash
    sudo useradd -m -s /bin/bash test-user
@@ -71,12 +71,12 @@ ansible-playbook tests/integration.yml -i inventories/test/hosts
 
 ### Building Test Container
 ```bash
-docker build -t kvmhost-test -f Dockerfile .
+podman build -t kvmhost-test -f Dockerfile .
 ```
 
 ### Running Tests in Container
 ```bash
-docker run --privileged \
+podman run --privileged \
   -v ${PWD}:/ansible \
   kvmhost-test \
   ansible-playbook tests/integration.yml
@@ -84,7 +84,7 @@ docker run --privileged \
 
 ### Debugging in Container
 ```bash
-docker run -it --privileged \
+podman run -it --privileged \
   -v ${PWD}:/ansible \
   kvmhost-test \
   /bin/bash
@@ -93,11 +93,11 @@ docker run -it --privileged \
 ## Troubleshooting
 
 ### Common Issues
-1. **Permission Denied**: Ensure Docker is running and you have proper permissions
-2. **Network Issues**: Verify Docker network configuration
+1. **Permission Denied**: Ensure Podman is running and you have proper permissions
+2. **Network Issues**: Verify Podman network configuration
 3. **Test Failures**: Check logs in `molecule/default/logs/`
 
 ### Debugging Tips
 - Use `-vvv` flag for verbose output
-- Check container logs with `docker logs <container_id>`
+- Check container logs with `podman logs <container_id>`
 - Run individual test scenarios with `molecule converge`

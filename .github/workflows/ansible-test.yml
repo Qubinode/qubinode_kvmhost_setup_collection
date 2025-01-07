@@ -20,6 +20,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-lint molecule-podman
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
       - name: Run ansible-lint
         uses: ansible/ansible-lint-action@main
         with:
@@ -42,13 +54,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-docker pytest-testinfra
-      - name: Run Molecule tests with Docker
-        run: molecule test --driver-name docker
+          pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-podman pytest-testinfra
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+      - name: Run Molecule tests with Podman
+        run: molecule test --driver-name podman
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DRIVER: docker
+          MOLECULE_DRIVER: podman
 
   integration:
     needs: test
@@ -59,10 +75,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build test container
-        run: docker build -t kvmhost-test -f Dockerfile .
+        run: podman build -t kvmhost-test -f Dockerfile .
       - name: Run integration tests
         run: |
-          docker run --privileged \
+          podman run --privileged \
             -v ${PWD}:/ansible \
             kvmhost-test \
             ansible-playbook tests/integration.yml \

@@ -3,6 +3,7 @@ collections:
   - ansible.posix
   - community.general
   - community.libvirt
+  - molecule-podman
   - fedora.linux_system_roles
   - ansible.netcommon
 
