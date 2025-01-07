@@ -164,37 +164,18 @@ Every voice is important. If you have something on your mind, create an issue or
 
 ## Testing and CI/CD
 
-This collection includes comprehensive testing through GitHub Actions CI/CD pipelines. The testing strategy includes:
+For detailed testing instructions, see our [Testing Guide](testing.md). This includes:
 
-### Supported Versions
-- Ansible: 2.12, 2.13, 2.14, devel, and milestone releases
+- Prerequisites and setup
+- Molecule testing
+- Integration testing
+- CI/CD pipeline configuration
+- Container-based testing
+- Troubleshooting tips
+
+The collection includes comprehensive testing through GitHub Actions CI/CD pipelines, supporting:
+- Ansible: 2.13, 2.14, 2.15
 - Python: 3.9 and 3.10
-
-### Testing Workflow
-The CI/CD pipeline includes:
-1. **Linting**: Runs ansible-lint on all roles
-2. **Unit Tests**: Molecule-based tests for all roles
-3. **Integration Tests**: Docker-based integration testing
-4. **Version Monitoring**: Automated checks for new Ansible releases
-
-### Running Tests Locally
-To run tests locally, ensure you have:
-- Molecule installed: `pip install molecule molecule-docker pytest-testinfra`
-- Docker running
-
-Run tests for a specific role:
-```bash
-cd roles/<role_name>
-molecule test
-```
-
-Run all tests:
-```bash
-molecule test --all
-```
-
-### Version Monitoring
-The CI pipeline automatically monitors for new Ansible releases and will notify maintainers when updates are available. This helps ensure compatibility with the latest Ansible versions.
 
 
 ### Installing the Collection from Ansible Galaxy

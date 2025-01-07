@@ -2,15 +2,29 @@
 dependency:
   name: galaxy
 driver:
-  name: docker
+  name: podman
+  options:
+    podman_binary: /usr/bin/podman
+    podman_extra_args: --log-level=debug
 platforms:
   - name: kvmhost-test
-    image: rockylinux:9
+    image: docker.io/rockylinux/rockylinux:9-ubi-init
     pre_build_image: true
     privileged: true
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: "/usr/sbin/init"
+    tmpfs:
+      - /run
+      - /tmp
+    capabilities:
+      - SYS_ADMIN
+    security_opts:
+      - seccomp=unconfined
+    pre_build_image: false
+    build:
+      context: .
+      dockerfile: Dockerfile
 provisioner:
   name: ansible
   env:
@@ -19,12 +33,18 @@ provisioner:
     defaults:
       interpreter_python: auto_silent
       callback_whitelist: profile_tasks, timer, yaml
+      roles_path: /home/lab-user/qubinode_kvmhost_setup_collection/roles
     ssh_connection:
       pipelining: true
   inventory:
     links:
-      hosts: ../qubinode_navigator/inventories/rhel9-equinix/hosts
-      group_vars: ../qubinode_navigator/inventories/rhel9-equinix/group_vars/
+      hosts: ../../inventories/test/hosts
+      group_vars: ../../inventories/test/group_vars/
+lint: |
+  set -e
+  yamllint .
+  ansible-lint roles/kvmhost_setup/
+
 verifier:
   name: testinfra
   options:
@@ -32,7 +52,6 @@ verifier:
 scenario:
   test_sequence:
     - dependency
-    - lint
     - cleanup
     - destroy
     - syntax
