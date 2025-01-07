@@ -45,3 +45,27 @@
 - Updated test documentation to reflect current practices
 - Successfully executed molecule tests using Podman driver
 - Verified all test scenarios work with Podman runtime
+
+## CI/CD Fixes (2024-01-15)
+
+### Issues Identified
+1. Podman configuration was incomplete in CI environment
+2. Ansible version mismatch between test container and CI
+3. Duplicate pre_build_image setting in molecule.yml
+
+### Changes Made
+1. Updated Dockerfile to:
+   - Install podman and slirp4netns packages
+   - Use compatible Ansible version range (>=2.13,<2.16)
+2. Fixed molecule.yml by:
+   - Removing duplicate pre_build_image setting
+   - Cleaning up podman configuration
+3. Updated CI workflow to:
+   - Properly configure podman with registries.conf and containers.conf
+   - Remove redundant driver specifications
+   - Add necessary podman dependencies
+
+### Testing Results
+- CI pipeline now runs successfully through syntax check phase
+- Molecule tests complete without podman-related errors
+- Consistent Ansible versions between test container and CI

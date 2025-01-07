@@ -16,7 +16,6 @@ driver:
 platforms:
   - name: kvmhost-test
     image: docker.io/rockylinux/rockylinux:9-ubi-init
-    pre_build_image: true
     privileged: true
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -28,7 +27,6 @@ platforms:
       - SYS_ADMIN
     security_opts:
       - seccomp=unconfined
-    pre_build_image: false
     build:
       context: .
       dockerfile: Dockerfile

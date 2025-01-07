@@ -58,13 +58,15 @@ jobs:
       - name: Install Podman
         run: |
           sudo apt-get update
-          sudo apt-get install -y podman
-      - name: Run Molecule tests with Podman
-        run: molecule test --driver-name podman
+          sudo apt-get install -y podman slirp4netns
+          sudo mkdir -p /etc/containers
+          echo -e '[registries.search]\nregistries = ["docker.io"]' | sudo tee /etc/containers/registries.conf
+          echo -e '[engine]\nevents_logger = "file"' | sudo tee /etc/containers/containers.conf
+      - name: Run Molecule tests
+        run: molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DRIVER: podman
 
   integration:
     needs: test
