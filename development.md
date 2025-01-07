@@ -1,18 +1,27 @@
-## CI/CD Pipeline Fix - 2023-10-05
+## CI/CD Pipeline Fixes
 
+### 2023-10-05 - Pruning Phase Fix
 **Issue:** Pipeline was exiting during pruning phase despite successful tests
-
 **Solution:** Modified molecule test command to use `--no-destroy` flag
-
 **Reasoning:**
-- The molecule.yml configuration already includes cleanup and destroy steps in its test sequence
-- Running `molecule destroy` after `molecule test` was redundant and causing premature cleanup
-- Using `--no-destroy` allows the scenario's built-in cleanup process to handle environment cleanup
-
+- The molecule.yml configuration already includes cleanup and destroy steps
+- Running `molecule destroy` after `molecule test` was redundant
+- Using `--no-destroy` allows scenario's built-in cleanup process
 **Impact:**
 - Prevents pipeline from exiting during pruning phase
-- Maintains proper test environment cleanup through scenario sequence
-- Reduces redundant operations in the CI/CD pipeline
+- Maintains proper test environment cleanup
+- Reduces redundant operations
+
+### 2023-10-05 - Missing Collection Fix
+**Issue:** Pipeline failing due to missing community.general.parted module
+**Solution:** Added collection installation step in CI/CD workflow
+**Reasoning:**
+- Required collections were listed in requirements.yml but not being installed
+- Explicit collection installation ensures all dependencies are available
+**Impact:**
+- Resolves module resolution errors
+- Ensures consistent test environment setup
+- Maintains dependency management best practices
 
 **Approved by:** Architect (A)
 **Implemented by:** Developer 1 (D1)
