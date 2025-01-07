@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ansible-version: ['stable-2.12', 'stable-2.13', 'stable-2.14', 'devel', 'milestone']
+        ansible-version: ['stable-2.12', 'stable-2.13', 'stable-2.14']
         python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ansible-version: ['stable-2.12', 'stable-2.13', 'stable-2.14', 'devel', 'milestone']
+        ansible-version: ['stable-2.12', 'stable-2.13', 'stable-2.14']
     steps:
       - uses: actions/checkout@v3
       - name: Build test container
