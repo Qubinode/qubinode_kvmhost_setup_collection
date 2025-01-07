@@ -1,12 +1,12 @@
 ---
 collections:
-  - ansible.posix
-  - community.general
-  - community.libvirt
-  - molecule-podman
-  - fedora.linux_system_roles
-  - ansible.netcommon
+  - name: ansible.posix
+  - name: community.general
+  - name: community.libvirt
+  - name: molecule.podman
+  - name: fedora.linux_system_roles
+  - name: ansible.netcommon
 
 roles:
-  - src: https://github.com/linux-system-roles/network
-    name: linux-system-roles.network
+  - name: linux-system-roles.network
+    src: https://github.com/linux-system-roles/network

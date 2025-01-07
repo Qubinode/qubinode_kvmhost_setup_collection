@@ -12,11 +12,25 @@
 - Maintains proper test environment cleanup
 - Reduces redundant operations
 
-### 2023-10-05 - Missing Collection Fix
+### 2023-10-05 - Dependency Management Fixes
+
+**Collection Format Fix**
+**Issue:** Pipeline failing due to invalid collection requirements format
+**Solution:** Updated requirements.yml with proper FQCN format
+**Reasoning:**
+- Collections must follow `<namespace>.<collection>` format
+- Explicit 'name' field required for each collection
+- Roles section needed proper field ordering
+**Impact:**
+- Resolves collection installation errors
+- Ensures proper dependency resolution
+- Maintains Ansible best practices
+
+**Collection Installation Fix**
 **Issue:** Pipeline failing due to missing community.general.parted module
 **Solution:** Added collection installation step in CI/CD workflow
 **Reasoning:**
-- Required collections were listed in requirements.yml but not being installed
+- Required collections were listed but not being installed
 - Explicit collection installation ensures all dependencies are available
 **Impact:**
 - Resolves module resolution errors
