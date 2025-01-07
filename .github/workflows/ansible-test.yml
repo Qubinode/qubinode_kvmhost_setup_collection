@@ -43,11 +43,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-docker pytest-testinfra
-      - name: Run Molecule tests
-        run: molecule test
+      - name: Run Molecule tests with Docker
+        run: molecule test --driver-name docker
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DRIVER: docker
 
   integration:
     needs: test
