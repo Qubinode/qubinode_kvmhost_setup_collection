@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ansible-version: ['stable-2.12', 'stable-2.13', 'stable-2.14']
+        ansible-version: ['2.12', '2.13', '2.14']
         python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ansible-version: ['stable-2.12', 'stable-2.13', 'stable-2.14']
+        ansible-version: ['2.12', '2.13', '2.14']
     steps:
       - uses: actions/checkout@v3
       - name: Build test container
@@ -77,7 +77,7 @@ jobs:
           python -c "from packaging import version
           import requests
           latest = version.parse(requests.get('https://pypi.org/pypi/ansible/json').json()['info']['version'])
-          current = version.parse('${{ matrix.ansible-version }}'.replace('stable-', ''))
+          current = version.parse('${{ matrix.ansible-version }}')
           if latest > current:
               print(f'New Ansible version available: {latest}')
               exit(1)
