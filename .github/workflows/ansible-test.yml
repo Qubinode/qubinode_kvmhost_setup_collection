@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, stable-* ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
   schedule:
@@ -43,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ansible-version: ['2.13', '2.14'] #, '2.15']
+        ansible-version: ['2.13', '2.14', '2.15']
         python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
@@ -55,22 +57,33 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-podman pytest-testinfra
-          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml --server https://galaxy.ansible.com --token ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
+          # Install collections with proper error handling
+          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml -vv || {
+            echo "Retrying collection installation with force..."
+            ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml -vv --force
+          }
+          # Verify installations
+          ansible-galaxy collection list
+          ansible --version
       - name: Install Podman
         run: |
           sudo apt-get update
           sudo apt-get install -y podman slirp4netns
           sudo mkdir -p /etc/containers
-          echo -e '[registries.search]\nregistries = ["docker.io"]' | sudo tee /etc/containers/registries.conf
-          echo -e '[engine]\nevents_logger = "file"' | sudo tee /etc/containers/containers.conf
+          echo -e '[registries.search]\nregistries = ["docker.io", "quay.io"]' | sudo tee /etc/containers/registries.conf
+          echo -e '[engine]\nevents_logger = "file"\ncgroup_manager = "cgroupfs"' | sudo tee /etc/containers/containers.conf
+      - name: Pull CentOS Stream 9 image
+        run: |
+          podman pull quay.io/centos/centos:stream9
       - name: Run Molecule tests
-        timeout-minutes: 30
+        timeout-minutes: 45
         run: |
           molecule test --destroy=never
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DEBUG: 'true'
+          ANSIBLE_VERBOSITY: '2'
 
   integration:
     needs: test
@@ -81,14 +94,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build test container
-        run: podman build -t kvmhost-test -f Dockerfile .
+        run: |
+          podman build \
+            --build-arg ANSIBLE_VERSION=${{ matrix.ansible-version }} \
+            -t kvmhost-test -f Dockerfile .
       - name: Run integration tests
         run: |
           podman run --privileged \
-            -v ${PWD}:/ansible \
+            -v ${PWD}:/ansible:Z \
+            -e ANSIBLE_VERBOSITY=2 \
             kvmhost-test \
             ansible-playbook tests/integration.yml \
-            -e ansible_version=${{ matrix.ansible-version }}
+            -e ansible_version=${{ matrix.ansible-version }} \
+            -e cicd_test=true
 
   version-monitoring:
     runs-on: ubuntu-latest
@@ -108,12 +126,47 @@ jobs:
               print('Using latest version')"
         continue-on-error: true
 
-  release:
-    needs: [test, integration, version-monitoring]
+  security:
+    needs: lint
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Run Bandit security check
+        run: |
+          pip install bandit
+          bandit -r roles/ -f txt -ll
+          
+  release:
+    needs: [test, integration, version-monitoring, security]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.0.1
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            LICENSE
+            README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

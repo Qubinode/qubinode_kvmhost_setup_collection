@@ -5,10 +5,9 @@
     state: present
   become: true
 
-- name: Install EPEL repository
-  ansible.builtin.yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-    state: present
+- name: Install EPEL repository using yum
+  ansible.builtin.command:
+    cmd: sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm -y
   become: true
 
 - name: Update package cache

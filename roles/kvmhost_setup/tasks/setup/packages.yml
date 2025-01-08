@@ -1,15 +1,9 @@
 ---
-- name: Enable EPEL repository (RHEL 9)
+- name: Enable EPEL repository
   ansible.builtin.dnf:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    name: epel-release
     state: present
-  when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "9"
-
-- name: Enable EPEL repository (Rocky Linux)
-  ansible.builtin.dnf:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm
-    state: present
-  when: ansible_distribution == "Rocky"
+  when: ansible_os_family == "RedHat"
 
 - name: Update package cache
   ansible.builtin.dnf:
@@ -70,13 +64,42 @@
     service_check.status.SubState != "running"
   loop: "{{ libvirt_services }}"
 
+- name: Ensure pip3 is installed
+  ansible.builtin.dnf:
+    name: python3-pip
+    state: present
+  register: pip_install
+  retries: 3
+  delay: 5
+  until: pip_install is success
+
+- name: Verify pip3 installation
+  ansible.builtin.command: pip3 --version
+  register: pip_check
+  changed_when: false
+  ignore_errors: true
+  when: pip_install is success
+
+- name: Ensure pip3 is in PATH
+  ansible.builtin.shell: |
+    export PATH=$PATH:/usr/local/bin
+    pip3 --version
+  register: pip_path_check
+  changed_when: false
+  ignore_errors: true
+
 - name: Install Python dependencies
   ansible.builtin.pip:
     name:
       - libvirt-python
       - lxml
     state: present
+    executable: pip3
   register: pip_install
   retries: 3
   delay: 5
   until: pip_install is success
+  when: pip_path_check.rc == 0
+
+- name: Install k9s
+  ansible.builtin.include_tasks: k9s.yml

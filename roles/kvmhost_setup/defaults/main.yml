@@ -140,8 +140,8 @@ required_rpm_packages:
   - bc
   - nmap
   - ncurses-devel
-  - curl
   - podman
   - container-selinux
+  - k9s
 
 download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"

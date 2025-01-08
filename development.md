@@ -1,35 +1,24 @@
-## Collection Installation Issue
+# Development Decisions
 
-### Problem
-The CI pipeline is failing to install collections from Ansible Galaxy due to API access issues.
+## Improving Production Readiness
 
-### Proposed Solutions
-1. **Add Galaxy Token (D1)**
-   - Store token in GitHub Secrets
-   - Modify pipeline to use token for authentication
-   - Quickest solution to unblock development
+This document outlines the decisions made to improve the production readiness of the codebase.
 
-2. **Local Collection Cache (D2)**
-   - Create local cache of required collections
-   - More reliable and faster builds
-   - Requires additional setup effort
+### EPEL Repository Installation
 
-### Decision
-We will implement the Galaxy token solution first to unblock development, while considering the local cache approach for future optimization.
+- **Initial Issue:** The Ansible task for installing the EPEL repository was failing due to a GPG key validation error. This was because the task was using the `yum` module with a direct URL, which doesn't automatically handle GPG key verification.
+- **Solution:** The task was modified to use the `dnf` module to install the `epel-release` package. The `dnf` module automatically handles GPG key verification for packages from known repositories. This change was implemented in `roles/kvmhost_setup/tasks/rhpds_instance.yml`.
 
-### Implementation Steps
-1. Add Galaxy token to GitHub Secrets as `ANSIBLE_GALAXY_TOKEN`
-   - Go to GitHub repository Settings → Secrets and variables → Actions
-   - Click "New repository secret"
-   - Name: `ANSIBLE_GALAXY_TOKEN`
-   - Value: [Your Galaxy API token]
-2. Modify CI pipeline to use the token [COMPLETED]
-3. Test collection installation
-   - Push changes to trigger pipeline
-   - Verify collection installation succeeds
-   - Check logs for any warnings or errors
+### Duplicate Molecule Configuration
 
-### Future Considerations
-- Implement local collection caching for faster builds
-- Monitor Galaxy API reliability
-- Consider mirroring critical collections
+- **Issue:** A duplicate Molecule configuration directory (`molecule/default copy/`) was present in the repository.
+- **Solution:** The duplicate directory was removed using the `rm -rf` command.
+
+### Ansible Task Review
+
+- The Ansible tasks related to EPEL installation were reviewed to ensure they are efficient and follow best practices. The `epel-release` package is installed correctly, and the `roles/kvmhost_setup/tasks/setup/packages.yml` file correctly enables the EPEL repository and installs necessary packages.
+
+## Future Considerations
+
+- Further review of Ansible roles for potential areas of improvement in terms of efficiency and security.
+- Implementation of more comprehensive testing and validation strategies.

@@ -1,11 +1,15 @@
 ---
 collections:
   - name: ansible.posix
+    version: ">=1.5.0"
   - name: community.general
+    version: ">=7.0.0"
   - name: community.libvirt
-  - name: molecule.podman
+    version: ">=1.3.0"
   - name: fedora.linux_system_roles
+    version: ">=1.34.0"
   - name: ansible.netcommon
+    version: ">=5.0.0"
 
 roles:
   - name: linux-system-roles.network

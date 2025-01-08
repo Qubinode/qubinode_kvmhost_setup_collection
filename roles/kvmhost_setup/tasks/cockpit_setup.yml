@@ -7,7 +7,7 @@
 
 - name: Configure Firewall for Web Console
   ansible.builtin.include_role:
-    name: linux-system-roles.firewall
+    name: fedora.linux_system_roles.firewall
   vars:
     firewall:
       service: cockpit
