@@ -18,7 +18,9 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      - uses: ./.github/workflows/common-setup.yml
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       - name: Run ansible-lint
@@ -33,10 +35,13 @@ jobs:
       matrix:
         ansible-version: ['2.13', '2.14', '2.15']
     steps:
-      - uses: ./.github/workflows/common-setup.yml
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          ansible-version: ${{ matrix.ansible-version }}
+      - name: Install Ansible
+        run: pip install ansible==${{ matrix.ansible-version }}
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
@@ -72,9 +77,13 @@ jobs:
     needs: lint
     runs-on: self-hosted
     steps:
-      - uses: ./.github/workflows/common-setup.yml
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Install Ansible
+        run: pip install ansible
       - name: Run security scan
         run: |
           bandit -r roles/ -f txt -ll
