@@ -1,5 +1,9 @@
 name: CI/CD Pipeline
 
+# Add env block at workflow level
+env:
+  PYTHON_VERSION: '3.9.19'
+
 on:
   push:
     branches: [ main, stable-* ]
@@ -22,7 +26,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.21'
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Run ansible-lint
         run: |
           pip install ansible-lint
@@ -39,7 +43,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.21'
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Ansible
         run: pip install ansible==${{ matrix.ansible-version }}
       - name: Run Molecule tests
@@ -81,7 +85,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.21'
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Ansible
         run: pip install ansible
       - name: Run security scan
