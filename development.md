@@ -39,3 +39,19 @@
 
 **Approved by:** Architect (A)
 **Implemented by:** Developer 1 (D1)
+
+### 2024-01-15 - Collection Version Constraints
+
+**Issue:** Pipeline failing with API error when getting available versions of community.general collection
+**Solution:** Added version constraints (>=6.0.0,<7.0.0) for community.general in requirements.yml
+**Reasoning:**
+- Prevents API version lookup errors
+- Ensures compatibility with tested Ansible versions
+- Provides stable collection dependencies
+**Impact:**
+- Resolves collection installation errors
+- Maintains consistent dependency resolution
+- Improves pipeline reliability
+
+**Approved by:** Architect (A)
+**Implemented by:** Developer 2 (D2)
