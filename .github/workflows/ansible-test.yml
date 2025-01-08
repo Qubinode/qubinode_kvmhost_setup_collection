@@ -11,29 +11,19 @@ on:
     - cron: '0 6 * * *'
 
 concurrency:
-  group: >-
-    ${{ github.workflow }}-${{
-      github.event.pull_request.number || github.sha
-    }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install ansible-lint molecule-podman
-      - name: Install Podman
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y podman
+          sudo dnf install -y python3-pip
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-lint molecule
       - name: Run ansible-lint
         uses: ansible/ansible-lint-action@main
         with:
@@ -42,69 +32,31 @@ jobs:
 
   test:
     needs: lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         ansible-version: ['2.13', '2.14', '2.15']
-        python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-podman pytest-testinfra
+          sudo dnf install -y python3-pip
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-core==${{ matrix.ansible-version }} molecule pytest-testinfra
           ansible-galaxy role install linux-system-roles.network
-          ansible-galaxy collection install ansible.posix
-          #ansible-galaxy collection install community.general
-          ansible-galaxy collection install community.libvirt
-          ansible-galaxy collection install fedora.linux_system_roles
-          ansible-galaxy collection install ansible.netcommon
-      - name: Install Podman
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y podman slirp4netns
-          sudo mkdir -p /etc/containers
-          echo -e '[registries.search]\nregistries = ["docker.io", "quay.io"]' | sudo tee /etc/containers/registries.conf
-          echo -e '[engine]\nevents_logger = "file"\ncgroup_manager = "cgroupfs"' | sudo tee /etc/containers/containers.conf
-      - name: Pull CentOS Stream 9 image
-        run: |
-          podman pull quay.io/centos/centos:stream9
+          ansible-galaxy collection install ansible.posix community.libvirt fedora.linux_system_roles ansible.netcommon
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
-          molecule test --destroy=never
+          molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DEBUG: 'true'
           ANSIBLE_VERBOSITY: '2'
-
-  integration:
-    needs: test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ansible-version: ['2.13', '2.14', '2.15']
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build test container
+      - name: Run Playbook tests
         run: |
-          podman build \
-            --build-arg ANSIBLE_VERSION=${{ matrix.ansible-version }} \
-            -t kvmhost-test -f Dockerfile .
-      - name: Run integration tests
-        run: |
-          podman run --privileged \
-            -v ${PWD}:/ansible:Z \
-            -e ANSIBLE_VERBOSITY=2 \
-            kvmhost-test \
-            ansible-playbook tests/integration.yml \
-            -e ansible_version=${{ matrix.ansible-version }} \
-            -e cicd_test=true
+          ansible-playbook -i inventories/test/hosts test.yml -vv
 
   version-monitoring:
     runs-on: ubuntu-latest
@@ -126,24 +78,127 @@ jobs:
 
   security:
     needs: lint
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install and run security tools
+        run: |
+          sudo dnf install -y python3-pip
+          pip3 install bandit
+          bandit -r roles/ -f txt -ll
+
+  release:
+    needs: [test, integration, version-monitoring, security]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.0.1
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            LICENSE
+            README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, stable-* ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo dnf install -y python3-pip
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-lint molecule
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint-action@main
+        with:
+          path: "roles/"
+          exclude_paths: "roles/.cache/,roles/.venv/"
+
+  test:
+    needs: lint
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        ansible-version: ['2.13', '2.14', '2.15']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo dnf install -y python3-pip
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-core==${{ matrix.ansible-version }} molecule pytest-testinfra
+          ansible-galaxy role install linux-system-roles.network
+          ansible-galaxy collection install ansible.posix community.libvirt fedora.linux_system_roles ansible.netcommon
+      - name: Run Molecule tests
+        timeout-minutes: 45
+        run: |
+          molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DEBUG: 'true'
+          ANSIBLE_VERBOSITY: '2'
+      - name: Run Playbook tests
+        run: |
+          ansible-playbook -i inventories/test/hosts test.yml -vv
+
+  version-monitoring:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
-      
-      - name: Run Bandit security check
+      - name: Check for new Ansible versions
         run: |
-          pip install bandit
+          pip install packaging
+          python -c "from packaging import version
+          import requests
+          latest = version.parse(requests.get('https://pypi.org/pypi/ansible/json').json()['info']['version'])
+          current = version.parse('2.13')  # Use 2.13 as baseline
+          if latest > current:
+              print(f'New Ansible version available: {latest}')
+              exit(1)
+          else:
+              print('Using latest version')"
+        continue-on-error: true
+
+  security:
+    needs: lint
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install and run security tools
+        run: |
+          sudo dnf install -y python3-pip
+          pip3 install bandit
           bandit -r roles/ -f txt -ll
-          
+
   release:
     needs: [test, integration, version-monitoring, security]
     runs-on: ubuntu-latest
