@@ -1,9 +1,5 @@
 name: CI/CD Pipeline
 
-# Add env block at workflow level
-env:
-  PYTHON_VERSION: '3.9.19'
-
 on:
   push:
     branches: [ main, stable-* ]
@@ -22,17 +18,14 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      # Important: This sets up your GITHUB_WORKSPACE environment variable
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # needed for progressive mode to work
-
       - name: Install python3-devel
         run: sudo yum install -y python3-devel
       - name: Run ansible-lint
         run: |
           pip install ansible-lint
           ansible-lint roles/ --exclude roles/.cache/ --exclude roles/.venv/
+
   test:
     needs: lint
     runs-on: self-hosted
@@ -40,11 +33,7 @@ jobs:
       matrix:
         ansible-version: ['2.13', '2.14', '2.15']
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/checkout@v4
       - name: Install Ansible
         run: pip install ansible==${{ matrix.ansible-version }}
       - name: Run Molecule tests
@@ -63,7 +52,7 @@ jobs:
   version-monitoring:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check for new Ansible versions
         run: |
           pip install packaging
@@ -82,11 +71,7 @@ jobs:
     needs: lint
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/checkout@v4
       - name: Install Ansible
         run: pip install ansible
       - name: Run security scan
@@ -98,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           
