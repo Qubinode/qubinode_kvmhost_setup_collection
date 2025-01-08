@@ -21,11 +21,12 @@ jobs:
       - uses: ./.github/workflows/common-setup.yml
         with:
           python-version: '3.11'
-      - name: Run ansible-lint
+      - name: Run ansible-lint with Podman
         uses: ansible/ansible-lint-action@main
         with:
           path: "roles/"
           exclude_paths: "roles/.cache/,roles/.venv/"
+          container-engine: podman
 
   test:
     needs: lint
