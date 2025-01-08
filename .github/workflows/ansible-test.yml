@@ -57,14 +57,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-podman pytest-testinfra
-          # Install collections with proper error handling
-          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml -vv || {
-            echo "Retrying collection installation with force..."
-            ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml -vv --force
-          }
-          # Verify installations
-          ansible-galaxy collection list
-          ansible --version
+          ansible-galaxy role install linux-system-roles.network
+          ansible-galaxy collection install ansible.posix
+          #ansible-galaxy collection install community.general
+          ansible-galaxy collection install community.libvirt
+          ansible-galaxy collection install fedora.linux_system_roles
+          ansible-galaxy collection install ansible.netcommon
       - name: Install Podman
         run: |
           sudo apt-get update
