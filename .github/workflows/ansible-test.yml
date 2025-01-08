@@ -22,7 +22,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.9.21'
       - name: Run ansible-lint
         run: |
           pip install ansible-lint
@@ -39,7 +39,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.9.21'
       - name: Install Ansible
         run: pip install ansible==${{ matrix.ansible-version }}
       - name: Run Molecule tests
@@ -81,7 +81,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.9.21'
       - name: Install Ansible
         run: pip install ansible
       - name: Run security scan
