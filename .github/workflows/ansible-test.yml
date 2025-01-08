@@ -22,17 +22,16 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      # Important: This sets up your GITHUB_WORKSPACE environment variable
+      - uses: actions/checkout@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install python3-devel
-        run: sudo yum install -y python3-devel
+          fetch-depth: 0 # needed for progressive mode to work
+
       - name: Run ansible-lint
-        run: |
-          pip install ansible-lint
-          ansible-lint roles/ --exclude roles/.cache/ --exclude roles/.venv/
+        uses: ansible/ansible-lint-action@main
+        with:
+          path: "roles/"
+          exclude_paths: "roles/.cache/,roles/.venv/"
 
   test:
     needs: lint
