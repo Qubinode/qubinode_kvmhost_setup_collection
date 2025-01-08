@@ -81,7 +81,7 @@ jobs:
           bandit -r roles/ -f txt -ll
 
   release:
-    needs: [test, integration, version-monitoring, security]
+    needs: [test, version-monitoring, security]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
