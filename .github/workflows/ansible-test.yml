@@ -18,12 +18,9 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: |
-          sudo dnf install -y python3-pip
-          python3 -m pip install --upgrade pip
-          pip3 install ansible-lint molecule
+      - uses: ./.github/workflows/common-setup.yml
+        with:
+          python-version: '3.11'
       - name: Run ansible-lint
         uses: ansible/ansible-lint-action@main
         with:
@@ -37,14 +34,10 @@ jobs:
       matrix:
         ansible-version: ['2.13', '2.14', '2.15']
     steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: |
-          sudo dnf install -y python3-pip
-          python3 -m pip install --upgrade pip
-          pip3 install ansible-core==${{ matrix.ansible-version }} molecule pytest-testinfra
-          ansible-galaxy role install linux-system-roles.network
-          ansible-galaxy collection install ansible.posix community.libvirt fedora.linux_system_roles ansible.netcommon
+      - uses: ./.github/workflows/common-setup.yml
+        with:
+          python-version: '3.11'
+          ansible-version: ${{ matrix.ansible-version }}
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
@@ -80,123 +73,11 @@ jobs:
     needs: lint
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: Install and run security tools
-        run: |
-          sudo dnf install -y python3-pip
-          pip3 install bandit
-          bandit -r roles/ -f txt -ll
-
-  release:
-    needs: [test, integration, version-monitoring, security]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - uses: actions/checkout@v3
+      - uses: ./.github/workflows/common-setup.yml
         with:
-          fetch-depth: 0
-          
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.0.1
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          body: ${{ steps.changelog.outputs.changelog }}
-          files: |
-            LICENSE
-            README.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}name: CI/CD Pipeline
-
-on:
-  push:
-    branches: [ main, stable-* ]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 6 * * *'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
-
-jobs:
-  lint:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
+          python-version: '3.11'
+      - name: Run security scan
         run: |
-          sudo dnf install -y python3-pip
-          python3 -m pip install --upgrade pip
-          pip3 install ansible-lint molecule
-      - name: Run ansible-lint
-        uses: ansible/ansible-lint-action@main
-        with:
-          path: "roles/"
-          exclude_paths: "roles/.cache/,roles/.venv/"
-
-  test:
-    needs: lint
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        ansible-version: ['2.13', '2.14', '2.15']
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: |
-          sudo dnf install -y python3-pip
-          python3 -m pip install --upgrade pip
-          pip3 install ansible-core==${{ matrix.ansible-version }} molecule pytest-testinfra
-          ansible-galaxy role install linux-system-roles.network
-          ansible-galaxy collection install ansible.posix community.libvirt fedora.linux_system_roles ansible.netcommon
-      - name: Run Molecule tests
-        timeout-minutes: 45
-        run: |
-          molecule test
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DEBUG: 'true'
-          ANSIBLE_VERBOSITY: '2'
-      - name: Run Playbook tests
-        run: |
-          ansible-playbook -i inventories/test/hosts test.yml -vv
-
-  version-monitoring:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check for new Ansible versions
-        run: |
-          pip install packaging
-          python -c "from packaging import version
-          import requests
-          latest = version.parse(requests.get('https://pypi.org/pypi/ansible/json').json()['info']['version'])
-          current = version.parse('2.13')  # Use 2.13 as baseline
-          if latest > current:
-              print(f'New Ansible version available: {latest}')
-              exit(1)
-          else:
-              print('Using latest version')"
-        continue-on-error: true
-
-  security:
-    needs: lint
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install and run security tools
-        run: |
-          sudo dnf install -y python3-pip
-          pip3 install bandit
           bandit -r roles/ -f txt -ll
 
   release:
