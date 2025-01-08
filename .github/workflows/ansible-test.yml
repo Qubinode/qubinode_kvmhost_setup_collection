@@ -27,12 +27,12 @@ jobs:
         with:
           fetch-depth: 0 # needed for progressive mode to work
 
+      - name: Install python3-devel
+        run: sudo yum install -y python3-devel
       - name: Run ansible-lint
-        uses: ansible/ansible-lint-action@main
-        with:
-          path: "roles/"
-          exclude_paths: "roles/.cache/,roles/.venv/"
-
+        run: |
+          pip install ansible-lint
+          ansible-lint roles/ --exclude roles/.cache/ --exclude roles/.venv/
   test:
     needs: lint
     runs-on: self-hosted
