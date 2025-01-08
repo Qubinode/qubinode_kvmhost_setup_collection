@@ -55,7 +55,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ansible-core==${{ matrix.ansible-version }} molecule molecule-podman pytest-testinfra
-          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml --server https://galaxy.ansible.com/api/ --token ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
+          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml --server https://galaxy.ansible.com --token ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
       - name: Install Podman
         run: |
           sudo apt-get update
