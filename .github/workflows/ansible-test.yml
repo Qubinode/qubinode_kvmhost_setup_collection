@@ -39,7 +39,7 @@ jobs:
     needs: lint
     runs-on: self-hosted
     strategy:
-        matrix:
+      matrix:
         ansible-version: ['2.13']
     steps:
       - uses: actions/checkout@v4
