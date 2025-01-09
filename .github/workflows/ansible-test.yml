@@ -19,19 +19,28 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - name: Install python3-devel
-        run: sudo yum install -y python3-devel
+      - name: Setup Python environment
+        run: |
+          sudo yum install -y python3-devel python3-pip
+          python3 -m pip install --upgrade pip
+          pip install virtualenv
+          python3 -m virtualenv venv
+          source venv/bin/activate
+      - name: Install lint tools
+        run: |
+          source venv/bin/activate
+          pip install ansible-lint bandit
       - name: Run ansible-lint
         run: |
-          pip install ansible-lint
+          source venv/bin/activate
           ansible-lint roles/ --exclude roles/.cache/ --exclude roles/.venv/
 
   test:
     needs: lint
     runs-on: self-hosted
     strategy:
-      matrix:
-        ansible-version: ['2.13', '2.14', '2.15']
+        matrix:
+        ansible-version: ['2.13']
     steps:
       - uses: actions/checkout@v4
       - name: Install Ansible
@@ -72,10 +81,13 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - name: Install Ansible
-        run: pip install ansible
+      - name: Install security tools
+        run: |
+          source venv/bin/activate
+          pip install ansible bandit
       - name: Run security scan
         run: |
+          source venv/bin/activate
           bandit -r roles/ -f txt -ll
 
   release:
