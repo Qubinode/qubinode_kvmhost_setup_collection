@@ -20,6 +20,6 @@
       changed_when: false
 
   roles:
-    - role: roles/edge_hosts_validate
-    - role: roles/swygue_lvm
-    - role: roles/kvmhost_setup
+    - role: edge_hosts_validate
+    - role: swygue_lvm
+    - role: kvmhost_setup
