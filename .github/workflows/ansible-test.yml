@@ -43,6 +43,8 @@ jobs:
         ansible-version: ['2.13']
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install ansible-core
         run: pip install ansible-core==${{ matrix.ansible-version }}
       - name: Install Molecule
