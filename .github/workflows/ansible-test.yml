@@ -46,7 +46,8 @@ jobs:
       - name: Install ansible-core
         run: pip install ansible-core==${{ matrix.ansible-version }}
       - name: Install Molecule
-        run: pip install molecule
+        run: pip install molecule  molecule-podman
+
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
