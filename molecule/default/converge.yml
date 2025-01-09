@@ -20,6 +20,6 @@
       changed_when: false
 
   roles:
-    - role: /home/lab-user/qubinode_kvmhost_setup_collection/roles/edge_hosts_validate
-    - role: /home/lab-user/qubinode_kvmhost_setup_collection/roles/swygue_lvm
-    - role: /home/lab-user/qubinode_kvmhost_setup_collection/roles/kvmhost_setup
+    - role: roles/edge_hosts_validate
+    - role: roles/swygue_lvm
+    - role: roles/kvmhost_setup
