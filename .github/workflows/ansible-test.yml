@@ -43,8 +43,8 @@ jobs:
         ansible-version: ['2.13']
     steps:
       - uses: actions/checkout@v4
-      - name: Install Ansible
-        run: pip install ansible==${{ matrix.ansible-version }}
+      - name: Install ansible-core
+        run: pip install ansible-core==${{ matrix.ansible-version }}
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
@@ -81,10 +81,17 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Python environment
+        run: |
+          sudo yum install -y python3-devel python3-pip
+          python3 -m pip install --upgrade pip
+          pip install virtualenv
+          python3 -m virtualenv venv
+          source venv/bin/activate
       - name: Install security tools
         run: |
           source venv/bin/activate
-          pip install ansible bandit
+          pip install ansible-core bandit
       - name: Run security scan
         run: |
           source venv/bin/activate
