@@ -1,0 +1,102 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    # Package Verification
+    - name: Collect package facts
+      ansible.builtin.package_facts:
+        manager: auto
+      register: pkg_facts
+
+    - name: Verify required packages are installed
+      ansible.builtin.assert:
+        that: item in ansible_facts.packages
+        fail_msg: "Package {{ item }} is not installed"
+        success_msg: "Package {{ item }} is installed"
+      loop: "{{ required_rpm_packages }}"
+
+    # Service Verification
+    - name: Verify libvirt service status
+      ansible.builtin.service_facts:
+
+    - name: Assert libvirt services are running
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['libvirtd.service'].state == 'running'
+          - ansible_facts.services['libvirtd.service'].status == 'enabled'
+        fail_msg: "Libvirt service is not running and enabled"
+        success_msg: "Libvirt service is running and enabled"
+
+    # Directory Structure Verification
+    - name: Verify libvirt directories
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: dir_check
+      loop:
+        - "/var/lib/libvirt/images"
+        - "/etc/libvirt"
+
+    - name: Assert directories exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isdir
+        fail_msg: "Directory {{ item.item }} does not exist or is not a directory"
+        success_msg: "Directory {{ item.item }} exists and is a directory"
+      loop: "{{ dir_check.results }}"
+
+    # Network Configuration Verification
+    - name: Get bridge interface info
+      ansible.builtin.command: ip link show {{ kvmhost_bridge_device }}
+      register: bridge_info
+      changed_when: false
+      failed_when: false
+
+    - name: Assert bridge interface exists
+      ansible.builtin.assert:
+        that: bridge_info.rc == 0
+        fail_msg: "Bridge interface {{ kvmhost_bridge_device }} does not exist"
+        success_msg: "Bridge interface {{ kvmhost_bridge_device }} exists"
+
+    # Storage Pool Verification
+    - name: Get libvirt pool info
+      ansible.builtin.command: virsh pool-list --all
+      register: pool_info
+      changed_when: false
+
+    - name: Assert default storage pool exists
+      ansible.builtin.assert:
+        that: '"default" in pool_info.stdout'
+        fail_msg: "Default storage pool is not configured"
+        success_msg: "Default storage pool is configured"
+
+    # User Configuration Verification
+    - name: Verify user in libvirt group
+      ansible.builtin.command: groups {{ admin_user }}
+      register: user_groups
+      changed_when: false
+
+    - name: Assert user is in libvirt group
+      ansible.builtin.assert:
+        that: '"libvirt" in user_groups.stdout'
+        fail_msg: "User {{ admin_user }} is not in libvirt group"
+        success_msg: "User {{ admin_user }} is in libvirt group"
+
+    # Shell Configuration Verification
+    - name: Verify shell configuration files
+      ansible.builtin.stat:
+        path: "/home/{{ admin_user }}/{{ item }}"
+      register: shell_files
+      loop:
+        - .bashrc
+        - .vimrc
+
+    - name: Assert shell configuration files exist
+      ansible.builtin.assert:
+        that: item.stat.exists
+        fail_msg: "Shell configuration file {{ item.item }} does not exist"
+        success_msg: "Shell configuration file {{ item.item }} exists"
+      loop: "{{ shell_files.results }}"

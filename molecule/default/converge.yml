@@ -1,0 +1,25 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  vars:
+    admin_user: molecule
+    domain: test.local
+    dns_forwarder: "1.1.1.1"
+    lib_virt_setup: true
+    enable_cockpit: true
+    configure_shell: true
+    kvm_host_libvirt_dir: /var/lib/libvirt/images
+    kvmhost_bridge_device: vmbr0
+    kvm_host_domain: test.local
+
+  pre_tasks:
+    - name: Update package cache
+      ansible.builtin.dnf:
+        update_cache: true
+      changed_when: false
+
+  roles:
+    - role: /home/lab-user/qubinode_kvmhost_setup_collection/roles/edge_hosts_validate
+    - role: /home/lab-user/qubinode_kvmhost_setup_collection/roles/swygue_lvm
+    - role: /home/lab-user/qubinode_kvmhost_setup_collection/roles/kvmhost_setup
