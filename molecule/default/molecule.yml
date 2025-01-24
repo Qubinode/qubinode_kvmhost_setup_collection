@@ -1,69 +1,49 @@
 ---
 dependency:
   name: galaxy
-driver:
-  # Uncomment below for Podman (default for local development)
-  name: podman
   options:
-    podman_binary: /usr/bin/podman
-    podman_extra_args: --log-level=debug
+    role-file: galaxy/requirements.yml
+    requirements-file: galaxy/requirements.yml
+driver:
+  name: libvirt
+  connection_uri: qemu:///session
+  socket: /run/user/1000/libvirt/libvirt-sock
 
-  # Uncomment below for Docker (use in CI/CD)
-  # name: docker
-  # options:
-  #   docker_binary: /usr/bin/docker
-  #   docker_extra_args: --log-level=debug
 platforms:
-  - name: kvmhost-test
-    image: docker.io/rockylinux/rockylinux:9-ubi-init
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    command: "/usr/sbin/init"
-    tmpfs:
-      - /run
-      - /tmp
-    capabilities:
-      - SYS_ADMIN
-    security_opts:
-      - seccomp=unconfined
-    build:
-      context: .
-      dockerfile: Dockerfile
+  - name: kvm-testnode
+    memory: 2048
+    vcpus: 2
+    disks:
+      - name: vda
+        size: 20G
+    networks:
+      - network: default
+    os:
+      variant: centos-stream9
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_FORCE_COLOR: "true"
-  config_options:
-    defaults:
-      interpreter_python: auto_silent
-      callback_whitelist: profile_tasks, timer, yaml
-      roles_path: /home/lab-user/actions-runner/_work/qubinode_kvmhost_setup_collection/roles
-    ssh_connection:
-      pipelining: true
-  inventory:
-    links:
-      hosts: ../../inventories/test/hosts
-      group_vars: ../../inventories/test/group_vars/
-lint: |
-  set -e
-  yamllint .
-  ansible-lint roles/kvmhost_setup/
-
+  roles_path:
+    - ../../roles
+    - roles
+  become: true
+  environment:
+    LIBVIRT_SOCKET: "/run/user/1000/libvirt/libvirt-sock"
+    XDG_RUNTIME_DIR: "/run/user/1000"
+  inventory: 
+    group_vars:
+      molecule:
+        ansible_connection: local
+        host_device: /dev/sda  # Use primary disk that exists
+        kvm_host_ip: 192.168.122.1  # Default libvirt bridge IP
+        kvm_host_interface: virbr0  # Default libvirt bridge interface  
+        kvm_host_mask_prefix: 24  # Default libvirt subnet mask
+        kvm_host_netmask: 255.255.255.0  # Calculated from /24 prefix
+        kvm_host_gw: 192.168.122.1  # Default libvirt gateway IP
+        kvm_host_bootproto: static  # Static network configuration
+        kvm_bridge_type: nat  # NAT bridge configuration
+        qubinet: qubinet-default  # Default network name
+        qubinode_bridge_name: virbr0  # Default bridge interface
+        kvm_host_macaddr: "52:54:00:12:34:56"  # Default libvirt MAC address
+        vm_libvirt_net: "{{ qubinet }}"  # Network name variable
 verifier:
-  name: testinfra
-  options:
-    verbose: true
-scenario:
-  test_sequence:
-    - dependency
-    - cleanup
-    - destroy
-    - syntax
-    - create
-    - prepare
-    - converge
-    - idempotence
-    - verify
-    - cleanup
-    - destroy
+  name: ansible

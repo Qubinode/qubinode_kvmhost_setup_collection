@@ -1,0 +1,73 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Debug system information
+      ansible.builtin.debug:
+        msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Check systemd unit files for virtqemud
+      ansible.builtin.command:
+        cmd: "systemctl list-unit-files | grep virtqemu"
+      register: unit_files
+      failed_when: false
+      changed_when: false
+
+    - name: Debug unit files
+      ansible.builtin.debug:
+        var: unit_files
+
+    - name: Check if virtqemud.socket exists
+      ansible.builtin.stat:
+        path: /usr/lib/systemd/system/virtqemud.socket
+      register: virtqemud_socket
+
+    - name: Enable and start virtqemud socket if exists
+      ansible.builtin.systemd:
+        name: virtqemud.socket
+        state: started
+        enabled: true
+      when: virtqemud_socket.stat.exists
+
+    - name: Enable and start virtqemud service if socket exists
+      ansible.builtin.systemd:
+        name: virtqemud
+        state: started
+        enabled: true
+      when: virtqemud_socket.stat.exists
+
+    - name: Check if virtlogd.socket exists
+      ansible.builtin.stat:
+        path: /usr/lib/systemd/system/virtlogd.socket
+      register: virtlogd_socket
+
+    - name: Enable and start virtlogd socket if exists
+      ansible.builtin.systemd:
+        name: virtlogd.socket
+        state: started
+        enabled: true
+      when: virtlogd_socket.stat.exists
+
+    - name: Debug socket statuses
+      ansible.builtin.debug:
+        msg: "virtqemud: {{ 'exists' if virtqemud_socket.stat.exists else 'not found' }}, virtlogd: {{ 'exists' if virtlogd_socket.stat.exists else 'not found' }}\n"
+
+    - name: Check systemd status
+      ansible.builtin.command:
+        cmd: "systemctl status"
+      register: systemd_status
+      failed_when: false
+      changed_when: false
+
+    - name: Debug systemd status
+      ansible.builtin.debug:
+        var: systemd_status
+
+    - name: Generate SSH key pair for VM access
+      community.crypto.openssh_keypair:
+        path: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/ssh_key"
+        type: ed25519
+        force: false

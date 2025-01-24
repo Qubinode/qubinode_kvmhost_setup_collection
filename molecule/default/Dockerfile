@@ -1,14 +1,26 @@
-FROM docker.io/rockylinux/rockylinux:9-ubi-init
+FROM quay.io/centos/centos:stream9
 
-# Install required packages
-RUN dnf install -y sudo python3 python3-pip openssh-clients podman slirp4netns && \
+RUN dnf install -y dnf-plugins-core epel-release && \
+    dnf config-manager --set-enabled crb && \
+    dnf -y update && \
+    dnf install -y \
+    systemd \
+    python3-pip \
+    libvirt \
+    libvirt-daemon-driver-qemu \
+    libvirt-client \
+    qemu-kvm \
+    virt-install \
+    python3-libvirt \
+    systemd-container \
+    procps-ng \
+    iproute && \
     dnf clean all
 
-# Create molecule user
-RUN useradd -m -s /bin/bash molecule && \
-    echo "molecule ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/molecule && \
-    chmod 0440 /etc/sudoers.d/molecule
+RUN mkdir -p /var/run/libvirt/common /var/run/libvirt/qemu /var/lib/libvirt/qemu /var/lib/libvirt/images /run/libvirt && \
+    chown -R root:libvirt /var/run/libvirt /var/lib/libvirt /run/libvirt && \
+    chmod -R g+rwx /var/run/libvirt /var/lib/libvirt /run/libvirt
 
-# Install Ansible and dependencies
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install "ansible>=2.13,<2.16" molecule podman
+RUN systemctl enable virtqemud.socket virtlogd.socket
+
+CMD ["/usr/sbin/init"]

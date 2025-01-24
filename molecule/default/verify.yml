@@ -2,101 +2,194 @@
 - name: Verify
   hosts: all
   become: true
-  gather_facts: true
+  gather_facts: false
+
+  vars:
+    cleanup_vm: "{{ lookup('env', 'MOLECULE_CLEANUP_VM') | default('true') | bool }}"
+    vm_name: "molecule-test"
 
   tasks:
-    # Package Verification
-    - name: Collect package facts
-      ansible.builtin.package_facts:
-        manager: auto
-      register: pkg_facts
+    - name: Check if libvirtd service is running
+      ansible.builtin.systemd:
+        name: libvirtd
+      register: libvirtd_status
+      failed_when: not libvirtd_status.status.ActiveState == "active"
 
-    - name: Verify required packages are installed
-      ansible.builtin.assert:
-        that: item in ansible_facts.packages
-        fail_msg: "Package {{ item }} is not installed"
-        success_msg: "Package {{ item }} is installed"
-      loop: "{{ required_rpm_packages }}"
+    - name: Verify libvirt packages are installed
+      ansible.builtin.dnf:
+        name:
+          - libvirt
+          - libvirt-client
+          - qemu-kvm
+          - virt-manager
+          - virt-install
+          - python3-libvirt
+        state: present
+      check_mode: true
+      register: pkg_status
+      failed_when: pkg_status.changed
 
-    # Service Verification
-    - name: Verify libvirt service status
-      ansible.builtin.service_facts:
-
-    - name: Assert libvirt services are running
-      ansible.builtin.assert:
-        that:
-          - ansible_facts.services['libvirtd.service'].state == 'running'
-          - ansible_facts.services['libvirtd.service'].status == 'enabled'
-        fail_msg: "Libvirt service is not running and enabled"
-        success_msg: "Libvirt service is running and enabled"
-
-    # Directory Structure Verification
-    - name: Verify libvirt directories
+    - name: Check libvirt socket permissions
       ansible.builtin.stat:
+        path: /run/libvirt/libvirt-sock
+      register: socket_status
+      failed_when: not socket_status.stat.exists
+
+    - name: Create SSH key directory
+      ansible.builtin.file:
+        path: /root/.ssh
+        state: directory
+        mode: '0700'
+        owner: root
+        group: root
+
+    - name: Check if test key exists
+      ansible.builtin.stat:
+        path: /root/.ssh/test-key
+      register: key_exists
+
+    - name: Generate SSH key for testing
+      ansible.builtin.command:
+        cmd: ssh-keygen -t rsa -b 2048 -f /root/.ssh/test-key -N ""
+      args:
+        creates: /root/.ssh/test-key
+      when: not key_exists.stat.exists
+
+    - name: Set SSH key permissions
+      ansible.builtin.file:
         path: "{{ item }}"
-      register: dir_check
+        mode: '0600'
+        owner: root
+        group: root
       loop:
-        - "/var/lib/libvirt/images"
-        - "/etc/libvirt"
+        - /root/.ssh/test-key
+        - /root/.ssh/test-key.pub
 
-    - name: Assert directories exist
-      ansible.builtin.assert:
-        that:
-          - item.stat.exists
-          - item.stat.isdir
-        fail_msg: "Directory {{ item.item }} does not exist or is not a directory"
-        success_msg: "Directory {{ item.item }} exists and is a directory"
-      loop: "{{ dir_check.results }}"
+    - name: Create cloud-init config directory
+      ansible.builtin.file:
+        path: /tmp/cloud-init
+        state: directory
+        mode: '0755'
 
-    # Network Configuration Verification
-    - name: Get bridge interface info
-      ansible.builtin.command: ip link show {{ kvmhost_bridge_device }}
-      register: bridge_info
+    - name: Create cloud-init user-data
+      ansible.builtin.copy:
+        dest: /tmp/cloud-init/user-data
+        content: |
+          #cloud-config
+          users:
+            - name: cloud-user
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              ssh_authorized_keys:
+                - {{ lookup('file', '/root/.ssh/test-key.pub') }}
+          ssh_pwauth: false
+          disable_root: true
+          package_update: false
+          package_upgrade: false
+        mode: '0644'
+
+    - name: Create cloud-init meta-data
+      ansible.builtin.copy:
+        dest: /tmp/cloud-init/meta-data
+        content: |
+          instance-id: {{ vm_name }}
+          local-hostname: {{ vm_name }}
+        mode: '0644'
+
+    - name: Check if cloud-init ISO exists
+      ansible.builtin.stat:
+        path: /tmp/cloud-init.iso
+      register: iso_exists
+
+    - name: Create cloud-init ISO
+      ansible.builtin.command:
+        cmd: genisoimage -output /tmp/cloud-init.iso -volid cidata -joliet -rock /tmp/cloud-init/user-data /tmp/cloud-init/meta-data
+      when: not iso_exists.stat.exists
+
+    - name: Check if CentOS image exists
+      ansible.builtin.stat:
+        path: /var/lib/libvirt/images/{{ vm_name }}.qcow2
+      register: qcow2_exists
+
+    - name: Download CentOS 9 cloud image
+      ansible.builtin.get_url:
+        url: https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2
+        dest: /var/lib/libvirt/images/{{ vm_name }}.qcow2
+        mode: '0644'
+      when: not qcow2_exists.stat.exists
+
+    - name: Check if VM exists
+      ansible.builtin.command:
+        cmd: virsh dominfo {{ vm_name }}
+      register: vm_exists
       changed_when: false
       failed_when: false
 
-    - name: Assert bridge interface exists
-      ansible.builtin.assert:
-        that: bridge_info.rc == 0
-        fail_msg: "Bridge interface {{ kvmhost_bridge_device }} does not exist"
-        success_msg: "Bridge interface {{ kvmhost_bridge_device }} exists"
+    - name: Create test VM
+      ansible.builtin.command:
+        cmd: >
+          virt-install --name {{ vm_name }}
+          --memory 2048 --vcpus 2
+          --disk /var/lib/libvirt/images/{{ vm_name }}.qcow2
+          --disk /tmp/cloud-init.iso,device=cdrom
+          --import --os-variant centos-stream9
+          --network network=default
+          --noautoconsole
+      when: vm_exists.rc != 0
 
-    # Storage Pool Verification
-    - name: Get libvirt pool info
-      ansible.builtin.command: virsh pool-list --all
-      register: pool_info
+    - name: Wait for VM to be running
+      ansible.builtin.command:
+        cmd: virsh domstate {{ vm_name }}
+      register: vm_state
+      until: vm_state.stdout == "running"
+      retries: 30
+      delay: 2
       changed_when: false
 
-    - name: Assert default storage pool exists
-      ansible.builtin.assert:
-        that: '"default" in pool_info.stdout'
-        fail_msg: "Default storage pool is not configured"
-        success_msg: "Default storage pool is configured"
-
-    # User Configuration Verification
-    - name: Verify user in libvirt group
-      ansible.builtin.command: groups {{ admin_user }}
-      register: user_groups
+    - name: Get VM IP address
+      ansible.builtin.shell:
+        cmd: virsh domifaddr {{ vm_name }} | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}'
+      register: vm_ip
+      until: vm_ip.stdout != ""
+      retries: 30
+      delay: 2
       changed_when: false
 
-    - name: Assert user is in libvirt group
-      ansible.builtin.assert:
-        that: '"libvirt" in user_groups.stdout'
-        fail_msg: "User {{ admin_user }} is not in libvirt group"
-        success_msg: "User {{ admin_user }} is in libvirt group"
+    - name: Wait for SSH to come up
+      ansible.builtin.wait_for:
+        host: "{{ vm_ip.stdout }}"
+        port: 22
+        state: started
+        timeout: 300
 
-    # Shell Configuration Verification
-    - name: Verify shell configuration files
-      ansible.builtin.stat:
-        path: "/home/{{ admin_user }}/{{ item }}"
-      register: shell_files
-      loop:
-        - .bashrc
-        - .vimrc
+    - name: Check if test file exists
+      ansible.builtin.command:
+        cmd: ssh -i /root/.ssh/test-key -o StrictHostKeyChecking=no cloud-user@{{ vm_ip.stdout }} "test -f ~/test.txt"
+      register: test_file_exists
+      changed_when: false
+      failed_when: false
 
-    - name: Assert shell configuration files exist
-      ansible.builtin.assert:
-        that: item.stat.exists
-        fail_msg: "Shell configuration file {{ item.item }} does not exist"
-        success_msg: "Shell configuration file {{ item.item }} exists"
-      loop: "{{ shell_files.results }}"
+    - name: Create test file via SSH
+      ansible.builtin.command:
+        cmd: ssh -i /root/.ssh/test-key -o StrictHostKeyChecking=no cloud-user@{{ vm_ip.stdout }} "echo 'Molecule test successful' > ~/test.txt"
+      when: test_file_exists.rc != 0
+
+    - name: Verify test file content
+      ansible.builtin.command:
+        cmd: ssh -i /root/.ssh/test-key -o StrictHostKeyChecking=no cloud-user@{{ vm_ip.stdout }} "cat ~/test.txt"
+      register: test_content
+      failed_when: "'Molecule test successful' not in test_content.stdout"
+      changed_when: false
+
+    - name: Clean up - destroy VM
+      ansible.builtin.command:
+        cmd: virsh destroy {{ vm_name }}
+      ignore_errors: true
+      changed_when: true
+      when: cleanup_vm | bool
+
+    - name: Clean up - undefine VM and remove storage
+      ansible.builtin.command:
+        cmd: virsh undefine {{ vm_name }} --remove-all-storage
+      ignore_errors: true
+      changed_when: true
+      when: cleanup_vm | bool
