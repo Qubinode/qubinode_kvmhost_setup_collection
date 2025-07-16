@@ -41,9 +41,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
-      - name: Generate compatibility matrix
+      - name: Generate enhanced compatibility matrix
         run: |
-          python scripts/generate_compatibility_matrix.py
+          python scripts/generate_enhanced_compatibility_matrix.py
 
       - name: Set matrix output
         id: set-matrix
@@ -68,7 +68,7 @@ jobs:
           echo "rhel-versions=$RHEL_VERSIONS" >> $GITHUB_OUTPUT
 
       - name: Upload compatibility reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: compatibility-reports
           path: |
@@ -252,7 +252,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-rhel${{ matrix.rhel_version }}-ansible${{ matrix.ansible_version }}
           path: test-results/
@@ -260,7 +260,7 @@ jobs:
   update-compatibility-report:
     name: Update Compatibility Documentation
     runs-on: ubuntu-latest
-    needs: [generate-matrix, validate-local-testing, test-compatibility]
+    needs: [generate-matrix, validate-local-testing, test-compatibility, container-compatibility-validation]
     if: always() && github.ref == 'refs/heads/main'
     
     steps:
@@ -270,9 +270,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all test results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: test-artifacts/
+          pattern: test-results-*
+          merge-multiple: true
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -285,7 +287,7 @@ jobs:
           pip install pyyaml
 
       - name: Download compatibility reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: compatibility-reports
           path: docs/
@@ -349,12 +351,12 @@ jobs:
   compatibility-summary:
     name: Compatibility Test Summary
     runs-on: ubuntu-latest
-    needs: [generate-matrix, validate-local-testing, test-compatibility]
+    needs: [generate-matrix, validate-local-testing, test-compatibility, container-compatibility-validation]
     if: always()
     
     steps:
       - name: Download compatibility reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: compatibility-reports
 
@@ -384,3 +386,74 @@ jobs:
           echo "📋 **Full compatibility report**: [compatibility_report.md](./docs/compatibility_report.md)" >> $GITHUB_STEP_SUMMARY
           echo "🔧 **Matrix data**: [compatibility_matrix.json](./docs/compatibility_matrix.json)" >> $GITHUB_STEP_SUMMARY
           echo "🧪 **Local testing guide**: [Local Molecule Testing Research](./docs/research/local-molecule-testing-validation-2025-01-12.md)" >> $GITHUB_STEP_SUMMARY
+
+  container-compatibility-validation:
+    name: Container Compatibility Validation
+    runs-on: ubuntu-latest
+    needs: [generate-matrix]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible molecule podman-py
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          podman --version
+
+      - name: Start test containers for validation
+        run: |
+          # Start minimal test containers for compatibility validation
+          podman run -d --name rocky-9 --privileged --tmpfs /tmp --tmpfs /run \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+            docker.io/rockylinux/rockylinux:9-ubi-init /usr/sbin/init
+          
+          podman run -d --name alma-9 --privileged --tmpfs /tmp --tmpfs /run \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+            docker.io/almalinux/9-init:9.6-20250712 /usr/sbin/init
+          
+          # Wait for containers to be ready
+          sleep 10
+          
+          # Install Ansible in containers
+          for container in rocky-9 alma-9; do
+            podman exec $container bash -c "
+              dnf install -y python3 python3-pip &&
+              pip3 install ansible
+            " || echo "Warning: Failed to setup $container"
+          done
+
+      - name: Copy role to containers
+        run: |
+          # Copy the entire collection to test containers
+          for container in rocky-9 alma-9; do
+            podman cp roles/ $container:/tmp/roles/ || echo "Warning: Copy failed for $container"
+            podman cp test_container_detection.yml $container:/tmp/ || echo "Warning: Test copy failed for $container"
+          done
+
+      - name: Run container compatibility validation
+        run: |
+          python scripts/validate_container_compatibility.py
+
+      - name: Upload validation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-compatibility-validation
+          path: container-compatibility-validation.json
+
+      - name: Clean up test containers
+        if: always()
+        run: |
+          podman stop rocky-9 alma-9 || true
+          podman rm rocky-9 alma-9 || true

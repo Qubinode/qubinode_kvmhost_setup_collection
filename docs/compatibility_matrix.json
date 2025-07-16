@@ -1,1224 +1,1488 @@
 {
   "metadata": {
-    "generated_date": "2025-07-12 14:13:13",
+    "generated_date": "2025-07-16 15:00:05",
     "project": "Qubinode KVM Host Setup Collection",
-    "rhel_versions_detected": [
+    "version": "2.1.0",
+    "rhel_versions_supported": [
       "10",
       "8",
       "9"
     ],
-    "generator_version": "1.0.0"
+    "generator_version": "2.0.0",
+    "container_compatibility": "enhanced",
+    "last_updated_commit": "745cc2c1"
   },
-  "compatibility_matrix": {
+  "container_compatibility": {
+    "advanced_container_detection": {
+      "implemented": true,
+      "criteria": [
+        "virtualization_type",
+        "environment_variables",
+        "filesystem_analysis",
+        "selinux_context"
+      ],
+      "description": "Multi-criteria container environment detection"
+    },
+    "task_skipping": {
+      "implemented": true,
+      "skipped_tasks": [
+        "11 KVM-specific tasks"
+      ],
+      "description": "Container-inappropriate task skipping"
+    },
+    "gpg_verification": {
+      "implemented": true,
+      "strategy": "dynamic_container_detection",
+      "description": "Dynamic GPG verification for container environments"
+    },
+    "molecule_testing": {
+      "implemented": true,
+      "scenarios": [
+        "default",
+        "rhel8",
+        "validation",
+        "idempotency",
+        "modular"
+      ],
+      "platforms": [
+        "docker.io/rockylinux/rockylinux:9-ubi-init",
+        "docker.io/almalinux/9-init:9.6-20250712",
+        "registry.redhat.io/ubi9-init:9.6-1751962289",
+        "registry.redhat.io/ubi10-init:10.0-1751895590",
+        "docker.io/rockylinux/rockylinux:8-ubi-init",
+        "registry.redhat.io/ubi9/ubi-init:latest",
+        "quay.io/centos/centos:stream9-init",
+        "registry.redhat.io/ubi10/ubi-init:latest",
+        "docker.io/almalinux/almalinux:9-init"
+      ],
+      "description": "Container-based testing with Molecule"
+    }
+  },
+  "platform_support": {
+    "physical_hosts": {
+      "supported": true,
+      "features": "full_kvm_optimization",
+      "notes": "All features available including performance optimization"
+    },
+    "virtual_machines": {
+      "supported": true,
+      "features": "limited_optimization",
+      "notes": "Some performance features may not be applicable"
+    },
+    "containers": {
+      "supported": true,
+      "features": "testing_only",
+      "notes": "Container-inappropriate tasks automatically skipped",
+      "testing_platforms": [
+        "Podman",
+        "Docker"
+      ]
+    }
+  },
+  "rhel_compatibility_matrix": {
     "kvmhost_setup": {
       "description": "KVM Host setup role for setup",
       "features": {
-        "enable_cockpit": {
-          "default": true,
-          "description": "Feature flag for enable_cockpit",
-          "rhel_compatibility": {}
-        },
-        "configure_shell": {
-          "default": true,
-          "description": "Feature flag for configure_shell",
-          "rhel_compatibility": {
-            "rhel10": {
-              "supported": true,
-              "notes": "Detected from configure_shell.yml"
-            },
-            "rhel8": {
-              "supported": true,
-              "notes": "Detected from configure_shell.yml"
-            },
-            "rhel9": {
-              "supported": true,
-              "notes": "Detected from configure_shell.yml"
-            }
-          }
-        },
-        "enable_libvirt_admin_user": {
-          "default": true,
-          "description": "Feature flag for enable_libvirt_admin_user",
-          "rhel_compatibility": {}
-        },
-        "enable_kvm_performance_optimization": {
-          "default": true,
-          "description": "Feature flag for enable_kvm_performance_optimization",
-          "rhel_compatibility": {}
-        },
-        "kvm_enable_cpu_isolation": {
-          "default": true,
-          "description": "Feature flag for kvm_enable_cpu_isolation",
-          "rhel_compatibility": {}
-        },
-        "kvm_enable_ksm": {
-          "default": true,
-          "description": "Feature flag for kvm_enable_ksm",
-          "rhel_compatibility": {}
-        },
-        "kvm_enable_nested_virtualization": {
-          "default": true,
-          "description": "Feature flag for kvm_enable_nested_virtualization",
-          "rhel_compatibility": {}
-        },
-        "kvm_enable_performance_monitoring": {
-          "default": true,
-          "description": "Feature flag for kvm_enable_performance_monitoring",
-          "rhel_compatibility": {}
-        },
         "bridge_interface": {
-          "description": "Task group: bridge_interface",
+          "file": "roles/kvmhost_setup/tasks/bridge_interface.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from bridge_interface.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from bridge_interface.yml"
+              "notes": [
+                "Version 8 specifically supported"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from bridge_interface.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "build_user_home_dir": {
-          "description": "Task group: build_user_home_dir",
+          "file": "roles/kvmhost_setup/tasks/build_user_home_dir.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from build_user_home_dir.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from build_user_home_dir.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from build_user_home_dir.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "cockpit_setup": {
-          "description": "Task group: cockpit_setup",
+          "file": "roles/kvmhost_setup/tasks/cockpit_setup.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from cockpit_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from cockpit_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from cockpit_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "configure_remote_user": {
-          "description": "Task group: configure_remote_user",
+          "file": "roles/kvmhost_setup/tasks/configure_remote_user.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from configure_remote_user.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from configure_remote_user.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from configure_remote_user.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
+        },
+        "configure_shell": {
+          "file": "roles/kvmhost_setup/tasks/configure_shell.yml",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
+            }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "libvirt_setup": {
-          "description": "Task group: libvirt_setup",
+          "file": "roles/kvmhost_setup/tasks/libvirt_setup.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from libvirt_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from libvirt_setup.yml"
+              "notes": [
+                "Version 8 specifically supported"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from libvirt_setup.yml"
+              "notes": [
+                "Version 9 specifically supported"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_setup/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "networks": {
-          "description": "Task group: networks",
+          "file": "roles/kvmhost_setup/tasks/networks.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from networks.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from networks.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from networks.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "rhpds_instance": {
-          "description": "Task group: rhpds_instance",
+          "file": "roles/kvmhost_setup/tasks/rhpds_instance.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from rhpds_instance.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from rhpds_instance.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from rhpds_instance.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "rocky_linux": {
-          "description": "Task group: rocky_linux",
+          "file": "roles/kvmhost_setup/tasks/rocky_linux.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from rocky_linux.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from rocky_linux.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from rocky_linux.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "storage_pool": {
-          "description": "Task group: storage_pool",
+          "file": "roles/kvmhost_setup/tasks/storage_pool.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from storage_pool.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from storage_pool.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from storage_pool.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "user_libvirt": {
-          "description": "Task group: user_libvirt",
+          "file": "roles/kvmhost_setup/tasks/user_libvirt.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from user_libvirt.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from user_libvirt.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from user_libvirt.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "user_shell_configs": {
-          "description": "Task group: user_shell_configs",
+          "file": "roles/kvmhost_setup/tasks/user_shell_configs.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from user_shell_configs.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from user_shell_configs.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from user_shell_configs.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "validate": {
-          "description": "Task group: validate",
+          "file": "roles/kvmhost_setup/tasks/validate.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from validate.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from validate.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from validate.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "verify_variables": {
-          "description": "Task group: verify_variables",
+          "file": "roles/kvmhost_setup/tasks/verify_variables.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from verify_variables.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from verify_variables.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from verify_variables.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "rhel_version_detection": {
-          "description": "Task group: rhel_version_detection",
+          "file": "roles/kvmhost_setup/tasks/rhel_version_detection.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from rhel_version_detection.yml"
+              "notes": [
+                "RHEL 10 specifically mentioned",
+                "Version 10 specifically supported"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from rhel_version_detection.yml"
+              "notes": [
+                "RHEL 8 specifically mentioned",
+                "Version 8 specifically supported"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from rhel_version_detection.yml"
+              "notes": [
+                "RHEL 9 specifically mentioned",
+                "Version 9 specifically supported"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "kvm_host_validation": {
-          "description": "Task group: kvm_host_validation",
+          "file": "roles/kvmhost_setup/tasks/kvm_host_validation.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from kvm_host_validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from kvm_host_validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from kvm_host_validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "performance_optimization": {
-          "description": "Task group: performance_optimization",
+          "file": "roles/kvmhost_setup/tasks/performance_optimization.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from performance_optimization.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from performance_optimization.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from performance_optimization.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "skipped_in_containers",
+          "requires_physical_host": true
         },
         "kvm_feature_detection": {
-          "description": "Task group: kvm_feature_detection",
+          "file": "roles/kvmhost_setup/tasks/kvm_feature_detection.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from kvm_feature_detection.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from kvm_feature_detection.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from kvm_feature_detection.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
+        },
+        "gpg_verification": {
+          "file": "roles/kvmhost_setup/tasks/gpg_verification.yml",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
+            }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 26,
-          "total_features": 26,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 20,
+          "total_features": 20,
+          "container_awareness_percentage": 5.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 26,
-          "total_features": 26,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 20,
+          "total_features": 20,
+          "container_awareness_percentage": 5.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 26,
-          "total_features": 26,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 20,
+          "total_features": 20,
+          "container_awareness_percentage": 5.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     },
     "kvmhost_base": {
       "description": "KVM Host setup role for base",
       "features": {
-        "enable_epel": {
-          "default": true,
-          "description": "Feature flag for enable_epel",
-          "rhel_compatibility": {}
-        },
-        "epel_installation_method": {
-          "default": "dnf_module",
-          "description": "Feature flag for epel_installation_method",
-          "rhel_compatibility": {}
-        },
-        "base_services_enabled": {
-          "default": [
-            "NetworkManager",
-            "firewalld"
-          ],
-          "description": "Feature flag for base_services_enabled",
-          "rhel_compatibility": {}
-        },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_base/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "os_detection": {
-          "description": "Task group: os_detection",
+          "file": "roles/kvmhost_base/tasks/os_detection.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from os_detection.yml"
+              "notes": [
+                "RHEL 10 specifically mentioned",
+                "Version 10 specifically supported"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from os_detection.yml"
+              "notes": [
+                "RHEL 8 specifically mentioned",
+                "Version 8 specifically supported"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from os_detection.yml"
+              "notes": [
+                "RHEL 9 specifically mentioned",
+                "Version 9 specifically supported"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "validate_os": {
-          "description": "Task group: validate_os",
+          "file": "roles/kvmhost_base/tasks/validate_os.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from validate_os.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from validate_os.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from validate_os.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "packages": {
-          "description": "Task group: packages",
+          "file": "roles/kvmhost_base/tasks/packages.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from packages.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from packages.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from packages.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "services": {
-          "description": "Task group: services",
+          "file": "roles/kvmhost_base/tasks/services.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from services.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from services.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from services.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "system_prep": {
-          "description": "Task group: system_prep",
+          "file": "roles/kvmhost_base/tasks/system_prep.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from system_prep.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from system_prep.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from system_prep.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 9,
-          "total_features": 9,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 6,
+          "total_features": 6,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 9,
-          "total_features": 9,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 6,
+          "total_features": 6,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 9,
-          "total_features": 9,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 6,
+          "total_features": 6,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     },
     "kvmhost_networking": {
       "description": "KVM Host setup role for networking",
       "features": {
-        "network_validation_enabled": {
-          "default": true,
-          "description": "Feature flag for network_validation_enabled",
-          "rhel_compatibility": {}
-        },
-        "configure_firewall_for_bridge": {
-          "default": true,
-          "description": "Feature flag for configure_firewall_for_bridge",
-          "rhel_compatibility": {}
-        },
-        "enable_network_debugging": {
-          "default": false,
-          "description": "Feature flag for enable_network_debugging",
-          "rhel_compatibility": {}
-        },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_networking/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "preflight": {
-          "description": "Task group: preflight",
+          "file": "roles/kvmhost_networking/tasks/preflight.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from preflight.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from preflight.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from preflight.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "interface_detection": {
-          "description": "Task group: interface_detection",
+          "file": "roles/kvmhost_networking/tasks/interface_detection.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from interface_detection.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from interface_detection.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from interface_detection.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "bridge_config": {
-          "description": "Task group: bridge_config",
+          "file": "roles/kvmhost_networking/tasks/bridge_config.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from bridge_config.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from bridge_config.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from bridge_config.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "network_validation": {
-          "description": "Task group: network_validation",
+          "file": "roles/kvmhost_networking/tasks/network_validation.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from network_validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from network_validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from network_validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 8,
-          "total_features": 8,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 5,
+          "total_features": 5,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 8,
-          "total_features": 8,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 5,
+          "total_features": 5,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 8,
-          "total_features": 8,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 5,
+          "total_features": 5,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     },
     "kvmhost_libvirt": {
       "description": "KVM Host setup role for libvirt",
       "features": {
-        "kvmhost_libvirt_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_libvirt_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_libvirt_storage_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_libvirt_storage_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_libvirt_networks_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_libvirt_networks_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_libvirt_user_access_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_libvirt_user_access_enabled",
-          "rhel_compatibility": {}
-        },
-        "enable_libvirt_admin_user": {
-          "default": "{{ kvmhost_libvirt_user_access_enabled }}",
-          "description": "Feature flag for enable_libvirt_admin_user",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_libvirt_validation_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_libvirt_validation_enabled",
-          "rhel_compatibility": {}
-        },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_libvirt/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "validation": {
-          "description": "Task group: validation",
+          "file": "roles/kvmhost_libvirt/tasks/validation.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "services": {
-          "description": "Task group: services",
+          "file": "roles/kvmhost_libvirt/tasks/services.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from services.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from services.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from services.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "storage": {
-          "description": "Task group: storage",
+          "file": "roles/kvmhost_libvirt/tasks/storage.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from storage.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from storage.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from storage.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "networks": {
-          "description": "Task group: networks",
+          "file": "roles/kvmhost_libvirt/tasks/networks.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from networks.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from networks.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from networks.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "create_network": {
-          "description": "Task group: create_network",
+          "file": "roles/kvmhost_libvirt/tasks/create_network.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from create_network.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from create_network.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from create_network.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "user_access": {
-          "description": "Task group: user_access",
+          "file": "roles/kvmhost_libvirt/tasks/user_access.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from user_access.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from user_access.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from user_access.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 13,
-          "total_features": 13,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 7,
+          "total_features": 7,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 13,
-          "total_features": 13,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 7,
+          "total_features": 7,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 13,
-          "total_features": 13,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 7,
+          "total_features": 7,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     },
     "kvmhost_storage": {
       "description": "KVM Host setup role for storage",
       "features": {
-        "kvmhost_storage_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_storage_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_lvm_enabled": {
-          "default": false,
-          "description": "Feature flag for kvmhost_storage_lvm_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_pools_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_storage_pools_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_performance_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_storage_performance_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_monitoring_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_storage_monitoring_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_backup_enabled": {
-          "default": false,
-          "description": "Feature flag for kvmhost_storage_backup_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_snapshot_enabled": {
-          "default": false,
-          "description": "Feature flag for kvmhost_storage_snapshot_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_storage_validation_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_storage_validation_enabled",
-          "rhel_compatibility": {}
-        },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_storage/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "validation": {
-          "description": "Task group: validation",
+          "file": "roles/kvmhost_storage/tasks/validation.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from validation.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "lvm_setup": {
-          "description": "Task group: lvm_setup",
+          "file": "roles/kvmhost_storage/tasks/lvm_setup.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from lvm_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from lvm_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from lvm_setup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "advanced_pools": {
-          "description": "Task group: advanced_pools",
+          "file": "roles/kvmhost_storage/tasks/advanced_pools.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from advanced_pools.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from advanced_pools.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from advanced_pools.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "performance": {
-          "description": "Task group: performance",
+          "file": "roles/kvmhost_storage/tasks/performance.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from performance.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from performance.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from performance.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "monitoring": {
-          "description": "Task group: monitoring",
+          "file": "roles/kvmhost_storage/tasks/monitoring.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from monitoring.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from monitoring.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from monitoring.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         },
         "backup": {
-          "description": "Task group: backup",
+          "file": "roles/kvmhost_storage/tasks/backup.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from backup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from backup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from backup.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 15,
-          "total_features": 15,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 7,
+          "total_features": 7,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 15,
-          "total_features": 15,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 7,
+          "total_features": 7,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 15,
-          "total_features": 15,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 7,
+          "total_features": 7,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     },
     "kvmhost_cockpit": {
       "description": "KVM Host setup role for cockpit",
       "features": {
-        "kvmhost_cockpit_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_cockpit_service_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_service_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_cockpit_socket_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_socket_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_cockpit_ssl_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_ssl_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_cockpit_firewall_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_firewall_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_cockpit_monitoring_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_monitoring_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_cockpit_remote_access_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_cockpit_remote_access_enabled",
-          "rhel_compatibility": {}
-        },
-        "enable_cockpit": {
-          "default": "{{ kvmhost_cockpit_enabled }}",
-          "description": "Feature flag for enable_cockpit",
-          "rhel_compatibility": {}
-        },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_cockpit/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 9,
-          "total_features": 9,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 1,
+          "total_features": 1,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 9,
-          "total_features": 9,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 1,
+          "total_features": 1,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 9,
-          "total_features": 9,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 1,
+          "total_features": 1,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     },
     "kvmhost_user_config": {
       "description": "KVM Host setup role for user_config",
       "features": {
-        "kvmhost_user_config_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_shell_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_shell_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_starship_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_starship_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_ssh_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_ssh_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_ssh_agent_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_ssh_agent_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_permissions_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_permissions_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_sudo_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_sudo_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_tools_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_tools_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_dotfiles_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_dotfiles_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_git_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_git_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_environment_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_environment_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_security_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_security_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_backup_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_backup_enabled",
-          "rhel_compatibility": {}
-        },
-        "kvmhost_user_config_validation_enabled": {
-          "default": true,
-          "description": "Feature flag for kvmhost_user_config_validation_enabled",
-          "rhel_compatibility": {}
-        },
-        "configure_ssh": {
-          "default": "{{ kvmhost_user_config_ssh_enabled }}",
-          "description": "Feature flag for configure_ssh",
-          "rhel_compatibility": {}
-        },
         "main": {
-          "description": "Task group: main",
+          "file": "roles/kvmhost_user_config/tasks/main.yml",
           "rhel_compatibility": {
             "rhel10": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 10"
+              ]
             },
             "rhel8": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 8"
+              ]
             },
             "rhel9": {
               "supported": true,
-              "notes": "Detected from main.yml"
+              "notes": [
+                "No specific restrictions found for RHEL 9"
+              ]
             }
-          }
+          },
+          "container_compatibility": "compatible",
+          "requires_physical_host": false
         }
       },
       "overall_compatibility": {
         "rhel10": {
-          "supported_features": 16,
-          "total_features": 16,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 1,
+          "total_features": 1,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel8": {
-          "supported_features": 16,
-          "total_features": 16,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 1,
+          "total_features": 1,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         },
         "rhel9": {
-          "supported_features": 16,
-          "total_features": 16,
           "compatibility_percentage": 100.0,
-          "status": "full"
+          "supported_features": 1,
+          "total_features": 1,
+          "container_awareness_percentage": 0.0,
+          "status": "supported"
         }
+      },
+      "container_readiness": {
+        "testing_compatible": true,
+        "production_deployment": "physical_vm_only"
       }
     }
   }
