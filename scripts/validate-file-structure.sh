@@ -25,20 +25,20 @@ WARNING_CHECKS=0
 # Function to log validation results
 log_pass() {
     echo -e "${GREEN}✅ PASS${NC}: $1"
-    ((PASSED_CHECKS++))
-    ((TOTAL_CHECKS++))
+    PASSED_CHECKS=$((PASSED_CHECKS + 1))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
 log_fail() {
     echo -e "${RED}❌ FAIL${NC}: $1"
-    ((FAILED_CHECKS++))
-    ((TOTAL_CHECKS++))
+    FAILED_CHECKS=$((FAILED_CHECKS + 1))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
 log_warning() {
     echo -e "${YELLOW}⚠️  WARN${NC}: $1"
-    ((WARNING_CHECKS++))
-    ((TOTAL_CHECKS++))
+    WARNING_CHECKS=$((WARNING_CHECKS + 1))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
 log_info() {
@@ -370,8 +370,11 @@ main() {
     echo -e "${RED}❌ Failed: $FAILED_CHECKS${NC}"
     echo -e "${BLUE}📊 Total checks: $TOTAL_CHECKS${NC}"
     
-    # Calculate success rate
-    local success_rate=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
+    # Calculate success rate safely
+    local success_rate=0
+    if [[ $TOTAL_CHECKS -gt 0 ]]; then
+        success_rate=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
+    fi
     echo -e "${BLUE}📈 Success rate: ${success_rate}%${NC}"
     
     if [[ $FAILED_CHECKS -eq 0 ]]; then

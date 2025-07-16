@@ -85,12 +85,12 @@ check_adr_0001_compliance() {
             if [[ -d "$role_dir/tasks" ]]; then
                 # Check for dnf.dnf_module usage
                 if grep -r "dnf_module" "$role_dir/tasks" >/dev/null 2>&1; then
-                    ((roles_with_dnf++))
+                    roles_with_dnf=$((roles_with_dnf + 1))
                 fi
                 
                 # Check for deprecated yum usage
                 if grep -r "ansible.builtin.yum\|community.general.yum" "$role_dir/tasks" >/dev/null 2>&1; then
-                    ((roles_with_yum++))
+                    roles_with_yum=$((roles_with_yum + 1))
                     issues+=("Role $(basename "$role_dir") uses deprecated yum module")
                 fi
             fi
@@ -169,7 +169,7 @@ check_adr_0005_compliance() {
         local scenario_count=0
         for scenario_dir in "$PROJECT_ROOT/molecule"/*; do
             if [[ -d "$scenario_dir" ]]; then
-                ((scenario_count++))
+                scenario_count=$((scenario_count + 1))
                 local scenario_name=$(basename "$scenario_dir")
                 
                 # Check required files
@@ -329,6 +329,12 @@ generate_compliance_report() {
     
     mkdir -p "$COMPLIANCE_REPORT_DIR"
     
+    # Calculate compliance percentage safely
+    local compliance_percentage=0
+    if [[ $TOTAL_ADRS -gt 0 ]]; then
+        compliance_percentage=$(( COMPLIANT_ADRS * 100 / TOTAL_ADRS ))
+    fi
+    
     cat > "$REPORT_FILE" << EOF
 {
   "report_metadata": {
@@ -337,7 +343,7 @@ generate_compliance_report() {
     "total_adrs_checked": $TOTAL_ADRS,
     "compliant_adrs": $COMPLIANT_ADRS,
     "non_compliant_adrs": $NON_COMPLIANT_ADRS,
-    "compliance_percentage": $(( COMPLIANT_ADRS * 100 / TOTAL_ADRS ))
+    "compliance_percentage": $compliance_percentage
   },
   "adr_compliance_results": [
 EOF
@@ -374,6 +380,12 @@ create_github_summary() {
     local compliance_results=("$@")
     
     if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+        # Calculate compliance rate safely for GitHub summary
+        local github_rate=0
+        if [[ $TOTAL_ADRS -gt 0 ]]; then
+            github_rate=$(( COMPLIANT_ADRS * 100 / TOTAL_ADRS ))
+        fi
+        
         cat >> "$GITHUB_STEP_SUMMARY" << EOF
 # ADR Compliance Check Results
 
@@ -381,7 +393,7 @@ create_github_summary() {
 - **Total ADRs Checked**: $TOTAL_ADRS
 - **Compliant**: $COMPLIANT_ADRS ✅
 - **Non-Compliant**: $NON_COMPLIANT_ADRS ❌
-- **Compliance Rate**: $(( COMPLIANT_ADRS * 100 / TOTAL_ADRS ))%
+- **Compliance Rate**: ${github_rate}%
 
 ## Detailed Results
 EOF
@@ -438,9 +450,9 @@ main() {
     for result in "${compliance_results[@]}"; do
         IFS='|' read -r adr_id status issues <<< "$result"
         if [[ "$status" == "COMPLIANT" ]]; then
-            ((COMPLIANT_ADRS++))
+            COMPLIANT_ADRS=$((COMPLIANT_ADRS + 1))
         else
-            ((NON_COMPLIANT_ADRS++))
+            NON_COMPLIANT_ADRS=$((NON_COMPLIANT_ADRS + 1))
         fi
     done
     
@@ -454,7 +466,13 @@ main() {
     echo -e "${GREEN}✅ Compliant ADRs: $COMPLIANT_ADRS${NC}"
     echo -e "${RED}❌ Non-Compliant ADRs: $NON_COMPLIANT_ADRS${NC}"
     echo -e "${BLUE}📊 Total ADRs Checked: $TOTAL_ADRS${NC}"
-    echo -e "${BLUE}📈 Compliance Rate: $(( COMPLIANT_ADRS * 100 / TOTAL_ADRS ))%${NC}"
+    
+    # Calculate and display compliance rate safely
+    local display_rate=0
+    if [[ $TOTAL_ADRS -gt 0 ]]; then
+        display_rate=$(( COMPLIANT_ADRS * 100 / TOTAL_ADRS ))
+    fi
+    echo -e "${BLUE}📈 Compliance Rate: ${display_rate}%${NC}"
     
     if [[ $NON_COMPLIANT_ADRS -eq 0 ]]; then
         echo -e "\n${GREEN}🎉 All ADRs are compliant!${NC}"
