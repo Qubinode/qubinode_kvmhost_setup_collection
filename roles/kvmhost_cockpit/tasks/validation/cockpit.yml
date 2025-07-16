@@ -5,7 +5,7 @@
 # Validates Cockpit installation, configuration, and accessibility
 
 - name: Verify Cockpit socket is active
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     name: cockpit.socket
   register: cockpit_socket_check
   failed_when: cockpit_socket_check.status.ActiveState != "active"
@@ -28,7 +28,7 @@
 
 - name: Verify Cockpit configuration files
   ansible.builtin.stat:
-    path: "{{ item }}"
+    path: '{{ item }}'
   register: config_files
   loop:
     - /etc/cockpit/cockpit.conf
@@ -60,7 +60,7 @@
   failed_when: false
 
 - name: Generate Cockpit validation report
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: cockpit_validation_report.j2
     dest: /tmp/cockpit_validation_report.txt
     mode: '0644'
@@ -69,9 +69,9 @@
     port_accessible: "{{ port_test is succeeded }}"
     web_interface_responsive: "{{ web_test.status == 200 }}"
     ssl_configured: "{{ kvmhost_cockpit_ssl_enabled }}"
-    ssl_test_result: "{{ ssl_test.rc | default('N/A') }}"
-    api_responsive: "{{ api_test.status | default('N/A') }}"
-    modules_loaded: "{{ cockpit_modules.stdout_lines | default([]) }}"
+    ssl_test_result: "{{ ssl_test.rc           | default(\'N/A\'\)   }}"
+    api_responsive: "{{ api_test.status           | default(\'N/A\'\)   }}"
+    modules_loaded: "{{ cockpit_modules.stdout_lines           | default([])   }}"
 
 - name: Display validation results
   ansible.builtin.debug:
@@ -90,4 +90,4 @@
 
 - name: Show validation report
   ansible.builtin.debug:
-    msg: "{{ validation_report.content | b64decode }}"
+    msg: "{{ validation_report.content           | b64decode   }}"

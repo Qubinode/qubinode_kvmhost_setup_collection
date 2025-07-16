@@ -6,24 +6,24 @@ galaxy_info:
   company: Red Hat
   license: Apache-2.0
   min_ansible_version: "2.9"
-  
+
   platforms:
     - name: EL
       versions:
-        - "8"
-        - "9" 
-        - "10"
+        - "all"
+        - "all"
+        - "all"
     - name: CentOS
       versions:
-        - "9"
+        - "all"
     - name: Rocky
       versions:
-        - "8"
-        - "9"
+        - "all"
+        - "all"
     - name: AlmaLinux
       versions:
-        - "8" 
-        - "9"
+        - "all"
+        - "all"
     - name: Fedora
       versions:
         - "37"
@@ -43,7 +43,7 @@ galaxy_info:
 dependencies:
   - role: kvmhost_base
     when: kvmhost_libvirt_require_base | default(true)
-  - role: kvmhost_networking  
+  - role: kvmhost_networking
     when: kvmhost_libvirt_require_networking | default(true)
 
 collections:

@@ -12,28 +12,28 @@
 - name: Include schema validation for kvmhost_base
   ansible.builtin.include_tasks: "{{ playbook_dir }}/validation/schema_validation_base.yml"
   vars:
-    validation_scope: "kvmhost_base"
+    validation_scope: kvmhost_base
 
 - name: Validate OS family support
   ansible.builtin.assert:
     that:
       - ansible_os_family in supported_os_families
     fail_msg: "Current OS family '{{ ansible_os_family }}' is not in supported list: {{ supported_os_families }}"
-    success_msg: "OS family '{{ ansible_os_family }}' is supported"
+    success_msg: OS family '{{ ansible_os_family }}' is supported
 
 - name: Validate OS major version support
   ansible.builtin.assert:
     that:
       - ansible_distribution_major_version in supported_major_versions
     fail_msg: "Current OS major version '{{ ansible_distribution_major_version }}' is not in supported list: {{ supported_major_versions }}"
-    success_msg: "OS major version '{{ ansible_distribution_major_version }}' is supported"
+    success_msg: OS major version '{{ ansible_distribution_major_version }}' is supported
 
 - name: Validate EPEL configuration (ADR-0001 compliance)
   ansible.builtin.assert:
     that:
       - epel_installation_method == 'dnf_module'
     fail_msg: "ADR-0001 violation: epel_installation_method must be 'dnf_module', found '{{ epel_installation_method }}'"
-    success_msg: "EPEL installation method is ADR-0001 compliant"
+    success_msg: EPEL installation method is ADR-0001 compliant
   when: enable_epel | bool
 
 - name: Validate base packages are defined
@@ -41,13 +41,13 @@
     that:
       - base_packages_common is defined
       - base_packages_common | length > 0
-    fail_msg: "base_packages_common must be defined and non-empty"
-    success_msg: "Base packages are properly defined"
+    fail_msg: base_packages_common must be defined and non-empty
+    success_msg: Base packages are properly defined
 
 - name: Validate base services configuration
   ansible.builtin.assert:
     that:
       - base_services_enabled is defined
       - base_services_enabled | type_debug == "list"
-    fail_msg: "base_services_enabled must be defined as a list"
-    success_msg: "Base services configuration is valid"
+    fail_msg: base_services_enabled must be defined as a list
+    success_msg: Base services configuration is valid

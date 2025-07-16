@@ -10,6 +10,6 @@
     name: fedora.linux_system_roles.firewall
   vars:
     firewall:
-      service: cockpit
+      ansible.builtin.ansible.builtin.service: cockpit
       state: enabled
   when: not cicd_test|bool

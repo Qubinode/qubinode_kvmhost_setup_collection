@@ -9,12 +9,12 @@
       - kvmhost_bridge_device is defined and kvmhost_bridge_device | length > 0
     fail_msg: |
       Missing required variables:
-      admin_user: {{ admin_user | default('not defined') }}
-      domain: {{ domain | default('not defined') }}
-      dns_forwarder: {{ dns_forwarder | default('not defined') }}
-      kvm_host_libvirt_dir: {{ kvm_host_libvirt_dir | default('not defined') }}
-      kvmhost_bridge_device: {{ kvmhost_bridge_device | default('not defined') }}
-    success_msg: "All required variables are properly defined"
+      admin_user: {{ admin_user           | default(\'not defined\')   }}
+      domain: {{ domain           | default(\'not defined\')   }}
+      dns_forwarder: {{ dns_forwarder           | default(\'not defined\')   }}
+      kvm_host_libvirt_dir: {{ kvm_host_libvirt_dir           | default(\'not defined\')   }}
+      kvmhost_bridge_device: {{ kvmhost_bridge_device           | default(\'not defined\')   }}
+    success_msg: All required variables are properly defined
 
 - name: Validate network configuration variables
   ansible.builtin.assert:
@@ -25,8 +25,8 @@
       - item.name is defined
       - item.mode is defined
       - item.bridge_device is defined
-    fail_msg: "Invalid network configuration for {{ item.name | default('unnamed network') }}"
-    success_msg: "Network configuration for {{ item.name }} is valid"
+    fail_msg: Invalid network configuration for {{ item.name           | default(\'unnamed network\'\)   }}
+    success_msg: Network configuration for {{ item.name }} is valid
   loop: "{{ libvirt_host_networks }}"
   when: libvirt_host_networks is defined
 
@@ -38,8 +38,8 @@
       - libvirt_host_storage_pools | length > 0
       - item.name is defined
       - item.path is defined
-    fail_msg: "Invalid storage pool configuration for {{ item.name | default('unnamed pool') }}"
-    success_msg: "Storage pool configuration for {{ item.name }} is valid"
+    fail_msg: Invalid storage pool configuration for {{ item.name           | default(\'unnamed pool\'\)   }}
+    success_msg: Storage pool configuration for {{ item.name }} is valid
   loop: "{{ libvirt_host_storage_pools }}"
   when: libvirt_host_storage_pools is defined
 
@@ -52,8 +52,8 @@
       - enable_libvirt_admin_user | type_debug == "bool"
     fail_msg: |
       Invalid boolean flags:
-      lib_virt_setup must be boolean: {{ lib_virt_setup | type_debug }}
-      enable_cockpit must be boolean: {{ enable_cockpit | type_debug }}
-      configure_shell must be boolean: {{ configure_shell | type_debug }}
-      enable_libvirt_admin_user must be boolean: {{ enable_libvirt_admin_user | type_debug }}
-    success_msg: "All boolean flags are properly defined"
+      lib_virt_setup must be boolean: {{ lib_virt_setup           | type_debug   }}
+      enable_cockpit must be boolean: {{ enable_cockpit           | type_debug   }}
+      configure_shell must be boolean: {{ configure_shell           | type_debug   }}
+      enable_libvirt_admin_user must be boolean: {{ enable_libvirt_admin_user           | type_debug   }}
+    success_msg: All boolean flags are properly defined

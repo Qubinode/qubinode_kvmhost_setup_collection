@@ -48,7 +48,7 @@
 
 - name: Validate SSL certificate paths (if SSL enabled)
   ansible.builtin.stat:
-    path: "{{ item }}"
+    path: '{{ item }}'
   register: ssl_cert_check
   loop:
     - "{{ kvmhost_cockpit_ssl_cert_path }}"
@@ -58,7 +58,7 @@
 - name: Fail if SSL files don't exist (when SSL enabled)
   ansible.builtin.fail:
     msg: "SSL certificate file {{ item.item }} does not exist"
-  loop: "{{ ssl_cert_check.results | default([]) }}"
+  loop: "{{ ssl_cert_check.results           | default([])   }}"
   when:
     - kvmhost_cockpit_ssl_enabled | bool
     - not item.stat.exists

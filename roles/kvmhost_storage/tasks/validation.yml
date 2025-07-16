@@ -6,9 +6,9 @@
 
 - name: Check if LVM device exists
   ansible.builtin.stat:
-    path: "/dev/{{ kvmhost_storage_lvm_device }}"
+    path: '/dev/{{ kvmhost_storage_lvm_device }}'
   register: lvm_device_check
-  when: 
+  when:
     - kvmhost_storage_lvm_enabled | default(false)
     - kvmhost_storage_lvm_device | length > 0
 
@@ -61,7 +61,7 @@
     success_msg: "Storage space validation passed. Available: {{ available_space_check.stdout }}GB"
 
 - name: Check for required LVM packages
-  ansible.builtin.package:
+  ansible.builtin.ansible.builtin.package:
     name:
       - lvm2
       - xfsprogs

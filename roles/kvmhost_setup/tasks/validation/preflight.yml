@@ -22,8 +22,8 @@
       ansible.builtin.assert:
         that:
           - item.size_available > 53687091200  # 50GB in bytes
-        fail_msg: "Insufficient disk space in {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available, minimum 50GB required"
-        success_msg: "Disk space check passed for {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available"
+        fail_msg: "Insufficient disk space in {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024)           | round(2)   }}GB available, minimum 50GB required"
+        success_msg: "Disk space check passed for {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024)           | round(2)   }}GB available"
       when: item.mount == "/"
       loop: "{{ ansible_mounts }}"
 
@@ -89,7 +89,7 @@
         that:
           - ansible_interfaces | length > 1
         fail_msg: "Insufficient network interfaces. At least 2 interfaces recommended for bridge configuration"
-        success_msg: "Network interfaces available: {{ ansible_interfaces | join(', ') }}"
+        success_msg: "Network interfaces available: {{ ansible_interfaces           | join(', ')   }}"
 
     - name: Verify primary network interface is up
       ansible.builtin.assert:
@@ -108,26 +108,26 @@
   block:
     - name: Check for available storage pools location
       ansible.builtin.stat:
-        path: "{{ libvirt_host_storage_pools[0].path | default('/var/lib/libvirt/images') }}"
+        path: '{{ libvirt_host_storage_pools[0].path           | default(\'/var/lib/libvirt/images\'\)   }}'
       register: storage_path_check
       when: libvirt_host_storage_pools is defined and libvirt_host_storage_pools | length > 0
 
     - name: Create storage pool directory if it doesn't exist
-      ansible.builtin.file:
-        path: "{{ libvirt_host_storage_pools[0].path | default('/var/lib/libvirt/images') }}"
+      ansible.builtin.ansible.builtin.file:
+        path: '{{ libvirt_host_storage_pools[0].path           | default(\'/var/lib/libvirt/images\'\)   }}'
         state: directory
         mode: '0755'
         owner: root
         group: root
       become: true
-      when: 
-        - libvirt_host_storage_pools is defined 
+      when:
+        - libvirt_host_storage_pools is defined
         - libvirt_host_storage_pools | length > 0
         - not storage_path_check.stat.exists
 
     - name: Check storage pool directory permissions
-      ansible.builtin.file:
-        path: "{{ libvirt_host_storage_pools[0].path | default('/var/lib/libvirt/images') }}"
+      ansible.builtin.ansible.builtin.file:
+        path: '{{ libvirt_host_storage_pools[0].path           | default(\'/var/lib/libvirt/images\'\)   }}'
         state: directory
         mode: '0755'
         owner: root
@@ -156,7 +156,7 @@
         success_msg: "Package manager {{ ansible_pkg_mgr }} available"
 
     - name: Test package manager connectivity
-      ansible.builtin.package:
+      ansible.builtin.ansible.builtin.package:
         name: which
         state: present
       check_mode: true
@@ -219,17 +219,17 @@
   ansible.builtin.debug:
     msg: |
       Pre-flight validation completed successfully!
-      
+
       System Summary:
       - OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
       - Kernel: {{ ansible_kernel }}
       - Memory: {{ ansible_memtotal_mb }}MB
       - CPU Cores: {{ ansible_processor_vcpus }}
       - Architecture: {{ ansible_architecture }}
-      - Default Network: {{ ansible_default_ipv4.interface | default('N/A') }} - {{ ansible_default_ipv4.address | default('N/A') }}
+      - Default Network: {{ ansible_default_ipv4.interface           | default(\'N/A\')   }} - {{ ansible_default_ipv4.address           | default(\'N/A\')   }}
       - Package Manager: {{ ansible_pkg_mgr }}
-      - SELinux: {{ selinux_status.stdout | default('unknown') }}
-      
+      - SELinux: {{ selinux_status.stdout           | default(\'unknown\')   }}
+
       System is ready for KVM host setup!
   tags:
     - preflight

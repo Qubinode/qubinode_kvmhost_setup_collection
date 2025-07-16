@@ -1,13 +1,13 @@
 ---
 # Network Validation Tasks
 
-- name: "Check bridge interface status"
+- name: 'Check bridge interface status'
   ansible.builtin.command: "ip link show {{ qubinode_bridge_name }}"
   register: bridge_link_status
   changed_when: false
   failed_when: false
 
-- name: "Verify bridge is up"
+- name: 'Verify bridge is up'
   ansible.builtin.assert:
     that:
       - bridge_link_status.rc == 0
@@ -15,12 +15,12 @@
     fail_msg: "Bridge {{ qubinode_bridge_name }} is not up or does not exist"
     success_msg: "Bridge {{ qubinode_bridge_name }} is active"
 
-- name: "Check bridge IP configuration"
+- name: 'Check bridge IP configuration'
   ansible.builtin.command: "ip addr show {{ qubinode_bridge_name }}"
   register: bridge_ip_status
   changed_when: false
 
-- name: "Test network connectivity"
+- name: 'Test network connectivity'
   ansible.builtin.command: "ping -c 3 {{ item }}"
   register: ping_tests
   loop: "{{ ping_test_hosts }}"
@@ -28,25 +28,25 @@
   failed_when: false
   when: ping_test_hosts | length > 0
 
-- name: "Display ping test results"
+- name: 'Display ping test results'
   ansible.builtin.debug:
     msg: |
       Ping test to {{ item.item }}: {{ 'SUCCESS' if item.rc == 0 else 'FAILED' }}
   loop: "{{ ping_tests.results }}"
   when: ping_test_hosts | length > 0
 
-- name: "Generate network validation report"
-  ansible.builtin.template:
+- name: 'Generate network validation report'
+  ansible.builtin.ansible.builtin.template:
     src: network_validation_report.j2
     dest: "/tmp/network_validation_{{ ansible_date_time.epoch }}.txt"
     mode: '0644'
   become: true
 
-- name: "Display network validation summary"
+- name: 'Display network validation summary'
   ansible.builtin.debug:
     msg: |
       Network Validation Summary:
       - Bridge Interface: {{ qubinode_bridge_name }}
       - Bridge Status: {{ 'UP' if bridge_link_status.rc == 0 and 'UP' in bridge_link_status.stdout else 'DOWN' }}
-      - Connectivity Tests: {{ ping_tests.results | selectattr('rc', 'equalto', 0) | list | length }}/{{ ping_test_hosts | length }} passed
+      - Connectivity Tests: {{ ping_tests.results      | selectattr('rc', 'equalto', 0)      |      list           |  length   }}/{{ ping_test_hosts           | length   }} passed
       - Report saved: /tmp/network_validation_{{ ansible_date_time.epoch }}.txt

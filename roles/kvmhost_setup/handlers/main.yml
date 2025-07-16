@@ -1,18 +1,18 @@
 ---
 - name: Reload libvirtd service
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     name: libvirtd
     daemon_reload: true
     state: restarted
   become: true
 
-- name: restart libvirtd
-  ansible.builtin.systemd:
+- name: Restart libvirtd
+  ansible.builtin.ansible.builtin.systemd:
     name: libvirtd
     state: restarted
   become: true
 
-- name: reboot system
+- name: Reboot system
   ansible.builtin.reboot:
     reboot_timeout: 600
     msg: "Rebooting system to apply performance optimizations"

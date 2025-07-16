@@ -5,13 +5,13 @@
 # Configures firewall rules for Cockpit web interface access
 
 - name: Check if firewalld is running
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     name: firewalld
   register: firewalld_status
   failed_when: false
 
 - name: Start firewalld if not running
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     name: firewalld
     state: started
     enabled: true
@@ -20,8 +20,8 @@
     - firewalld_status.status.ActiveState != "active"
 
 - name: Configure firewall for Cockpit (default port)
-  ansible.posix.firewalld:
-    service: cockpit
+  ansible.posix.ansible.posix.firewalld:
+    ansible.builtin.ansible.builtin.service: cockpit
     permanent: true
     immediate: true
     state: enabled
@@ -29,7 +29,7 @@
   when: kvmhost_cockpit_port == 9090
 
 - name: Configure firewall for Cockpit (custom port)
-  ansible.posix.firewalld:
+  ansible.posix.ansible.posix.firewalld:
     port: "{{ kvmhost_cockpit_port }}/tcp"
     permanent: true
     immediate: true
@@ -38,7 +38,7 @@
   when: kvmhost_cockpit_port != 9090
 
 - name: Configure additional firewall rules
-  ansible.posix.firewalld:
+  ansible.posix.ansible.posix.firewalld:
     rich_rule: "{{ item }}"
     permanent: true
     immediate: true
@@ -48,7 +48,7 @@
   when: kvmhost_cockpit_firewall_rich_rules | length > 0
 
 - name: Restrict access to specific source IPs (if configured)
-  ansible.posix.firewalld:
+  ansible.posix.ansible.posix.firewalld:
     rich_rule: "rule family='ipv4' source address='{{ item }}' port protocol='tcp' port='{{ kvmhost_cockpit_port }}' accept"
     permanent: true
     immediate: true
@@ -60,8 +60,8 @@
     - kvmhost_cockpit_restrict_access | bool
 
 - name: Remove general Cockpit access when IP restriction is enabled
-  ansible.posix.firewalld:
-    service: cockpit
+  ansible.posix.ansible.posix.firewalld:
+    ansible.builtin.ansible.builtin.service: cockpit
     permanent: true
     immediate: true
     state: disabled
@@ -72,7 +72,7 @@
     - kvmhost_cockpit_port == 9090
 
 - name: Remove general custom port access when IP restriction is enabled
-  ansible.posix.firewalld:
+  ansible.posix.ansible.posix.firewalld:
     port: "{{ kvmhost_cockpit_port }}/tcp"
     permanent: true
     immediate: true

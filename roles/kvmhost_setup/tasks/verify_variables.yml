@@ -51,7 +51,7 @@
 
 - name: Get the index of a dict
   ansible.builtin.debug:
-    msg: "{{ item.mac | default('no-mac-configured') }}"
+    msg: "{{ item.mac           | default(\'no-mac-configured\'\)   }}"
   loop: "{{ libvirt_host_networks }}"
   when: not (skip_variable_validation | default(false))
 

@@ -1,14 +1,14 @@
 version: 2
 updates:
-  # GitHub Actions dependencies
+  # GitHub Actions dependencies - Critical for CI/CD pipeline
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
     reviewers:
       - "qubinode/maintainers"
     assignees:
@@ -19,16 +19,37 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+      - "security"
 
-  # Docker dependencies for Molecule testing
+  # Docker dependencies for Molecule testing - Enhanced for container compatibility
+  - package-ecosystem: "docker"
+    directory: "/molecule"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 8
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "testing"
+      - "container-compatibility"
+    reviewers:
+      - "qubinode/maintainers"
+
+  # Docker for all molecule scenarios
   - package-ecosystem: "docker"
     directory: "/molecule/default"
     schedule:
       interval: "weekly"
       day: "tuesday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 3
+      time: "10:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
     commit-message:
       prefix: "ci"
       include: "scope"
@@ -37,30 +58,51 @@ updates:
       - "docker"
       - "testing"
 
-  # Python dependencies (if requirements files exist)
+  # Python dependencies - Critical for Ansible and Molecule
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "wednesday"
+      interval: "daily"  # More frequent for security
       time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
     commit-message:
       prefix: "deps"
       include: "scope"
     labels:
       - "dependencies"
       - "python"
+      - "molecule"
+      - "ansible"
+    reviewers:
+      - "qubinode/maintainers"
 
-  # Ansible Galaxy dependencies
+  # NPM dependencies (package.json exists)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "javascript"
+    reviewers:
+      - "qubinode/maintainers"
+
+  # Ansible Galaxy dependencies (if requirements.yml exists)
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "thursday"
       time: "09:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 3
     commit-message:
       prefix: "deps"
@@ -68,3 +110,6 @@ updates:
     labels:
       - "dependencies"
       - "ansible"
+      - "galaxy"
+    reviewers:
+      - "qubinode/maintainers"

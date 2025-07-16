@@ -13,7 +13,7 @@ kvmhost_libvirt_services:
   - tuned
 
 # Tuned profile for virtualization
-kvmhost_libvirt_tuned_profile: "virtual-host"
+kvmhost_libvirt_tuned_proansible.builtin.ansible.builtin.file: "virtual-host"
 
 # =============================================================================
 # STORAGE POOL CONFIGURATION
@@ -23,13 +23,13 @@ kvmhost_libvirt_storage_pools:
   - name: default
     state: active
     autostart: true
-    path: "/var/lib/libvirt/images"
+    path: '/var/lib/libvirt/images'
     type: "dir"
 
 # Legacy compatibility
 kvm_host_libvirt_dir: "/var/lib/libvirt/images"
-libvirt_images_dir: "/var/lib/libvirt/images" 
-libvirt_pool_name: "default"
+libvirt_images_dir: "/var/lib/libvirt/images"
+libvirt_pool_name: 'default'
 create_libvirt_storage: true
 libvirt_host_storage_pools: "{{ kvmhost_libvirt_storage_pools }}"
 
@@ -38,14 +38,14 @@ libvirt_host_storage_pools: "{{ kvmhost_libvirt_storage_pools }}"
 # =============================================================================
 kvmhost_libvirt_networks_enabled: true
 kvmhost_libvirt_networks:
-  - name: "vmnetbr0"
+  - name: 'vmnetbr0'
     create: true
     mode: bridge
-    bridge_name: "{{ kvmhost_bridge_device | default('vmbr0') }}"
+    bridge_name: '{{ kvmhost_bridge_device           | default(\'vmbr0\'\)   }}'
 
 # Legacy compatibility
 kvmhost_bridge_device: "vmbr0"
-qubinode_bridge_name: "qubibr0"
+qubinode_bridge_name: 'qubibr0'
 kvm_host_domain: "example.com"
 libvirt_networks: "{{ kvmhost_libvirt_networks }}"
 libvirt_host_networks: "{{ kvmhost_libvirt_networks }}"
@@ -62,7 +62,7 @@ kvmhost_libvirt_unix_sock_group: "libvirt"
 kvmhost_libvirt_unix_sock_rw_perms: "0770"
 kvmhost_libvirt_unix_sock_admin_perms: "0700"
 
-# Legacy compatibility  
+# Legacy compatibility
 enable_libvirt_admin_user: "{{ kvmhost_libvirt_user_access_enabled }}"
 kvm_host_group: "{{ kvmhost_libvirt_admin_group }}"
 
@@ -81,10 +81,10 @@ kvmhost_libvirt_cpu_overcommit: false
 # =============================================================================
 kvmhost_libvirt_dns_forwarder: "1.1.1.1"
 kvmhost_libvirt_search_domains:
-  - "{{ kvm_host_domain | default('example.com') }}"
+  - "{{ kvm_host_domain           | default(\'example.com\'\)   }}"
 
 # Legacy compatibility
 primary_dns_server: "{{ kvmhost_libvirt_dns_forwarder }}"
 dns_forwarder: "{{ kvmhost_libvirt_dns_forwarder }}"
-domain: "{{ kvm_host_domain | default('example.com') }}"
+domain: "{{ kvm_host_domain           | default(\'example.com\'\)   }}"
 search_domains: "{{ kvmhost_libvirt_search_domains }}"

@@ -6,7 +6,7 @@
 
 - name: Display networks to configure
   ansible.builtin.debug:
-    msg: "Configuring libvirt networks: {{ kvmhost_libvirt_networks | map(attribute='name') | join(', ') }}"
+    msg: "Configuring libvirt networks: {{ kvmhost_libvirt_networks      | map(attribute='name')                |   join(', ')    }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Include network creation tasks
@@ -30,8 +30,8 @@
     msg:
       - "Network: {{ item.item.name }}"
       - "Status: {{ 'Active' if 'State:     active' in item.stdout else 'Inactive' }}"
-      - "Mode: {{ item.item.mode | default('bridge') }}"
+      - "Mode: {{ item.item.mode           | default(\'bridge\'\)   }}"
   loop: "{{ network_info_check.results }}"
-  when: 
+  when:
     - kvmhost_libvirt_debug_enabled | default(false)
     - item.rc == 0

@@ -9,7 +9,7 @@
 
 - name: Create custom logical volumes
   community.general.lvol:
-    lv: "lv_{{ item.name }}"
+    lv: lv_{{ item.name }}
     vg: "{{ vg_name }}"
     state: present
     size: "{{ item.size }}"
@@ -20,15 +20,15 @@
 - name: Ensure filesystems are created
   community.general.filesystem:
     fstype: "{{ item.fstype }}"
-    dev: "/dev/mapper/{{ vg_name }}-lv_{{ item.name }}"
-    opts: "-L {{ item.name }}"
+    dev: /dev/mapper/{{ vg_name }}-lv_{{ item.name }}
+    opts: -L {{ item.name }}
   with_items: "{{ logical_volumes }}"
   when: create_vg|bool
   become: true
 
 - name: Ensure mount points are created
-  ansible.builtin.file:
-    path: "{{ item.mount_dir }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item.mount_dir }}'
     state: directory
     mode: '0755'
     owner: root
@@ -37,11 +37,10 @@
   when: create_vg|bool
   become: true
 
-
 - name: Config mount points in fstab
-  ansible.posix.mount:
-    name: "{{ item.mount_dir }}"
-    src: "/dev/mapper/{{ vg_name }}-lv_{{ item.name }}"
+  ansible.posix.ansible.posix.mount:
+    name: '{{ item.mount_dir }}'
+    src: /dev/mapper/{{ vg_name }}-lv_{{ item.name }}
     fstype: "{{ item.fstype }}"
     dump: 0
     passno: 0

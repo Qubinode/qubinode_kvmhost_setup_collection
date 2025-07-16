@@ -14,8 +14,8 @@
   when: kvmhost_storage_debug_enabled | default(false)
 
 - name: Create backup directories
-  ansible.builtin.file:
-    path: "{{ item }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item }}'
     state: directory
     mode: '0755'
     owner: root
@@ -27,7 +27,7 @@
   when: kvmhost_storage_backup_enabled | default(false)
 
 - name: Create VM backup script
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: vm_backup.sh.j2
     dest: /usr/local/bin/kvmhost-vm-backup
     mode: '0755'
@@ -37,7 +37,7 @@
   when: kvmhost_storage_backup_enabled | default(false)
 
 - name: Create VM snapshot management script
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: vm_snapshot.sh.j2
     dest: /usr/local/bin/kvmhost-vm-snapshot
     mode: '0755'
@@ -48,7 +48,7 @@
 
 - name: Configure backup cleanup cron job
   ansible.builtin.cron:
-    name: "KVM Storage Backup Cleanup"
+    name: 'KVM Storage Backup Cleanup'
     minute: "0"
     hour: "2"
     job: "find /var/lib/libvirt/backups -type f -mtime +{{ kvmhost_storage_backup_retention_days }} -delete"
@@ -64,6 +64,6 @@
       - "Backup directory: /var/lib/libvirt/backups"
       - "Snapshot directory: /var/lib/libvirt/snapshots"
       - "Retention policy: {{ kvmhost_storage_backup_retention_days }} days"
-  when: 
+  when:
     - kvmhost_storage_debug_enabled | default(false)
     - kvmhost_storage_backup_enabled | default(false)

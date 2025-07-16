@@ -10,7 +10,7 @@
       - "Configuring LVM storage"
       - "Device: /dev/{{ kvmhost_storage_lvm_device }}"
       - "Volume Group: {{ kvmhost_storage_lvm_vg_name }}"
-      - "Volumes: {{ kvmhost_storage_lvm_volumes | selectattr('enabled') | list | length }}"
+      - "Volumes: {{ kvmhost_storage_lvm_volumes      | selectattr('enabled')      |      list           |  length   }}"
   when: kvmhost_storage_debug_enabled | default(false)
 
 - name: Create physical volume
@@ -50,8 +50,8 @@
   register: fs_creation_result
 
 - name: Create mount point directories
-  ansible.builtin.file:
-    path: "{{ item.mount_dir }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item.mount_dir }}'
     state: directory
     mode: '0755'
     owner: root
@@ -61,11 +61,11 @@
   become: true
 
 - name: Configure mount points in fstab and mount
-  ansible.posix.mount:
-    name: "{{ item.mount_dir }}"
+  ansible.posix.ansible.posix.mount:
+    name: '{{ item.mount_dir }}'
     src: "/dev/mapper/{{ kvmhost_storage_lvm_vg_name }}-lv_{{ item.name }}"
     fstype: "{{ item.fstype }}"
-    opts: "{{ kvmhost_storage_mount_options[item.fstype] | default('defaults') }}"
+    opts: "{{ kvmhost_storage_mount_options[item.fstype]           | default(\'defaults\'\)   }}"
     dump: 0
     passno: 0
     state: mounted
@@ -75,14 +75,14 @@
   register: mount_result
 
 - name: Set correct ownership for libvirt directories
-  ansible.builtin.file:
-    path: "{{ item.mount_dir }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item.mount_dir }}'
     owner: root
     group: root
     mode: '0711'
     recurse: false
   loop: "{{ kvmhost_storage_lvm_volumes }}"
-  when: 
+  when:
     - item.enabled | default(true)
     - "'libvirt' in item.mount_dir"
   become: true
@@ -91,5 +91,5 @@
   ansible.builtin.debug:
     msg:
       - "LVM configuration completed"
-      - "Mounted volumes: {{ kvmhost_storage_lvm_volumes | selectattr('enabled') | list | map(attribute='mount_dir') | join(', ') }}"
+      - "Mounted volumes: {{ kvmhost_storage_lvm_volumes      | selectattr('enabled')      |      list | map(attribute='mount_dir')           |  join(', ')    }}"
   when: kvmhost_storage_debug_enabled | default(false)

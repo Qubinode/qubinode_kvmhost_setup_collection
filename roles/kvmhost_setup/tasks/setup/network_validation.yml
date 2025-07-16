@@ -2,228 +2,228 @@
 # Network Validation and Testing Framework for ADR-0007
 # Comprehensive network validation for bridge configurations
 
-- name: "Network Validation Framework - Initialize"
+- name: 'Network Validation Framework - Initialize'
   ansible.builtin.debug:
     msg: "Starting comprehensive network validation for {{ inventory_hostname }}"
 
-- name: "Create network validation results directory"
-  ansible.builtin.file:
-    path: "/tmp/network_validation"
+- name: 'Create network validation results directory'
+  ansible.builtin.ansible.builtin.file:
+    path: '/tmp/network_validation'
     state: directory
     mode: '0755'
 
-- name: "Initialize validation results"
+- name: 'Initialize validation results'
   ansible.builtin.set_fact:
     network_validation_results: []
     validation_failed_checks: []
 
 # Basic Network Interface Validation
-- name: "Validate - Check primary network interface exists"
+- name: 'Validate - Check primary network interface exists'
   ansible.builtin.set_fact:
     interface_check:
-      test_name: "primary_interface_exists"
+      test_name: 'primary_interface_exists'
       description: "Primary network interface exists"
       status: "{{ 'pass' if ansible_default_ipv4.interface in ansible_interfaces else 'fail' }}"
-      details: "Interface: {{ ansible_default_ipv4.interface | default('N/A') }}"
-      evidence: "Available interfaces: {{ ansible_interfaces | join(', ') }}"
+      details: "Interface: {{ ansible_default_ipv4.interface           | default(\'N/A\'\)   }}"
+      evidence: "Available interfaces: {{ ansible_interfaces           | join(', ')   }}"
 
-- name: "Record interface validation result"
+- name: 'Record interface validation result'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [interface_check] }}"
 
 # Bridge Configuration Validation
-- name: "Validate - Check if bridge exists"
-  ansible.builtin.command: "nmcli connection show {{ qubinode_bridge_name | default('qubibr0') }}"
+- name: 'Validate - Check if bridge exists'
+  ansible.builtin.command: "nmcli connection show {{ qubinode_bridge_name           | default(\'qubibr0\'\)   }}"
   register: bridge_exists_validation
   failed_when: false
   changed_when: false
 
-- name: "Record bridge existence validation"
+- name: 'Record bridge existence validation'
   ansible.builtin.set_fact:
     bridge_exists_check:
-      test_name: "bridge_exists"
+      test_name: 'bridge_exists'
       description: "Bridge connection exists"
       status: "{{ 'pass' if bridge_exists_validation.rc == 0 else 'fail' }}"
-      details: "Bridge: {{ qubinode_bridge_name | default('qubibr0') }}"
+      details: "Bridge: {{ qubinode_bridge_name           | default(\'qubibr0\'\)   }}"
       evidence: "Return code: {{ bridge_exists_validation.rc }}"
 
-- name: "Add bridge existence to results"
+- name: 'Add bridge existence to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [bridge_exists_check] }}"
 
-# Bridge Interface Status Validation  
-- name: "Validate - Check bridge interface status"
-  ansible.builtin.command: "ip link show {{ qubinode_bridge_name | default('qubibr0') }}"
+# Bridge Interface Status Validation
+- name: 'Validate - Check bridge interface status'
+  ansible.builtin.command: "ip link show {{ qubinode_bridge_name           | default(\'qubibr0\'\)   }}"
   register: bridge_status_validation
   failed_when: false
   changed_when: false
   when: bridge_exists_validation.rc == 0
 
-- name: "Parse bridge interface status"
+- name: 'Parse bridge interface status'
   ansible.builtin.set_fact:
     bridge_status_check:
-      test_name: "bridge_interface_status"
+      test_name: 'bridge_interface_status'
       description: "Bridge interface is UP"
       status: "{{ 'pass' if 'state UP' in bridge_status_validation.stdout else 'fail' }}"
       details: "Bridge interface state"
-      evidence: "{{ bridge_status_validation.stdout | default('Bridge not found') }}"
+      evidence: "{{ bridge_status_validation.stdout           | default(\'Bridge not found\'\)   }}"
   when: bridge_exists_validation.rc == 0
 
-- name: "Add bridge status to results (when bridge exists)"
+- name: 'Add bridge status to results (when bridge exists)'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [bridge_status_check] }}"
   when: bridge_exists_validation.rc == 0
 
-- name: "Add bridge status failure (when bridge missing)"
+- name: 'Add bridge status failure (when bridge missing)'
   ansible.builtin.set_fact:
     bridge_status_fail:
-      test_name: "bridge_interface_status"
+      test_name: 'bridge_interface_status'
       description: "Bridge interface is UP"
       status: "fail"
       details: "Bridge interface not available"
       evidence: "Bridge connection does not exist"
   when: bridge_exists_validation.rc != 0
 
-- name: "Add bridge status failure to results"
+- name: 'Add bridge status failure to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [bridge_status_fail] }}"
   when: bridge_exists_validation.rc != 0
 
 # IP Configuration Validation
-- name: "Validate - Check bridge IP configuration"
-  ansible.builtin.shell: "ip addr show {{ qubinode_bridge_name | default('qubibr0') }} | grep 'inet '"
+- name: 'Validate - Check bridge IP configuration'
+  ansible.builtin.shell: "ip addr show {{ qubinode_bridge_name           | default(\'qubibr0\'\)   }} | grep 'inet '"
   register: bridge_ip_validation
   failed_when: false
   changed_when: false
   when: bridge_exists_validation.rc == 0
 
-- name: "Record bridge IP validation"
+- name: 'Record bridge IP validation'
   ansible.builtin.set_fact:
     bridge_ip_check:
-      test_name: "bridge_ip_configuration"
+      test_name: 'bridge_ip_configuration'
       description: "Bridge has IP address configured"
       status: "{{ 'pass' if bridge_ip_validation.rc == 0 and bridge_ip_validation.stdout else 'fail' }}"
       details: "IP configuration check"
-      evidence: "{{ bridge_ip_validation.stdout | default('No IP address found') }}"
+      evidence: "{{ bridge_ip_validation.stdout           | default(\'No IP address found\'\)   }}"
   when: bridge_exists_validation.rc == 0
 
-- name: "Add bridge IP check to results"
+- name: 'Add bridge IP check to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [bridge_ip_check] }}"
   when: bridge_exists_validation.rc == 0
 
 # Gateway Connectivity Validation
-- name: "Validate - Test gateway connectivity"
+- name: 'Validate - Test gateway connectivity'
   ansible.builtin.command: "ping -c 3 -W 5 {{ ansible_default_ipv4.gateway }}"
   register: gateway_connectivity_validation
   failed_when: false
   changed_when: false
   when: ansible_default_ipv4.gateway is defined
 
-- name: "Record gateway connectivity validation"
+- name: 'Record gateway connectivity validation'
   ansible.builtin.set_fact:
     gateway_connectivity_check:
-      test_name: "gateway_connectivity"
+      test_name: 'gateway_connectivity'
       description: "Gateway is reachable"
       status: "{{ 'pass' if gateway_connectivity_validation.rc == 0 else 'fail' }}"
-      details: "Gateway: {{ ansible_default_ipv4.gateway | default('N/A') }}"
+      details: "Gateway: {{ ansible_default_ipv4.gateway           | default(\'N/A\'\)   }}"
       evidence: "Ping result: {{ 'Success' if gateway_connectivity_validation.rc == 0 else 'Failed' }}"
   when: ansible_default_ipv4.gateway is defined
 
-- name: "Add gateway connectivity to results"
+- name: 'Add gateway connectivity to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [gateway_connectivity_check] }}"
   when: ansible_default_ipv4.gateway is defined
 
 # DNS Resolution Validation
-- name: "Validate - Test DNS resolution"
+- name: 'Validate - Test DNS resolution'
   ansible.builtin.command: "nslookup google.com"
   register: dns_resolution_validation
   failed_when: false
   changed_when: false
 
-- name: "Record DNS resolution validation"
+- name: 'Record DNS resolution validation'
   ansible.builtin.set_fact:
     dns_resolution_check:
-      test_name: "dns_resolution"
+      test_name: 'dns_resolution'
       description: "DNS resolution is working"
       status: "{{ 'pass' if dns_resolution_validation.rc == 0 else 'fail' }}"
       details: "DNS resolution test"
       evidence: "nslookup result: {{ 'Success' if dns_resolution_validation.rc == 0 else 'Failed' }}"
 
-- name: "Add DNS resolution to results"
+- name: 'Add DNS resolution to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [dns_resolution_check] }}"
 
 # Libvirt Network Validation
-- name: "Validate - Check libvirt bridge network"
-  ansible.builtin.shell: "virsh net-list --all | grep {{ qubinode_bridge_name | default('qubibr0') }}"
+- name: 'Validate - Check libvirt bridge network'
+  ansible.builtin.shell: "virsh net-list --all | grep {{ qubinode_bridge_name           | default(\'qubibr0\'\)   }}"
   register: libvirt_network_validation
   failed_when: false
   changed_when: false
   when: bridge_exists_validation.rc == 0
 
-- name: "Record libvirt network validation"
+- name: 'Record libvirt network validation'
   ansible.builtin.set_fact:
     libvirt_network_check:
-      test_name: "libvirt_network"
+      test_name: 'libvirt_network'
       description: "Libvirt bridge network is configured"
       status: "{{ 'pass' if libvirt_network_validation.rc == 0 else 'warning' }}"
       details: "Libvirt network status"
-      evidence: "{{ libvirt_network_validation.stdout | default('Network not found in libvirt') }}"
+      evidence: "{{ libvirt_network_validation.stdout           | default(\'Network not found in libvirt\'\)   }}"
   when: bridge_exists_validation.rc == 0
 
-- name: "Add libvirt network to results"
+- name: 'Add libvirt network to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [libvirt_network_check] }}"
   when: bridge_exists_validation.rc == 0
 
 # Network Performance Validation
-- name: "Validate - Test network performance (basic)"
+- name: 'Validate - Test network performance (basic)'
   ansible.builtin.shell: "ping -c 5 -i 0.2 {{ ansible_default_ipv4.gateway }} | tail -1"
   register: network_performance_validation
   failed_when: false
   changed_when: false
   when: ansible_default_ipv4.gateway is defined
 
-- name: "Parse network performance results"
+- name: 'Parse network performance results'
   ansible.builtin.set_fact:
-    avg_latency: "{{ network_performance_validation.stdout | regex_search('([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)', '\\2') | first | default('N/A') }}"
-  when: 
+    avg_latency: "{{ network_performance_validation.stdout      | regex_search('([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)', '\\2')      |      first           |  default(\'N/A\'\)    }}"
+  when:
     - ansible_default_ipv4.gateway is defined
     - network_performance_validation.rc == 0
 
-- name: "Record network performance validation"
+- name: 'Record network performance validation'
   ansible.builtin.set_fact:
     network_performance_check:
-      test_name: "network_performance"
+      test_name: 'network_performance'
       description: "Network latency is acceptable (<50ms)"
-      status: "{{ 'pass' if avg_latency != 'N/A' and avg_latency | float < 50 else 'warning' }}"
+      status: "{{ 'pass' if avg_latency != 'N/A' and avg_latency           | float < 50 else 'warning'   }}"
       details: "Average latency: {{ avg_latency }}ms"
-      evidence: "{{ network_performance_validation.stdout | default('Performance test failed') }}"
+      evidence: "{{ network_performance_validation.stdout           | default(\'Performance test failed\'\)   }}"
   when: ansible_default_ipv4.gateway is defined
 
-- name: "Add network performance to results"
+- name: 'Add network performance to results'
   ansible.builtin.set_fact:
     network_validation_results: "{{ network_validation_results + [network_performance_check] }}"
   when: ansible_default_ipv4.gateway is defined
 
 # Calculate validation summary
-- name: "Calculate validation statistics"
+- name: 'Calculate validation statistics'
   ansible.builtin.set_fact:
-    total_tests: "{{ network_validation_results | length }}"
-    passed_tests: "{{ network_validation_results | selectattr('status', 'equalto', 'pass') | list | length }}"
-    failed_tests: "{{ network_validation_results | selectattr('status', 'equalto', 'fail') | list | length }}"
-    warning_tests: "{{ network_validation_results | selectattr('status', 'equalto', 'warning') | list | length }}"
+    total_tests: "{{ network_validation_results           | length   }}"
+    passed_tests: "{{ network_validation_results      | selectattr('status', 'equalto', 'pass')      |      list           |  length   }}"
+    failed_tests: "{{ network_validation_results      | selectattr('status', 'equalto', 'fail')      |      list           |  length   }}"
+    warning_tests: "{{ network_validation_results      | selectattr('status', 'equalto', 'warning')      |      list           |  length   }}"
 
-- name: "Calculate success rate"
+- name: 'Calculate success rate'
   ansible.builtin.set_fact:
-    success_rate: "{{ (passed_tests | int / total_tests | int * 100) | round(2) }}"
-    overall_status: "{{ 'pass' if failed_tests | int == 0 else 'fail' }}"
+    success_rate: "{{ (passed_tests      | int / total_tests      |  int* 100)           |           round(2)    }}"
+    overall_status: "{{ 'pass' if failed_tests           | int== 0 else 'fail'   }}"
 
 # Generate validation report
-- name: "Generate network validation report"
-  ansible.builtin.template:
+- name: 'Generate network validation report'
+  ansible.builtin.ansible.builtin.template:
     src: network_validation_report.j2
     dest: "/tmp/network_validation/network_validation_{{ ansible_date_time.epoch }}.json"
     mode: '0644'
@@ -231,49 +231,49 @@
     validation_summary:
       timestamp: "{{ ansible_date_time.iso8601 }}"
       host: "{{ inventory_hostname }}"
-      bridge_name: "{{ qubinode_bridge_name | default('qubibr0') }}"
-      total_tests: "{{ total_tests | int }}"
-      passed_tests: "{{ passed_tests | int }}"
-      failed_tests: "{{ failed_tests | int }}"
-      warning_tests: "{{ warning_tests | int }}"
-      success_rate: "{{ success_rate | float }}"
+      bridge_name: '{{ qubinode_bridge_name           | default(\'qubibr0\'\)   }}'
+      total_tests: "{{ total_tests           | int   }}"
+      passed_tests: "{{ passed_tests           | int   }}"
+      failed_tests: "{{ failed_tests           | int   }}"
+      warning_tests: "{{ warning_tests           | int   }}"
+      success_rate: "{{ success_rate           | float   }}"
       overall_status: "{{ overall_status }}"
       adr_compliance: "{{ overall_status == 'pass' }}"
     test_results: "{{ network_validation_results }}"
 
-- name: "Display network validation summary"
+- name: 'Display network validation summary'
   ansible.builtin.debug:
     msg: |
-      
+
       ========================================
       NETWORK VALIDATION SUMMARY
       ========================================
-      
+
       Host: {{ inventory_hostname }}
-      Bridge: {{ qubinode_bridge_name | default('qubibr0') }}
+      Bridge: {{ qubinode_bridge_name           | default(\'qubibr0\'\)   }}
       Timestamp: {{ ansible_date_time.iso8601 }}
-      
+
       Test Results:
       - Total Tests: {{ total_tests }}
       - Passed: {{ passed_tests }}
       - Failed: {{ failed_tests }}
       - Warnings: {{ warning_tests }}
       - Success Rate: {{ success_rate }}%
-      
+
       Overall Status: {{ '✅ PASS' if overall_status == 'pass' else '❌ FAIL' }}
       ADR-0007 Compliance: {{ '✅ COMPLIANT' if overall_status == 'pass' else '❌ NON-COMPLIANT' }}
-      
+
       {% for result in network_validation_results %}
       {{ loop.index }}. {{ result.description }}: {{ '✅' if result.status == 'pass' else '⚠️' if result.status == 'warning' else '❌' }}
       {% endfor %}
-      
+
       ========================================
 
-- name: "Collect failed tests for detailed analysis"
+- name: 'Collect failed tests for detailed analysis'
   ansible.builtin.set_fact:
-    validation_failed_checks: "{{ network_validation_results | selectattr('status', 'equalto', 'fail') | list }}"
+    validation_failed_checks: "{{ network_validation_results      | selectattr('status', 'equalto', 'fail')                |                list    }}"
 
-- name: "Display failed test details"
+- name: 'Display failed test details'
   ansible.builtin.debug:
     msg: |
       Failed Test Details:
@@ -283,25 +283,25 @@
       {% endfor %}
   when: validation_failed_checks | length > 0
 
-- name: "Network validation compliance check"
+- name: 'Network validation compliance check'
   ansible.builtin.assert:
     that:
       - overall_status == "pass"
     fail_msg: |
       ❌ Network validation failed!
-      
+
       {{ failed_tests }} out of {{ total_tests }} network tests failed.
       Please address the failed tests before proceeding with KVM setup.
-      
+
       See detailed report: /tmp/network_validation/network_validation_{{ ansible_date_time.epoch }}.json
     success_msg: |
       ✅ Network validation completed successfully!
-      
+
       All {{ total_tests }} network tests passed.
       The network configuration meets ADR-0007 requirements.
   when: qubinode_enforce_network_validation | default(true)
 
-- name: "Set network validation facts"
+- name: 'Set network validation facts'
   ansible.builtin.set_fact:
     network_validation_completed: true
     network_validation_status: "{{ overall_status }}"

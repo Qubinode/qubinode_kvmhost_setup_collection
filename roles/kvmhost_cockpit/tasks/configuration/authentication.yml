@@ -5,7 +5,7 @@
 # Configures authentication methods and user access for Cockpit
 
 - name: Configure Cockpit authentication methods
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: cockpit-auth.conf.j2
     dest: /etc/cockpit/cockpit.conf.d/auth.conf
     mode: '0644'
@@ -16,7 +16,7 @@
   when: kvmhost_cockpit_auth_methods | length > 0
 
 - name: Create cockpit configuration directory
-  ansible.builtin.file:
+  ansible.builtin.ansible.builtin.file:
     path: /etc/cockpit/cockpit.conf.d
     state: directory
     mode: '0755'
@@ -24,7 +24,7 @@
     group: root
 
 - name: Configure Cockpit user access restrictions
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: access.conf.j2
     dest: /etc/cockpit/cockpit.conf.d/access.conf
     mode: '0644'
@@ -41,14 +41,14 @@
 
 - name: Add admin users to wheel group
   ansible.builtin.user:
-    name: "{{ item }}"
+    name: '{{ item }}'
     groups: wheel
     append: true
   loop: "{{ kvmhost_cockpit_admin_users }}"
   when: kvmhost_cockpit_admin_users | length > 0
 
 - name: Configure PAM for Cockpit authentication
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/pam.d/cockpit
     line: "{{ item }}"
     create: true
@@ -62,7 +62,7 @@
 - name: Display authentication configuration
   ansible.builtin.debug:
     msg:
-      - "Cockpit authentication configured"
-      - "Auth methods: {{ kvmhost_cockpit_auth_methods | join(', ') if kvmhost_cockpit_auth_methods | length > 0 else 'Default' }}"
-      - "Allowed users: {{ kvmhost_cockpit_allowed_users | join(', ') if kvmhost_cockpit_allowed_users | length > 0 else 'All system users' }}"
-      - "Admin users: {{ kvmhost_cockpit_admin_users | join(', ') if kvmhost_cockpit_admin_users | length > 0 else 'Default wheel group members' }}"
+      - Cockpit authentication configured
+      - "Auth methods: {{ kvmhost_cockpit_auth_methods      | join(', ') if kvmhost_cockpit_auth_methods                |   length> 0 else 'Default'    }}"
+      - "Allowed users: {{ kvmhost_cockpit_allowed_users      | join(', ') if kvmhost_cockpit_allowed_users                |   length> 0 else 'All system users'    }}"
+      - "Admin users: {{ kvmhost_cockpit_admin_users      | join(', ') if kvmhost_cockpit_admin_users                |   length> 0 else 'Default wheel group members'    }}"

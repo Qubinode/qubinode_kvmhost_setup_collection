@@ -5,22 +5,20 @@
 - name: Advanced container environment detection
   ansible.builtin.set_fact:
     is_container_environment: >-
-      {{
-        ansible_virtualization_type in ['container', 'docker', 'podman', 'lxc'] or
+      {{ ansible_virtualization_type in ['container', 'docker', 'podman', 'lxc'] or
         ansible_env.container is defined or
         ansible_facts.get('ansible_proc_cmdline', {}).get('init', '') == '/usr/sbin/init' or
         (ansible_mounts | selectattr('mount', 'equalto', '/') | first).fstype in ['overlay', 'tmpfs'] or
-        ansible_facts.get('ansible_selinux', {}).get('type', '') == 'docker_t'
-      }}
+        ansible_facts.get('ansible_selinux', {}).get('type', '') == 'docker_t' }}
 
 - name: Detect container testing environment
   ansible.builtin.debug:
     msg: |
       🐳 Container Testing Mode Detected
-      Virtualization Type: {{ ansible_virtualization_type | default('unknown') }}
+      Virtualization Type: {{ ansible_virtualization_type           | default(\'unknown\')   }}
       Container Detection: {{ is_container_environment }}
-      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version | default('N/A') }}
-      
+      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default(\'N/A\')   }}
+
       Performance optimization tasks will be skipped in container environments.
       This is expected behavior for Molecule testing scenarios.
   when: is_container_environment
@@ -29,10 +27,10 @@
   ansible.builtin.debug:
     msg: |
       🖥️  Physical/VM Host Environment Detected
-      Virtualization Type: {{ ansible_virtualization_type | default('unknown') }}
+      Virtualization Type: {{ ansible_virtualization_type           | default(\'unknown\')   }}
       Container Detection: {{ is_container_environment }}
-      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version | default('N/A') }}
-      
+      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default(\'N/A\')   }}
+
       Full KVM performance optimization will be applied.
   when: not is_container_environment
 
@@ -44,8 +42,8 @@
 
 - name: Calculate recommended hugepage count (25% of total memory)
   ansible.builtin.set_fact:
-    recommended_hugepages: "{{ (ansible_memtotal_mb * 0.25 / 2) | int }}"
-    current_hugepages_count: "{{ current_hugepages.stdout | int }}"
+    recommended_hugepages: "{{ (ansible_memtotal_mb * 0.25 / 2)           | int   }}"
+    current_hugepages_count: "{{ current_hugepages.stdout           | int   }}"
 
 - name: Check if GRUB configuration file exists
   ansible.builtin.stat:
@@ -54,13 +52,13 @@
   when: not is_container_environment
 
 - name: Configure hugepages for KVM performance
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX='
     line: 'GRUB_CMDLINE_LINUX="hugepages={{ recommended_hugepages }} default_hugepagesz=2M hugepagesz=2M transparent_hugepage=never isolcpus=1-{{ ansible_processor_vcpus - 1 }} rcu_nocbs=1-{{ ansible_processor_vcpus - 1 }}"'
     backup: true
   register: grub_config_changed
-  when: 
+  when:
     - current_hugepages_count | int < recommended_hugepages | int
     - not is_container_environment
     - ansible_os_family == "RedHat"
@@ -72,13 +70,13 @@
   register: grub_mkconfig_cmd
   failed_when: false
   changed_when: false
-  when: 
+  when:
     - not is_container_environment
     - grub_config_changed is changed
 
 - name: Update GRUB configuration
   ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
-  when: 
+  when:
     - grub_config_changed is changed
     - not is_container_environment
     - grub_mkconfig_cmd is defined
@@ -86,7 +84,7 @@
   notify: reboot system
 
 - name: Configure CPU governor for performance
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     content: |
       #!/bin/bash
       # Set CPU governor to performance for KVM hosts
@@ -102,7 +100,7 @@
   when: not is_container_environment
 
 - name: Create systemd service for CPU performance
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     content: |
       [Unit]
       Description=Set CPU Performance Governor
@@ -123,17 +121,17 @@
   when: not is_container_environment
 
 - name: Enable and start CPU performance service
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     name: cpu-performance
     enabled: true
     state: started
     daemon_reload: true
-  when: 
+  when:
     - cpu_performance_service is changed
     - not is_container_environment
 
 - name: Configure kernel same-page merging (KSM) for memory optimization
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /sys/kernel/mm/ksm/run
     line: "1"
     create: false
@@ -141,7 +139,7 @@
   when: not is_container_environment
 
 - name: Create KSM systemd service for persistent configuration
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     content: |
       [Unit]
       Description=Kernel Samepage Merging
@@ -164,24 +162,24 @@
   when: not is_container_environment
 
 - name: Enable and start KSM service
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     name: ksm
     enabled: true
     state: started
     daemon_reload: true
-  when: 
+  when:
     - ksm_service is changed
     - not is_container_environment
   ignore_errors: true
 
 - name: Configure libvirt for optimal performance
-  ansible.builtin.blockinfile:
+  ansible.builtin.blockinansible.builtin.ansible.builtin.file:
     path: /etc/libvirt/qemu.conf
     block: |
       # Performance optimizations based on research findings
       # Enable memory ballooning for better memory management
       memory_backing_dir = "/dev/hugepages"
-      
+
       # Configure cgroup settings for better resource management
       cgroup_device_acl = [
           "/dev/null", "/dev/full", "/dev/zero",
@@ -189,7 +187,7 @@
           "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
           "/dev/rtc", "/dev/hpet"
       ]
-      
+
       # Enable nested virtualization if supported
       # This will be set dynamically based on CPU capabilities
     marker: "# {mark} ANSIBLE MANAGED BLOCK - KVM Performance"
@@ -213,11 +211,11 @@
   when: not is_container_environment
 
 - name: Enable nested virtualization for Intel
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/modprobe.d/kvm.conf
     line: "options kvm_intel nested=1"
     create: true
-  when: 
+  when:
     - not is_container_environment
     - kvm_intel_info is defined
     - kvm_intel_info.rc == 0
@@ -225,11 +223,11 @@
   register: intel_nested
 
 - name: Enable nested virtualization for AMD
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/modprobe.d/kvm.conf
     line: "options kvm_amd nested=1"
     create: true
-  when: 
+  when:
     - not is_container_environment
     - kvm_amd_info is defined
     - kvm_amd_info.rc == 0
@@ -237,21 +235,21 @@
   register: amd_nested
 
 - name: Configure virtio optimization settings
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     content: |
       # Virtio performance optimizations
       # These settings will be applied to all VMs using virtio devices
-      
+
       # Network performance
       net.core.default_qdisc = fq_codel
       net.ipv4.tcp_congestion_control = bbr
-      
+
       # Disk I/O performance
       vm.dirty_background_ratio = 5
       vm.dirty_ratio = 10
       vm.dirty_writeback_centisecs = 500
       vm.dirty_expire_centisecs = 3000
-      
+
       # Memory management for virtualization
       vm.swappiness = 1
       vm.vfs_cache_pressure = 50
@@ -264,7 +262,7 @@
 
 - name: Apply sysctl settings
   ansible.builtin.command: sysctl -p /etc/sysctl.d/99-kvm-performance.conf
-  when: 
+  when:
     - sysctl_kvm_config is changed
     - not is_container_environment
   ignore_errors: true
@@ -275,7 +273,7 @@
   register: bridge_module_check
 
 - name: Optimize libvirt network performance
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     content: |
       # Increase network buffer sizes
       net.core.rmem_max = 268435456
@@ -284,7 +282,7 @@
       net.core.wmem_default = 65536
       net.core.netdev_max_backlog = 5000
       {% if bridge_module_check.stat.exists %}
-      
+
       # Optimize bridge performance (only when bridge module is loaded)
       net.bridge.bridge-nf-call-ip6tables = 0
       net.bridge.bridge-nf-call-iptables = 0
@@ -299,28 +297,28 @@
 
 - name: Apply network sysctl settings
   ansible.builtin.command: sysctl -p /etc/sysctl.d/99-kvm-network.conf
-  when: 
+  when:
     - sysctl_network_config is changed
     - not is_container_environment
   ignore_errors: true
 
 - name: Create performance monitoring script
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     content: |
       #!/bin/bash
       # KVM Performance Monitoring Script
       # Based on research findings for optimal KVM host monitoring
-      
+
       echo "=== KVM Host Performance Status ==="
       echo "Date: $(date)"
       echo
-      
+
       echo "=== CPU Information ==="
       echo "CPU Governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo 'N/A')"
       echo "CPU Frequency: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null || echo 'N/A')"
       echo "Available CPUs: $(nproc)"
       echo
-      
+
       echo "=== Memory Information ==="
       echo "Total Memory: $(grep MemTotal /proc/meminfo)"
       echo "Available Memory: $(grep MemAvailable /proc/meminfo)"
@@ -328,19 +326,19 @@
       echo "Hugepages Free: $(grep HugePages_Free /proc/meminfo)"
       echo "KSM Status: $(cat /sys/kernel/mm/ksm/run 2>/dev/null || echo 'N/A')"
       echo
-      
+
       echo "=== Virtualization Status ==="
       echo "KVM Module: $(lsmod | grep kvm || echo 'Not loaded')"
       echo "Libvirt Status: $(systemctl is-active libvirtd)"
       echo "Running VMs: $(virsh list --state-running --name 2>/dev/null | wc -l)"
       echo
-      
+
       echo "=== Network Status ==="
       echo "Bridge Status: $(ip link show type bridge)"
       echo
-      
+
       echo "=== Performance Tuning Status ==="
-      echo "Tuned Profile: $(tuned-adm active)"
+      echo "Tuned Proansible.builtin.ansible.builtin.file: $(tuned-adm active)"
       echo "Nested Virtualization (Intel): $(cat /sys/module/kvm_intel/parameters/nested 2>/dev/null || echo 'N/A')"
       echo "Nested Virtualization (AMD): $(cat /sys/module/kvm_amd/parameters/nested 2>/dev/null || echo 'N/A')"
     dest: /usr/local/bin/kvm-perf-status.sh
@@ -352,7 +350,7 @@
   ansible.builtin.debug:
     msg:
       - "KVM Performance Optimization Summary:"
-      - "✓ Hugepages configured: {{ recommended_hugepages }} pages ({{ (recommended_hugepages | int * 2) }}MB)"
+      - "✓ Hugepages configured: {{ recommended_hugepages }} pages ({{ (recommended_hugepages           | int* 2)   }}MB)"
       - "✓ CPU governor set to performance mode"
       - "✓ Kernel Same-page Merging (KSM) enabled"
       - "✓ Virtio optimizations applied"

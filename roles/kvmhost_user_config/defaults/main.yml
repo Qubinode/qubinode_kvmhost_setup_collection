@@ -13,8 +13,8 @@ kvmhost_user_config_target_user: "{{ ansible_user_id }}"
 
 # User account configuration
 kvmhost_user_config_users:
-  - name: "{{ kvmhost_user_config_target_user }}"
-    shell: "/bin/bash"
+  - name: '{{ kvmhost_user_config_target_user }}'
+    shell: /bin/bash
     groups:
       - wheel
       - libvirt
@@ -24,14 +24,13 @@ kvmhost_user_config_users:
 
 # Additional users to configure
 kvmhost_user_config_additional_users: []
-
 # =============================================================================
 # SHELL CONFIGURATION
 # =============================================================================
 kvmhost_user_config_shell_enabled: true
 
 # Shell customization
-kvmhost_user_config_shell_type: "bash"  # bash, zsh, fish
+kvmhost_user_config_shell_type: bash # bash, zsh, fish
 kvmhost_user_config_starship_enabled: true
 kvmhost_user_config_vim_enhanced: true
 
@@ -42,7 +41,7 @@ kvmhost_user_config_bash_history_size: 10000
 
 # Shell prompt customization
 kvmhost_user_config_custom_prompt: true
-kvmhost_user_config_prompt_style: "starship"  # basic, starship, custom
+kvmhost_user_config_prompt_style: starship # basic, starship, custom
 
 # =============================================================================
 # SSH CONFIGURATION
@@ -51,7 +50,7 @@ kvmhost_user_config_ssh_enabled: true
 
 # SSH key management
 kvmhost_user_config_ssh_generate_keys: true
-kvmhost_user_config_ssh_key_type: "ed25519"
+kvmhost_user_config_ssh_key_type: ed25519
 kvmhost_user_config_ssh_key_bits: 4096
 kvmhost_user_config_ssh_key_comment: "{{ ansible_fqdn }}-{{ kvmhost_user_config_target_user }}"
 
@@ -70,19 +69,19 @@ kvmhost_user_config_permissions_enabled: true
 
 # System groups to add users to
 kvmhost_user_config_system_groups:
-  - wheel        # sudo access
-  - libvirt      # VM management
-  - docker       # Container management (if installed)
+  - wheel # sudo access
+  - libvirt # VM management
+  - docker # Container management (if installed)
 
 # Sudo configuration
 kvmhost_user_config_sudo_enabled: true
 kvmhost_user_config_sudo_nopasswd: false
-kvmhost_user_config_sudo_commands: []  # Specific commands, empty = all
+kvmhost_user_config_sudo_commands: [] # Specific commands, empty = all
 
 # =============================================================================
 # HOME DIRECTORY CONFIGURATION
 # =============================================================================
-kvmhost_user_config_home_setup: true
+kvmhost_user_config_home_ansible.builtin.ansible.builtin.setup: true
 
 # Directory structure
 kvmhost_user_config_create_directories:
@@ -118,7 +117,7 @@ kvmhost_user_config_dev_tools:
 kvmhost_user_config_modern_tools: []
 # Example modern tools:
 # - bat      # cat replacement
-# - exa      # ls replacement  
+# - exa      # ls replacement
 # - fd       # find replacement
 # - ripgrep  # grep replacement
 # - fzf      # fuzzy finder
@@ -130,9 +129,9 @@ kvmhost_user_config_dotfiles_enabled: true
 
 # Git configuration
 kvmhost_user_config_git_enabled: true
-kvmhost_user_config_git_user_name: ""
+kvmhost_user_config_git_user_name: ''
 kvmhost_user_config_git_user_email: ""
-kvmhost_user_config_git_default_branch: "main"
+kvmhost_user_config_git_default_branch: main
 
 # Vim configuration
 kvmhost_user_config_vim_config:
@@ -152,15 +151,15 @@ kvmhost_user_config_environment_enabled: true
 
 # Custom environment variables
 kvmhost_user_config_env_vars:
-  EDITOR: "vim"
-  PAGER: "less"
+  EDITOR: vim
+  PAGER: less
   HISTSIZE: "{{ kvmhost_user_config_bash_history_size }}"
-  HISTCONTROL: "ignoredups:erasedups"
+  HISTCONTROL: ignoredups:erasedups
 
 # PATH modifications
 kvmhost_user_config_custom_paths:
-  - "$HOME/bin"
-  - "$HOME/.local/bin"
+  - $HOME/bin
+  - $HOME/.local/bin
 
 # =============================================================================
 # SHELL INTEGRATION
@@ -169,27 +168,26 @@ kvmhost_user_config_shell_integration: true
 
 # Starship configuration
 kvmhost_user_config_starship_config:
-  format: "$all$character"
-  right_format: "$time"
+  format: $all$character
+  right_format: $time
   add_newline: true
 
 # Command aliases
 kvmhost_user_config_aliases:
-  ll: "ls -alF"
-  la: "ls -A"
-  l: "ls -CF"
-  grep: "grep --color=auto"
-  fgrep: "fgrep --color=auto"
-  egrep: "egrep --color=auto"
+  ll: ls -alF
+  la: ls -A
+  l: ls -CF
+  grep: grep --color=auto
+  fgrep: fgrep --color=auto
+  egrep: egrep --color=auto
   # KVM/libvirt aliases
-  vms: "virsh list --all"
-  vmstart: "virsh start"
-  vmstop: "virsh shutdown"
-  vmconsole: "virsh console"
+  vms: virsh list --all
+  vmstart: virsh start
+  vmstop: virsh shutdown
+  vmconsole: virsh console
 
 # Shell functions
 kvmhost_user_config_shell_functions: []
-
 # =============================================================================
 # SECURITY SETTINGS
 # =============================================================================
@@ -210,7 +208,7 @@ kvmhost_user_config_ssh_security:
 # =============================================================================
 kvmhost_user_config_backup_enabled: true
 kvmhost_user_config_backup_existing: true
-kvmhost_user_config_backup_suffix: ".backup"
+kvmhost_user_config_backup_suffix: .backup
 
 # =============================================================================
 # VALIDATION SETTINGS
@@ -221,7 +219,7 @@ kvmhost_user_config_validation_enabled: true
 # LEGACY COMPATIBILITY
 # =============================================================================
 # Support for original kvmhost_setup variables
-user_name: "{{ kvmhost_user_config_target_user }}"
+user_name: '{{ kvmhost_user_config_target_user }}'
 admin_user: "{{ kvmhost_user_config_target_user }}"
 create_user_dir: "{{ kvmhost_user_config_home_setup }}"
 setup_shell: "{{ kvmhost_user_config_shell_enabled }}"

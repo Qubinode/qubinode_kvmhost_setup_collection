@@ -1,31 +1,31 @@
 ---
 - name: Configure user shell environment
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: '0644'
   loop:
     - src: bash_profile.j2
-      dest: "/home/{{ admin_user }}/.bash_profile"
+      dest: /home/{{ admin_user }}/.bash_profile
     - src: bashrc.j2
-      dest: "/home/{{ admin_user }}/.bashrc"
+      dest: /home/{{ admin_user }}/.bashrc
     - src: vimrc.j2
-      dest: "/home/{{ admin_user }}/.vimrc"
+      dest: /home/{{ admin_user }}/.vimrc
     - src: starship.toml.j2
-      dest: "/home/{{ admin_user }}/.config/starship.toml"
+      dest: /home/{{ admin_user }}/.config/starship.toml
   when: configure_shell | bool
 
 - name: Ensure correct permissions for shell files
-  ansible.builtin.file:
-    path: "{{ item }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item }}'
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
     mode: '0644'
   loop:
-    - "/home/{{ admin_user }}/.bash_profile"
-    - "/home/{{ admin_user }}/.bashrc"
-    - "/home/{{ admin_user }}/.vimrc"
-    - "/home/{{ admin_user }}/.config/starship.toml"
+    - /home/{{ admin_user }}/.bash_profile
+    - /home/{{ admin_user }}/.bashrc
+    - /home/{{ admin_user }}/.vimrc
+    - /home/{{ admin_user }}/.config/starship.toml
   when: configure_shell | bool
 
 - name: Download starship installer
@@ -40,15 +40,15 @@
   ansible.builtin.command: >
     /tmp/starship-install.sh --yes
   args:
-    chdir: "/home/{{ admin_user }}"
-    creates: "/usr/local/bin/starship"
+    chdir: /home/{{ admin_user }}
+    creates: /usr/local/bin/starship
   when: configure_shell | bool
 
 - name: Add starship to shell configuration
-  ansible.builtin.lineinfile:
-    path: "/home/{{ admin_user }}/.bashrc"
-    regexp: '^eval "\$(starship init bash)"'
-    line: 'eval "$(starship init bash)"'
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+    path: /home/{{ admin_user }}/.bashrc
+    regexp: ^eval "\$(starship init bash)"
+    line: eval "$(starship init bash)"
     create: true
     mode: '0644'
   when: configure_shell | bool
@@ -64,6 +64,6 @@
 - name: Assert shell is properly configured
   ansible.builtin.assert:
     that: shell_check.rc == 0
-    fail_msg: "Shell configuration failed for user {{ admin_user }}"
-    success_msg: "Shell successfully configured for user {{ admin_user }}"
+    fail_msg: Shell configuration failed for user {{ admin_user }}
+    success_msg: Shell successfully configured for user {{ admin_user }}
   when: configure_shell | bool

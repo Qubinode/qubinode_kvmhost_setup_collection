@@ -14,23 +14,23 @@
   changed_when: false
   failed_when: false
   register: vt_check_result
-  when: 
+  when:
     - not cicd_test | default(false)
     - not kvmhost_libvirt_skip_vt_check | default(false)
 
 - name: Set fact about Virtualization Technology (VT) status
   ansible.builtin.set_fact:
     kvmhost_libvirt_vt_enabled: "{{ vt_check_result.rc == 0 }}"
-  when: 
+  when:
     - not cicd_test | default(false)
     - not kvmhost_libvirt_skip_vt_check | default(false)
 
 - name: Display VT status information
   ansible.builtin.debug:
     msg: >
-      Virtualization Technology (VT) status: 
-      {{ 'Enabled' if kvmhost_libvirt_vt_enabled | default(true) else 'Disabled' }}
-  when: 
+      Virtualization Technology (VT) status:
+      {{ 'Enabled' if kvmhost_libvirt_vt_enabled           | default(true) else 'Disabled'   }}
+  when:
     - not cicd_test | default(false)
     - not kvmhost_libvirt_skip_vt_check | default(false)
 
@@ -39,7 +39,7 @@
     msg: >
       Virtualization Technology (VT) is currently disabled. Please enable VT
       in your system BIOS/UEFI before running this role again.
-  when: 
+  when:
     - not cicd_test | default(false)
     - not kvmhost_libvirt_skip_vt_check | default(false)
     - not kvmhost_libvirt_vt_enabled | default(true)
@@ -58,20 +58,20 @@
 
 - name: Validate storage pool paths exist
   ansible.builtin.stat:
-    path: "{{ item.path }}"
+    path: '{{ item.path }}'
   register: storage_path_check
   loop: "{{ kvmhost_libvirt_storage_pools }}"
   when: kvmhost_libvirt_storage_enabled | default(true)
 
 - name: Create storage pool directories if missing
-  ansible.builtin.file:
-    path: "{{ item.item.path }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item.item.path }}'
     state: directory
     mode: '0711'
     owner: root
     group: root
   loop: "{{ storage_path_check.results }}"
-  when: 
+  when:
     - kvmhost_libvirt_storage_enabled | default(true)
     - not item.stat.exists
   become: true

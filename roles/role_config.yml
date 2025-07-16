@@ -92,7 +92,7 @@ role_compatibility:
     max_ansible_version: "7.x"
     supported_os:
       - "RedHat"
-      - "CentOS" 
+      - "CentOS"
       - "Rocky"
       - "AlmaLinux"
     supported_versions:
@@ -143,7 +143,7 @@ role_compatibility:
     supported_os:
       - "RedHat"
       - "CentOS"
-      - "Rocky" 
+      - "Rocky"
       - "AlmaLinux"
     supported_versions:
       - "8"

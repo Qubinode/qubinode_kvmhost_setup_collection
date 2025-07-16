@@ -6,7 +6,7 @@
 
 - name: Install Cockpit base packages
   ansible.builtin.dnf:
-    name: "{{ kvmhost_cockpit_packages }}"
+    name: '{{ kvmhost_cockpit_packages }}'
     state: present
     update_cache: true
   register: cockpit_install
@@ -16,7 +16,7 @@
 
 - name: Install additional Cockpit modules
   ansible.builtin.dnf:
-    name: "{{ kvmhost_cockpit_additional_packages }}"
+    name: '{{ kvmhost_cockpit_additional_packages }}'
     state: present
   register: cockpit_modules_install
   retries: 3
@@ -35,5 +35,5 @@
   ansible.builtin.debug:
     msg:
       - "Cockpit packages installed successfully"
-      - "Base packages: {{ kvmhost_cockpit_packages | join(', ') }}"
-      - "Additional packages: {{ kvmhost_cockpit_additional_packages | join(', ') if kvmhost_cockpit_additional_packages | length > 0 else 'None' }}"
+      - "Base packages: {{ kvmhost_cockpit_packages           | join(', ')   }}"
+      - "Additional packages: {{ kvmhost_cockpit_additional_packages      | join(', ') if kvmhost_cockpit_additional_packages                |   length> 0 else 'None'    }}"

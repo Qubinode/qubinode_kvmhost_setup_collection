@@ -7,7 +7,7 @@
 cicd_test: false
 
 # Set to true to enable libvirt and kvm
-lib_virt_setup: true
+lib_virt_ansible.builtin.ansible.builtin.setup: true
 
 # Set to true to enable cockpit
 enable_cockpit: true
@@ -30,10 +30,10 @@ qubinode_bridge_name: qubibr0
 ## Optional User Configurations
 ## dictionary of libvirt networks to create
 libvirt_host_networks:
-  - name: "{{ vm_libvirt_net | default(qubinet) }}"
+  - name: '{{ vm_libvirt_net           | default(qubinet)   }}'
     create: true
     mode: bridge
-    bridge_device: "{{ kvm_host_bridge_name | default(qubinode_bridge_name) }}"
+    bridge_device: "{{ kvm_host_bridge_name           | default(qubinode_bridge_name)   }}"
     ifcfg_type: "{{ kvm_bridge_type }}"
     ifcfg_bootproto: "{{ kvm_host_bootproto }}"
     bridge_slave_dev: "{{ kvm_host_interface }}"
@@ -41,27 +41,26 @@ libvirt_host_networks:
     mask_prefix: "{{ kvm_host_mask_prefix }}"
     ipaddress: "{{ kvm_host_ip }}"
     mask: "{{ kvm_host_netmask }}"
-    subnet: "not currently in use"
+    subnet: not currently in use
     mac: "{{ kvm_host_macaddr }}"
 
 # The the primary dns server to the dns_forwarder
-primary_dns_server: "{{ dns_forwarder | default('1.1.1.1') }}"
-kvm_host_dns_server: "{{ primary_dns_server | default('1.1.1.1') }}"
+primary_dns_server: "{{ dns_forwarder      | default(\'1.1.1.1\'\)   }}"
+kvm_host_dns_server: "{{ primary_dns_server      | default(\'1.1.1.1\'\)   }}"
 search_domains:
   - "{{ domain }}"
 
 libvirt_networks:
-  - name: "vmnetbr0"
+  - name: vmnetbr0
     create: true
     mode: bridge
-    bridge_name: "{{ kvmhost_bridge_device }}"
+    bridge_name: '{{ kvmhost_bridge_device }}'
 
 libvirt_host_storage_pools:
   - name: default
     state: active
     autostart: true
-    path: "{{ kvm_host_libvirt_dir }}"
-
+    path: '{{ kvm_host_libvirt_dir }}'
 
 ######################
 ## Libvirt Storage
@@ -87,7 +86,6 @@ admin_user: ""
 # users whose shell will be configured
 shell_users:
   - "{{ admin_user }}"
-
 
 #############################
 # None configurable variables
@@ -144,7 +142,7 @@ required_rpm_packages:
   - container-selinux
   - k9s
 
-download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"
+download_vim_url: https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip
 
 # KVM Performance Optimization Settings
 # Based on research findings for enterprise KVM hosts
@@ -155,7 +153,7 @@ enable_kvm_performance_optimization: true
 kvm_hugepages_percent: 25
 
 # CPU optimization settings
-kvm_cpu_governor: "performance"
+kvm_cpu_governor: performance
 kvm_enable_cpu_isolation: true
 
 # Memory optimization settings
@@ -178,16 +176,16 @@ kvm_performance_sysctls:
   vm.dirty_ratio: 10
   vm.dirty_writeback_centisecs: 500
   vm.dirty_expire_centisecs: 3000
-  
+
   # Network performance
-  net.core.default_qdisc: "fq_codel"
-  net.ipv4.tcp_congestion_control: "bbr"
+  net.core.default_qdisc: fq_codel
+  net.ipv4.tcp_congestion_control: bbr
   net.core.rmem_max: 268435456
   net.core.wmem_max: 268435456
   net.core.rmem_default: 65536
   net.core.wmem_default: 65536
   net.core.netdev_max_backlog: 5000
-  
+
   # Bridge optimizations
   net.bridge.bridge-nf-call-ip6tables: 0
   net.bridge.bridge-nf-call-iptables: 0

@@ -6,6 +6,6 @@
 
 - name: Placeholder for home directory setup
   ansible.builtin.debug:
-    msg: "Home directory setup tasks will be implemented here"
+    msg: Home directory setup tasks will be implemented here
 
 # TODO: Implement home directory creation and configuration tasks

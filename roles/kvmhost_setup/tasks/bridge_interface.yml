@@ -24,7 +24,7 @@
   block:
     - name: Setting bridge name
       ansible.builtin.set_fact:
-        bridge_name: "{{ qubinode_bridge_fact }}"
+        bridge_name: '{{ qubinode_bridge_fact }}'
       failed_when: false
 
     - name: Display message when bridge_name is undefined
@@ -35,7 +35,7 @@
     - name: Setup bridge interface
       vars:
         bridge_idx: "{{ type_idx }}"
-      ansible.builtin.template:
+      ansible.builtin.ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
         mode: '0640'
@@ -45,7 +45,7 @@
     - name: Setup ethernet device interface
       vars:
         bridge_idx: "{{ type_idx }}"
-      ansible.builtin.template:
+      ansible.builtin.ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
         mode: '0640'
@@ -59,8 +59,8 @@
     # connectivity and the bridge interface comes up.
 
     - name: Restart network service for older systems
-      ansible.builtin.systemd:
-        name: "{{ item }}"
+      ansible.builtin.ansible.builtin.systemd:
+        name: '{{ item }}'
         state: restarted
       changed_when: false
       with_items:
@@ -70,8 +70,8 @@
       when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is undefined))
 
     - name: Restart network service
-      ansible.builtin.systemd:
-        name: "{{ item }}"
+      ansible.builtin.ansible.builtin.systemd:
+        name: '{{ item }}'
         state: restarted
       changed_when: false
       with_items:
@@ -92,7 +92,7 @@
       failed_when: true
 
 - name: Update /etc/resolv.conf
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
     mode: '0644'
@@ -100,12 +100,12 @@
 
 - name: Ensure libvirt bridge network is defined
   vars:
-    net_name: "{{ libvirt_host_networks[type_idx].name }}"
-    net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
+    net_name: '{{ libvirt_host_networks[type_idx].name }}'
+    net_mode: '{{ libvirt_host_networks[type_idx].mode }}'
     net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
     net_create: "{{ libvirt_host_networks[type_idx].create }}"
   community.libvirt.virt_net:
-    name: "{{ net_name }}"
+    name: '{{ net_name }}'
     command: define
     xml: '{{ (lookup("template", "libvirt_net_bridge.xml.j2")) }}'
   when: net_create|bool

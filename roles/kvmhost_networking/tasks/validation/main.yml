@@ -1,6 +1,6 @@
 ---
 # =============================================================================
-# KVMHOST NETWORKING ROLE - VALIDATION TASKS  
+# KVMHOST NETWORKING ROLE - VALIDATION TASKS
 # =============================================================================
 # Main validation entry point for kvmhost_networking role
 
@@ -20,7 +20,7 @@
       - kvmhost_bridge_device is defined
       - kvmhost_bridge_device | length > 0
       - kvmhost_bridge_device | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$')
-    fail_msg: "Bridge device '{{ kvmhost_bridge_device | default('undefined') }}' is invalid"
+    fail_msg: "Bridge device '{{ kvmhost_bridge_device           | default(\'undefined\'\)   }}' is invalid"
     success_msg: "Bridge device configuration is valid"
 
 - name: Validate DNS forwarder configuration
@@ -28,7 +28,7 @@
     that:
       - dns_forwarder is defined
       - dns_forwarder | ansible.utils.ipv4
-    fail_msg: "DNS forwarder '{{ dns_forwarder | default('undefined') }}' must be a valid IPv4 address"
+    fail_msg: "DNS forwarder '{{ dns_forwarder           | default(\'undefined\'\)   }}' must be a valid IPv4 address"
     success_msg: "DNS forwarder configuration is valid"
 
 - name: Validate domain configuration
@@ -37,7 +37,7 @@
       - domain is defined
       - domain | length >= 3
       - domain | regex_search('^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$')
-    fail_msg: "Domain '{{ domain | default('undefined') }}' is invalid"
+    fail_msg: "Domain '{{ domain           | default(\'undefined\'\)   }}' is invalid"
     success_msg: "Domain configuration is valid"
 
 - name: Validate libvirt networks configuration

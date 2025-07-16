@@ -9,12 +9,12 @@
     msg:
       - "Configuring libvirt user access"
       - "Admin group: {{ kvmhost_libvirt_admin_group }}"
-      - "Admin users: {{ kvmhost_libvirt_admin_users | join(', ') if kvmhost_libvirt_admin_users else admin_user | default('None') }}"
+      - "Admin users: {{ kvmhost_libvirt_admin_users      | join(', ') if kvmhost_libvirt_admin_users else admin_user                |   default(\'None\'\)    }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Add specified users to libvirt group
   ansible.builtin.user:
-    name: "{{ item }}"
+    name: '{{ item }}'
     groups: "{{ kvmhost_libvirt_admin_group }},qemu"
     append: true
   loop: "{{ kvmhost_libvirt_admin_users }}"
@@ -23,17 +23,17 @@
 
 - name: Add admin_user to libvirt group (legacy compatibility)
   ansible.builtin.user:
-    name: "{{ admin_user }}"
+    name: '{{ admin_user }}'
     groups: "{{ kvmhost_libvirt_admin_group }},qemu"
     append: true
   become: true
-  when: 
+  when:
     - admin_user is defined
     - admin_user != ""
     - admin_user not in kvmhost_libvirt_admin_users | default([])
 
 - name: Configure libvirt unix socket group
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     dest: /etc/libvirt/libvirtd.conf
     regexp: '^#?\s*unix_sock_group\s*=.*$'
     line: 'unix_sock_group = "{{ kvmhost_libvirt_unix_sock_group }}"'
@@ -42,7 +42,7 @@
   become: true
 
 - name: Configure libvirt unix socket read-write permissions
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     dest: /etc/libvirt/libvirtd.conf
     regexp: '^#?\s*unix_sock_rw_perms\s*=.*$'
     line: 'unix_sock_rw_perms = "{{ kvmhost_libvirt_unix_sock_rw_perms }}"'
@@ -51,7 +51,7 @@
   become: true
 
 - name: Configure libvirt unix socket admin permissions
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     dest: /etc/libvirt/libvirtd.conf
     regexp: '^#?\s*unix_sock_admin_perms\s*=.*$'
     line: 'unix_sock_admin_perms = "{{ kvmhost_libvirt_unix_sock_admin_perms }}"'
@@ -80,7 +80,7 @@
 
 - name: Display libvirt access test result
   ansible.builtin.debug:
-    msg: "Libvirt access test for {{ ansible_user | default('current user') }}: {{ 'Success' if user_libvirt_test.rc == 0 else 'Failed - may need to log out and back in' }}"
-  when: 
+    msg: "Libvirt access test for {{ ansible_user           | default(\'current user\'\)   }}: {{ 'Success' if user_libvirt_test.rc == 0 else 'Failed - may need to log out and back in' }}"
+  when:
     - kvmhost_libvirt_debug_enabled | default(false)
     - user_libvirt_test is defined

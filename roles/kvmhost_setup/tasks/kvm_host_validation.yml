@@ -3,6 +3,10 @@
 # Based on ADR-0003: KVM Virtualization Platform Selection
 
 - name: KVM host hardware validation
+  tags:
+    - kvm_validation
+    - hardware_check
+
   block:
     - name: Check CPU supports virtualization
       ansible.builtin.shell: |
@@ -18,8 +22,8 @@
       ansible.builtin.assert:
         that:
           - cpu_virt_support.stdout == "supported"
-        fail_msg: "CPU does not support virtualization extensions (Intel VT-x or AMD-V)"
-        success_msg: "CPU virtualization support confirmed"
+        fail_msg: CPU does not support virtualization extensions (Intel VT-x or AMD-V)
+        success_msg: CPU virtualization support confirmed
 
     - name: Check if KVM module is available
       ansible.builtin.shell: |
@@ -34,13 +38,13 @@
       changed_when: false
 
     - name: Load KVM modules if available but not loaded
-      ansible.builtin.modprobe:
-        name: "{{ item }}"
+      community.general.community.general.modprobe:
+        name: '{{ item }}'
         state: present
       loop:
         - kvm
-        - kvm_intel  # Will fail silently on AMD
-        - kvm_amd    # Will fail silently on Intel
+        - kvm_intel # Will fail silently on AMD
+        - kvm_amd # Will fail silently on Intel
       ignore_errors: true
       become: true
       when: kvm_module_status.stdout in ["available", "loaded"]
@@ -54,14 +58,14 @@
       ansible.builtin.assert:
         that:
           - kvm_device.stat.exists
-        fail_msg: "/dev/kvm device not found. KVM may not be properly loaded or supported"
-        success_msg: "KVM device /dev/kvm is available"
-
-  tags:
-    - kvm_validation
-    - hardware_check
+        fail_msg: /dev/kvm device not found. KVM may not be properly loaded or supported
+        success_msg: KVM device /dev/kvm is available
 
 - name: KVM software validation
+  tags:
+    - kvm_validation
+    - software_check
+
   block:
     - name: Check libvirt installation and version
       ansible.builtin.shell: |
@@ -90,36 +94,36 @@
           - libvirt version: {{ libvirt_version.stdout }}
           - QEMU version: {{ qemu_version.stdout }}
 
+- name: KVM service validation
   tags:
     - kvm_validation
-    - software_check
+    - service_check
 
-- name: KVM service validation
   block:
     - name: Check libvirtd service status
-      ansible.builtin.systemd:
+      ansible.builtin.ansible.builtin.systemd:
         name: libvirtd
       register: libvirtd_status
       ignore_errors: true
 
     - name: Check if libvirtd is running
-      ansible.builtin.shell: systemctl is-active libvirtd
+      ansible.builtin.command: systemctl is-active libvirtd
       register: libvirtd_active
       changed_when: false
       failed_when: false
 
     - name: Start libvirtd if not running
-      ansible.builtin.systemd:
+      ansible.builtin.ansible.builtin.systemd:
         name: libvirtd
         state: started
         enabled: true
       become: true
-      when: 
+      when:
         - libvirtd_active.stdout != "active"
         - libvirtd_status is not failed
 
     - name: Verify libvirt connectivity
-      ansible.builtin.shell: virsh list --all
+      ansible.builtin.command: virsh list --all
       register: virsh_connectivity
       changed_when: false
 
@@ -130,19 +134,19 @@
           Current VMs:
           {{ virsh_connectivity.stdout }}
 
+- name: KVM network validation
   tags:
     - kvm_validation
-    - service_check
+    - network_check
 
-- name: KVM network validation
   block:
     - name: Check default libvirt network
-      ansible.builtin.shell: virsh net-list --all
+      ansible.builtin.command: virsh net-list --all
       register: libvirt_networks
       changed_when: false
 
     - name: Check if default network exists
-      ansible.builtin.shell: virsh net-info default
+      ansible.builtin.command: virsh net-info default
       register: default_net_info
       changed_when: false
       failed_when: false
@@ -180,19 +184,19 @@
           libvirt Networks:
           {{ libvirt_networks.stdout }}
 
+- name: KVM storage validation
   tags:
     - kvm_validation
-    - network_check
+    - storage_check
 
-- name: KVM storage validation
   block:
     - name: Check default storage pool
-      ansible.builtin.shell: virsh pool-list --all
+      ansible.builtin.command: virsh pool-list --all
       register: libvirt_pools
       changed_when: false
 
     - name: Check if default pool exists
-      ansible.builtin.shell: virsh pool-info default
+      ansible.builtin.command: virsh pool-info default
       register: default_pool_info
       changed_when: false
       failed_when: false
@@ -208,7 +212,7 @@
       ignore_errors: true
 
     - name: Verify storage pool directory
-      ansible.builtin.file:
+      ansible.builtin.ansible.builtin.file:
         path: /var/lib/libvirt/images
         state: directory
         mode: '0711'
@@ -222,11 +226,11 @@
           libvirt Storage Pools:
           {{ libvirt_pools.stdout }}
 
+- name: KVM performance validation
   tags:
     - kvm_validation
-    - storage_check
+    - performance_check
 
-- name: KVM performance validation
   block:
     - name: Check available memory for VMs
       ansible.builtin.shell: |
@@ -251,15 +255,11 @@
           KVM Host Performance Summary:
           Memory: {{ memory_status.stdout }}
           {{ cpu_info.stdout }}
-          
+
           Recommendations:
           - Reserve at least 2GB RAM for host OS
           - Ensure CPU supports virtualization extensions
           - Consider CPU pinning for production workloads
-
-  tags:
-    - kvm_validation
-    - performance_check
 
 - name: KVM validation summary
   ansible.builtin.debug:
@@ -269,8 +269,8 @@
       ✓ KVM device: {{ '/dev/kvm available' if kvm_device.stat.exists else 'Not available' }}
       ✓ libvirt version: {{ libvirt_version.stdout }}
       ✓ QEMU version: {{ qemu_version.stdout }}
-      ✓ libvirtd service: {{ libvirtd_active.stdout | default('checking...') }}
-      
+      ✓ libvirtd ansible.builtin.ansible.builtin.service: {{ libvirtd_active.stdout           | default(\'checking...\')   }}
+
       KVM host validation completed successfully!
       System is ready for virtual machine deployment.
   tags:

@@ -2,34 +2,34 @@
 # OS Validation for Supported Platforms
 # Based on ADR-0008: RHEL 9/10 Support Strategy
 
-- name: "Validate OS family is supported"
+- name: Validate OS family is supported
   ansible.builtin.assert:
     that:
       - kvmhost_os_is_rhel_compatible
     fail_msg: |
       Unsupported OS family: {{ kvmhost_os_family }}
-      Supported families: {{ supported_os_families | join(', ') }}
-    success_msg: "OS family {{ kvmhost_os_family }} is supported"
+      Supported families: {{ supported_os_families           | join(', ')   }}
+    success_msg: OS family {{ kvmhost_os_family }} is supported
 
-- name: "Validate OS major version is supported"
+- name: Validate OS major version is supported
   ansible.builtin.assert:
     that:
       - kvmhost_os_major_version in supported_major_versions
     fail_msg: |
       Unsupported OS major version: {{ kvmhost_os_major_version }}
-      Supported versions: {{ supported_major_versions | join(', ') }}
-    success_msg: "OS version {{ kvmhost_os_major_version }} is supported"
+      Supported versions: {{ supported_major_versions           | join(', ')   }}
+    success_msg: OS version {{ kvmhost_os_major_version }} is supported
 
-- name: "Validate architecture is supported"
+- name: Validate architecture is supported
   ansible.builtin.assert:
     that:
       - kvmhost_is_x86_64
     fail_msg: |
       Unsupported architecture: {{ kvmhost_architecture }}
       Only x86_64 is currently supported
-    success_msg: "Architecture {{ kvmhost_architecture }} is supported"
+    success_msg: Architecture {{ kvmhost_architecture }} is supported
 
-- name: "Check for minimum system requirements"
+- name: Check for minimum system requirements
   ansible.builtin.assert:
     that:
       - ansible_memtotal_mb >= 2048
@@ -38,9 +38,9 @@
       Minimum requirement: 2048MB
     success_msg: "Memory requirement satisfied: {{ ansible_memtotal_mb }}MB"
 
-- name: "Validate test mode vs production requirements"
+- name: Validate test mode vs production requirements
   ansible.builtin.fail:
-    msg: "Testing mode is enabled but cicd_test is false. Set cicd_test=true for testing environments."
+    msg: Testing mode is enabled but cicd_test is false. Set cicd_test=true for testing environments.
   when:
     - testing_mode | default(false)
     - not cicd_test | default(false)

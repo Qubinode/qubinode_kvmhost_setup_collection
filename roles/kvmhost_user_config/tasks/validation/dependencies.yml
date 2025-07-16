@@ -6,12 +6,12 @@
 
 - name: Check if system is supported
   ansible.builtin.fail:
-    msg: "User config role requires RHEL/CentOS/Rocky/AlmaLinux"
+    msg: User config role requires RHEL/CentOS/Rocky/AlmaLinux
   when: ansible_os_family != "RedHat"
 
 - name: Verify target user is defined
   ansible.builtin.fail:
-    msg: "Target user must be specified (kvmhost_user_config_target_user)"
+    msg: Target user must be specified (kvmhost_user_config_target_user)
   when:
     - kvmhost_user_config_target_user is not defined
     - kvmhost_user_config_target_user | length == 0
@@ -56,7 +56,7 @@
 
 - name: Check for conflicting shell configuration
   ansible.builtin.fail:
-    msg: "Cannot configure both starship and custom prompt simultaneously"
+    msg: Cannot configure both starship and custom prompt simultaneously
   when:
     - kvmhost_user_config_starship_enabled | bool
     - kvmhost_user_config_prompt_style == "custom"

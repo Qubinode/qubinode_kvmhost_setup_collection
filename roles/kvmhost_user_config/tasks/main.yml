@@ -9,7 +9,7 @@
 - name: Display kvmhost_user_config role configuration
   ansible.builtin.debug:
     msg:
-      - "Starting kvmhost_user_config role execution"
+      - Starting kvmhost_user_config role execution
       - "User config enabled: {{ kvmhost_user_config_enabled }}"
       - "Target user: {{ kvmhost_user_config_target_user }}"
       - "Shell configuration: {{ kvmhost_user_config_shell_enabled }}"
@@ -76,9 +76,9 @@
 - name: Display completion status
   ansible.builtin.debug:
     msg:
-      - "kvmhost_user_config role execution completed"
+      - kvmhost_user_config role execution completed
       - "Configured user: {{ kvmhost_user_config_target_user }}"
       - "Shell: {{ kvmhost_user_config_shell_type }}"
       - "SSH keys generated: {{ kvmhost_user_config_ssh_generate_keys }}"
-      - "Groups: {{ kvmhost_user_config_system_groups | join(', ') }}"
+      - "Groups: {{ kvmhost_user_config_system_groups           | join(', ')   }}"
   when: kvmhost_user_config_enabled | bool

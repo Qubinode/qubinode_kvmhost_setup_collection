@@ -1,24 +1,24 @@
 ---
 # Enhanced Network Configuration with ADR-0007 Bridge Automation
-- name: "Network Setup - Get network interface facts"
-  ansible.builtin.setup:
+- name: 'Network Setup - Get network interface facts'
+  ansible.builtin.ansible.builtin.setup:
     gather_subset:
       - network
   register: network_facts
 
-- name: "Network Setup - Display current network configuration"
+- name: 'Network Setup - Display current network configuration'
   ansible.builtin.debug:
     msg: |
       Current Network Configuration:
-      - Primary Interface: {{ ansible_default_ipv4.interface | default('N/A') }}
-      - Primary IP: {{ ansible_default_ipv4.address | default('N/A') }}
-      - Gateway: {{ ansible_default_ipv4.gateway | default('N/A') }}
-      - DNS: {{ ansible_dns.nameservers | default(['N/A']) | join(', ') }}
+      - Primary Interface: {{ ansible_default_ipv4.interface           | default(\'N/A\')   }}
+      - Primary IP: {{ ansible_default_ipv4.address           | default(\'N/A\')   }}
+      - Gateway: {{ ansible_default_ipv4.gateway           | default(\'N/A\')   }}
+      - DNS: {{ ansible_dns.nameservers      | default(['N/A'])                |   join(', ')    }}
 
 # ADR-0007: Automated Bridge Configuration
-- name: "Network Setup - Run automated bridge configuration"
+- name: 'Network Setup - Run automated bridge configuration'
   ansible.builtin.include_tasks: automated_bridge_config.yml
-  when: 
+  when:
     - qubinode_setup_bridge | default(true)
     - not qubinode_skip_bridge_config | default(false)
   tags:
@@ -26,7 +26,7 @@
     - network_automation
 
 # Network Validation Framework
-- name: "Network Setup - Run network validation"
+- name: 'Network Setup - Run network validation'
   ansible.builtin.include_tasks: network_validation.yml
   when: qubinode_validate_network | default(true)
   tags:
@@ -34,7 +34,7 @@
     - adr_compliance
 
 # Legacy bridge interface verification (for compatibility)
-- name: "Network Setup - Verify bridge interface status"
+- name: 'Network Setup - Verify bridge interface status'
   ansible.builtin.command: "ip link show {{ item.bridge_device }}"
   register: bridge_check
   failed_when: false
@@ -43,7 +43,7 @@
   when: libvirt_host_networks is defined
 
 - name: Create network bridge interface configuration
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: "libvirt_net_bridge.xml.j2"
     dest: "/etc/libvirt/qemu/networks/{{ item.name }}.xml"
     mode: '0644'
@@ -84,7 +84,7 @@
   when: item.create | default(true)
 
 - name: Configure network bridge interface
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: "bridge_interface.j2"
     dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_device }}"
     mode: '0644'
@@ -95,7 +95,7 @@
   notify: Restart NetworkManager
 
 - name: Configure bridge slave interface
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: "bridge_slave.j2"
     dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_slave_dev }}"
     mode: '0644'
@@ -106,7 +106,7 @@
   notify: Restart NetworkManager
 
 - name: Update resolv.conf
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
     mode: '0644'

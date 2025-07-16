@@ -11,7 +11,7 @@
       - network_config.name | length > 0
       - network_config.mode is defined
       - network_config.bridge_device is defined
-    fail_msg: "Network '{{ network_config.name | default('unnamed') }}' missing required fields"
+    fail_msg: "Network '{{ network_config.name           | default(\'unnamed\'\)   }}' missing required fields"
     success_msg: "Network '{{ network_config.name }}' has all required fields"
 
 - name: Validate network mode
@@ -30,6 +30,6 @@
 
 - name: Validate DHCP configuration if present
   ansible.builtin.include_tasks: validate_dhcp_item.yml
-  when: 
+  when:
     - network_config.dhcp is defined
     - network_config.dhcp.enabled | default(false)

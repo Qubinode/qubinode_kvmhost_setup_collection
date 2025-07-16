@@ -27,8 +27,8 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
-        - "8"
-        - "9"
+        - "all"
+        - "all"
 
   galaxy_tags: []
     # List tags for your role here, one per line. A tag is a keyword that describes

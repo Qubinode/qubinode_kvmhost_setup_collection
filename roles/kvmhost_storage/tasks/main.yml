@@ -8,7 +8,7 @@
 - name: Display storage configuration summary
   ansible.builtin.debug:
     msg:
-      - "=== KVM Host Storage Configuration ==="
+      - === KVM Host Storage Configuration ===
       - "Storage enabled: {{ kvmhost_storage_enabled }}"
       - "LVM enabled: {{ kvmhost_storage_lvm_enabled }}"
       - "Advanced pools: {{ kvmhost_storage_pools_enabled }}"
@@ -22,7 +22,7 @@
 
 - name: Include LVM configuration
   ansible.builtin.include_tasks: lvm_setup.yml
-  when: 
+  when:
     - kvmhost_storage_enabled | default(true)
     - kvmhost_storage_lvm_enabled | default(false)
     - kvmhost_storage_lvm_device | length > 0
@@ -54,8 +54,9 @@
 - name: Display completion summary
   ansible.builtin.debug:
     msg:
-      - "=== KVM Host Storage Configuration Complete ==="
-      - "Total storage pools: {{ (kvmhost_storage_advanced_pools | selectattr('enabled') | list | length) + (kvmhost_storage_lvm_volumes | selectattr('enabled') | list | length) }}"
-      - "LVM volumes: {{ kvmhost_storage_lvm_volumes | selectattr('enabled') | list | map(attribute='name') | join(', ') if kvmhost_storage_lvm_enabled else 'None' }}"
+      - === KVM Host Storage Configuration Complete ===
+      - "Total storage pools: {{ (kvmhost_storage_advanced_pools      | selectattr('enabled')      |      list | length) + (kvmhost_storage_lvm_volumes | selectattr('enabled') |
+        list           |  length)    }}"
+      - "LVM volumes: {{ kvmhost_storage_lvm_volumes      | selectattr('enabled')      |      list | map(attribute='name')           |  join(', ') if kvmhost_storage_lvm_enabled else 'None'    }}"
       - "Performance optimization: {{ 'Applied' if kvmhost_storage_performance_enabled else 'Skipped' }}"
   when: kvmhost_storage_debug_enabled | default(false)

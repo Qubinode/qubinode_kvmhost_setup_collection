@@ -46,14 +46,14 @@
     success_msg: "SELinux is properly configured"
 
 - name: Check available disk space
-  ansible.builtin.command: df -BG {{ kvm_host_libvirt_dir | dirname }}
+  ansible.builtin.command: df -BG {{ kvm_host_libvirt_dir           | dirname   }}
   register: disk_space
   changed_when: false
 
 - name: Verify sufficient disk space
   ansible.builtin.assert:
     that: disk_space.stdout_lines[1].split()[3] | replace('G', '') | int >= 20
-    fail_msg: "Insufficient disk space. Minimum 20GB required in {{ kvm_host_libvirt_dir | dirname }}"
+    fail_msg: "Insufficient disk space. Minimum 20GB required in {{ kvm_host_libvirt_dir           | dirname   }}"
     success_msg: "Sufficient disk space available"
 
 - name: Check network connectivity

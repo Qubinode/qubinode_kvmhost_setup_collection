@@ -1,0 +1,108 @@
+# Automated Ansible Lint Fixes Configuration
+# This file controls the behavior of the automated ansible-lint fixes workflow
+
+# GitHub Actions Settings
+schedule:
+  enabled: true
+  cron: "0 2 * * 0"  # Weekly on Sundays at 2 AM UTC
+  timezone: "UTC"
+
+# Pull Request Settings
+pull_request:
+  auto_assign: true
+  auto_label: true
+  draft_mode: false
+  base_branch: "main"
+  title_prefix: "🤖 Automated Ansible Lint Fixes"
+  
+# Labels to apply to automated PRs
+labels:
+  - "automated"
+  - "ansible-lint" 
+  - "code-quality"
+  - "maintenance"
+  - "ci/cd"
+
+# Automation Behavior
+automation:
+  # Minimum improvements required to create a PR
+  min_improvements_threshold: 5
+  
+  # Maximum files to modify in a single PR
+  max_files_per_pr: 100
+  
+  # Skip PR creation if no critical issues fixed
+  require_critical_fixes: false
+  
+  # Enable detailed diff in PR description
+  include_detailed_diff: true
+  
+  # Enable full automation log in PR description
+  include_automation_log: true
+
+# Notification Settings
+notifications:
+  # Notify on successful automation (even if no changes)
+  notify_on_success: true
+  
+  # Notify on automation failure
+  notify_on_failure: true
+  
+  # Create issues for automation failures
+  create_failure_issues: true
+
+# Advanced Settings
+advanced:
+  # Retry failed automation steps
+  retry_on_failure: true
+  retry_count: 2
+  
+  # Artifact retention
+  artifact_retention_days: 30
+  
+  # Enable metrics collection
+  collect_metrics: true
+
+# Exclusions
+exclude:
+  # Paths to exclude from automation
+  paths:
+    - "roles/.cache/"
+    - "roles/.venv/"
+    - "molecule/"
+    - ".git/"
+  
+  # File patterns to exclude
+  patterns:
+    - "*.log"
+    - "*.tmp"
+    - "backup_*"
+
+# Integration Settings
+integrations:
+  # Enable Slack notifications (requires SLACK_WEBHOOK_URL secret)
+  slack:
+    enabled: false
+    webhook_secret: "SLACK_WEBHOOK_URL"
+    channel: "#ansible-automation"
+  
+  # Enable Teams notifications (requires TEAMS_WEBHOOK_URL secret)
+  teams:
+    enabled: false
+    webhook_secret: "TEAMS_WEBHOOK_URL"
+  
+  # Enable email notifications
+  email:
+    enabled: false
+    recipients: []
+
+# Security Settings
+security:
+  # Require approval for automated PRs in protected branches
+  require_approval: true
+  
+  # Enable branch protection verification
+  verify_branch_protection: true
+  
+  # Maximum automation run time (minutes)
+  max_runtime: 30

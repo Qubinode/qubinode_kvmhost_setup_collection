@@ -19,9 +19,9 @@
 
     - name: Set package manager facts based on OS version
       ansible.builtin.set_fact:
-        kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version|int >= 8 else 'yum' }}"
-        kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version|int >= 8 else 'python' }}"
-        kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version|int >= 8 else 'pip' }}"
+        kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version          | int>= 8 else 'yum'   }}"
+        kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version          | int>= 8 else 'python'   }}"
+        kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version          | int>= 8 else 'pip'   }}"
 
     - name: Display OS detection results
       ansible.builtin.debug:
@@ -90,12 +90,10 @@
 - name: Set current OS package list
   ansible.builtin.set_fact:
     kvmhost_packages_current: >-
-      {{
-        kvmhost_packages_base.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_packages_base.rhel10 if kvmhost_is_rhel10 else
         kvmhost_packages_base.rhel9 if kvmhost_is_rhel9 else
         kvmhost_packages_base.rhel8 if kvmhost_is_rhel8 else
-        kvmhost_packages_base.rhel9
-      }}
+        kvmhost_packages_base.rhel9 }}
   tags:
     - rhel_packages
 
@@ -120,12 +118,10 @@
 - name: Set current OS service list
   ansible.builtin.set_fact:
     kvmhost_services_current: >-
-      {{
-        kvmhost_services.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_services.rhel10 if kvmhost_is_rhel10 else
         kvmhost_services.rhel9 if kvmhost_is_rhel9 else
         kvmhost_services.rhel8 if kvmhost_is_rhel8 else
-        kvmhost_services.rhel9
-      }}
+        kvmhost_services.rhel9 }}
   tags:
     - rhel_services
 
@@ -150,12 +146,10 @@
 - name: Set current OS firewall service list
   ansible.builtin.set_fact:
     kvmhost_firewall_services_current: >-
-      {{
-        kvmhost_firewall_services.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_firewall_services.rhel10 if kvmhost_is_rhel10 else
         kvmhost_firewall_services.rhel9 if kvmhost_is_rhel9 else
         kvmhost_firewall_services.rhel8 if kvmhost_is_rhel8 else
-        kvmhost_firewall_services.rhel9
-      }}
+        kvmhost_firewall_services.rhel9 }}
   tags:
     - rhel_firewall
 
@@ -177,12 +171,10 @@
 - name: Set current OS repository configuration
   ansible.builtin.set_fact:
     kvmhost_repos_current: >-
-      {{
-        kvmhost_repos.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_repos.rhel10 if kvmhost_is_rhel10 else
         kvmhost_repos.rhel9 if kvmhost_is_rhel9 else
         kvmhost_repos.rhel8 if kvmhost_is_rhel8 else
-        kvmhost_repos.rhel9
-      }}
+        kvmhost_repos.rhel9 }}
   tags:
     - rhel_repos
 

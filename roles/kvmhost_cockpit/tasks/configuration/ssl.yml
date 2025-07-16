@@ -5,7 +5,7 @@
 # Configures SSL certificates for Cockpit web interface
 
 - name: Create SSL certificate directory
-  ansible.builtin.file:
+  ansible.builtin.ansible.builtin.file:
     path: /etc/cockpit/ws-certs.d
     state: directory
     mode: '0755'
@@ -26,7 +26,7 @@
   notify: restart cockpit
 
 - name: Copy custom SSL certificate
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     src: "{{ kvmhost_cockpit_ssl_cert_path }}"
     dest: /etc/cockpit/ws-certs.d/1-custom.cert
     mode: '0644'
@@ -39,7 +39,7 @@
   notify: restart cockpit
 
 - name: Copy custom SSL private key
-  ansible.builtin.copy:
+  ansible.builtin.ansible.builtin.copy:
     src: "{{ kvmhost_cockpit_ssl_key_path }}"
     dest: /etc/cockpit/ws-certs.d/1-custom.key
     mode: '0600'
@@ -52,14 +52,14 @@
   notify: restart cockpit
 
 - name: Set proper permissions on SSL files
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    mode: "{{ item.mode }}"
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item.path }}'
+    mode: '{{ item.mode }}'
     owner: root
     group: root
   loop:
-    - { path: "/etc/cockpit/ws-certs.d/*.cert", mode: "0644" }
-    - { path: "/etc/cockpit/ws-certs.d/*.key", mode: "0600" }
+    - { path: '/etc/cockpit/ws-certs.d/*.cert', mode: '0644' }
+    - { path: '/etc/cockpit/ws-certs.d/*.key', mode: '0600' }
   with_fileglob:
     - "/etc/cockpit/ws-certs.d/*.cert"
     - "/etc/cockpit/ws-certs.d/*.key"

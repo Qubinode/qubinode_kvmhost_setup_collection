@@ -1,11 +1,11 @@
 ---
 - name: Reload systemd
-  ansible.builtin.systemd:
+  ansible.builtin.ansible.builtin.systemd:
     daemon_reload: true
   become: true
 
 - name: Remount filesystem
-  ansible.builtin.shell: "mount -o remount {{ item }}"
+  ansible.builtin.command: mount -o remount {{ item }}
   become: true
 
 - name: Update grub configuration

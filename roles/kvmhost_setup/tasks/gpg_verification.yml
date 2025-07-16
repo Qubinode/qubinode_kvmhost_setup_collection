@@ -3,11 +3,11 @@
 # Enhanced security compliance with automatic key verification
 
 - name: Ensure DNF GPG key verification is enabled globally
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/dnf/dnf.conf
     regexp: '^gpgcheck='
     line: 'gpgcheck=1'
-    backup: yes
+    backup: true
   become: true
   tags:
     - security
@@ -15,11 +15,11 @@
     - adr_0001
 
 - name: Ensure DNF repo GPG key verification is enabled globally
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/dnf/dnf.conf
     regexp: '^repo_gpgcheck='
     line: 'repo_gpgcheck=1'
-    backup: yes
+    backup: true
   become: true
   tags:
     - security
@@ -27,11 +27,11 @@
     - adr_0001
 
 - name: Ensure DNF local package GPG verification is enabled
-  ansible.builtin.lineinfile:
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/dnf/dnf.conf
     regexp: '^localpkg_gpgcheck='
     line: 'localpkg_gpgcheck=1'
-    backup: yes
+    backup: true
   become: true
   tags:
     - security
@@ -104,10 +104,10 @@
       - epel_info_check.rc == 0
     fail_msg: "EPEL repository GPG verification failed"
     success_msg: "EPEL repository GPG verification successful"
-  when: 
+  when:
     - epel_info_check is defined
     - "'epel' in enabled_repos_check.stdout | lower"
-    - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
+    - not (ansible_virtualization_type | default(\'\'\) in ['container', 'docker', 'podman'])
   tags:
     - security
     - gpg_verification
@@ -116,8 +116,8 @@
 - name: Skip EPEL GPG verification in container environments
   ansible.builtin.debug:
     msg: "Skipping EPEL GPG verification - container environment detected or EPEL not configured"
-  when: 
-    - ansible_virtualization_type | default('') in ['container', 'docker', 'podman'] or 
+  when:
+    - ansible_virtualization_type | default(\'\'\) in ['container', 'docker', 'podman'] or
       "'epel' not in enabled_repos_check.stdout | lower"
   tags:
     - security
@@ -125,7 +125,7 @@
     - adr_0001
 
 - name: Create GPG verification status report
-  ansible.builtin.template:
+  ansible.builtin.ansible.builtin.template:
     src: gpg_verification_report.j2
     dest: "/var/log/ansible-gpg-verification-{{ ansible_date_time.epoch }}.log"
     mode: '0644'

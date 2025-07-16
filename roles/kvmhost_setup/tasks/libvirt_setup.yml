@@ -4,8 +4,8 @@
   when: not cicd_test|bool
 
 - name: Enable libvirt services
-  ansible.builtin.service:
-    name: "{{ item }}"
+  ansible.builtin.ansible.builtin.service:
+    name: '{{ item }}'
     enabled: true
     state: started
   with_items: "{{ libvirt_services }}"
@@ -21,7 +21,7 @@
   register: tuned_profile_changed
 
 - name: Return bridge status
-  ansible.builtin.command: "ifconfig {{ qubinode_bridge_name }}"
+  ansible.builtin.command: ifconfig {{ qubinode_bridge_name }}
   register: bridge_interface
   ignore_errors: true
   check_mode: true
@@ -38,52 +38,42 @@
 - name: Set flag for Fedora 38
   ansible.builtin.set_fact:
     is_fedora_38: >-
-      {{
-        ansible_distribution == 'Fedora'
+      {{ ansible_distribution == 'Fedora'
         and ansible_distribution_major_version == '38'
         and bridge_interface_status.stdout == ''
-        and configure_bridge
-      }}
+        and configure_bridge }}
 
 - name: Set flag for Fedora 37
   ansible.builtin.set_fact:
     is_fedora_37: >-
-      {{
-        ansible_distribution == 'Fedora'
+      {{ ansible_distribution == 'Fedora'
         and ansible_distribution_major_version == '37'
         and bridge_interface_status.stdout == ''
-        and configure_bridge
-      }}
+        and configure_bridge }}
 
 - name: Set flag for CentOS 9
   ansible.builtin.set_fact:
     is_centos_9: >-
-      {{
-        ansible_distribution == 'CentOS'
+      {{ ansible_distribution == 'CentOS'
         and ansible_distribution_major_version == '9'
         and bridge_interface_status.stdout == ''
-        and configure_bridge
-      }}
+        and configure_bridge }}
 
 - name: Set flag for RedHat 8
   ansible.builtin.set_fact:
     is_redhat_8: >-
-      {{
-        ansible_distribution == 'RedHat'
+      {{ ansible_distribution == 'RedHat'
         and ansible_distribution_major_version == '8'
         and bridge_interface_status.stdout == ''
-        and configure_bridge
-      }}
+        and configure_bridge }}
 
 - name: Set flag for RedHat 9
   ansible.builtin.set_fact:
     is_redhat_9: >-
-      {{
-        ansible_distribution == 'RedHat'
+      {{ ansible_distribution == 'RedHat'
         and ansible_distribution_major_version == '9'
         and bridge_interface_status.stdout == ''
-        and configure_bridge
-      }}
+        and configure_bridge }}
 
 - name: Configure bridge interface for libvirt
   ansible.builtin.import_role:
@@ -91,7 +81,7 @@
   vars:
     network_provider: nm
     network_connections:
-      - name: "{{ qubinode_bridge_name }}"
+      - name: '{{ qubinode_bridge_name }}'
         type: bridge
         state: up
         ip:
@@ -108,7 +98,7 @@
       - name: eno1
         state: up
         type: ethernet
-        interface_name: "{{ kvm_host_interface }}"
+        interface_name: '{{ kvm_host_interface }}'
         controller: "{{ qubinode_bridge_name }}"
         port_type: bridge
   when: is_fedora_38 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9

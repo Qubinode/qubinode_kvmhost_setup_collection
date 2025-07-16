@@ -3,9 +3,9 @@
 # Based on ADR-0007: Network Architecture Decisions
 
 # Bridge configuration
-qubinode_bridge_name: "qubibr0"
-qubinode_bridge_type: "Bridge"
-qubinode_bridge_interface: ""  # Auto-detect if not specified
+qubinode_bridge_name: qubibr0
+qubinode_bridge_type: Bridge
+qubinode_bridge_interface: "" # Auto-detect if not specified
 
 # Network interface detection
 auto_detect_interface: true
@@ -13,10 +13,10 @@ force_bridge_creation: false
 
 # Bridge network settings
 bridge_network_config:
-  method: "auto"  # auto, static, dhcp
+  method: auto # auto, static, dhcp
   dhcp_timeout: 30
-  ipv4_method: "auto"
-  ipv6_method: "auto"
+  ipv4_method: auto
+  ipv6_method: auto
 
 # NetworkManager configuration
 use_networkmanager: true
@@ -26,12 +26,12 @@ backup_existing_config: true
 network_validation_enabled: true
 validation_timeout: 60
 ping_test_hosts:
-  - "8.8.8.8"
-  - "1.1.1.1"
+  - 8.8.8.8
+  - 1.1.1.1
 
 # Firewall configuration
 configure_firewall_for_bridge: true
-firewall_zone: "public"
+firewall_zone: public
 
 # Bridge interface settings
 bridge_interface_settings:
@@ -43,4 +43,4 @@ bridge_interface_settings:
 
 # Network troubleshooting
 enable_network_debugging: false
-network_debug_level: "info"
+network_debug_level: info
