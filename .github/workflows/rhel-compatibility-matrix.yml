@@ -68,7 +68,7 @@ jobs:
           echo "rhel-versions=$RHEL_VERSIONS" >> $GITHUB_OUTPUT
 
       - name: Upload compatibility reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: compatibility-reports
           path: |
@@ -252,7 +252,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-rhel${{ matrix.rhel_version }}-ansible${{ matrix.ansible_version }}
           path: test-results/
