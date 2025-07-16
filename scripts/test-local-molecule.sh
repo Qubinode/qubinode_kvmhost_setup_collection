@@ -1,12 +1,15 @@
 #!/bin/bash
-# Local Molecule Testing Script
-# Based on research findings from docs/research/local-molecule-testing-validation-2025-01-12.md
+# Local Molecule Testing Script with EPEL GPG Workarounds
+# Based on research findings from docs/research/epel-gpg-verification-in-container-testing.md
 # Validates ADR-0012 compliance: Use Init Containers for Molecule Testing
+# Updated for ADR-0012 & ADR-0013: Security-Enhanced Container Testing with GPG fixes
 
 set -e
 
 echo "🧪 Local Molecule Testing Validation Script"
-echo "==========================================="
+echo "🛡️ Security-Enhanced Testing per ADR-0012 & ADR-0013"
+echo "🔑 EPEL GPG Verification Workarounds Applied"
+echo "======================================================"
 
 # Check Python version (research recommends 3.11 for RHEL 9)
 python_version=$(python3 --version 2>&1 | cut -d" " -f2 | cut -d"." -f1,2)
@@ -26,10 +29,10 @@ if command -v molecule &> /dev/null; then
     molecule_version=$(molecule --version | head -1 | cut -d" " -f2)
     echo "📋 Molecule version: $molecule_version"
     
-    if [[ "${molecule_version%%.*}" -ge "6" ]] || [[ "${molecule_version}" == "25"* ]]; then
-        echo "✅ Molecule version is current (research recommends v25.6.0+)"
+    if [[ "${molecule_version%%.*}" -ge 6 ]] || [[ "${molecule_version}" == "25"* ]]; then
+        echo "✅ Molecule version is current (research recommends v6.0+)"
     else
-        echo "⚠️  Consider upgrading Molecule: pip install 'molecule>=25.6.0'"
+        echo "⚠️  Consider upgrading Molecule: pip install 'molecule>=6.0'"
     fi
 else
     echo "❌ Molecule not found."
@@ -38,13 +41,13 @@ else
     echo "   Option 1 (Recommended): Run setup script"
     echo "     ./scripts/setup-local-testing.sh"
     echo ""
-    echo "   Option 2: Manual installation"
-    echo "     pip install molecule molecule-plugins[docker]"
+    echo "   Option 2: Manual installation (Security-Enhanced)"
+    echo "     pip install molecule molecule-podman  # Note: Podman preferred"
     echo ""
-    echo "   Option 3: Use virtual environment"
-    echo "     python3 -m venv ~/.local/molecule-env"
+    echo "   Option 3: Use virtual environment (Recommended)"
+    echo "     python3.11 -m venv ~/.local/molecule-env"
     echo "     source ~/.local/molecule-env/bin/activate"
-    echo "     pip install molecule molecule-plugins[docker] ansible-core"
+    echo "     pip install molecule molecule-podman ansible-core>=2.17"
     echo ""
     echo "🛡️ This is a CRITICAL requirement for ADR-0011 compliance"
     echo "📋 Rule: mandatory-local-testing-before-push"
@@ -66,28 +69,63 @@ else
     exit 1
 fi
 
-# Check container runtime (research recommends Podman over Docker)
+# Check container runtime with security focus (ADR-0012 security migration)
 if command -v podman &> /dev/null; then
-    echo "✅ Podman available (research-recommended for RHEL 9)"
+    echo "✅ Podman available (security-enhanced for RHEL 9+ per ADR-0012)"
+    
+    # Check for rootless Podman configuration
+    if podman info --format="{{.Host.Security.Rootless}}" 2>/dev/null | grep -q "true"; then
+        echo "✅ Rootless Podman configured (enhanced security)"
+    else
+        echo "⚠️  Rootless Podman not configured - consider enabling for security"
+        echo "   Run: podman system migrate"
+    fi
+    
+    # Check for user namespaces
+    if podman info --format="{{.Host.IDMappings.UIDMap}}" 2>/dev/null | grep -q "0:"; then
+        echo "✅ User namespace mapping available"
+    else
+        echo "⚠️  User namespace mapping not detected"
+    fi
+    
 elif command -v docker &> /dev/null; then
-    echo "⚠️  Docker available (consider migrating to Podman for RHEL 9)"
+    echo "⚠️  Docker available - migrate to Podman for ADR-0012 security compliance"
+    echo "   Install: dnf install podman"
+    echo "   Migration: See testing.md Security-Enhanced Testing section"
 else
     echo "❌ No container runtime found. Install Podman: dnf install podman"
     exit 1
 fi
 
 echo ""
-echo "🐳 Validating Container Image Compliance (ADR-0012)"
-echo "===================================================="
+echo "🐳 Validating Container Security Compliance (ADR-0012 & ADR-0013)"
+echo "=================================================================="
 
-# Check for init container compliance in molecule configurations
-init_compliance_failed=false
+# Check for security-enhanced container compliance in molecule configurations
+security_compliance_failed=false
+privileged_usage_found=false
 
 if [ -d "molecule" ]; then
     for molecule_file in molecule/*/molecule.yml; do
         if [ -f "$molecule_file" ]; then
             scenario_name=$(basename $(dirname "$molecule_file"))
             echo "📋 Checking scenario: $scenario_name"
+            
+            # Check for privileged containers (security violation)
+            if grep -q "privileged.*true" "$molecule_file"; then
+                echo "  ❌ Privileged container found - security violation"
+                echo "     🚫 Violates ADR-0012: Security-Enhanced Container Testing"
+                privileged_usage_found=true
+            else
+                echo "  ✅ No privileged containers detected"
+            fi
+            
+            # Check for security-enhanced capabilities approach
+            if grep -q "capabilities:" "$molecule_file"; then
+                echo "  ✅ Capability-specific security found"
+            else
+                echo "  ⚠️  No specific capabilities defined - consider adding SYS_ADMIN only"
+            fi
             
             # Extract image names from molecule.yml
             images=$(grep -E "^\s*image:" "$molecule_file" | sed 's/.*image:\s*//' | tr -d '"' | tr -d "'" || true)
@@ -97,12 +135,12 @@ if [ -d "molecule" ]; then
                     # Check if image is an init container per ADR-0012
                     if echo "$image" | grep -qE "(ubi.*-init|rockylinux.*-init|almalinux.*-init)" || \
                        echo "$image" | grep -qE "centos:stream9"; then
-                        echo "  ✅ Init image compliant: $image"
+                        echo "  ✅ Security-enhanced init image: $image"
                     else
                         echo "  ❌ Non-init image found: $image"
                         echo "     🚫 Violates ADR-0012: Use Init Containers for Molecule Testing"
-                        echo "     💡 Available init images documented in: molecule/AVAILABLE_INIT_IMAGES.md"
-                        init_compliance_failed=true
+                        echo "     💡 Available secure images documented in: molecule/AVAILABLE_INIT_IMAGES.md"
+                        security_compliance_failed=true
                     fi
                 done <<< "$images"
             else
@@ -111,15 +149,16 @@ if [ -d "molecule" ]; then
         fi
     done
     
-    if [ "$init_compliance_failed" = true ]; then
+    if [ "$security_compliance_failed" = true ] || [ "$privileged_usage_found" = true ]; then
         echo ""
-        echo "❌ CRITICAL: ADR-0012 Compliance Failed"
-        echo "🚫 BLOCKING CI/CD - Update to use only init containers"
+        echo "❌ CRITICAL: Security Compliance Failed"
+        echo "🚫 BLOCKING CI/CD - Security violations detected"
         echo "📖 See: docs/adrs/adr-0012-init-container-vs-regular-container-molecule-testing.md"
-        echo "📋 Available images: molecule/AVAILABLE_INIT_IMAGES.md"
+        echo "� Migration guide: testing.md Security-Enhanced Testing section"
+        echo "🛡️ Required: Rootless Podman + Capability-specific (no privileged containers)"
         exit 1
     else
-        echo "✅ All images comply with ADR-0012 init container requirement"
+        echo "✅ All configurations comply with security-enhanced testing requirements"
     fi
 else
     echo "⚠️  No molecule directory found"
@@ -128,6 +167,20 @@ fi
 echo ""
 echo "🧪 Running Local Molecule Tests"
 echo "================================"
+
+# Quick syntax validation first
+echo "🔍 Running syntax validation..."
+if [ -f "test.yml" ]; then
+    if ansible-playbook --syntax-check test.yml; then
+        echo "✅ Syntax validation passed"
+    else
+        echo "❌ Syntax validation failed"
+        echo "🚫 Fix syntax errors before proceeding"
+        exit 1
+    fi
+else
+    echo "⚠️  test.yml not found - skipping syntax validation"
+fi
 
 # Define test scenarios based on project structure
 test_scenarios=("default")
@@ -146,16 +199,27 @@ echo "📋 Found test scenarios: ${test_scenarios[*]}"
 for scenario in "${test_scenarios[@]}"; do
     echo ""
     echo "🔬 Testing scenario: $scenario"
+    echo "🔑 GPG verification workarounds active"
     echo "------------------------------"
     
     if [ -d "molecule/$scenario" ]; then
         echo "✅ Scenario directory exists"
         
+        # Check if prepare.yml exists (GPG workaround indicator)
+        if [ -f "molecule/$scenario/prepare.yml" ]; then
+            echo "✅ GPG workaround prepare.yml detected"
+        else
+            echo "⚠️  No prepare.yml - may encounter EPEL GPG issues"
+        fi
+        
         # Run molecule test for this scenario
+        echo "🧪 Running molecule test with EPEL GPG workarounds..."
         if molecule test -s "$scenario"; then
-            echo "✅ Scenario '$scenario' passed"
+            echo "✅ Scenario '$scenario' passed (with GPG workarounds)"
         else
             echo "❌ Scenario '$scenario' failed"
+            echo "🔍 Check for EPEL GPG verification issues"
+            echo "📖 See: docs/research/epel-gpg-verification-in-container-testing.md"
             echo "🚫 BLOCKING CI/CD - Fix issues before pushing"
             exit 1
         fi
@@ -168,10 +232,16 @@ echo ""
 echo "🎉 All local Molecule tests passed!"
 echo "✅ Safe to proceed with CI/CD"
 echo ""
-echo "💡 Tips based on research findings:"
-echo "   - Use Python 3.11 for 10-60% performance improvement"
-echo "   - Consider upgrading to Ansible-core 2.17+ for enhanced features"
-echo "   - Podman is preferred over Docker for RHEL 9 environments"
-echo "   - Self-hosted runners are essential for KVM/libvirt testing"
-echo "   - Only use init containers (ADR-0012): ubi-init, rockylinux-init, almalinux-init"
-echo "   - Available init images documented in: molecule/AVAILABLE_INIT_IMAGES.md"
+echo "💡 Security-Enhanced Testing Tips (ADR-0012 & ADR-0013):"
+echo "   - Use Python 3.11+ for optimal RHEL 9+ performance (10-60% improvement)"
+echo "   - Ansible-core 2.17+ recommended with Python 3.11"
+echo "   - Rootless Podman preferred for enhanced security"
+echo "   - Use capability-specific security (SYS_ADMIN only, no privileged)"
+echo "   - User namespace isolation: --user-ns=auto for container security"
+echo "   - Only use systemd-enabled init containers (ADR-0012)"
+echo "   - Available secure images: molecule/AVAILABLE_INIT_IMAGES.md"
+echo ""
+echo "🛡️ Security Migration Resources:"
+echo "   - Testing Guide: testing.md Security-Enhanced Testing section"
+echo "   - ADR Documentation: docs/adrs/"
+echo "   - Migration Examples: See testing.md Migration Guide"

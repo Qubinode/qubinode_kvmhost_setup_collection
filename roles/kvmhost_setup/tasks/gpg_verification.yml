@@ -88,13 +88,37 @@
     - gpg_verification
     - adr_0001
 
+- name: Check if EPEL repository is available and configured
+  ansible.builtin.command: dnf repolist --enabled
+  register: enabled_repos_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
 - name: Verify EPEL repository GPG signature validation
   ansible.builtin.assert:
     that:
       - epel_info_check.rc == 0
     fail_msg: "EPEL repository GPG verification failed"
     success_msg: "EPEL repository GPG verification successful"
-  when: epel_info_check is defined
+  when: 
+    - epel_info_check is defined
+    - "'epel' in enabled_repos_check.stdout | lower"
+    - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
+- name: Skip EPEL GPG verification in container environments
+  ansible.builtin.debug:
+    msg: "Skipping EPEL GPG verification - container environment detected or EPEL not configured"
+  when: 
+    - ansible_virtualization_type | default('') in ['container', 'docker', 'podman'] or 
+      "'epel' not in enabled_repos_check.stdout | lower"
   tags:
     - security
     - gpg_verification

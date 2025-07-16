@@ -1,0 +1,92 @@
+{
+  "timestamp": "2025-07-15T20:10:00Z",
+  "project_root": "/home/vpcuser/qubinode_kvmhost_setup_collection",
+  "scan_type": "comprehensive_security_assessment",
+  "vulnerability_summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 11,
+    "low": 3,
+    "total": 14
+  },
+  "package_security": {
+    "total_packages_scanned": 98,
+    "vulnerable_packages": 8,
+    "packages_with_fixes": 8,
+    "vulnerability_details": [
+      {
+        "package": "ansible-core",
+        "version": "2.14.18",
+        "vulnerabilities": 2,
+        "highest_severity": "medium",
+        "fix_version": "2.17.6",
+        "cves": ["CVE-2024-8775", "CVE-2024-11079"]
+      },
+      {
+        "package": "cryptography", 
+        "version": "36.0.1",
+        "vulnerabilities": 8,
+        "highest_severity": "medium",
+        "fix_version": "42.0.2",
+        "cves": ["CVE-2023-49083", "CVE-2023-23931", "CVE-2023-0286", "CVE-2023-50782", "CVE-2024-0727"]
+      },
+      {
+        "package": "urllib3",
+        "version": "1.26.5", 
+        "vulnerabilities": 4,
+        "highest_severity": "medium",
+        "fix_version": "2.5.0",
+        "cves": ["CVE-2023-43804", "CVE-2023-45803", "CVE-2024-37891", "CVE-2025-50181"]
+      }
+    ]
+  },
+  "code_security": {
+    "static_analysis_tool": "bandit",
+    "total_issues": 3,
+    "severity_breakdown": {
+      "high": 0,
+      "medium": 0,
+      "low": 3
+    },
+    "affected_files": ["scripts/generate_compatibility_matrix.py"]
+  },
+  "deployment_assessment": {
+    "blocking_issues": 0,
+    "deployment_status": "conditional_approval",
+    "security_score": 75,
+    "target_score": 95,
+    "recommendations": [
+      "Update ansible-core to >=2.17.6",
+      "Update cryptography to >=42.0.2", 
+      "Update urllib3 to >=2.5.0",
+      "Implement automated dependency scanning"
+    ]
+  },
+  "compliance": {
+    "owasp_dependency_check": "passed",
+    "supply_chain_security": "passed", 
+    "code_security_scan": "passed",
+    "critical_vulnerability_check": "passed"
+  },
+  "next_actions": {
+    "immediate": [
+      "Update high-priority vulnerable packages",
+      "Test updated dependencies in staging environment"
+    ],
+    "short_term": [
+      "Implement automated security scanning in CI/CD",
+      "Create vulnerability management process"
+    ],
+    "long_term": [
+      "Regular security audits",
+      "Security training for development team"
+    ]
+  },
+  "risk_level": "moderate",
+  "deployment_approved": true,
+  "conditions": [
+    "Update ansible-core before production deployment",
+    "Schedule remaining updates within 30 days",
+    "Implement continuous security monitoring"
+  ]
+}

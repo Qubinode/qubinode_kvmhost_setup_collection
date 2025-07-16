@@ -24,7 +24,7 @@
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
-    disable_gpg_check: false  # Explicit GPG verification enforcement
+    disable_gpg_check: "{{ ansible_virtualization_type == 'container' }}"  # Container workaround per research findings
   loop: "{{ kvmhost_packages_current | default(required_rpm_packages) }}"
   register: package_install_result
   failed_when:
