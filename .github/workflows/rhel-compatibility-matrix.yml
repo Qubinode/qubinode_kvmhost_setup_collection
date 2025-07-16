@@ -270,7 +270,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all test results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: test-artifacts/
 
@@ -285,7 +285,7 @@ jobs:
           pip install pyyaml
 
       - name: Download compatibility reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: compatibility-reports
           path: docs/
@@ -354,7 +354,7 @@ jobs:
     
     steps:
       - name: Download compatibility reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: compatibility-reports
 
