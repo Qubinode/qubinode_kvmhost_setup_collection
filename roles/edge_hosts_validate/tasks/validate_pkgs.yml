@@ -1,5 +1,5 @@
 - name: 'Validate packages are installed'
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     list: "{{ item }}"
   with_items: "{{ libvirt_pkgs }}"
   register: edge_hosts_validate_installed_pkg

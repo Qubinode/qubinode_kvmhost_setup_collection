@@ -1,0 +1,27 @@
+---
+- name: Converge - RHEL8 Testing
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    # Basic configuration for RHEL8 testing
+    admin_user: molecule
+    domain: test.local
+    dns_forwarder: "1.1.1.1"
+    
+    # Minimal KVM host configuration for RHEL8
+    lib_virt_setup: false
+    enable_cockpit: false
+    configure_shell: true
+    
+  tasks:
+    - name: Debug RHEL8 test environment
+      ansible.builtin.debug:
+        msg: "RHEL8 compatibility test - minimal configuration"
+    
+    - name: Ensure basic system packages are available
+      ansible.builtin.dnf:
+        name:
+          - python3
+          - python3-pip
+        state: present

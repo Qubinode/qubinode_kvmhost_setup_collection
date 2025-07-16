@@ -74,7 +74,7 @@ check_adr_0001_compliance() {
     local compliance_status="COMPLIANT"
     local issues=()
     
-    log_info "Checking ADR-0001: DNF Module Management compliance"
+    log_info "Checking ADR-0001: DNF Module Management compliance" >&2
     
     # Check for dnf module usage in roles
     local roles_with_dnf=0
@@ -115,7 +115,7 @@ check_adr_0002_compliance() {
     local compliance_status="COMPLIANT"
     local issues=()
     
-    log_info "Checking ADR-0002: Role Architecture Standards compliance"
+    log_info "Checking ADR-0002: Role Architecture Standards compliance" >&2
     
     if [[ -d "$PROJECT_ROOT/roles" ]]; then
         for role_dir in "$PROJECT_ROOT/roles"/*; do
@@ -163,7 +163,7 @@ check_adr_0005_compliance() {
     local compliance_status="COMPLIANT"
     local issues=()
     
-    log_info "Checking ADR-0005: Molecule Testing Framework compliance"
+    log_info "Checking ADR-0005: Molecule Testing Framework compliance" >&2
     
     if [[ -d "$PROJECT_ROOT/molecule" ]]; then
         local scenario_count=0
@@ -211,7 +211,7 @@ check_adr_0009_compliance() {
     local compliance_status="COMPLIANT"
     local issues=()
     
-    log_info "Checking ADR-0009: GitHub Actions Dependabot Auto-Updates compliance"
+    log_info "Checking ADR-0009: GitHub Actions Dependabot Auto-Updates compliance" >&2
     
     # Check for dependabot.yml
     if [[ ! -f "$PROJECT_ROOT/.github/dependabot.yml" ]]; then
@@ -251,7 +251,7 @@ check_adr_0011_compliance() {
     local compliance_status="COMPLIANT"
     local issues=()
     
-    log_info "Checking ADR-0011: Mandatory Local Testing Requirements compliance"
+    log_info "Checking ADR-0011: Mandatory Local Testing Requirements compliance" >&2
     
     # Check for required testing scripts
     local required_scripts=(
@@ -290,7 +290,7 @@ check_adr_0013_compliance() {
     local compliance_status="COMPLIANT"
     local issues=()
     
-    log_info "Checking ADR-0013: Molecule Container Configuration Best Practices compliance"
+    log_info "Checking ADR-0013: Molecule Container Configuration Best Practices compliance" >&2
     
     if [[ -d "$PROJECT_ROOT/molecule" ]]; then
         for scenario_dir in "$PROJECT_ROOT/molecule"/*; do

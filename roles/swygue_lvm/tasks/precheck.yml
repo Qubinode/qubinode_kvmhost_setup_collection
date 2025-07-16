@@ -1,6 +1,6 @@
 ---
 - name: Ensure lvm2 is installed
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: lvm2
     state: present
   tags:
