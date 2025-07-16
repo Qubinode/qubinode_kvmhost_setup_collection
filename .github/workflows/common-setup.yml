@@ -18,16 +18,16 @@ jobs:
   setup:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python-version }}
           cache: 'pip'
           
       - name: Cache Python packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: pip-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('requirements.txt') }}
