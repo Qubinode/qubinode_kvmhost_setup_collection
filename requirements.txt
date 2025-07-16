@@ -1,0 +1,42 @@
+# Python dependencies for Qubinode KVM Host Setup Collection
+# Core Ansible and testing tools
+
+# Ansible Core - matches your workflow requirements
+ansible-core>=2.17.0,<2.19.0
+
+# Ansible Lint - for code quality
+ansible-lint>=6.0.0
+
+# Molecule - for testing roles
+molecule>=25.6.0
+molecule-podman
+
+# YAML linting
+yamllint>=1.28.0
+
+# Jinja2 templating
+jinja2>=3.0.0
+
+# Security tools
+bandit>=1.7.0
+safety>=2.0.0
+
+# Development and testing tools
+pre-commit>=2.15.0
+pytest>=6.0.0
+pytest-ansible
+testinfra
+
+# Collection-specific tools
+packaging
+requests
+pyyaml
+
+# Documentation tools
+sphinx
+sphinx-rtd-theme
+
+# Automation and CI/CD helpers
+wheel
+setuptools
+pip-tools
