@@ -1,0 +1,9 @@
+<network>
+  <name>{{ network_item.name }}</name>
+  <bridge name='virbr{{ network_idx + 10 }}' stp='on' delay='0'/>
+  <ip address='192.168.{{ 200 + network_idx }}.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.{{ 200 + network_idx }}.2' end='192.168.{{ 200 + network_idx }}.254'/>
+    </dhcp>
+  </ip>
+</network>

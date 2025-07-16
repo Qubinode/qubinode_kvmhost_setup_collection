@@ -1,0 +1,102 @@
+
+# =============================================================================
+# SCHEMA VALIDATION FOR KVMHOST_COCKPIT ROLE
+# =============================================================================
+# Validates kvmhost_cockpit role variables against JSON schema
+
+- name: Load kvmhost_cockpit schema
+  ansible.builtin.set_fact:
+    kvmhost_cockpit_schema: "{{ lookup('file', validation_schemas_dir + '/kvmhost_cockpit_schema.json') | from_json }}"
+  vars:
+    validation_schemas_dir: "{{ playbook_dir }}/validation/schemas"
+
+- name: Extract kvmhost_cockpit variables for validation
+  ansible.builtin.set_fact:
+    kvmhost_cockpit_vars:
+      enable_cockpit: "{{ enable_cockpit | default(false) }}"
+      kvmhost_cockpit_port: "{{ kvmhost_cockpit_port | default(9090) }}"
+      kvmhost_cockpit_ssl_enabled: "{{ kvmhost_cockpit_ssl_enabled | default(true) }}"
+      cockpit_packages: "{{ cockpit_packages | default([]) }}"
+      cockpit_modules: "{{ cockpit_modules | default([]) }}"
+      cockpit_firewall_zone: "{{ cockpit_firewall_zone | default('public') }}"
+      cockpit_auth_methods: "{{ cockpit_auth_methods | default([]) }}"
+      cockpit_certificates: "{{ cockpit_certificates | default({}) }}"
+
+- name: Validate kvmhost_cockpit required properties
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [error_msg] }}"
+  vars:
+    error_msg: "kvmhost_cockpit validation error: Required property '{{ item }}' is missing"
+  when: 
+    - kvmhost_cockpit_schema.required is defined
+    - item in kvmhost_cockpit_schema.required
+    - kvmhost_cockpit_vars[item] is not defined
+  loop: "{{ kvmhost_cockpit_schema.required }}"
+
+- name: Validate cockpit port range
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [port_error_msg] }}"
+  vars:
+    port_error_msg: "kvmhost_cockpit validation error: Port '{{ kvmhost_cockpit_vars.kvmhost_cockpit_port }}' must be between 1024 and 65535"
+  when: 
+    - kvmhost_cockpit_vars.enable_cockpit
+    - kvmhost_cockpit_vars.kvmhost_cockpit_port is defined
+    - (kvmhost_cockpit_vars.kvmhost_cockpit_port | int < 1024 or kvmhost_cockpit_vars.kvmhost_cockpit_port | int > 65535)
+
+- name: Validate cockpit modules
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [module_error_msg] }}"
+  vars:
+    module_error_msg: "kvmhost_cockpit validation error: Invalid cockpit module '{{ item }}'"
+    valid_modules: ["machines", "networkmanager", "selinux", "storaged", "packagekit", "podman", "sosreport", "system", "kdump", "users"]
+  when: 
+    - kvmhost_cockpit_vars.cockpit_modules | length > 0
+    - item not in valid_modules
+  loop: "{{ kvmhost_cockpit_vars.cockpit_modules }}"
+
+- name: Validate firewall zone
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [zone_error_msg] }}"
+  vars:
+    zone_error_msg: "kvmhost_cockpit validation error: Invalid firewall zone '{{ kvmhost_cockpit_vars.cockpit_firewall_zone }}'"
+    valid_zones: ["public", "internal", "trusted", "dmz", "work", "home"]
+  when: 
+    - kvmhost_cockpit_vars.cockpit_firewall_zone is defined
+    - kvmhost_cockpit_vars.cockpit_firewall_zone not in valid_zones
+
+- name: Validate auth methods
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [auth_error_msg] }}"
+  vars:
+    auth_error_msg: "kvmhost_cockpit validation error: Invalid authentication method '{{ item }}'"
+    valid_auth_methods: ["password", "certificate", "sso", "kerberos"]
+  when: 
+    - kvmhost_cockpit_vars.cockpit_auth_methods | length > 0
+    - item not in valid_auth_methods
+  loop: "{{ kvmhost_cockpit_vars.cockpit_auth_methods }}"
+
+- name: Validate certificate paths
+  ansible.builtin.include_tasks: validate_cockpit_certificates.yml
+  when: 
+    - kvmhost_cockpit_vars.enable_cockpit
+    - kvmhost_cockpit_vars.kvmhost_cockpit_ssl_enabled
+    - kvmhost_cockpit_vars.cockpit_certificates.keys() | length > 0
+
+- name: Check conditional requirements for enabled cockpit
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [conditional_error_msg] }}"
+  vars:
+    conditional_error_msg: "kvmhost_cockpit validation error: When enable_cockpit is true, '{{ required_field }}' must be defined"
+  when: 
+    - kvmhost_cockpit_vars.enable_cockpit
+    - kvmhost_cockpit_vars[required_field] is not defined or (kvmhost_cockpit_vars[required_field] | type_debug == 'list' and kvmhost_cockpit_vars[required_field] | length == 0)
+  loop:
+    - kvmhost_cockpit_port
+    - cockpit_packages
+  loop_control:
+    loop_var: required_field
+
+- name: Add kvmhost_cockpit validation success
+  ansible.builtin.set_fact:
+    validation_warnings: "{{ validation_warnings + ['kvmhost_cockpit schema validation passed'] }}"
+  when: validation_errors | length == 0

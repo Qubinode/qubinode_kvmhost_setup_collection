@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "mcp-adr-analysis-server": "^2.0.2"
+  }
+}

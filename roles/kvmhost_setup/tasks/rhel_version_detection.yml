@@ -1,0 +1,200 @@
+---
+# RHEL version detection and conditional logic
+# Based on ADR-0008: RHEL 9/10 Support Strategy
+
+- name: Detect RHEL/CentOS/Rocky/AlmaLinux version and set facts
+  block:
+    - name: Set OS family facts
+      ansible.builtin.set_fact:
+        kvmhost_os_family: "{{ ansible_distribution }}"
+        kvmhost_os_major_version: "{{ ansible_distribution_major_version }}"
+        kvmhost_os_full_version: "{{ ansible_distribution_version }}"
+        kvmhost_os_is_rhel_compatible: "{{ ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux'] }}"
+
+    - name: Set RHEL version-specific facts
+      ansible.builtin.set_fact:
+        kvmhost_is_rhel8: "{{ kvmhost_os_major_version == '8' and kvmhost_os_is_rhel_compatible }}"
+        kvmhost_is_rhel9: "{{ kvmhost_os_major_version == '9' and kvmhost_os_is_rhel_compatible }}"
+        kvmhost_is_rhel10: "{{ kvmhost_os_major_version == '10' and kvmhost_os_is_rhel_compatible }}"
+
+    - name: Set package manager facts based on OS version
+      ansible.builtin.set_fact:
+        kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version|int >= 8 else 'yum' }}"
+        kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version|int >= 8 else 'python' }}"
+        kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version|int >= 8 else 'pip' }}"
+
+    - name: Display OS detection results
+      ansible.builtin.debug:
+        msg: |
+          OS Detection Results:
+          - Distribution: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
+          - Major Version: {{ kvmhost_os_major_version }}
+          - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible }}
+          - RHEL 8: {{ kvmhost_is_rhel8 }}
+          - RHEL 9: {{ kvmhost_is_rhel9 }}
+          - RHEL 10: {{ kvmhost_is_rhel10 }}
+          - Package Manager: {{ kvmhost_package_manager }}
+          - Python: {{ kvmhost_python_executable }}
+
+  tags:
+    - rhel_detection
+    - os_facts
+
+- name: Set version-specific package names
+  ansible.builtin.set_fact:
+    kvmhost_packages_base:
+      rhel8:
+        - libvirt
+        - libvirt-daemon-kvm
+        - qemu-kvm
+        - virt-manager
+        - virt-install
+        - libguestfs-tools
+        - iproute
+        - NetworkManager
+        - cockpit
+        - cockpit-machines
+        - python3-libvirt
+        - python3-lxml
+      rhel9:
+        - libvirt
+        - libvirt-daemon-kvm
+        - qemu-kvm
+        - virt-manager
+        - virt-install
+        - libguestfs-tools
+        - iproute
+        - NetworkManager
+        - cockpit
+        - cockpit-machines
+        - python3-libvirt
+        - python3-lxml
+        - guestfs-tools
+      rhel10:
+        - libvirt
+        - libvirt-daemon-kvm
+        - qemu-kvm
+        - virt-manager
+        - virt-install
+        - libguestfs-tools
+        - iproute
+        - NetworkManager
+        - cockpit
+        - cockpit-machines
+        - python3-libvirt
+        - python3-lxml
+        - guestfs-tools
+  tags:
+    - rhel_packages
+
+- name: Set current OS package list
+  ansible.builtin.set_fact:
+    kvmhost_packages_current: >-
+      {{
+        kvmhost_packages_base.rhel10 if kvmhost_is_rhel10 else
+        kvmhost_packages_base.rhel9 if kvmhost_is_rhel9 else
+        kvmhost_packages_base.rhel8 if kvmhost_is_rhel8 else
+        kvmhost_packages_base.rhel9
+      }}
+  tags:
+    - rhel_packages
+
+- name: Set version-specific service configurations
+  ansible.builtin.set_fact:
+    kvmhost_services:
+      rhel8:
+        - libvirtd
+        - NetworkManager
+        - cockpit.socket
+      rhel9:
+        - libvirtd
+        - NetworkManager
+        - cockpit.socket
+      rhel10:
+        - libvirtd
+        - NetworkManager
+        - cockpit.socket
+  tags:
+    - rhel_services
+
+- name: Set current OS service list
+  ansible.builtin.set_fact:
+    kvmhost_services_current: >-
+      {{
+        kvmhost_services.rhel10 if kvmhost_is_rhel10 else
+        kvmhost_services.rhel9 if kvmhost_is_rhel9 else
+        kvmhost_services.rhel8 if kvmhost_is_rhel8 else
+        kvmhost_services.rhel9
+      }}
+  tags:
+    - rhel_services
+
+- name: Set version-specific firewall configurations
+  ansible.builtin.set_fact:
+    kvmhost_firewall_services:
+      rhel8:
+        - libvirt
+        - cockpit
+        - ssh
+      rhel9:
+        - libvirt
+        - cockpit
+        - ssh
+      rhel10:
+        - libvirt
+        - cockpit
+        - ssh
+  tags:
+    - rhel_firewall
+
+- name: Set current OS firewall service list
+  ansible.builtin.set_fact:
+    kvmhost_firewall_services_current: >-
+      {{
+        kvmhost_firewall_services.rhel10 if kvmhost_is_rhel10 else
+        kvmhost_firewall_services.rhel9 if kvmhost_is_rhel9 else
+        kvmhost_firewall_services.rhel8 if kvmhost_is_rhel8 else
+        kvmhost_firewall_services.rhel9
+      }}
+  tags:
+    - rhel_firewall
+
+- name: Set version-specific repository configurations
+  ansible.builtin.set_fact:
+    kvmhost_repos:
+      rhel8:
+        epel: "epel-release"
+        codeready: "codeready-builder-for-rhel-8-x86_64-rpms"
+      rhel9:
+        epel: "epel-release"
+        codeready: "codeready-builder-for-rhel-9-x86_64-rpms"
+      rhel10:
+        epel: "epel-release"
+        codeready: "codeready-builder-for-rhel-10-x86_64-rpms"
+  tags:
+    - rhel_repos
+
+- name: Set current OS repository configuration
+  ansible.builtin.set_fact:
+    kvmhost_repos_current: >-
+      {{
+        kvmhost_repos.rhel10 if kvmhost_is_rhel10 else
+        kvmhost_repos.rhel9 if kvmhost_is_rhel9 else
+        kvmhost_repos.rhel8 if kvmhost_is_rhel8 else
+        kvmhost_repos.rhel9
+      }}
+  tags:
+    - rhel_repos
+
+- name: Verify RHEL version compatibility
+  ansible.builtin.assert:
+    that:
+      - kvmhost_os_is_rhel_compatible
+      - kvmhost_os_major_version|int >= 8
+    fail_msg: |
+      Unsupported operating system: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
+      This role supports RHEL/CentOS/Rocky/AlmaLinux versions 8, 9, and 10 only.
+    success_msg: |
+      OS compatibility confirmed: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }} is supported.
+  tags:
+    - rhel_validation

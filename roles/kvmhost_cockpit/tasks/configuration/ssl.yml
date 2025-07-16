@@ -1,0 +1,74 @@
+---
+# =============================================================================
+# KVMHOST COCKPIT ROLE - SSL CONFIGURATION
+# =============================================================================
+# Configures SSL certificates for Cockpit web interface
+
+- name: Create SSL certificate directory
+  ansible.builtin.file:
+    path: /etc/cockpit/ws-certs.d
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Generate self-signed certificate (if enabled and no custom cert)
+  ansible.builtin.command:
+    cmd: >
+      openssl req -x509 -nodes -days 365 -newkey rsa:2048
+      -keyout /etc/cockpit/ws-certs.d/0-self-signed.key
+      -out /etc/cockpit/ws-certs.d/0-self-signed.cert
+      -subj "/C=US/ST=State/L=City/O=Organization/CN={{ ansible_fqdn }}"
+    creates: /etc/cockpit/ws-certs.d/0-self-signed.cert
+  when:
+    - kvmhost_cockpit_ssl_generate_self_signed | bool
+    - not (kvmhost_cockpit_ssl_cert_path and kvmhost_cockpit_ssl_key_path)
+  notify: restart cockpit
+
+- name: Copy custom SSL certificate
+  ansible.builtin.copy:
+    src: "{{ kvmhost_cockpit_ssl_cert_path }}"
+    dest: /etc/cockpit/ws-certs.d/1-custom.cert
+    mode: '0644'
+    owner: root
+    group: root
+    backup: true
+  when:
+    - kvmhost_cockpit_ssl_cert_path is defined
+    - kvmhost_cockpit_ssl_cert_path | length > 0
+  notify: restart cockpit
+
+- name: Copy custom SSL private key
+  ansible.builtin.copy:
+    src: "{{ kvmhost_cockpit_ssl_key_path }}"
+    dest: /etc/cockpit/ws-certs.d/1-custom.key
+    mode: '0600'
+    owner: root
+    group: root
+    backup: true
+  when:
+    - kvmhost_cockpit_ssl_key_path is defined
+    - kvmhost_cockpit_ssl_key_path | length > 0
+  notify: restart cockpit
+
+- name: Set proper permissions on SSL files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: root
+  loop:
+    - { path: "/etc/cockpit/ws-certs.d/*.cert", mode: "0644" }
+    - { path: "/etc/cockpit/ws-certs.d/*.key", mode: "0600" }
+  with_fileglob:
+    - "/etc/cockpit/ws-certs.d/*.cert"
+    - "/etc/cockpit/ws-certs.d/*.key"
+
+- name: Verify SSL certificate validity
+  ansible.builtin.command:
+    cmd: openssl x509 -in {{ item }} -text -noout
+  register: ssl_verify
+  changed_when: false
+  with_fileglob:
+    - "/etc/cockpit/ws-certs.d/*.cert"
+  when: ansible_check_mode | bool == false

@@ -1,0 +1,65 @@
+---
+# =============================================================================
+# KVMHOST COCKPIT ROLE - DEPENDENCY VALIDATION
+# =============================================================================
+# Validates that required dependencies are met for Cockpit configuration
+
+- name: Check if system is supported
+  ansible.builtin.fail:
+    msg: "Cockpit role requires RHEL/CentOS/Rocky/AlmaLinux"
+  when: ansible_os_family != "RedHat"
+
+- name: Verify minimum RHEL version
+  ansible.builtin.fail:
+    msg: "Cockpit role requires RHEL 8 or newer"
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version | int < 8
+
+- name: Check if firewalld is available (if firewall management enabled)
+  ansible.builtin.command:
+    cmd: systemctl is-available firewalld
+  register: firewalld_available
+  failed_when: false
+  changed_when: false
+  when: kvmhost_cockpit_firewall_enabled | bool
+
+- name: Warn if firewalld not available but firewall management enabled
+  ansible.builtin.debug:
+    msg: "Warning: firewalld not available but firewall management is enabled"
+  when:
+    - kvmhost_cockpit_firewall_enabled | bool
+    - firewalld_available.rc != 0
+
+- name: Check for conflicting services on Cockpit port
+  ansible.builtin.wait_for:
+    port: "{{ kvmhost_cockpit_port }}"
+    timeout: 1
+  register: port_check
+  failed_when: false
+  changed_when: false
+
+- name: Fail if port is already in use
+  ansible.builtin.fail:
+    msg: "Port {{ kvmhost_cockpit_port }} is already in use by another service"
+  when:
+    - port_check is succeeded
+    - "'cockpit' not in (ansible_facts.services | default({}))"
+
+- name: Validate SSL certificate paths (if SSL enabled)
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: ssl_cert_check
+  loop:
+    - "{{ kvmhost_cockpit_ssl_cert_path }}"
+    - "{{ kvmhost_cockpit_ssl_key_path }}"
+  when: kvmhost_cockpit_ssl_enabled | bool
+
+- name: Fail if SSL files don't exist (when SSL enabled)
+  ansible.builtin.fail:
+    msg: "SSL certificate file {{ item.item }} does not exist"
+  loop: "{{ ssl_cert_check.results | default([]) }}"
+  when:
+    - kvmhost_cockpit_ssl_enabled | bool
+    - not item.stat.exists
+    - item.item is defined

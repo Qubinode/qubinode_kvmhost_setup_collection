@@ -1,0 +1,35 @@
+
+# =============================================================================
+# SHELL CONFIGS VALIDATION HELPER
+# =============================================================================
+# Validates user shell configuration
+
+- name: Validate vim tab size
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [vim_tab_error_msg] }}"
+  vars:
+    vim_tab_error_msg: "kvmhost_user_config validation error: Vim tab size '{{ kvmhost_user_config_vars.user_shell_configs.vim_configuration.tab_size }}' must be between 2 and 8"
+  when: 
+    - kvmhost_user_config_vars.user_shell_configs.vim_configuration is defined
+    - kvmhost_user_config_vars.user_shell_configs.vim_configuration.tab_size is defined
+    - (kvmhost_user_config_vars.user_shell_configs.vim_configuration.tab_size | int < 2 or kvmhost_user_config_vars.user_shell_configs.vim_configuration.tab_size | int > 8)
+
+- name: Validate custom aliases pattern
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [alias_error_msg] }}"
+  vars:
+    alias_error_msg: "kvmhost_user_config validation error: Custom alias name '{{ item.key }}' does not match naming pattern"
+  when: 
+    - kvmhost_user_config_vars.user_shell_configs.custom_aliases is defined
+    - not (item.key | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
+  loop: "{{ kvmhost_user_config_vars.user_shell_configs.custom_aliases | dict2items }}"
+
+- name: Validate environment variables pattern
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [env_var_error_msg] }}"
+  vars:
+    env_var_error_msg: "kvmhost_user_config validation error: Environment variable name '{{ item.key }}' does not match naming pattern"
+  when: 
+    - kvmhost_user_config_vars.user_shell_configs.environment_variables is defined
+    - not (item.key | regex_search('^[A-Z][A-Z0-9_]*$'))
+  loop: "{{ kvmhost_user_config_vars.user_shell_configs.environment_variables | dict2items }}"

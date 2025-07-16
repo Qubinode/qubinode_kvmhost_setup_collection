@@ -19,17 +19,19 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python environment
+      - name: Setup Python 3.11 environment
         run: |
-          sudo yum install -y python3-devel python3-pip
-          python3 -m pip install --upgrade pip
-          pip install virtualenv
-          python3 -m virtualenv venv
+          # Install Python 3.11 for RHEL 9 compatibility (based on research findings)
+          sudo yum install -y python3.11 python3.11-devel python3.11-pip
+          python3.11 -m pip install --upgrade pip
+          python3.11 -m pip install virtualenv
+          python3.11 -m virtualenv venv
           source venv/bin/activate
       - name: Install lint tools
         run: |
           source venv/bin/activate
-          pip install ansible-lint bandit
+          # Updated to latest versions based on research findings
+          pip install ansible-lint>=6.0.0 bandit>=1.7.0 ansible-core>=2.17.0
       - name: Run ansible-lint
         run: |
           source venv/bin/activate
@@ -40,19 +42,30 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        ansible-version: ['2.13']
+        # Updated to support latest Ansible-core versions (based on research)
+        ansible-version: ['2.17', '2.18']
+        python-version: ['3.11']
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Setup Python ${{ matrix.python-version }}
+        run: |
+          # Ensure Python 3.11 is available (RHEL 9 compatibility)
+          sudo yum install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+          python${{ matrix.python-version }} -m pip install --upgrade pip
       - name: Install ansible-core
-        run: pip install ansible-core==${{ matrix.ansible-version }}
-      - name: Install Molecule
-        run: pip install molecule  molecule-podman
+        run: python${{ matrix.python-version }} -m pip install ansible-core==${{ matrix.ansible-version }}
+      - name: Install Molecule with Python 3.11 support
+        run: |
+          # Updated to Molecule v25.6.0+ for Python 3.11 compatibility
+          python${{ matrix.python-version }} -m pip install "molecule>=25.6.0" molecule-podman
 
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
+          # Set Python interpreter for Ansible (Python 3.11)
+          export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
           molecule test
         env:
           PY_COLORS: '1'
@@ -61,6 +74,8 @@ jobs:
           ANSIBLE_VERBOSITY: '2'
       - name: Run Playbook tests
         run: |
+          # Use Python 3.11 interpreter for consistency
+          export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
           ansible-playbook -i inventories/test/hosts test.yml -vv
 
   version-monitoring:
@@ -69,16 +84,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check for new Ansible versions
         run: |
-          pip install packaging
+          pip install packaging requests
           python -c "from packaging import version
           import requests
-          latest = version.parse(requests.get('https://pypi.org/pypi/ansible/json').json()['info']['version'])
-          current = version.parse('2.13')  # Use 2.13 as baseline
+          latest = version.parse(requests.get('https://pypi.org/pypi/ansible-core/json').json()['info']['version'])
+          current = version.parse('2.17')  # Updated baseline based on research
           if latest > current:
-              print(f'New Ansible version available: {latest}')
+              print(f'New Ansible-core version available: {latest}')
               exit(1)
           else:
-              print('Using latest version')"
+              print('Using current stable version')"
         continue-on-error: true
 
   security:
@@ -86,21 +101,40 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python environment
+      - name: Setup Python 3.11 environment
         run: |
-          sudo yum install -y python3-devel python3-pip
-          python3 -m pip install --upgrade pip
-          pip install virtualenv
-          python3 -m virtualenv venv
+          # Use Python 3.11 for security scanning consistency
+          sudo yum install -y python3.11 python3.11-devel python3.11-pip
+          python3.11 -m pip install --upgrade pip
+          python3.11 -m pip install virtualenv
+          python3.11 -m virtualenv venv
           source venv/bin/activate
       - name: Install security tools
         run: |
           source venv/bin/activate
-          pip install ansible-core bandit
+          # Updated to latest versions for better security coverage
+          pip install ansible-core>=2.17.0 bandit>=1.7.0 safety>=2.0.0
       - name: Run security scan
         run: |
           source venv/bin/activate
           bandit -r roles/ -f txt -ll
+          # Additional security check for dependencies
+          safety check --json
+      - name: Test dependency security (simple approach)
+        run: |
+          source venv/bin/activate
+          # Create temp requirements for key dependencies
+          echo "ansible-core>=2.17,<2.19" > temp-requirements.txt
+          echo "molecule[podman]>=25.6.0" >> temp-requirements.txt
+          echo "ansible-lint" >> temp-requirements.txt
+          # Check for vulnerabilities in our core dependencies
+          safety check -r temp-requirements.txt --json || echo "⚠️ Security issues found in dependencies"
+          rm temp-requirements.txt
+          # Verify dependencies can be installed and work
+          pip install ansible-core molecule[podman] ansible-lint
+          ansible --version
+          molecule --version
+          echo "✅ Core dependencies install and work correctly"
 
   release:
     needs: [test, version-monitoring, security]

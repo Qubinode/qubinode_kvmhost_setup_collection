@@ -130,3 +130,85 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+mcp-shrimp-task-manager
+.vscode
+
+# Security and sensitive files
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.yml
+secrets.yaml
+.secrets
+.credentials
+config/secrets.yml
+config/database.yml
+
+# Security scanner configuration files (keep these tracked)
+.security-config.toml
+.security-ignore
+
+# Temporary analysis and report files (generated content)
+*-analysis-*.json
+*-compliance-*.json
+*-validation-*.json
+security-reports/*.json
+dependency-validation-reports/*.json
+compliance-reports/*.json
+
+# Temporary and generated files  
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE and editor files
+.idea/
+*.sublime-*
+.vscode/settings.json
+.vscode/launch.json
+
+# Node.js and npm (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# API keys and tokens (additional patterns)
+.env.local
+.env.*.local
+*.env
+api_keys.txt
+tokens.txt
+
+# Logs and debug files
+*.log
+logs/
+debug/
+crash.log
+error.log
+
+# Experimental and research files
+experiments/
+research-temp/
+*.experimental
+*.research
+conversation-logs/
+llm-conversations/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# MCP Task Management Cache (Private - Don't Commit)
+.mcp-adr-cache/
+todo-data.json
+tasks.json

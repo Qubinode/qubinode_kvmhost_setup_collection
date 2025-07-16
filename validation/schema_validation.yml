@@ -1,0 +1,44 @@
+
+# =============================================================================
+# VARIABLE VALIDATION FRAMEWORK
+# =============================================================================
+# ADR-0006 compliant variable validation using JSON Schema
+# This framework extends existing assert-based validation with schema-driven
+# validation for comprehensive configuration management.
+
+- name: Initialize validation framework
+  ansible.builtin.set_fact:
+    validation_framework_version: "1.0.0"
+    validation_errors: []
+    validation_warnings: []
+
+- name: Include role-specific schema validation
+  ansible.builtin.include_tasks: "{{ validation_schema_task }}"
+  loop:
+    - schema_validation_base.yml
+    - schema_validation_networking.yml
+    - schema_validation_storage.yml
+    - schema_validation_cockpit.yml
+    - schema_validation_user_config.yml
+  loop_control:
+    loop_var: validation_schema_task
+  when: validation_schema_task is file
+
+- name: Include cross-role dependency validation
+  ansible.builtin.include_tasks: cross_role_validation.yml
+
+- name: Include configuration drift detection
+  ansible.builtin.include_tasks: configuration_drift_detection.yml
+  when: enable_drift_detection | default(false)
+
+- name: Report validation results
+  ansible.builtin.include_tasks: validation_reporting.yml
+
+- name: Fail on validation errors
+  ansible.builtin.fail:
+    msg: |
+      Variable validation failed with {{ validation_errors | length }} errors:
+      {% for error in validation_errors %}
+      - {{ error }}
+      {% endfor %}
+  when: validation_errors | length > 0

@@ -1,0 +1,237 @@
+---
+# Pre-flight validation checks for KVM host setup
+# Based on ADR-0010: End-User Repeatability Strategy
+
+- name: Pre-flight validation - System requirements check
+  block:
+    - name: Check minimum memory requirements (8GB)
+      ansible.builtin.assert:
+        that:
+          - ansible_memtotal_mb >= 8192
+        fail_msg: "Insufficient memory: {{ ansible_memtotal_mb }}MB available, minimum 8GB (8192MB) required"
+        success_msg: "Memory check passed: {{ ansible_memtotal_mb }}MB available"
+
+    - name: Check minimum CPU requirements (4 cores)
+      ansible.builtin.assert:
+        that:
+          - ansible_processor_vcpus >= 4
+        fail_msg: "Insufficient CPU cores: {{ ansible_processor_vcpus }} available, minimum 4 required"
+        success_msg: "CPU check passed: {{ ansible_processor_vcpus }} cores available"
+
+    - name: Check minimum disk space requirements (50GB in /)
+      ansible.builtin.assert:
+        that:
+          - item.size_available > 53687091200  # 50GB in bytes
+        fail_msg: "Insufficient disk space in {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available, minimum 50GB required"
+        success_msg: "Disk space check passed for {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available"
+      when: item.mount == "/"
+      loop: "{{ ansible_mounts }}"
+
+    - name: Verify CPU virtualization support
+      ansible.builtin.shell: |
+        if grep -E "(vmx|svm)" /proc/cpuinfo > /dev/null; then
+          echo "supported"
+        else
+          echo "not_supported"
+        fi
+      register: vt_support
+      changed_when: false
+
+    - name: Assert CPU virtualization is supported
+      ansible.builtin.assert:
+        that:
+          - vt_support.stdout == "supported"
+        fail_msg: "CPU virtualization not supported. Intel VT-x or AMD-V required for KVM"
+        success_msg: "CPU virtualization support confirmed"
+
+  tags:
+    - preflight
+    - validation
+    - system_requirements
+
+- name: Pre-flight validation - Operating system compatibility
+  block:
+    - name: Check RHEL/CentOS/Rocky/AlmaLinux version compatibility
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux']
+          - ansible_distribution_major_version in ['8', '9', '10']
+        fail_msg: "Unsupported OS: {{ ansible_distribution }} {{ ansible_distribution_version }}. Supported: RHEL/CentOS/Rocky/AlmaLinux 8/9/10"
+        success_msg: "OS compatibility confirmed: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Check kernel version for KVM support
+      ansible.builtin.shell: |
+        kernel_version=$(uname -r | cut -d. -f1-2)
+        if [ "$(echo "$kernel_version >= 3.10" | bc)" -eq 1 ]; then
+          echo "supported"
+        else
+          echo "not_supported"
+        fi
+      register: kernel_support
+      changed_when: false
+
+    - name: Assert kernel version supports KVM
+      ansible.builtin.assert:
+        that:
+          - kernel_support.stdout == "supported"
+        fail_msg: "Kernel version {{ ansible_kernel }} may not fully support KVM. Minimum recommended: 3.10+"
+        success_msg: "Kernel version {{ ansible_kernel }} supports KVM"
+
+  tags:
+    - preflight
+    - validation
+    - os_compatibility
+
+- name: Pre-flight validation - Network configuration prerequisites
+  block:
+    - name: Check network interface availability
+      ansible.builtin.assert:
+        that:
+          - ansible_interfaces | length > 1
+        fail_msg: "Insufficient network interfaces. At least 2 interfaces recommended for bridge configuration"
+        success_msg: "Network interfaces available: {{ ansible_interfaces | join(', ') }}"
+
+    - name: Verify primary network interface is up
+      ansible.builtin.assert:
+        that:
+          - ansible_default_ipv4.interface is defined
+          - ansible_default_ipv4.address is defined
+        fail_msg: "No default network interface or IP address configured"
+        success_msg: "Default network configured: {{ ansible_default_ipv4.interface }} - {{ ansible_default_ipv4.address }}"
+
+  tags:
+    - preflight
+    - validation
+    - network_prerequisites
+
+- name: Pre-flight validation - Storage prerequisites
+  block:
+    - name: Check for available storage pools location
+      ansible.builtin.stat:
+        path: "{{ libvirt_host_storage_pools[0].path | default('/var/lib/libvirt/images') }}"
+      register: storage_path_check
+      when: libvirt_host_storage_pools is defined and libvirt_host_storage_pools | length > 0
+
+    - name: Create storage pool directory if it doesn't exist
+      ansible.builtin.file:
+        path: "{{ libvirt_host_storage_pools[0].path | default('/var/lib/libvirt/images') }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      become: true
+      when: 
+        - libvirt_host_storage_pools is defined 
+        - libvirt_host_storage_pools | length > 0
+        - not storage_path_check.stat.exists
+
+    - name: Check storage pool directory permissions
+      ansible.builtin.file:
+        path: "{{ libvirt_host_storage_pools[0].path | default('/var/lib/libvirt/images') }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      become: true
+      when: libvirt_host_storage_pools is defined and libvirt_host_storage_pools | length > 0
+
+  tags:
+    - preflight
+    - validation
+    - storage_prerequisites
+
+- name: Pre-flight validation - Package management prerequisites
+  block:
+    - name: Check if dnf/yum is available
+      ansible.builtin.command: which {{ ansible_pkg_mgr }}
+      register: pkg_mgr_check
+      changed_when: false
+      failed_when: false
+
+    - name: Assert package manager is available
+      ansible.builtin.assert:
+        that:
+          - pkg_mgr_check.rc == 0
+        fail_msg: "Package manager {{ ansible_pkg_mgr }} not found"
+        success_msg: "Package manager {{ ansible_pkg_mgr }} available"
+
+    - name: Test package manager connectivity
+      ansible.builtin.package:
+        name: which
+        state: present
+      check_mode: true
+      register: pkg_test
+      failed_when: false
+
+    - name: Check repository access
+      ansible.builtin.shell: |
+        {{ ansible_pkg_mgr }} repolist enabled | grep -v "repo id" | wc -l
+      register: repo_count
+      changed_when: false
+
+    - name: Assert repositories are available
+      ansible.builtin.assert:
+        that:
+          - repo_count.stdout | int > 0
+        fail_msg: "No enabled repositories found. Check repository configuration"
+        success_msg: "{{ repo_count.stdout }} repositories available"
+
+  tags:
+    - preflight
+    - validation
+    - package_prerequisites
+
+- name: Pre-flight validation - Security and permissions
+  block:
+    - name: Check sudo access for current user
+      ansible.builtin.shell: sudo -n true
+      register: sudo_check
+      failed_when: false
+      changed_when: false
+
+    - name: Assert sudo access is available
+      ansible.builtin.assert:
+        that:
+          - sudo_check.rc == 0
+        fail_msg: "Sudo access required for installation. Configure passwordless sudo or run with --ask-become-pass"
+        success_msg: "Sudo access confirmed"
+
+    - name: Check SELinux status and mode
+      ansible.builtin.shell: |
+        if command -v getenforce >/dev/null 2>&1; then
+          getenforce
+        else
+          echo "not_installed"
+        fi
+      register: selinux_status
+      changed_when: false
+
+    - name: Report SELinux status
+      ansible.builtin.debug:
+        msg: "SELinux status: {{ selinux_status.stdout }}"
+
+  tags:
+    - preflight
+    - validation
+    - security_prerequisites
+
+- name: Pre-flight validation summary
+  ansible.builtin.debug:
+    msg: |
+      Pre-flight validation completed successfully!
+      
+      System Summary:
+      - OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+      - Kernel: {{ ansible_kernel }}
+      - Memory: {{ ansible_memtotal_mb }}MB
+      - CPU Cores: {{ ansible_processor_vcpus }}
+      - Architecture: {{ ansible_architecture }}
+      - Default Network: {{ ansible_default_ipv4.interface | default('N/A') }} - {{ ansible_default_ipv4.address | default('N/A') }}
+      - Package Manager: {{ ansible_pkg_mgr }}
+      - SELinux: {{ selinux_status.stdout | default('unknown') }}
+      
+      System is ready for KVM host setup!
+  tags:
+    - preflight
+    - validation
+    - summary

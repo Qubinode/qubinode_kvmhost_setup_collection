@@ -5,3 +5,15 @@
     daemon_reload: true
     state: restarted
   become: true
+
+- name: restart libvirtd
+  ansible.builtin.systemd:
+    name: libvirtd
+    state: restarted
+  become: true
+
+- name: reboot system
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+    msg: "Rebooting system to apply performance optimizations"
+  become: true

@@ -1,0 +1,70 @@
+---
+# =============================================================================
+# LIBVIRT STORAGE POOL CONFIGURATION
+# =============================================================================
+# Configure libvirt storage pools for VM disk images
+
+- name: Display storage pools to configure
+  ansible.builtin.debug:
+    msg: "Configuring storage pools: {{ kvmhost_libvirt_storage_pools | map(attribute='name') | join(', ') }}"
+  when: kvmhost_libvirt_debug_enabled | default(false)
+
+- name: Ensure libvirt storage pools are defined
+  community.libvirt.virt_pool:
+    command: define
+    name: "{{ item.name }}"
+    xml: '{{ lookup("template", "libvirt_pool.xml.j2") }}'
+  loop: "{{ kvmhost_libvirt_storage_pools }}"
+  become: true
+  register: pool_define_result
+
+- name: Ensure libvirt storage pools are active
+  community.libvirt.virt_pool:
+    state: "{{ item.state }}"
+    name: "{{ item.name }}"
+  loop: "{{ kvmhost_libvirt_storage_pools }}"
+  become: true
+  register: pool_active_result
+
+- name: Configure storage pool autostart
+  community.libvirt.virt_pool:
+    autostart: "{{ item.autostart }}"
+    name: "{{ item.name }}"
+  loop: "{{ kvmhost_libvirt_storage_pools }}"
+  become: true
+  register: pool_autostart_result
+
+- name: Verify storage pool configuration
+  ansible.builtin.command: "virsh pool-info {{ item.name }}"
+  register: pool_info_check
+  changed_when: false
+  failed_when: false
+  loop: "{{ kvmhost_libvirt_storage_pools }}"
+  become: true
+
+- name: Display storage pool information
+  ansible.builtin.debug:
+    msg: 
+      - "Storage pool: {{ item.item.name }}"
+      - "Status: {{ 'Active' if 'State:     running' in item.stdout else 'Inactive' }}"
+      - "Path: {{ item.item.path }}"
+  loop: "{{ pool_info_check.results }}"
+  when: 
+    - kvmhost_libvirt_debug_enabled | default(false)
+    - item.rc == 0
+
+- name: Check storage pool disk space
+  ansible.builtin.command: "df -h {{ item.path }}"
+  register: storage_space_check
+  changed_when: false
+  failed_when: false
+  loop: "{{ kvmhost_libvirt_storage_pools }}"
+  become: true
+
+- name: Display storage space information
+  ansible.builtin.debug:
+    msg: "Storage space for {{ item.item.path }}: {{ item.stdout_lines[1] if item.stdout_lines | length > 1 else 'Unknown' }}"
+  loop: "{{ storage_space_check.results }}"
+  when: 
+    - kvmhost_libvirt_debug_enabled | default(false)
+    - item.rc == 0

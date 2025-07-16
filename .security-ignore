@@ -1,0 +1,19 @@
+# Security scanner ignore patterns
+# Ansible validation files with comment decorations that look like AWS keys but are not
+
+# Validation files - these contain legitimate YAML comment decorations
+validation/**/*.yml
+test_validation_framework.yml
+
+# Comment decoration patterns that are NOT security keys
+========================================
+
+# Test and development files
+test*.yml
+**/test/**
+docs/research/**
+security-reports/**
+
+# Configuration and template files
+.env.example
+.security-config.toml

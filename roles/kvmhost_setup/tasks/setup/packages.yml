@@ -1,9 +1,10 @@
 ---
-- name: Enable EPEL repository
+- name: Enable EPEL repository using DNF module (ADR-0001 compliant)
   ansible.builtin.dnf:
-    name: epel-release
+    name: "epel-release"
     state: present
   when: ansible_os_family == "RedHat"
+  become: true
 
 - name: Update package cache
   ansible.builtin.dnf:

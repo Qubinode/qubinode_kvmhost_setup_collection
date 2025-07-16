@@ -1,0 +1,1225 @@
+{
+  "metadata": {
+    "generated_date": "2025-07-12 14:13:13",
+    "project": "Qubinode KVM Host Setup Collection",
+    "rhel_versions_detected": [
+      "10",
+      "8",
+      "9"
+    ],
+    "generator_version": "1.0.0"
+  },
+  "compatibility_matrix": {
+    "kvmhost_setup": {
+      "description": "KVM Host setup role for setup",
+      "features": {
+        "enable_cockpit": {
+          "default": true,
+          "description": "Feature flag for enable_cockpit",
+          "rhel_compatibility": {}
+        },
+        "configure_shell": {
+          "default": true,
+          "description": "Feature flag for configure_shell",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from configure_shell.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from configure_shell.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from configure_shell.yml"
+            }
+          }
+        },
+        "enable_libvirt_admin_user": {
+          "default": true,
+          "description": "Feature flag for enable_libvirt_admin_user",
+          "rhel_compatibility": {}
+        },
+        "enable_kvm_performance_optimization": {
+          "default": true,
+          "description": "Feature flag for enable_kvm_performance_optimization",
+          "rhel_compatibility": {}
+        },
+        "kvm_enable_cpu_isolation": {
+          "default": true,
+          "description": "Feature flag for kvm_enable_cpu_isolation",
+          "rhel_compatibility": {}
+        },
+        "kvm_enable_ksm": {
+          "default": true,
+          "description": "Feature flag for kvm_enable_ksm",
+          "rhel_compatibility": {}
+        },
+        "kvm_enable_nested_virtualization": {
+          "default": true,
+          "description": "Feature flag for kvm_enable_nested_virtualization",
+          "rhel_compatibility": {}
+        },
+        "kvm_enable_performance_monitoring": {
+          "default": true,
+          "description": "Feature flag for kvm_enable_performance_monitoring",
+          "rhel_compatibility": {}
+        },
+        "bridge_interface": {
+          "description": "Task group: bridge_interface",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from bridge_interface.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from bridge_interface.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from bridge_interface.yml"
+            }
+          }
+        },
+        "build_user_home_dir": {
+          "description": "Task group: build_user_home_dir",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from build_user_home_dir.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from build_user_home_dir.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from build_user_home_dir.yml"
+            }
+          }
+        },
+        "cockpit_setup": {
+          "description": "Task group: cockpit_setup",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from cockpit_setup.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from cockpit_setup.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from cockpit_setup.yml"
+            }
+          }
+        },
+        "configure_remote_user": {
+          "description": "Task group: configure_remote_user",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from configure_remote_user.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from configure_remote_user.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from configure_remote_user.yml"
+            }
+          }
+        },
+        "libvirt_setup": {
+          "description": "Task group: libvirt_setup",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from libvirt_setup.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from libvirt_setup.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from libvirt_setup.yml"
+            }
+          }
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        },
+        "networks": {
+          "description": "Task group: networks",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from networks.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from networks.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from networks.yml"
+            }
+          }
+        },
+        "rhpds_instance": {
+          "description": "Task group: rhpds_instance",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from rhpds_instance.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from rhpds_instance.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from rhpds_instance.yml"
+            }
+          }
+        },
+        "rocky_linux": {
+          "description": "Task group: rocky_linux",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from rocky_linux.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from rocky_linux.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from rocky_linux.yml"
+            }
+          }
+        },
+        "storage_pool": {
+          "description": "Task group: storage_pool",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from storage_pool.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from storage_pool.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from storage_pool.yml"
+            }
+          }
+        },
+        "user_libvirt": {
+          "description": "Task group: user_libvirt",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from user_libvirt.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from user_libvirt.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from user_libvirt.yml"
+            }
+          }
+        },
+        "user_shell_configs": {
+          "description": "Task group: user_shell_configs",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from user_shell_configs.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from user_shell_configs.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from user_shell_configs.yml"
+            }
+          }
+        },
+        "validate": {
+          "description": "Task group: validate",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from validate.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from validate.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from validate.yml"
+            }
+          }
+        },
+        "verify_variables": {
+          "description": "Task group: verify_variables",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from verify_variables.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from verify_variables.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from verify_variables.yml"
+            }
+          }
+        },
+        "rhel_version_detection": {
+          "description": "Task group: rhel_version_detection",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from rhel_version_detection.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from rhel_version_detection.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from rhel_version_detection.yml"
+            }
+          }
+        },
+        "kvm_host_validation": {
+          "description": "Task group: kvm_host_validation",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from kvm_host_validation.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from kvm_host_validation.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from kvm_host_validation.yml"
+            }
+          }
+        },
+        "performance_optimization": {
+          "description": "Task group: performance_optimization",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from performance_optimization.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from performance_optimization.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from performance_optimization.yml"
+            }
+          }
+        },
+        "kvm_feature_detection": {
+          "description": "Task group: kvm_feature_detection",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from kvm_feature_detection.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from kvm_feature_detection.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from kvm_feature_detection.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 26,
+          "total_features": 26,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 26,
+          "total_features": 26,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 26,
+          "total_features": 26,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    },
+    "kvmhost_base": {
+      "description": "KVM Host setup role for base",
+      "features": {
+        "enable_epel": {
+          "default": true,
+          "description": "Feature flag for enable_epel",
+          "rhel_compatibility": {}
+        },
+        "epel_installation_method": {
+          "default": "dnf_module",
+          "description": "Feature flag for epel_installation_method",
+          "rhel_compatibility": {}
+        },
+        "base_services_enabled": {
+          "default": [
+            "NetworkManager",
+            "firewalld"
+          ],
+          "description": "Feature flag for base_services_enabled",
+          "rhel_compatibility": {}
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        },
+        "os_detection": {
+          "description": "Task group: os_detection",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from os_detection.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from os_detection.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from os_detection.yml"
+            }
+          }
+        },
+        "validate_os": {
+          "description": "Task group: validate_os",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from validate_os.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from validate_os.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from validate_os.yml"
+            }
+          }
+        },
+        "packages": {
+          "description": "Task group: packages",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from packages.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from packages.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from packages.yml"
+            }
+          }
+        },
+        "services": {
+          "description": "Task group: services",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from services.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from services.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from services.yml"
+            }
+          }
+        },
+        "system_prep": {
+          "description": "Task group: system_prep",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from system_prep.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from system_prep.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from system_prep.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 9,
+          "total_features": 9,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 9,
+          "total_features": 9,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 9,
+          "total_features": 9,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    },
+    "kvmhost_networking": {
+      "description": "KVM Host setup role for networking",
+      "features": {
+        "network_validation_enabled": {
+          "default": true,
+          "description": "Feature flag for network_validation_enabled",
+          "rhel_compatibility": {}
+        },
+        "configure_firewall_for_bridge": {
+          "default": true,
+          "description": "Feature flag for configure_firewall_for_bridge",
+          "rhel_compatibility": {}
+        },
+        "enable_network_debugging": {
+          "default": false,
+          "description": "Feature flag for enable_network_debugging",
+          "rhel_compatibility": {}
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        },
+        "preflight": {
+          "description": "Task group: preflight",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from preflight.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from preflight.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from preflight.yml"
+            }
+          }
+        },
+        "interface_detection": {
+          "description": "Task group: interface_detection",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from interface_detection.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from interface_detection.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from interface_detection.yml"
+            }
+          }
+        },
+        "bridge_config": {
+          "description": "Task group: bridge_config",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from bridge_config.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from bridge_config.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from bridge_config.yml"
+            }
+          }
+        },
+        "network_validation": {
+          "description": "Task group: network_validation",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from network_validation.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from network_validation.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from network_validation.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 8,
+          "total_features": 8,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 8,
+          "total_features": 8,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 8,
+          "total_features": 8,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    },
+    "kvmhost_libvirt": {
+      "description": "KVM Host setup role for libvirt",
+      "features": {
+        "kvmhost_libvirt_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_libvirt_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_libvirt_storage_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_libvirt_storage_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_libvirt_networks_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_libvirt_networks_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_libvirt_user_access_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_libvirt_user_access_enabled",
+          "rhel_compatibility": {}
+        },
+        "enable_libvirt_admin_user": {
+          "default": "{{ kvmhost_libvirt_user_access_enabled }}",
+          "description": "Feature flag for enable_libvirt_admin_user",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_libvirt_validation_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_libvirt_validation_enabled",
+          "rhel_compatibility": {}
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        },
+        "validation": {
+          "description": "Task group: validation",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from validation.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from validation.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from validation.yml"
+            }
+          }
+        },
+        "services": {
+          "description": "Task group: services",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from services.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from services.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from services.yml"
+            }
+          }
+        },
+        "storage": {
+          "description": "Task group: storage",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from storage.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from storage.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from storage.yml"
+            }
+          }
+        },
+        "networks": {
+          "description": "Task group: networks",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from networks.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from networks.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from networks.yml"
+            }
+          }
+        },
+        "create_network": {
+          "description": "Task group: create_network",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from create_network.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from create_network.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from create_network.yml"
+            }
+          }
+        },
+        "user_access": {
+          "description": "Task group: user_access",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from user_access.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from user_access.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from user_access.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 13,
+          "total_features": 13,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 13,
+          "total_features": 13,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 13,
+          "total_features": 13,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    },
+    "kvmhost_storage": {
+      "description": "KVM Host setup role for storage",
+      "features": {
+        "kvmhost_storage_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_storage_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_lvm_enabled": {
+          "default": false,
+          "description": "Feature flag for kvmhost_storage_lvm_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_pools_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_storage_pools_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_performance_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_storage_performance_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_monitoring_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_storage_monitoring_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_backup_enabled": {
+          "default": false,
+          "description": "Feature flag for kvmhost_storage_backup_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_snapshot_enabled": {
+          "default": false,
+          "description": "Feature flag for kvmhost_storage_snapshot_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_storage_validation_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_storage_validation_enabled",
+          "rhel_compatibility": {}
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        },
+        "validation": {
+          "description": "Task group: validation",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from validation.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from validation.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from validation.yml"
+            }
+          }
+        },
+        "lvm_setup": {
+          "description": "Task group: lvm_setup",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from lvm_setup.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from lvm_setup.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from lvm_setup.yml"
+            }
+          }
+        },
+        "advanced_pools": {
+          "description": "Task group: advanced_pools",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from advanced_pools.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from advanced_pools.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from advanced_pools.yml"
+            }
+          }
+        },
+        "performance": {
+          "description": "Task group: performance",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from performance.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from performance.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from performance.yml"
+            }
+          }
+        },
+        "monitoring": {
+          "description": "Task group: monitoring",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from monitoring.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from monitoring.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from monitoring.yml"
+            }
+          }
+        },
+        "backup": {
+          "description": "Task group: backup",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from backup.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from backup.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from backup.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 15,
+          "total_features": 15,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 15,
+          "total_features": 15,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 15,
+          "total_features": 15,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    },
+    "kvmhost_cockpit": {
+      "description": "KVM Host setup role for cockpit",
+      "features": {
+        "kvmhost_cockpit_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_cockpit_service_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_service_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_cockpit_socket_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_socket_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_cockpit_ssl_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_ssl_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_cockpit_firewall_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_firewall_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_cockpit_monitoring_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_monitoring_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_cockpit_remote_access_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_cockpit_remote_access_enabled",
+          "rhel_compatibility": {}
+        },
+        "enable_cockpit": {
+          "default": "{{ kvmhost_cockpit_enabled }}",
+          "description": "Feature flag for enable_cockpit",
+          "rhel_compatibility": {}
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 9,
+          "total_features": 9,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 9,
+          "total_features": 9,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 9,
+          "total_features": 9,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    },
+    "kvmhost_user_config": {
+      "description": "KVM Host setup role for user_config",
+      "features": {
+        "kvmhost_user_config_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_shell_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_shell_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_starship_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_starship_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_ssh_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_ssh_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_ssh_agent_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_ssh_agent_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_permissions_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_permissions_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_sudo_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_sudo_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_tools_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_tools_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_dotfiles_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_dotfiles_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_git_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_git_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_environment_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_environment_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_security_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_security_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_backup_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_backup_enabled",
+          "rhel_compatibility": {}
+        },
+        "kvmhost_user_config_validation_enabled": {
+          "default": true,
+          "description": "Feature flag for kvmhost_user_config_validation_enabled",
+          "rhel_compatibility": {}
+        },
+        "configure_ssh": {
+          "default": "{{ kvmhost_user_config_ssh_enabled }}",
+          "description": "Feature flag for configure_ssh",
+          "rhel_compatibility": {}
+        },
+        "main": {
+          "description": "Task group: main",
+          "rhel_compatibility": {
+            "rhel10": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel8": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            },
+            "rhel9": {
+              "supported": true,
+              "notes": "Detected from main.yml"
+            }
+          }
+        }
+      },
+      "overall_compatibility": {
+        "rhel10": {
+          "supported_features": 16,
+          "total_features": 16,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel8": {
+          "supported_features": 16,
+          "total_features": 16,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        },
+        "rhel9": {
+          "supported_features": 16,
+          "total_features": 16,
+          "compatibility_percentage": 100.0,
+          "status": "full"
+        }
+      }
+    }
+  }
+}

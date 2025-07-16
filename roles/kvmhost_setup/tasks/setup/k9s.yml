@@ -1,46 +1,50 @@
 ---
 - name: Create k9s installation directory
   ansible.builtin.file:
-    path: /usr/local/bin/k9s
+    path: /tmp/k9s
     state: directory
     mode: '0755'
 
 - name: Download k9s binary
   ansible.builtin.get_url:
-    url: "https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz"
+    url: "https://github.com/derailed/k9s/releases/download/v0.50.7/k9s_Linux_amd64.tar.gz"
     dest: /tmp/k9s.tar.gz
-    checksum: "sha256:5f8e2e9b0b9b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b"
+    checksum: "sha256:33c7699c6d71544c6704f78be928eca3445262cf462b2ac110a3284f67eb1c7b"
     timeout: 30
     retries: 5
     delay: 10
   register: download_result
   until: download_result is success
-  ignore_errors: true
 
 - name: Extract k9s binary
   ansible.builtin.unarchive:
     src: /tmp/k9s.tar.gz
-    dest: /usr/local/bin/k9s
+    dest: /tmp/k9s
     remote_src: true
-    creates: /usr/local/bin/k9s/k9s
-    extra_opts:
-      - --strip-components=1
+    creates: /tmp/k9s/k9s
 
-- name: Set k9s executable permissions
-  ansible.builtin.file:
-    path: /usr/local/bin/k9s/k9s
-    mode: '0755'
-
-- name: Create k9s symlink
-  ansible.builtin.file:
-    src: /usr/local/bin/k9s/k9s
+- name: Install k9s binary to system path
+  ansible.builtin.copy:
+    src: /tmp/k9s/k9s
     dest: /usr/local/bin/k9s
-    state: link
+    mode: '0755'
+    owner: root
+    group: root
+    remote_src: true
+  become: true
 
 - name: Verify k9s installation
   ansible.builtin.command: k9s version
   register: k9s_version
   changed_when: false
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/k9s.tar.gz
+    - /tmp/k9s
 
 - name: Display k9s version
   ansible.builtin.debug:

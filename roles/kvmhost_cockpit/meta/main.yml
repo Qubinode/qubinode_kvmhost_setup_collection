@@ -1,0 +1,53 @@
+---
+galaxy_info:
+  role_name: kvmhost_cockpit
+  author: Qubinode Community
+  description: Configure Cockpit web interface for KVM host management with SSL, authentication, and module integration
+  company: Red Hat
+  license: Apache-2.0
+  min_ansible_version: "2.9"
+  
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9" 
+        - "10"
+    - name: CentOS
+      versions:
+        - "9"
+    - name: Rocky
+      versions:
+        - "8"
+        - "9"
+    - name: AlmaLinux
+      versions:
+        - "8" 
+        - "9"
+    - name: Fedora
+      versions:
+        - "37"
+        - "38"
+        - "39"
+        - "40"
+
+  galaxy_tags:
+    - cockpit
+    - web
+    - management
+    - kvm
+    - libvirt
+    - monitoring
+    - rhel
+    - rocky
+    - centos
+
+dependencies:
+  - role: kvmhost_base
+    when: kvmhost_cockpit_require_base | default(true)
+  - role: kvmhost_libvirt
+    when: kvmhost_cockpit_require_libvirt | default(true)
+
+collections:
+  - fedora.linux_system_roles
+  - ansible.posix

@@ -1,0 +1,14 @@
+---
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Remount filesystem
+  ansible.builtin.shell: "mount -o remount {{ item }}"
+  become: true
+
+- name: Update grub configuration
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  become: true
+  when: ansible_os_family == "RedHat"

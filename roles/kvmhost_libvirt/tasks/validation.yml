@@ -1,0 +1,77 @@
+---
+# =============================================================================
+# LIBVIRT VALIDATION TASKS
+# =============================================================================
+# Validate virtualization capabilities and prerequisites
+
+- name: Check if running in CI/CD test mode
+  ansible.builtin.debug:
+    msg: "Skipping hardware validation - CI/CD test mode enabled"
+  when: cicd_test | default(false)
+
+- name: Verify that Virtualization Technology (VT) is enabled
+  ansible.builtin.command: grep -c -E 'svm|vmx' /proc/cpuinfo
+  changed_when: false
+  failed_when: false
+  register: vt_check_result
+  when: 
+    - not cicd_test | default(false)
+    - not kvmhost_libvirt_skip_vt_check | default(false)
+
+- name: Set fact about Virtualization Technology (VT) status
+  ansible.builtin.set_fact:
+    kvmhost_libvirt_vt_enabled: "{{ vt_check_result.rc == 0 }}"
+  when: 
+    - not cicd_test | default(false)
+    - not kvmhost_libvirt_skip_vt_check | default(false)
+
+- name: Display VT status information
+  ansible.builtin.debug:
+    msg: >
+      Virtualization Technology (VT) status: 
+      {{ 'Enabled' if kvmhost_libvirt_vt_enabled | default(true) else 'Disabled' }}
+  when: 
+    - not cicd_test | default(false)
+    - not kvmhost_libvirt_skip_vt_check | default(false)
+
+- name: Fail if Virtualization Technology (VT) is disabled
+  ansible.builtin.fail:
+    msg: >
+      Virtualization Technology (VT) is currently disabled. Please enable VT
+      in your system BIOS/UEFI before running this role again.
+  when: 
+    - not cicd_test | default(false)
+    - not kvmhost_libvirt_skip_vt_check | default(false)
+    - not kvmhost_libvirt_vt_enabled | default(true)
+
+- name: Check if KVM kernel modules are loaded
+  ansible.builtin.command: lsmod | grep kvm
+  changed_when: false
+  failed_when: false
+  register: kvm_modules_check
+  when: not cicd_test | default(false)
+
+- name: Display KVM modules status
+  ansible.builtin.debug:
+    msg: "KVM kernel modules: {{ 'Loaded' if kvm_modules_check.rc == 0 else 'Not loaded' }}"
+  when: not cicd_test | default(false)
+
+- name: Validate storage pool paths exist
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  register: storage_path_check
+  loop: "{{ kvmhost_libvirt_storage_pools }}"
+  when: kvmhost_libvirt_storage_enabled | default(true)
+
+- name: Create storage pool directories if missing
+  ansible.builtin.file:
+    path: "{{ item.item.path }}"
+    state: directory
+    mode: '0711'
+    owner: root
+    group: root
+  loop: "{{ storage_path_check.results }}"
+  when: 
+    - kvmhost_libvirt_storage_enabled | default(true)
+    - not item.stat.exists
+  become: true

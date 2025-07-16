@@ -1,0 +1,197 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "name": "Local Molecule Testing Quality Gates",
+    "description": "Critical quality gates enforcing mandatory local Molecule testing validation before CI/CD execution based on ADR-0011. Includes blocking rules to prevent push without local validation.",
+    "created": "2025-01-12T15:00:00.000Z",
+    "lastModified": "2025-01-12T16:30:00.000Z",
+    "author": "Qubinode Project Team",
+    "tags": ["molecule", "ci-cd", "quality-gates", "local-testing", "adr-0011", "mandatory", "blocking"]
+  },
+  "rules": [
+    {
+      "id": "local-molecule-validation",
+      "name": "Local Molecule Testing Before CI/CD",
+      "category": "quality-gates",
+      "severity": "error",
+      "description": "All Ansible-related changes must pass local Molecule testing validation before reaching CI/CD to prevent failures and improve developer productivity",
+      "pattern": "scripts/test-local-molecule.sh",
+      "message": "Local Molecule tests must pass before pushing to CI/CD. Run: ./scripts/test-local-molecule.sh",
+      "source": "ADR-0011",
+      "evidence": [
+        "Research shows 80% CI/CD failure prevention potential",
+        "Cloud runners lack KVM virtualization support",
+        "Local testing provides 50% faster feedback loops",
+        "Developer productivity improvement through early issue detection"
+      ],
+      "applicability": [
+        "When modifying Ansible roles (roles/**/*.yml)",
+        "When changing playbooks (playbooks/**/*.yml)", 
+        "When updating Molecule tests (molecule/**/*.yml)",
+        "When modifying task files (*/tasks/*.yml)",
+        "When changing variable files (*/vars/*.yml, */defaults/*.yml)"
+      ],
+      "validation": {
+        "command": "./scripts/test-local-molecule.sh",
+        "timeout": 300,
+        "required_files": ["scripts/test-local-molecule.sh"],
+        "environment_checks": ["molecule --version", "ansible --version"]
+      }
+    },
+    {
+      "id": "pre-commit-molecule-hook",
+      "name": "Pre-commit Molecule Hook Required",
+      "category": "developer-workflow",
+      "severity": "warning",
+      "description": "Pre-commit hooks must validate Molecule tests for Ansible-related file changes to enforce quality gates",
+      "pattern": "\\.git/hooks/pre-commit",
+      "message": "Pre-commit hook should validate Molecule tests for Ansible changes. Use: .git/hooks/pre-commit.example",
+      "source": "architectural-pattern",
+      "evidence": [
+        "Automated local validation improves code quality",
+        "Pre-commit hooks prevent CI/CD failures",
+        "Enforces ADR-0011 compliance automatically"
+      ],
+      "applicability": [
+        "For all developers working on Ansible code",
+        "During local development workflow",
+        "Before pushing changes to remote repository"
+      ],
+      "validation": {
+        "file_exists": ".git/hooks/pre-commit",
+        "file_executable": true,
+        "content_check": "test-local-molecule.sh"
+      }
+    },
+    {
+      "id": "mandatory-local-testing-before-push",
+      "name": "Mandatory Local Testing Before Push to GitHub Actions",
+      "category": "quality-gates",
+      "severity": "critical",
+      "description": "Local Molecule testing script MUST pass successfully before any code can be pushed to trigger GitHub Actions CI/CD. This rule enforces ADR-0011 compliance and prevents CI/CD failures.",
+      "pattern": "scripts/test-local-molecule.sh",
+      "message": "CRITICAL: Local Molecule tests must pass before push. Run './scripts/test-local-molecule.sh' and ensure all tests pass. This rule prevents wasted CI/CD resources and ensures quality.",
+      "source": "ADR-0011",
+      "evidence": [
+        "Research shows 80% CI/CD failure prevention potential",
+        "Local testing provides 50% faster feedback loops",
+        "Cloud runners lack KVM virtualization support",
+        "Enforces quality gate before expensive CI/CD resources"
+      ],
+      "applicability": [
+        "Before every git push to remote repository",
+        "When modifying any Ansible-related files",
+        "Before opening pull requests",
+        "During pre-commit validation workflow"
+      ],
+      "validation": {
+        "command": "./scripts/test-local-molecule.sh",
+        "exit_code": 0,
+        "timeout": 600,
+        "required_files": ["scripts/test-local-molecule.sh"],
+        "environment_checks": ["molecule --version", "ansible --version"],
+        "blocking": true,
+        "enforcement_level": "mandatory"
+      }
+    },
+    {
+      "id": "ansible-role-molecule-tests",
+      "name": "Ansible Roles Must Have Molecule Tests",
+      "category": "testing-completeness",
+      "severity": "error",
+      "description": "Every Ansible role must have corresponding Molecule test scenarios to ensure quality and functionality validation",
+      "pattern": "roles/.*/molecule/.*",
+      "message": "Ansible role missing Molecule tests. Create molecule/default/molecule.yml and associated test files",
+      "source": "architectural-pattern",
+      "evidence": [
+        "Consistent testing across all roles ensures quality",
+        "Molecule provides comprehensive role validation",
+        "Testing completeness improves reliability"
+      ],
+      "applicability": [
+        "For all roles under roles/ directory",
+        "When creating new Ansible roles",
+        "When modifying existing role functionality"
+      ],
+      "validation": {
+        "required_structure": [
+          "molecule/default/molecule.yml",
+          "molecule/default/converge.yml",
+          "molecule/default/verify.yml"
+        ],
+        "optional_files": [
+          "molecule/default/prepare.yml",
+          "molecule/default/requirements.yml"
+        ]
+      }
+    }
+  ],
+  "categories": [
+    {
+      "name": "quality-gates",
+      "description": "Rules that enforce quality standards and prevent issues from reaching CI/CD",
+      "priority": "critical",
+      "ruleCount": 2
+    },
+    {
+      "name": "developer-workflow", 
+      "description": "Rules that improve developer experience and workflow efficiency",
+      "priority": "medium",
+      "ruleCount": 1
+    },
+    {
+      "name": "testing-completeness",
+      "description": "Rules that ensure comprehensive testing coverage across the codebase",
+      "priority": "high",
+      "ruleCount": 1
+    }
+  ],
+  "dependencies": [
+    {
+      "ruleId": "mandatory-local-testing-before-push",
+      "dependsOn": ["ansible-role-molecule-tests"],
+      "conflictsWith": [],
+      "relationship": "requires",
+      "enforcement_order": 1
+    },
+    {
+      "ruleId": "local-molecule-validation",
+      "dependsOn": ["mandatory-local-testing-before-push"],
+      "conflictsWith": [],
+      "relationship": "supports",
+      "enforcement_order": 2
+    },
+    {
+      "ruleId": "pre-commit-molecule-hook",
+      "dependsOn": ["mandatory-local-testing-before-push"],
+      "conflictsWith": [],
+      "relationship": "enforces",
+      "enforcement_order": 3
+    }
+  ],
+  "enforcement": {
+    "pre_commit": {
+      "enabled": true,
+      "rules": ["mandatory-local-testing-before-push", "local-molecule-validation", "pre-commit-molecule-hook"],
+      "blocking": true,
+      "mandatory_rules": ["mandatory-local-testing-before-push"]
+    },
+    "ci_cd": {
+      "enabled": true,
+      "rules": ["mandatory-local-testing-before-push", "local-molecule-validation", "ansible-role-molecule-tests"],
+      "blocking": true,
+      "mandatory_rules": ["mandatory-local-testing-before-push"],
+      "gate_order": ["mandatory-local-testing-before-push", "validate-local-testing", "test-compatibility"]
+    },
+    "documentation": {
+      "adr_references": ["ADR-0011"],
+      "research_references": ["docs/research/local-molecule-testing-validation-2025-01-12.md"]
+    },
+    "quality_gates": {
+      "local_testing_mandatory": true,
+      "ci_cd_prerequisites": ["scripts/test-local-molecule.sh"],
+      "failure_action": "block_push",
+      "compliance_level": "critical"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+---
+# =============================================================================
+# KVMHOST NETWORKING ROLE - VALIDATION TASKS  
+# =============================================================================
+# Main validation entry point for kvmhost_networking role
+
+- name: Initialize kvmhost_networking validation
+  ansible.builtin.set_fact:
+    kvmhost_networking_validation_errors: []
+    kvmhost_networking_validation_warnings: []
+
+- name: Include schema validation for kvmhost_networking
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/validation/schema_validation_networking.yml"
+  vars:
+    validation_scope: "kvmhost_networking"
+
+- name: Validate bridge device configuration
+  ansible.builtin.assert:
+    that:
+      - kvmhost_bridge_device is defined
+      - kvmhost_bridge_device | length > 0
+      - kvmhost_bridge_device | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$')
+    fail_msg: "Bridge device '{{ kvmhost_bridge_device | default('undefined') }}' is invalid"
+    success_msg: "Bridge device configuration is valid"
+
+- name: Validate DNS forwarder configuration
+  ansible.builtin.assert:
+    that:
+      - dns_forwarder is defined
+      - dns_forwarder | ansible.utils.ipv4
+    fail_msg: "DNS forwarder '{{ dns_forwarder | default('undefined') }}' must be a valid IPv4 address"
+    success_msg: "DNS forwarder configuration is valid"
+
+- name: Validate domain configuration
+  ansible.builtin.assert:
+    that:
+      - domain is defined
+      - domain | length >= 3
+      - domain | regex_search('^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$')
+    fail_msg: "Domain '{{ domain | default('undefined') }}' is invalid"
+    success_msg: "Domain configuration is valid"
+
+- name: Validate libvirt networks configuration
+  ansible.builtin.assert:
+    that:
+      - libvirt_host_networks is defined
+      - libvirt_host_networks | type_debug == "list"
+      - libvirt_host_networks | length > 0
+    fail_msg: "libvirt_host_networks must be defined as a non-empty list"
+    success_msg: "Libvirt networks configuration structure is valid"
+
+- name: Validate individual network configurations
+  ansible.builtin.include_tasks: validate_network_item.yml
+  loop: "{{ libvirt_host_networks }}"
+  loop_control:
+    loop_var: network_config
+
+- name: Check ADR-0007 bridge architecture compliance
+  ansible.builtin.assert:
+    that:
+      - libvirt_host_networks | selectattr('mode', 'equalto', 'bridge') | list | length > 0
+    fail_msg: "ADR-0007 compliance: At least one bridge-mode network must be configured"
+    success_msg: "ADR-0007 compliance: Bridge-based networking architecture validated"

@@ -1,0 +1,53 @@
+---
+# =============================================================================
+# KVMHOST LIBVIRT ROLE - MAIN TASKS
+# =============================================================================
+# This role configures libvirt services, storage pools, and virtualization
+# settings for KVM hosts following ADR-0002 modular architecture standards.
+
+- name: Display libvirt configuration summary
+  ansible.builtin.debug:
+    msg:
+      - "=== KVM Host Libvirt Configuration ==="
+      - "Libvirt enabled: {{ kvmhost_libvirt_enabled }}"
+      - "Storage pools: {{ kvmhost_libvirt_storage_pools | length }}"
+      - "Networks: {{ kvmhost_libvirt_networks | length }}"
+      - "User access: {{ kvmhost_libvirt_user_access_enabled }}"
+      - "Validation: {{ kvmhost_libvirt_validation_enabled }}"
+  when: kvmhost_libvirt_debug_enabled | default(false)
+
+- name: Include pre-flight validation
+  ansible.builtin.include_tasks: validation.yml
+  when: kvmhost_libvirt_validation_enabled | default(true)
+
+- name: Include libvirt service setup
+  ansible.builtin.include_tasks: services.yml
+  when: kvmhost_libvirt_enabled | default(true)
+
+- name: Include storage pool configuration
+  ansible.builtin.include_tasks: storage.yml
+  when: 
+    - kvmhost_libvirt_enabled | default(true)
+    - kvmhost_libvirt_storage_enabled | default(true)
+
+- name: Include network configuration
+  ansible.builtin.include_tasks: networks.yml
+  when:
+    - kvmhost_libvirt_enabled | default(true) 
+    - kvmhost_libvirt_networks_enabled | default(true)
+    - not cicd_test | default(false)
+
+- name: Include user access configuration
+  ansible.builtin.include_tasks: user_access.yml
+  when:
+    - kvmhost_libvirt_enabled | default(true)
+    - kvmhost_libvirt_user_access_enabled | default(true)
+
+- name: Display completion summary
+  ansible.builtin.debug:
+    msg:
+      - "=== KVM Host Libvirt Configuration Complete ==="
+      - "Services configured: {{ kvmhost_libvirt_services | join(', ') }}"
+      - "Storage pools configured: {{ kvmhost_libvirt_storage_pools | map(attribute='name') | join(', ') }}"
+      - "Networks configured: {{ kvmhost_libvirt_networks | map(attribute='name') | join(', ') }}"
+  when: kvmhost_libvirt_debug_enabled | default(false)

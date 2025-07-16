@@ -1,0 +1,30 @@
+---
+# kvmhost_base role meta information
+# Handles OS detection, basic packages, and system preparation
+
+galaxy_info:
+  author: Qubinode Project
+  description: Base KVM host configuration and OS detection
+  company: Red Hat
+  license: GPL-3.0
+  min_ansible_version: 2.9
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+        - "10"
+    - name: Rocky
+      versions:
+        - "8"
+        - "9"
+    - name: AlmaLinux
+      versions:
+        - "8"
+        - "9"
+
+dependencies: []
+
+collections:
+  - ansible.posix
+  - community.general

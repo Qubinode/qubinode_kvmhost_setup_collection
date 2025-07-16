@@ -1,0 +1,59 @@
+---
+# Base KVM host configuration defaults
+# ADR-0002 compliant modular design
+
+# System configuration flags
+cicd_test: false
+testing_mode: false
+
+# OS version support (ADR-0008)
+supported_os_families:
+  - RedHat
+  - CentOS
+  - Rocky
+  - AlmaLinux
+
+supported_major_versions:
+  - "8"
+  - "9"
+  - "10"
+
+# Base package management
+base_packages_common:
+  - curl
+  - wget
+  - git
+  - vim
+  - htop
+  - rsync
+  - unzip
+  - tar
+  - which
+  - lsof
+
+# RHEL/CentOS/Rocky/AlmaLinux specific packages
+base_packages_rhel_family:
+  - dnf-utils
+  - yum-utils
+  - redhat-lsb-core
+  - NetworkManager
+  - firewalld
+
+# Repository configuration
+enable_epel: true
+epel_installation_method: "dnf_module"  # ADR-0001 compliant
+
+# Service management
+base_services_enabled:
+  - NetworkManager
+  - firewalld
+
+base_services_started:
+  - NetworkManager
+  - firewalld
+
+# Python configuration
+python_packages:
+  - python3-pip
+  - python3-virtualenv
+  - python3-setuptools

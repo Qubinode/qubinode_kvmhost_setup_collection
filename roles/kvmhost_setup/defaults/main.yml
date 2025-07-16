@@ -145,3 +145,53 @@ required_rpm_packages:
   - k9s
 
 download_vim_url: "https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip"
+
+# KVM Performance Optimization Settings
+# Based on research findings for enterprise KVM hosts
+# ---------------------
+enable_kvm_performance_optimization: true
+
+# Hugepages configuration (percentage of total memory, default 25%)
+kvm_hugepages_percent: 25
+
+# CPU optimization settings
+kvm_cpu_governor: "performance"
+kvm_enable_cpu_isolation: true
+
+# Memory optimization settings
+kvm_enable_ksm: true
+kvm_ksm_pages_to_scan: 100
+kvm_ksm_sleep_millisecs: 1000
+
+# Nested virtualization (auto-detected based on CPU capabilities)
+kvm_enable_nested_virtualization: true
+
+# Network performance optimizations
+kvm_optimize_network_performance: true
+
+# Sysctl optimizations for virtualization workloads
+kvm_performance_sysctls:
+  # Memory management
+  vm.swappiness: 1
+  vm.vfs_cache_pressure: 50
+  vm.dirty_background_ratio: 5
+  vm.dirty_ratio: 10
+  vm.dirty_writeback_centisecs: 500
+  vm.dirty_expire_centisecs: 3000
+  
+  # Network performance
+  net.core.default_qdisc: "fq_codel"
+  net.ipv4.tcp_congestion_control: "bbr"
+  net.core.rmem_max: 268435456
+  net.core.wmem_max: 268435456
+  net.core.rmem_default: 65536
+  net.core.wmem_default: 65536
+  net.core.netdev_max_backlog: 5000
+  
+  # Bridge optimizations
+  net.bridge.bridge-nf-call-ip6tables: 0
+  net.bridge.bridge-nf-call-iptables: 0
+  net.bridge.bridge-nf-call-arptables: 0
+
+# Performance monitoring
+kvm_enable_performance_monitoring: true

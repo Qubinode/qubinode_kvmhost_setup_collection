@@ -1,0 +1,69 @@
+
+# =============================================================================
+# SCHEMA VALIDATION FOR KVMHOST_USER_CONFIG ROLE
+# =============================================================================
+# Validates kvmhost_user_config role variables against JSON schema
+
+- name: Load kvmhost_user_config schema
+  ansible.builtin.set_fact:
+    kvmhost_user_config_schema: "{{ lookup('file', validation_schemas_dir + '/kvmhost_user_config_schema.json') | from_json }}"
+  vars:
+    validation_schemas_dir: "{{ playbook_dir }}/validation/schemas"
+
+- name: Extract kvmhost_user_config variables for validation
+  ansible.builtin.set_fact:
+    kvmhost_user_config_vars:
+      admin_user: "{{ admin_user | default('') }}"
+      configure_shell: "{{ configure_shell | default(false) }}"
+      enable_libvirt_admin_user: "{{ enable_libvirt_admin_user | default(false) }}"
+      user_shell_configs: "{{ user_shell_configs | default({}) }}"
+      ssh_configuration: "{{ ssh_configuration | default({}) }}"
+      user_groups: "{{ user_groups | default([]) }}"
+      sudo_configuration: "{{ sudo_configuration | default({}) }}"
+
+- name: Validate kvmhost_user_config required properties
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [error_msg] }}"
+  vars:
+    error_msg: "kvmhost_user_config validation error: Required property '{{ item }}' is missing or empty"
+  when: 
+    - kvmhost_user_config_schema.required is defined
+    - item in kvmhost_user_config_schema.required
+    - kvmhost_user_config_vars[item] is not defined or kvmhost_user_config_vars[item] | length == 0
+  loop: "{{ kvmhost_user_config_schema.required }}"
+
+- name: Validate admin user name pattern
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [admin_user_error_msg] }}"
+  vars:
+    admin_user_error_msg: "kvmhost_user_config validation error: Admin user '{{ kvmhost_user_config_vars.admin_user }}' does not match naming pattern"
+  when: 
+    - kvmhost_user_config_vars.admin_user | length > 0
+    - not (kvmhost_user_config_vars.admin_user | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
+
+- name: Validate user shell configs
+  ansible.builtin.include_tasks: validate_shell_configs.yml
+  when: kvmhost_user_config_vars.user_shell_configs.keys() | length > 0
+
+- name: Validate SSH configuration
+  ansible.builtin.include_tasks: validate_ssh_config.yml
+  when: kvmhost_user_config_vars.ssh_configuration.keys() | length > 0
+
+- name: Validate user groups
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [group_error_msg] }}"
+  vars:
+    group_error_msg: "kvmhost_user_config validation error: User group '{{ item }}' does not match naming pattern"
+  when: 
+    - kvmhost_user_config_vars.user_groups | length > 0
+    - not (item | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
+  loop: "{{ kvmhost_user_config_vars.user_groups }}"
+
+- name: Validate sudo configuration
+  ansible.builtin.include_tasks: validate_sudo_config.yml
+  when: kvmhost_user_config_vars.sudo_configuration.keys() | length > 0
+
+- name: Add kvmhost_user_config validation success
+  ansible.builtin.set_fact:
+    validation_warnings: "{{ validation_warnings + ['kvmhost_user_config schema validation passed'] }}"
+  when: validation_errors | length == 0

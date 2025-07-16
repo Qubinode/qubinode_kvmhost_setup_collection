@@ -1,0 +1,80 @@
+---
+# =============================================================================
+# STORAGE MONITORING CONFIGURATION
+# =============================================================================
+# Configure storage monitoring and health checks
+
+- name: Display monitoring configuration
+  ansible.builtin.debug:
+    msg:
+      - "Configuring storage monitoring"
+      - "Space threshold: {{ kvmhost_storage_space_threshold }}%"
+      - "Inode threshold: {{ kvmhost_storage_inode_threshold }}%"
+  when: kvmhost_storage_debug_enabled | default(false)
+
+- name: Create storage monitoring script
+  ansible.builtin.template:
+    src: storage_monitor.sh.j2
+    dest: /usr/local/bin/kvmhost-storage-monitor
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+
+- name: Create storage health check script
+  ansible.builtin.template:
+    src: storage_health_check.sh.j2
+    dest: /usr/local/bin/kvmhost-storage-health
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+
+- name: Run initial storage health check
+  ansible.builtin.command: /usr/local/bin/kvmhost-storage-health
+  register: health_check_result
+  changed_when: false
+  become: true
+
+- name: Display health check results
+  ansible.builtin.debug:
+    msg: "{{ health_check_result.stdout_lines }}"
+  when: kvmhost_storage_debug_enabled | default(false)
+
+- name: Check current storage usage
+  ansible.builtin.shell: |
+    df -h | grep -E "(libvirt|mapper)" || true
+  register: storage_usage
+  changed_when: false
+
+- name: Display current storage usage
+  ansible.builtin.debug:
+    msg: |
+      Storage Usage Summary:
+      {{ storage_usage.stdout if storage_usage.stdout else 'No specialized storage detected' }}
+  when: kvmhost_storage_debug_enabled | default(false)
+
+- name: Check LVM volume group status
+  ansible.builtin.shell: "vgdisplay {{ kvmhost_storage_lvm_vg_name }}"
+  register: vg_status
+  changed_when: false
+  failed_when: false
+  when: kvmhost_storage_lvm_enabled | default(false)
+  become: true
+
+- name: Display LVM status
+  ansible.builtin.debug:
+    msg: "LVM Volume Group Status: {{ 'Active' if vg_status.rc == 0 else 'Not configured' }}"
+  when: 
+    - kvmhost_storage_debug_enabled | default(false)
+    - kvmhost_storage_lvm_enabled | default(false)
+
+- name: Create storage monitoring cron job (optional)
+  ansible.builtin.cron:
+    name: "KVM Storage Monitoring"
+    minute: "*/15"
+    job: "/usr/local/bin/kvmhost-storage-monitor"
+    user: root
+    state: present
+  become: true
+  when: kvmhost_storage_monitoring_enabled | default(true)

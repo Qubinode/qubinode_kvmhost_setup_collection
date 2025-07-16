@@ -10,13 +10,15 @@
     state: started
   with_items: "{{ libvirt_services }}"
 
-- name: Start tuned profile virtual-host
-  ansible.builtin.shell: |
-   set -o pipefail &&  tuned-adm profile virtual-host
-  register: start_tuned
-  changed_when: start_tuned.rc != 0
-  args:
-    executable: /bin/bash
+- name: Check current tuned profile
+  ansible.builtin.command: tuned-adm active
+  register: current_tuned_profile
+  changed_when: false
+
+- name: Start tuned profile virtual-host (idempotent)
+  ansible.builtin.command: tuned-adm profile virtual-host
+  when: "'virtual-host' not in current_tuned_profile.stdout"
+  register: tuned_profile_changed
 
 - name: Return bridge status
   ansible.builtin.command: "ifconfig {{ qubinode_bridge_name }}"

@@ -1,0 +1,229 @@
+---
+# Development Environment Configuration Template
+# Copy to inventories/<env>/group_vars/all.yml and customize
+
+# =============================================================================
+# ENVIRONMENT IDENTIFICATION
+# =============================================================================
+environment_name: "development"
+environment_type: "dev"
+deployment_stage: "development"
+
+# =============================================================================
+# TESTING AND DEBUG CONFIGURATION
+# =============================================================================
+# Enable testing features for development
+cicd_test: true
+testing_mode: true
+molecule_test: false
+
+# Debug and logging
+kvmhost_base_debug_enabled: true
+kvmhost_networking_debug_enabled: true
+enable_network_debugging: true
+network_debug_level: "debug"
+
+# =============================================================================
+# KVMHOST BASE CONFIGURATION (Development)
+# =============================================================================
+kvmhost_base_epel_enabled: true
+kvmhost_base_testing_mode: true
+
+# Additional development packages (minimal additions to original spec)
+kvmhost_base_packages_dev:
+  - tree          # For directory listing (helpful in dev)
+  - tcpdump       # Network debugging (original spec has net-tools)
+  - strace        # System call tracing (useful for debugging)
+
+# Original required packages from kvmhost_setup role
+required_rpm_packages:
+  - virt-install
+  - libvirt-daemon-config-network
+  - libvirt-daemon-kvm
+  - libguestfs-tools
+  - libvirt-client
+  - qemu-kvm
+  - nfs-utils
+  - libvirt-daemon
+  - libvirt-client
+  - virt-top
+  - tuned
+  - openssh-server
+  - wget
+  - bc
+  - git
+  - net-tools
+  - bind-utils
+  - dnf-utils
+  - firewalld
+  - bash-completion
+  - kexec-tools
+  - sos
+  - psacct
+  - vim
+  - device-mapper-event-libs
+  - device-mapper-libs
+  - httpd-tools
+  - tmux
+  - python3-dns
+  - python3-pip
+  - python3-lxml
+  - cargo
+  - lm_sensors
+  - python3-netaddr
+  - cockpit-machines
+  - bc
+  - nmap
+  - ncurses-devel
+  - podman
+  - container-selinux
+  - k9s
+
+# Python packages from original spec
+kvmhost_pip_packages:
+  - httpie      # Command line HTTP client
+  - tldr        # Simplified man pages  
+  - kube-shell  # Kubernetes shell
+  - openshift   # OpenShift CLI
+
+# Memory requirements (relaxed for dev)
+kvmhost_base_validation_memory_minimum: 1024  # 1GB minimum for dev VMs
+
+# =============================================================================
+# NETWORKING CONFIGURATION (Development)
+# =============================================================================
+kvmhost_networking_bridge_name: "devbr0"
+kvmhost_networking_auto_detect_interface: true
+kvmhost_networking_backup_existing_config: false  # Skip backup in dev
+kvmhost_networking_validation_enabled: true
+kvmhost_networking_validation_timeout: 30  # Shorter timeout for dev
+
+# Development-specific network settings
+kvmhost_networking_bridge_config:
+  method: "auto"
+  dhcp_timeout: 20
+  ipv4_method: "auto"
+  ipv6_method: "auto"
+
+# Testing connectivity hosts
+kvmhost_networking_ping_test_hosts:
+  - "8.8.8.8"
+  - "1.1.1.1"
+  - "google.com"
+
+# =============================================================================
+# LIBVIRT CONFIGURATION (Development)
+# =============================================================================
+# Planned for kvmhost_libvirt role
+kvmhost_libvirt_enabled: true
+kvmhost_libvirt_dev_unsafe_permissions: true  # Relaxed permissions for dev
+kvmhost_libvirt_autostart: false  # Don't autostart in dev
+
+# Development storage configuration
+kvmhost_libvirt_storage_pools:
+  - name: default
+    path: "/var/lib/libvirt/images"
+    type: "dir"
+    autostart: false
+  - name: dev-test
+    path: "/tmp/libvirt-dev"
+    type: "dir"
+    autostart: false
+
+# Development networks
+kvmhost_libvirt_networks:
+  - name: default
+    mode: nat
+    autostart: false
+  - name: dev-isolated
+    mode: isolated
+    autostart: false
+
+# =============================================================================
+# COCKPIT CONFIGURATION (Development)  
+# =============================================================================
+# Planned for kvmhost_cockpit role
+kvmhost_cockpit_enabled: true
+kvmhost_cockpit_ssl_enabled: false  # No SSL in dev
+kvmhost_cockpit_dev_features: true
+
+# =============================================================================
+# USER CONFIGURATION (Development)
+# =============================================================================
+# Planned for kvmhost_user_config role
+kvmhost_user_config_enabled: true
+kvmhost_user_config_dev_tools: true
+
+# Development shell configuration
+kvmhost_user_config_shell_features:
+  - starship_prompt
+  - git_aliases
+  - docker_aliases
+  - kubernetes_aliases
+  - development_functions
+
+# Additional development users
+kvmhost_user_config_dev_users:
+  - developer
+  - tester
+  - "{{ ansible_user | default('vagrant') }}"
+
+# =============================================================================
+# SECURITY SETTINGS (Development - Relaxed)
+# =============================================================================
+kvmhost_security_hardening_enabled: false  # Disabled for dev ease
+kvmhost_firewall_strict_mode: false
+kvmhost_selinux_mode: "permissive"  # Relaxed for development
+
+# =============================================================================
+# PERFORMANCE SETTINGS (Development)
+# =============================================================================
+kvmhost_performance_optimization: false  # No performance tuning in dev
+kvmhost_resource_limits_enabled: false
+
+# CPU and memory limits (development VMs)
+kvmhost_vm_defaults:
+  vcpus: 2
+  memory: 2048  # 2GB default for dev VMs
+  disk_size: 20  # 20GB default
+
+# =============================================================================
+# BACKUP AND RECOVERY (Development)
+# =============================================================================
+kvmhost_backup_enabled: false  # No backups needed in dev
+kvmhost_snapshot_enabled: true  # But enable snapshots for testing
+
+# =============================================================================
+# MONITORING AND ALERTING (Development)
+# =============================================================================
+kvmhost_monitoring_enabled: true  # Enable for testing
+kvmhost_monitoring_level: "debug"
+kvmhost_alerting_enabled: false  # No alerts in dev
+
+# =============================================================================
+# COMPATIBILITY AND MIGRATION
+# =============================================================================
+# Support legacy variables during development
+support_legacy_variables: true
+
+# Legacy variable mappings for backward compatibility
+enable_cockpit: "{{ kvmhost_cockpit_enabled }}"
+lib_virt_setup: "{{ kvmhost_libvirt_enabled }}"
+configure_shell: "{{ kvmhost_user_config_enabled }}"
+
+# =============================================================================
+# DEVELOPMENT-SPECIFIC OVERRIDES
+# =============================================================================
+# Override any production defaults for development
+force_bridge_creation: false
+skip_production_validations: true
+allow_experimental_features: true
+
+# Development logging
+log_level: "debug"
+log_to_file: true
+log_file_path: "/var/log/kvmhost-dev.log"
+
+# Quick development flags
+quick_setup: true  # Skip some validations for faster setup
+dev_shortcuts: true  # Enable development shortcuts

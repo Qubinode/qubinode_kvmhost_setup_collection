@@ -1,0 +1,32 @@
+
+# =============================================================================
+# COCKPIT CERTIFICATES VALIDATION HELPER
+# =============================================================================
+# Validates Cockpit SSL certificate configuration
+
+- name: Validate certificate path format
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [cert_path_error_msg] }}"
+  vars:
+    cert_path_error_msg: "kvmhost_cockpit validation error: Certificate path '{{ kvmhost_cockpit_vars.cockpit_certificates.cert_path }}' must be an absolute path"
+  when: 
+    - kvmhost_cockpit_vars.cockpit_certificates.cert_path is defined
+    - not (kvmhost_cockpit_vars.cockpit_certificates.cert_path | regex_search('^/[a-zA-Z0-9/_.-]+$'))
+
+- name: Validate key path format
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [key_path_error_msg] }}"
+  vars:
+    key_path_error_msg: "kvmhost_cockpit validation error: Key path '{{ kvmhost_cockpit_vars.cockpit_certificates.key_path }}' must be an absolute path"
+  when: 
+    - kvmhost_cockpit_vars.cockpit_certificates.key_path is defined
+    - not (kvmhost_cockpit_vars.cockpit_certificates.key_path | regex_search('^/[a-zA-Z0-9/_.-]+$'))
+
+- name: Validate CA path format
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [ca_path_error_msg] }}"
+  vars:
+    ca_path_error_msg: "kvmhost_cockpit validation error: CA path '{{ kvmhost_cockpit_vars.cockpit_certificates.ca_path }}' must be an absolute path"
+  when: 
+    - kvmhost_cockpit_vars.cockpit_certificates.ca_path is defined
+    - not (kvmhost_cockpit_vars.cockpit_certificates.ca_path | regex_search('^/[a-zA-Z0-9/_.-]+$'))

@@ -1,0 +1,28 @@
+---
+# =============================================================================
+# DHCP ITEM VALIDATION HELPER
+# =============================================================================
+# Validates DHCP configuration within network items
+
+- name: Validate DHCP IP addresses if defined
+  ansible.builtin.assert:
+    that:
+      - network_config.dhcp.start | ansible.utils.ipv4
+      - network_config.dhcp.end | ansible.utils.ipv4
+    fail_msg: "Network '{{ network_config.name }}' DHCP start/end IPs are not valid IPv4 addresses"
+    success_msg: "Network '{{ network_config.name }}' DHCP IP addresses are valid"
+  when: 
+    - network_config.dhcp.start is defined
+    - network_config.dhcp.end is defined
+
+- name: Validate DHCP range order
+  ansible.builtin.assert:
+    that:
+      - network_config.dhcp.start | ansible.utils.ipaddr('int') < network_config.dhcp.end | ansible.utils.ipaddr('int')
+    fail_msg: "Network '{{ network_config.name }}' DHCP start IP must be lower than end IP"
+    success_msg: "Network '{{ network_config.name }}' DHCP range is properly ordered"
+  when: 
+    - network_config.dhcp.start is defined
+    - network_config.dhcp.end is defined
+    - network_config.dhcp.start | ansible.utils.ipv4
+    - network_config.dhcp.end | ansible.utils.ipv4

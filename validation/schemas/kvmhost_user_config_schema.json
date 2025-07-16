@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KVM Host User Configuration Schema", 
+  "description": "Schema for validating kvmhost_user_config role variables",
+  "type": "object",
+  "properties": {
+    "admin_user": {
+      "type": "string",
+      "description": "Primary administrative user",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+      "minLength": 1
+    },
+    "configure_shell": {
+      "type": "boolean",
+      "description": "Whether to configure shell environment"
+    },
+    "enable_libvirt_admin_user": {
+      "type": "boolean",
+      "description": "Whether to enable libvirt access for admin user"
+    },
+    "user_shell_configs": {
+      "type": "object",
+      "description": "Shell configuration options",
+      "properties": {
+        "enable_starship": {
+          "type": "boolean",
+          "description": "Whether to install and configure Starship prompt"
+        },
+        "enable_bash_completion": {
+          "type": "boolean",
+          "description": "Whether to enable bash completion"
+        },
+        "custom_aliases": {
+          "type": "object",
+          "description": "Custom shell aliases",
+          "patternProperties": {
+            "^[a-zA-Z][a-zA-Z0-9_-]*$": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "environment_variables": {
+          "type": "object",
+          "description": "Custom environment variables",
+          "patternProperties": {
+            "^[A-Z][A-Z0-9_]*$": {
+              "type": "string"
+            }
+          }
+        },
+        "vim_configuration": {
+          "type": "object",
+          "properties": {
+            "enable_syntax_highlighting": {
+              "type": "boolean"
+            },
+            "enable_line_numbers": {
+              "type": "boolean"
+            },
+            "tab_size": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 8
+            }
+          }
+        }
+      }
+    },
+    "ssh_configuration": {
+      "type": "object",
+      "description": "SSH configuration options",
+      "properties": {
+        "enable_ssh_key_auth": {
+          "type": "boolean"
+        },
+        "disable_password_auth": {
+          "type": "boolean"
+        },
+        "ssh_port": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "allowed_users": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "user_groups": {
+      "type": "array",
+      "description": "Additional groups for the admin user",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+      },
+      "uniqueItems": true
+    },
+    "sudo_configuration": {
+      "type": "object",
+      "description": "Sudo configuration for admin user",
+      "properties": {
+        "enable_passwordless_sudo": {
+          "type": "boolean"
+        },
+        "sudo_timeout": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60
+        }
+      }
+    }
+  },
+  "required": [
+    "admin_user",
+    "configure_shell",
+    "enable_libvirt_admin_user"
+  ],
+  "additionalProperties": true,
+  "adr_compliance": {
+    "adr_002": {
+      "description": "User configuration follows modular role architecture"
+    }
+  }
+}

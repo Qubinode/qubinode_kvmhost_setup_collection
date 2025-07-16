@@ -5,12 +5,35 @@
     state: present
   become: true
 
-- name: Install EPEL repository
+- name: Enable EPEL repository using DNF module (ADR-0001 compliant)
   ansible.builtin.dnf:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    name: "epel-release"
     state: present
+    disable_gpg_check: false  # Explicit GPG verification required
   become: true
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
+- name: Verify EPEL repository is enabled
+  ansible.builtin.command: dnf repolist enabled
+  register: enabled_repos
   changed_when: false
+  failed_when: "'epel' not in enabled_repos.stdout"
+  tags:
+    - verification
+    - adr_0001
+
+- name: Verify EPEL GPG key is properly imported
+  ansible.builtin.command: rpm -q gpg-pubkey --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n'
+  register: epel_gpg_verification
+  changed_when: false
+  failed_when: false
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
 
 - name: Update package cache
   ansible.builtin.dnf:

@@ -1,0 +1,23 @@
+---
+# =============================================================================
+# KVMHOST USER CONFIG ROLE - HANDLERS
+# =============================================================================
+# Handlers for user configuration changes
+
+- name: reload bash profile
+  ansible.builtin.shell:
+    cmd: source ~/.bashrc
+  become_user: "{{ kvmhost_user_config_target_user }}"
+  listen: reload bash profile
+
+- name: restart ssh service
+  ansible.builtin.systemd:
+    name: sshd
+    state: restarted
+  listen: restart ssh service
+
+- name: reload user shell
+  ansible.builtin.shell:
+    cmd: exec $SHELL
+  become_user: "{{ kvmhost_user_config_target_user }}"
+  listen: reload user shell

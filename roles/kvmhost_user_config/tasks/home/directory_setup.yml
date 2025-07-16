@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# KVMHOST USER CONFIG ROLE - HOME DIRECTORY SETUP
+# =============================================================================
+# Sets up user home directory structure
+
+- name: Placeholder for home directory setup
+  ansible.builtin.debug:
+    msg: "Home directory setup tasks will be implemented here"
+
+# TODO: Implement home directory creation and configuration tasks

@@ -6,25 +6,27 @@
 
 - name: Ensure libvirt networks are setup
   vars:
-    net_name: "{{ libvirt_host_networks[libvirt_idx].name }}"
-    net_mode: "{{ libvirt_host_networks[libvirt_idx].mode }}"
-    net_create: "{{ libvirt_host_networks[libvirt_idx].create }}"
-  when: net_name in libvirt_nets.list_nets
-
+    net_name: "{{ item.name }}"
+    net_mode: "{{ item.mode }}"
+    net_create: "{{ item.create }}"
+  when: net_name not in libvirt_nets.list_nets and net_create|bool
+  with_items: "{{ libvirt_host_networks }}"
   block:
-    - name: Ensure libvirt nat network libvirt network is defined
+    - name: Ensure libvirt nat network is defined
       community.libvirt.virt_net:
         name: "{{ net_name }}"
         command: define
-        xml: '{{ lookup("templates", "nat_network.xml.j2") }}'
-      when: net_mode == 'nat' and net_create|bool
+        xml: '{{ lookup("template", "nat_network.xml.j2") }}'
+      when: net_mode == 'nat'
 
-    - name: Ensure libvirt network  is active
-      community.libvirt.virt_net:
-        name: "{{ net_name }}"
-        state: active
+- name: Ensure libvirt networks are active
+  community.libvirt.virt_net:
+    name: "{{ item.name }}"
+    state: active
+  with_items: "{{ libvirt_host_networks }}"
 
-    - name: Ensure libvirt network  is started on boot
-      community.libvirt.virt_net:
-        name: "{{ net_name }}"
-        autostart: true
+- name: Ensure libvirt networks start on boot
+  community.libvirt.virt_net:
+    name: "{{ item.name }}"
+    autostart: true
+  with_items: "{{ libvirt_host_networks }}"

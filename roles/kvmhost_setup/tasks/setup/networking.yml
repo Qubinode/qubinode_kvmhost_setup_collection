@@ -1,16 +1,46 @@
 ---
-- name: Get network interface facts
+# Enhanced Network Configuration with ADR-0007 Bridge Automation
+- name: "Network Setup - Get network interface facts"
   ansible.builtin.setup:
     gather_subset:
       - network
   register: network_facts
 
-- name: Verify bridge interface doesn't already exist
-  ansible.builtin.command: ip link show {{ item.bridge_device }}
+- name: "Network Setup - Display current network configuration"
+  ansible.builtin.debug:
+    msg: |
+      Current Network Configuration:
+      - Primary Interface: {{ ansible_default_ipv4.interface | default('N/A') }}
+      - Primary IP: {{ ansible_default_ipv4.address | default('N/A') }}
+      - Gateway: {{ ansible_default_ipv4.gateway | default('N/A') }}
+      - DNS: {{ ansible_dns.nameservers | default(['N/A']) | join(', ') }}
+
+# ADR-0007: Automated Bridge Configuration
+- name: "Network Setup - Run automated bridge configuration"
+  ansible.builtin.include_tasks: automated_bridge_config.yml
+  when: 
+    - qubinode_setup_bridge | default(true)
+    - not qubinode_skip_bridge_config | default(false)
+  tags:
+    - bridge_config
+    - network_automation
+
+# Network Validation Framework
+- name: "Network Setup - Run network validation"
+  ansible.builtin.include_tasks: network_validation.yml
+  when: qubinode_validate_network | default(true)
+  tags:
+    - network_validation
+    - adr_compliance
+
+# Legacy bridge interface verification (for compatibility)
+- name: "Network Setup - Verify bridge interface status"
+  ansible.builtin.command: "ip link show {{ item.bridge_device }}"
   register: bridge_check
   failed_when: false
   changed_when: false
   loop: "{{ libvirt_host_networks }}"
+  when: libvirt_host_networks is defined
 
 - name: Create network bridge interface configuration
   ansible.builtin.template:

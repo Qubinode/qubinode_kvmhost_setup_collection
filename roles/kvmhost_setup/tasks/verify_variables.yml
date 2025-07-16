@@ -51,8 +51,9 @@
 
 - name: Get the index of a dict
   ansible.builtin.debug:
-    msg: "{{ item.mac }}"
+    msg: "{{ item.mac | default('no-mac-configured') }}"
   loop: "{{ libvirt_host_networks }}"
+  when: not (skip_variable_validation | default(false))
 
 # TODO: this section might need to be replaced
 - name: Ensureing the libvirt_host_networks values are not empty if defined
@@ -74,3 +75,4 @@
     fail_msg: msg="'Please ensure the varaible libvirt_host_networks is setup correctly."
     success_msg: "'the libvirt_host_networks var is setup correctly'"
   loop: "{{ libvirt_host_networks }}"
+  when: not (skip_variable_validation | default(false))

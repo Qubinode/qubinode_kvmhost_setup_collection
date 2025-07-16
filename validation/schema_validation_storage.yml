@@ -1,0 +1,68 @@
+
+# =============================================================================
+# SCHEMA VALIDATION FOR KVMHOST_STORAGE ROLE
+# =============================================================================
+# Validates kvmhost_storage role variables against JSON schema
+
+- name: Load kvmhost_storage schema
+  ansible.builtin.set_fact:
+    kvmhost_storage_schema: "{{ lookup('file', validation_schemas_dir + '/kvmhost_storage_schema.json') | from_json }}"
+  vars:
+    validation_schemas_dir: "{{ playbook_dir }}/validation/schemas"
+
+- name: Extract kvmhost_storage variables for validation
+  ansible.builtin.set_fact:
+    kvmhost_storage_vars:
+      kvm_host_libvirt_dir: "{{ kvm_host_libvirt_dir | default('') }}"
+      libvirt_host_storage_pools: "{{ libvirt_host_storage_pools | default([]) }}"
+      storage_performance_tuning: "{{ storage_performance_tuning | default({}) }}"
+      lvm_configuration: "{{ lvm_configuration | default({}) }}"
+
+- name: Validate kvmhost_storage required properties
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [error_msg] }}"
+  vars:
+    error_msg: "kvmhost_storage validation error: Required property '{{ item }}' is missing or empty"
+  when: 
+    - kvmhost_storage_schema.required is defined
+    - item in kvmhost_storage_schema.required
+    - kvmhost_storage_vars[item] is not defined or kvmhost_storage_vars[item] | length == 0
+  loop: "{{ kvmhost_storage_schema.required }}"
+
+- name: Validate libvirt directory path format
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [libvirt_dir_error_msg] }}"
+  vars:
+    libvirt_dir_error_msg: "kvmhost_storage validation error: libvirt directory '{{ kvmhost_storage_vars.kvm_host_libvirt_dir }}' must be an absolute path"
+  when: 
+    - kvmhost_storage_vars.kvm_host_libvirt_dir | length > 0
+    - not (kvmhost_storage_vars.kvm_host_libvirt_dir | regex_search('^/[a-zA-Z0-9/_-]+$'))
+
+- name: Validate storage pool configuration
+  ansible.builtin.include_tasks: validate_storage_pool_config.yml
+  vars:
+    pool_item: "{{ item }}"
+  loop: "{{ kvmhost_storage_vars.libvirt_host_storage_pools }}"
+  when: kvmhost_storage_vars.libvirt_host_storage_pools | length > 0
+
+- name: Validate storage performance tuning
+  ansible.builtin.include_tasks: validate_storage_performance.yml
+  when: kvmhost_storage_vars.storage_performance_tuning.keys() | length > 0
+
+- name: Validate LVM configuration
+  ansible.builtin.include_tasks: validate_lvm_config.yml
+  when: kvmhost_storage_vars.lvm_configuration.keys() | length > 0
+
+- name: ADR-0003 KVM storage architecture compliance check
+  ansible.builtin.set_fact:
+    validation_warnings: "{{ validation_warnings + [kvm_compliance_msg] }}"
+  vars:
+    kvm_compliance_msg: "ADR-0003 compliance: KVM/libvirt storage architecture validated"
+  when: 
+    - kvmhost_storage_vars.libvirt_host_storage_pools | length > 0
+    - kvmhost_storage_vars.kvm_host_libvirt_dir | length > 0
+
+- name: Add kvmhost_storage validation success
+  ansible.builtin.set_fact:
+    validation_warnings: "{{ validation_warnings + ['kvmhost_storage schema validation passed'] }}"
+  when: validation_errors | length == 0
