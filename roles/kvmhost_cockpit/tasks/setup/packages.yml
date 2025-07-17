@@ -35,5 +35,8 @@
     msg:
       - "Cockpit packages installed successfully"
       - "Base packages: {{ kvmhost_cockpit_packages | join(', ') }}"
-      - "Additional packages: {{ kvmhost_cockpit_additional_packages | join(', ') if kvmhost_cockpit_additional_packages |
-        length > 0 else 'None' }}"
+      - >-
+        Additional packages: {{
+        kvmhost_cockpit_additional_packages | join(', ')
+        if kvmhost_cockpit_additional_packages | length > 0
+        else 'None' }}

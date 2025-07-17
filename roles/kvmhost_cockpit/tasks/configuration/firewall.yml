@@ -47,8 +47,10 @@
   when: kvmhost_cockpit_firewall_rich_rules | length > 0
 
 - name: Restrict access to specific source IPs (if configured)
-  ansible.posix.ansible.posix.firewalld:
-    rich_rule: "rule family='ipv4' source address='{{ item }}' port protocol='tcp' port='{{ kvmhost_cockpit_port }}' accept"
+  ansible.posix.firewalld:
+    rich_rule: >-
+      rule family='ipv4' source address='{{ item }}'
+      port protocol='tcp' port='{{ kvmhost_cockpit_port }}' accept
     permanent: true
     immediate: true
     state: enabled

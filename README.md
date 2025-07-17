@@ -177,6 +177,34 @@ The collection includes comprehensive testing through GitHub Actions CI/CD pipel
 - Ansible: 2.13, 2.14, 2.15
 - Python: 3.9 and 3.10
 
+### Automated Ansible Lint Fixes with AI Assistance
+
+This collection features an advanced automated lint fixing workflow that leverages Google Gemini AI for intelligent code analysis and fixes. The workflow provides three modes:
+
+#### Fix Modes:
+- **Auto**: Standard ansible-lint auto-fix functionality
+- **Manual Review**: Generates detailed reports for manual intervention
+- **Gemini-assisted**: AI-powered analysis and prioritized fix recommendations
+
+#### Usage:
+1. Navigate to the repository's Actions tab
+2. Select "Automated Ansible Lint Fixes with Gemini"
+3. Click "Run workflow" and choose your preferred fix mode
+4. The workflow will create a pull request with fixes if issues are found
+
+#### Required Secrets:
+To use Gemini-assisted mode, add your Google Gemini API key as a repository secret:
+- Secret name: `GEMINI_API_KEY`
+- Obtain from: [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+#### Benefits:
+- **Intelligent Prioritization**: AI analyzes issues by criticality
+- **Best Practice Compliance**: Ensures fixes follow Ansible conventions
+- **Breaking Change Detection**: Identifies potential compatibility issues
+- **Automated PR Creation**: Creates detailed pull requests with context
+
+The AI assistant provides expert-level analysis of ansible-lint issues, recommending fix strategies that align with Ansible best practices while maintaining backwards compatibility.
+
 
 ### Installing the Collection from Ansible Galaxy
 

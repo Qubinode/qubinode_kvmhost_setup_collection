@@ -18,8 +18,9 @@
 
 - name: Test Cockpit web interface response
   ansible.builtin.uri:
-    url: "{{ 'https' if kvmhost_cockpit_ssl_enabled else 'http' }}://{{ ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port
-      }}/login"
+    url: >-
+      {{ 'https' if kvmhost_cockpit_ssl_enabled else 'http' }}://{{
+      ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port }}/login
     method: GET
     validate_certs: false
     timeout: 10
@@ -44,8 +45,9 @@
 
 - name: Verify SSL certificate (if SSL enabled)
   ansible.builtin.command:
-    cmd: "openssl s_client -connect {{ ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port }} -servername {{ ansible_fqdn
-      }} < /dev/null"
+    cmd: >-
+      openssl s_client -connect {{ ansible_default_ipv4.address }}:{{
+      kvmhost_cockpit_port }} -servername {{ ansible_fqdn }} < /dev/null
   register: ssl_test
   changed_when: false
   failed_when: false
@@ -53,8 +55,9 @@
 
 - name: Test Cockpit API endpoint
   ansible.builtin.uri:
-    url: "{{ 'https' if kvmhost_cockpit_ssl_enabled else 'http' }}://{{ ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port
-      }}/cockpit/channel/v1/ping"
+    url: >-
+      {{ 'https' if kvmhost_cockpit_ssl_enabled else 'http' }}://{{
+      ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port }}/cockpit/channel/v1/ping
     method: GET
     validate_certs: false
     timeout: 10
@@ -62,7 +65,7 @@
   failed_when: false
 
 - name: Generate Cockpit validation report
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: cockpit_validation_report.j2
     dest: /tmp/cockpit_validation_report.txt
     mode: "0644"

@@ -70,4 +70,4 @@
   changed_when: false
   with_fileglob:
     - /etc/cockpit/ws-certs.d/*.cert
-  when: ansible_check_mode | bool == false
+  when: not ansible_check_mode
