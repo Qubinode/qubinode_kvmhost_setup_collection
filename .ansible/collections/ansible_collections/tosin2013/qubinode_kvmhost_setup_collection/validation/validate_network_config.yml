@@ -1,0 +1,55 @@
+# =============================================================================
+# NETWORK CONFIG VALIDATION HELPER
+# =============================================================================
+# Validates individual network configuration items
+
+- name: Validate network item required fields
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [network_error_msg] }}"
+  vars:
+    network_error_msg: "kvmhost_networking validation error: Network '{{ network_item.name | default('unnamed') }}' missing
+      required field '{{ required_field }}'"
+  when:
+    - network_item[required_field] is not defined or network_item[required_field] | length == 0
+  loop:
+    - name
+    - mode
+    - bridge_device
+  loop_control:
+    loop_var: required_field
+
+- name: Validate network name pattern
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [name_error_msg] }}"
+  vars:
+    name_error_msg: "kvmhost_networking validation error: Network name '{{ network_item.name }}' does not match naming pattern"
+  when:
+    - network_item.name is defined
+    - not (network_item.name | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
+
+- name: Validate network mode
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [mode_error_msg] }}"
+  vars:
+    mode_error_msg: "kvmhost_networking validation error: Network '{{ network_item.name }}' has invalid mode '{{ network_item.mode
+      }}'"
+    valid_modes: [bridge, nat, route, isolated]
+  when:
+    - network_item.mode is defined
+    - network_item.mode not in valid_modes
+
+- name: Validate bridge device pattern
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [bridge_device_error_msg] }}"
+  vars:
+    bridge_device_error_msg: "kvmhost_networking validation error: Network '{{ network_item.name }}' bridge device '{{ network_item.bridge_device
+      }}' does not match naming pattern"
+  when:
+    - network_item.bridge_device is defined
+    - not (network_item.bridge_device | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
+
+- name: Validate DHCP configuration if present
+  ansible.builtin.include_tasks: validate_dhcp_config.yml
+  when:
+    - network_item.dhcp is defined
+    - network_item.dhcp.enabled | default(false)

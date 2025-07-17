@@ -1,4 +1,3 @@
----
 # =============================================================================
 # STORAGE PERFORMANCE OPTIMIZATION
 # =============================================================================
@@ -35,7 +34,7 @@
 
 - name: Configure kernel parameters for storage performance
   ansible.posix.ansible.posix.sysctl:
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
     value: "{{ item.value }}"
     state: present
     reload: true

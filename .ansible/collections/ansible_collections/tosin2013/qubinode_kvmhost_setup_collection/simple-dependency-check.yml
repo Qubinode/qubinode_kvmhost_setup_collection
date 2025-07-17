@@ -1,0 +1,19 @@
+# Simple Dependency Security Check
+# Add this to existing .github/workflows/ansible-test.yml
+
+  dependency-security:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.11
+        run: |
+          sudo yum install -y python3.11 python3.11-pip
+          python3.11 -m pip install --upgrade pip
+      - name: Security scan
+        run: |
+          python3.11 -m pip install safety
+          # Create temp requirements for scanning
+          echo "ansible-core>=2.17,<2.19" > temp-requirements.txt
+          echo "molecule>=25.6.0" >> temp-requirements.txt
+          safety check -r temp-requirements.txt || echo "Security issues found"
+          rm temp-requirements.txt

@@ -1,0 +1,32 @@
+---
+# Network Pre-flight Checks
+
+- name: 'Verify NetworkManager is running'
+  ansible.builtin.ansible.builtin.systemd:
+    name: NetworkManager
+  register: nm_status
+  become: true
+
+- name: 'Assert NetworkManager is active'
+  ansible.builtin.assert:
+    that:
+      - nm_status.status.ActiveState == "active"
+    fail_msg: "NetworkManager is not running. Bridge configuration requires NetworkManager."
+    success_msg: "NetworkManager is active and ready"
+
+- name: 'Check for nmcli command'
+  ansible.builtin.command: "which nmcli"
+  register: nmcli_check
+  changed_when: false
+  failed_when: nmcli_check.rc != 0
+
+- name: 'Verify bridge utilities are available'
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: 'Check required network packages'
+  ansible.builtin.assert:
+    that:
+      - "'bridge-utils' in ansible_facts.packages or 'iproute' in ansible_facts.packages"
+    fail_msg: "Bridge utilities not found. Install bridge-utils or iproute package."
+    success_msg: "Bridge utilities are available"

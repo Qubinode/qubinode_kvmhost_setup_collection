@@ -1,4 +1,3 @@
----
 # =============================================================================
 # BACKUP AND SNAPSHOT CONFIGURATION
 # =============================================================================
@@ -15,9 +14,9 @@
 
 - name: Create backup directories
   ansible.builtin.ansible.builtin.file:
-    path: '{{ item }}'
+    path: "{{ item }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   loop:
@@ -30,7 +29,7 @@
   ansible.builtin.ansible.builtin.template:
     src: vm_backup.sh.j2
     dest: /usr/local/bin/kvmhost-vm-backup
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   become: true
@@ -40,7 +39,7 @@
   ansible.builtin.ansible.builtin.template:
     src: vm_snapshot.sh.j2
     dest: /usr/local/bin/kvmhost-vm-snapshot
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   become: true
@@ -48,7 +47,7 @@
 
 - name: Configure backup cleanup cron job
   ansible.builtin.cron:
-    name: 'KVM Storage Backup Cleanup'
+    name: "KVM Storage Backup Cleanup"
     minute: "0"
     hour: "2"
     job: "find /var/lib/libvirt/backups -type f -mtime +{{ kvmhost_storage_backup_retention_days }} -delete"

@@ -1,0 +1,126 @@
+---
+# =============================================================================
+# COCKPIT WEB INTERFACE CONFIGURATION
+# =============================================================================
+kvmhost_cockpit_enabled: true
+kvmhost_cockpit_require_base: true
+kvmhost_cockpit_require_libvirt: true
+
+# =============================================================================
+# COCKPIT INSTALLATION CONFIGURATION
+# =============================================================================
+# Package installation method
+kvmhost_cockpit_use_system_roles: true
+kvmhost_cockpit_packages_mode: full # full, minimal, custom
+
+# Custom package list (when mode is 'custom')
+kvmhost_cockpit_custom_packages:
+  - cockpit
+  - cockpit-machines
+  - cockpit-storaged
+  - cockpit-networkmanager
+  - cockpit-packagekit
+  - cockpit-podman
+
+# =============================================================================
+# SERVICE CONFIGURATION
+# =============================================================================
+kvmhost_cockpit_service_enabled: true
+kvmhost_cockpit_service_state: started
+kvmhost_cockpit_socket_enabled: true
+
+# =============================================================================
+# SSL AND SECURITY CONFIGURATION
+# =============================================================================
+kvmhost_cockpit_ssl_enabled: true
+kvmhost_cockpit_ssl_cert_path: /etc/cockpit/ws-certs.d
+kvmhost_cockpit_generate_self_signed: true
+
+# Authentication configuration
+kvmhost_cockpit_auth_methods:
+  - password
+  - ssh_key
+
+# Session configuration
+kvmhost_cockpit_session_timeout: 30 # minutes
+kvmhost_cockpit_max_sessions: 10
+
+# =============================================================================
+# FIREWALL CONFIGURATION
+# =============================================================================
+kvmhost_cockpit_firewall_enabled: true
+kvmhost_cockpit_port: 9090
+kvmhost_cockpit_allow_networks:
+  - 10.0.0.0/8
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+
+# =============================================================================
+# MODULE CONFIGURATION
+# =============================================================================
+kvmhost_cockpit_modules:
+  machines:
+    enabled: true
+    description: Virtual machine management
+  storaged:
+    enabled: true
+    description: Storage management
+  networkmanager:
+    enabled: true
+    description: Network configuration
+  packagekit:
+    enabled: true
+    description: Package management
+  podman:
+    enabled: false
+    description: Container management
+  logs:
+    enabled: true
+    description: System logs
+  terminal:
+    enabled: true
+    description: Web terminal
+
+# =============================================================================
+# BRANDING AND CUSTOMIZATION
+# =============================================================================
+kvmhost_cockpit_title: KVM Host Management
+kvmhost_cockpit_custom_branding: false
+kvmhost_cockpit_logo_path: ''
+
+# =============================================================================
+# MONITORING AND PERFORMANCE
+# =============================================================================
+kvmhost_cockpit_monitoring_enabled: true
+kvmhost_cockpit_performance_monitoring: true
+kvmhost_cockpit_log_level: info # debug, info, warn, error
+
+# =============================================================================
+# ACCESS CONTROL
+# =============================================================================
+kvmhost_cockpit_admin_users:
+  - root
+
+kvmhost_cockpit_allowed_groups:
+  - wheel
+  - libvirt
+
+# Remote access configuration
+kvmhost_cockpit_remote_access_enabled: true
+kvmhost_cockpit_listen_address: "0.0.0.0"
+
+# =============================================================================
+# BACKUP AND MAINTENANCE
+# =============================================================================
+kvmhost_cockpit_backup_config: true
+kvmhost_cockpit_config_backup_path: /var/backups/cockpit
+
+# =============================================================================
+# LEGACY COMPATIBILITY
+# =============================================================================
+# Support for original kvmhost_setup variables
+enable_cockpit: "{{ kvmhost_cockpit_enabled }}"
+cockpit_packages: "{{ kvmhost_cockpit_packages_mode }}"
+
+# Distribution-specific settings
+kvmhost_cockpit_rocky_compatible: true

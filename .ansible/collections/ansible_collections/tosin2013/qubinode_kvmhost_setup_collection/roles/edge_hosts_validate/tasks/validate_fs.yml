@@ -1,0 +1,24 @@
+---
+- name: Validate libirt install dir exists
+  ansible.builtin.stat:
+    path: "{{ libvirt_install_dir }}"
+  register: edge_hosts_validate_lvm_path
+  become: true
+  ignore_errors: true
+  failed_when: edge_hosts_validate_lvm_path.stat.isdir == false and edge_hosts_validate_lvm_path.stat.exists == false
+  tags:
+    - validate
+    - validate_fs
+
+- name: Validate libirt install dir is mounted
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+    dest: /etc/fstab
+    regexp: (^.*libvirt.*$)
+    state: present
+  register: edge_hosts_validate_libvirt_path
+  become: true
+  ignore_errors: true
+  failed_when: edge_hosts_validate_libvirt_path.changed
+  tags:
+    - validate
+    - validate_fs

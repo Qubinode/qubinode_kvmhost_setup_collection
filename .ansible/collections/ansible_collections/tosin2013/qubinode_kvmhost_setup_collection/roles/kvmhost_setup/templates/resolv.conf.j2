@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+{% if search_domains | length > 0 %}
+search {{ search_domains|join(' ') }}
+{% endif %}
+{% if kvm_host_domain != "" %}
+domain {{ kvm_host_domain }}
+{% endif %}
+{% if kvm_host_dns_server != "" %}
+nameserver {{ kvm_host_dns_server }}
+nameserver {{ dns_forwarder }}
+{% elif kvm_host_dns_server == "" %}
+{% for ns in kvm_host_dns_servers %}
+nameserver {{ dns_forwarder }}
+{% endfor %}
+{% endif %}
+options rotate timeout:1

@@ -1,0 +1,12 @@
+
+# =============================================================================
+# LVM CONFIG VALIDATION HELPER
+# =============================================================================
+# Validates LVM configuration
+
+- name: Validate volume group configuration
+  ansible.builtin.include_tasks: validate_volume_group_config.yml
+  vars:
+    vg_item: "{{ item }}"
+  loop: "{{ kvmhost_storage_vars.lvm_configuration.volume_groups | default([]) }}"
+  when: kvmhost_storage_vars.lvm_configuration.volume_groups is defined

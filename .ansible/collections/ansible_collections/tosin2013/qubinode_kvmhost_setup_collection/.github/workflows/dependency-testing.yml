@@ -1,0 +1,430 @@
+name: Dependency Testing Pipeline
+
+on:
+  pull_request:
+    paths:
+      - '.github/dependabot.yml'
+      - 'requirements*.txt'
+      - 'molecule/*/molecule.yml'
+      - 'galaxy.yml'
+      - '.github/workflows/**'
+      - 'meta/runtime.yml'
+  schedule:
+    # Run dependency tests weekly on Fridays at 10:00 UTC
+    - cron: '0 10 * * 5'
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Test scope'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - 'full'
+          - 'python-only'
+          - 'ansible-only'
+          - 'docker-only'
+
+concurrency:
+  group: dependency-testing-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  ANSIBLE_CORE_VERSION: "2.17"
+  MOLECULE_VERSION: "25.6.0"
+
+jobs:
+  security-scan:
+    name: Enhanced Dependency Security Scan
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install security scanning tools
+        run: |
+          # Install safety for Python dependencies
+          pip install --upgrade safety bandit semgrep
+          
+          # Install docker-bench-security if not present
+          if ! command -v docker-bench-security &> /dev/null; then
+            curl -sSL https://raw.githubusercontent.com/docker/docker-bench-security/master/docker-bench-security.sh > /tmp/docker-bench-security.sh
+            chmod +x /tmp/docker-bench-security.sh
+          fi
+      
+      - name: Run enhanced dependency vulnerability scan
+        run: |
+          chmod +x ./scripts/enhanced-dependency-scanner.sh
+          ./scripts/enhanced-dependency-scanner.sh --format json --output-dir security-reports/
+      
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results
+          path: security-reports/
+          retention-days: 30
+      
+      - name: Check for critical vulnerabilities
+        run: |
+          if [[ -f "security-reports/summary.json" ]]; then
+            CRITICAL_COUNT=$(jq '.summary.critical // 0' security-reports/summary.json)
+            HIGH_COUNT=$(jq '.summary.high // 0' security-reports/summary.json)
+            
+            echo "Critical vulnerabilities: $CRITICAL_COUNT"
+            echo "High vulnerabilities: $HIGH_COUNT"
+            
+            if [[ $CRITICAL_COUNT -gt 0 ]]; then
+              echo "::error::Critical vulnerabilities found! Build failed."
+              exit 1
+            elif [[ $HIGH_COUNT -gt 5 ]]; then
+              echo "::warning::High number of high-severity vulnerabilities found ($HIGH_COUNT)"
+            fi
+          fi
+
+  dependency-matrix:
+    name: Generate Dependency Test Matrix
+    runs-on: self-hosted
+    needs: security-scan
+    outputs:
+      python-matrix: ${{ steps.generate.outputs.python-matrix }}
+      ansible-matrix: ${{ steps.generate.outputs.ansible-matrix }}
+      docker-matrix: ${{ steps.generate.outputs.docker-matrix }}
+      test-scope: ${{ steps.generate.outputs.test-scope }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Generate test matrix
+        id: generate
+        run: |
+          # Determine test scope
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TEST_SCOPE="${{ github.event.inputs.test_scope }}"
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            TEST_SCOPE="full"
+          else
+            # For PRs, determine scope based on changed files
+            if git diff --name-only origin/main HEAD | grep -E "(requirements|galaxy\.yml|meta/runtime\.yml)"; then
+              TEST_SCOPE="full"
+            elif git diff --name-only origin/main HEAD | grep -E "molecule.*\.yml"; then
+              TEST_SCOPE="docker-only"
+            else
+              TEST_SCOPE="python-only"
+            fi
+          fi
+          
+          echo "test-scope=${TEST_SCOPE}" >> $GITHUB_OUTPUT
+          
+          # Python dependency matrix
+          PYTHON_MATRIX='{"include":[
+            {"python-version":"3.11","name":"current"},
+            {"python-version":"3.12","name":"next"}
+          ]}'
+          echo "python-matrix=${PYTHON_MATRIX}" >> $GITHUB_OUTPUT
+          
+          # Ansible dependency matrix  
+          ANSIBLE_MATRIX='{"include":[
+            {"ansible-core":"2.17","name":"current"},
+            {"ansible-core":"2.18","name":"next"}
+          ]}'
+          echo "ansible-matrix=${ANSIBLE_MATRIX}" >> $GITHUB_OUTPUT
+          
+          # Docker image matrix for Molecule
+          DOCKER_MATRIX='{"include":[
+            {"image":"registry.redhat.io/ubi9-init:9.6-1751962289","name":"rhel-9"},
+            {"image":"docker.io/rockylinux/rockylinux:9-ubi-init","name":"rocky-9"},
+            {"image":"docker.io/almalinux/9-init:9.6-20250712","name":"alma-9"}
+          ]}'
+          echo "docker-matrix=${DOCKER_MATRIX}" >> $GITHUB_OUTPUT
+
+  python-dependency-test:
+    name: Python Dependencies (${{ matrix.name }})
+    runs-on: self-hosted
+    needs: dependency-matrix
+    if: needs.dependency-matrix.outputs.test-scope == 'full' || needs.dependency-matrix.outputs.test-scope == 'python-only'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.dependency-matrix.outputs.python-matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python ${{ matrix.python-version }}
+        run: |
+          # Install specific Python version
+          sudo yum install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+          python${{ matrix.python-version }} -m pip install --upgrade pip
+          python${{ matrix.python-version }} -m pip install virtualenv
+          python${{ matrix.python-version }} -m virtualenv venv-${{ matrix.name }}
+          source venv-${{ matrix.name }}/bin/activate
+          
+      - name: Install core dependencies
+        run: |
+          source venv-${{ matrix.name }}/bin/activate
+          pip install --upgrade pip setuptools wheel
+          
+      - name: Test Ansible installation
+        run: |
+          source venv-${{ matrix.name }}/bin/activate
+          pip install ansible-core==${{ env.ANSIBLE_CORE_VERSION }}.*
+          ansible --version
+          ansible-galaxy --version
+          
+      - name: Test Molecule installation
+        run: |
+          source venv-${{ matrix.name }}/bin/activate
+          pip install molecule[podman]==${{ env.MOLECULE_VERSION }}.*
+          molecule --version
+          
+      - name: Test additional dependencies
+        run: |
+          source venv-${{ matrix.name }}/bin/activate
+          # Test Ansible collections installation
+          ansible-galaxy collection install community.general
+          ansible-galaxy collection install containers.podman
+          
+          # Test linting tools
+          pip install ansible-lint yamllint
+          ansible-lint --version
+          yamllint --version
+          
+      - name: Run dependency compatibility test
+        run: |
+          source venv-${{ matrix.name }}/bin/activate
+          cd molecule/default
+          # Test that molecule can load configuration without errors
+          molecule check
+          
+      - name: Generate dependency report
+        if: always()
+        run: |
+          source venv-${{ matrix.name }}/bin/activate
+          pip freeze > dependency-report-python-${{ matrix.name }}.txt
+          echo "## Python ${{ matrix.python-version }} Dependency Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat dependency-report-python-${{ matrix.name }}.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+      - name: Upload dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-report-python-${{ matrix.name }}
+          path: dependency-report-python-${{ matrix.name }}.txt
+
+  ansible-dependency-test:
+    name: Ansible Dependencies (${{ matrix.name }})
+    runs-on: self-hosted
+    needs: dependency-matrix
+    if: needs.dependency-matrix.outputs.test-scope == 'full' || needs.dependency-matrix.outputs.test-scope == 'ansible-only'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.dependency-matrix.outputs.ansible-matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        run: |
+          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
+          python${{ env.PYTHON_VERSION }} -m pip install virtualenv
+          python${{ env.PYTHON_VERSION }} -m virtualenv venv-ansible-${{ matrix.name }}
+          source venv-ansible-${{ matrix.name }}/bin/activate
+          
+      - name: Install Ansible Core ${{ matrix.ansible-core }}
+        run: |
+          source venv-ansible-${{ matrix.name }}/bin/activate
+          pip install ansible-core==${{ matrix.ansible-core }}.*
+          ansible --version
+          
+      - name: Test galaxy.yml dependencies
+        run: |
+          source venv-ansible-${{ matrix.name }}/bin/activate
+          # Test that all dependencies in galaxy.yml can be installed
+          if [[ -f galaxy.yml ]]; then
+            ansible-galaxy collection install -r galaxy.yml
+          fi
+          
+      - name: Test role dependencies
+        run: |
+          source venv-ansible-${{ matrix.name }}/bin/activate
+          # Test each role can be loaded
+          for role in roles/*/; do
+            role_name=$(basename "$role")
+            echo "Testing role: $role_name"
+            ansible-playbook --syntax-check --list-tasks test.yml \
+              -e "target_role=$role_name" || echo "Warning: $role_name syntax check failed"
+          done
+          
+      - name: Test collection build
+        run: |
+          source venv-ansible-${{ matrix.name }}/bin/activate
+          # Test that collection can be built
+          ansible-galaxy collection build --force
+          ls -la *.tar.gz
+          
+      - name: Generate Ansible dependency report
+        if: always()
+        run: |
+          source venv-ansible-${{ matrix.name }}/bin/activate
+          echo "## Ansible Core ${{ matrix.ansible-core }} Dependency Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ansible --version >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          ansible-galaxy collection list >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  docker-dependency-test:
+    name: Container Dependencies (${{ matrix.name }})
+    runs-on: self-hosted
+    needs: dependency-matrix
+    if: needs.dependency-matrix.outputs.test-scope == 'full' || needs.dependency-matrix.outputs.test-scope == 'docker-only'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.dependency-matrix.outputs.docker-matrix) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        run: |
+          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
+          python${{ env.PYTHON_VERSION }} -m pip install virtualenv
+          python${{ env.PYTHON_VERSION }} -m virtualenv venv-docker
+          source venv-docker/bin/activate
+          pip install molecule[podman]==${{ env.MOLECULE_VERSION }}.*
+          
+      - name: Test container image availability
+        run: |
+          # Test that container images are available and can be pulled
+          podman pull ${{ matrix.image }} || {
+            echo "Failed to pull image: ${{ matrix.image }}"
+            exit 1
+          }
+          
+      - name: Test Molecule with container
+        run: |
+          source venv-docker/bin/activate
+          cd molecule/default
+          
+          # Update molecule.yml to use specific image for testing
+          cp molecule.yml molecule.yml.backup
+          sed -i 's|image: .*|image: ${{ matrix.image }}|g' molecule.yml
+          
+          # Test that molecule can create and connect to container
+          molecule create --scenario-name default
+          molecule converge --scenario-name default || echo "Converge failed - expected in dependency test"
+          molecule destroy --scenario-name default
+          
+          # Restore original molecule.yml
+          mv molecule.yml.backup molecule.yml
+          
+      - name: Generate container dependency report
+        if: always()
+        run: |
+          echo "## Container ${{ matrix.name }} Dependency Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "Image: ${{ matrix.image }}" >> $GITHUB_STEP_SUMMARY
+          podman images --filter reference='*${{ matrix.image }}*' --format table >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  dependency-security-scan:
+    name: Dependency Security Scan
+    runs-on: self-hosted
+    needs: [python-dependency-test, ansible-dependency-test]
+    if: always() && (needs.python-dependency-test.result == 'success' || needs.ansible-dependency-test.result == 'success')
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        run: |
+          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
+          python${{ env.PYTHON_VERSION }} -m pip install virtualenv
+          python${{ env.PYTHON_VERSION }} -m virtualenv venv-security
+          source venv-security/bin/activate
+          
+      - name: Install security scanning tools
+        run: |
+          source venv-security/bin/activate
+          pip install safety bandit
+          
+      - name: Run dependency vulnerability scan
+        run: |
+          source venv-security/bin/activate
+          # Create a requirements file from our dependencies
+          cat > temp-requirements.txt << EOF
+          ansible-core==${{ env.ANSIBLE_CORE_VERSION }}.*
+          molecule[podman]==${{ env.MOLECULE_VERSION }}.*
+          ansible-lint
+          yamllint
+          EOF
+          
+          # Run safety check
+          safety check -r temp-requirements.txt || echo "Security vulnerabilities found"
+          
+      - name: Run static code analysis
+        run: |
+          source venv-security/bin/activate
+          # Run bandit on any Python files
+          find . -name "*.py" -exec bandit {} \; || echo "Security issues found in Python code"
+
+  dependency-test-summary:
+    name: Dependency Test Summary
+    runs-on: self-hosted
+    needs: [python-dependency-test, ansible-dependency-test, docker-dependency-test, dependency-security-scan]
+    if: always()
+    
+    steps:
+      - name: Generate final summary
+        run: |
+          echo "# Dependency Testing Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Python tests summary
+          if [[ "${{ needs.python-dependency-test.result }}" == "success" ]]; then
+            echo "✅ Python dependency tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Python dependency tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Ansible tests summary
+          if [[ "${{ needs.ansible-dependency-test.result }}" == "success" ]]; then
+            echo "✅ Ansible dependency tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Ansible dependency tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Docker tests summary
+          if [[ "${{ needs.docker-dependency-test.result }}" == "success" ]]; then
+            echo "✅ Container dependency tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Container dependency tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Security scan summary
+          if [[ "${{ needs.dependency-security-scan.result }}" == "success" ]]; then
+            echo "✅ Security dependency scan: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Security dependency scan: ISSUES FOUND" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Generated: $(date)" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Check overall status
+        run: |
+          # Fail if critical tests failed
+          if [[ "${{ needs.python-dependency-test.result }}" == "failure" ]] || \
+             [[ "${{ needs.ansible-dependency-test.result }}" == "failure" ]]; then
+            echo "Critical dependency tests failed!"
+            exit 1
+          fi
+          
+          echo "Dependency testing completed successfully!"

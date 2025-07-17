@@ -1,4 +1,3 @@
----
 - name: Create Volume Group
   community.general.lvg:
     vg: "{{ vg_name }}"
@@ -28,9 +27,9 @@
 
 - name: Ensure mount points are created
   ansible.builtin.ansible.builtin.file:
-    path: '{{ item.mount_dir }}'
+    path: "{{ item.mount_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: wheel
   with_items: "{{ logical_volumes }}"
@@ -39,7 +38,7 @@
 
 - name: Config mount points in fstab
   ansible.posix.ansible.posix.mount:
-    name: '{{ item.mount_dir }}'
+    name: "{{ item.mount_dir }}"
     src: /dev/mapper/{{ vg_name }}-lv_{{ item.name }}
     fstype: "{{ item.fstype }}"
     dump: 0

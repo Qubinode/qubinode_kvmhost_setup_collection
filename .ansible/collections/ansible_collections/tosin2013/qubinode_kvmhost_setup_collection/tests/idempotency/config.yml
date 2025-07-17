@@ -1,0 +1,113 @@
+# Idempotency Testing Framework Configuration
+# This file defines the configuration for idempotency testing across all roles
+
+# Test execution settings
+test_settings:
+  # Maximum allowed changed tasks on second run (should be 0 for full idempotency)
+  max_allowed_changes: 0
+
+  # Test timeout in seconds
+  test_timeout: 3600
+
+  # Enable verbose logging for debugging
+  verbose_logging: true
+
+  # Save test artifacts for analysis
+  save_artifacts: true
+
+  # Test report format
+  report_format: json
+
+# Role-specific test configuration
+role_configurations:
+  kvmhost_setup:
+    # Skip certain tasks that are expected to change (if any)
+    skip_tasks: []
+    # Custom variables for testing this role
+    test_vars:
+      testing_mode: true
+
+    # Expected changes that are acceptable (none for true idempotency)
+    allowed_changes: []
+    # Dependencies that must be available
+    dependencies:
+      - libvirt
+      - qemu-kvm
+
+  edge_hosts_validate:
+    skip_tasks: []
+    test_vars:
+      validation_only: true
+    allowed_changes: []
+    dependencies: []
+  swygue_lvm:
+    skip_tasks: []
+    test_vars:
+      lvm_testing: true
+    allowed_changes: []
+    dependencies:
+      - lvm2
+
+# Test environment settings
+environment:
+  # Clean environment before each test
+  clean_before_test: true
+
+  # Restore environment after test
+  restore_after_test: false
+
+  # Use container environment for isolation
+  use_containers: true
+
+  # Container image for testing
+  container_image: quay.io/ansible/molecule
+
+# Reporting and metrics
+reporting:
+  # Generate HTML report in addition to JSON
+  generate_html: true
+
+  # Send results to external system
+  external_reporting: false
+
+  # Metrics to collect
+  collect_metrics:
+    - execution_time
+    - memory_usage
+    - task_count
+    - change_count
+    - error_count
+
+# Quality thresholds
+quality_thresholds:
+  # Minimum success rate to pass overall test
+  minimum_success_rate: 100
+
+  # Maximum execution time per role (seconds)
+  max_execution_time: 1800
+
+  # Maximum memory usage (MB)
+  max_memory_usage: 2048
+
+# Integration settings
+integration:
+  # Integrate with Molecule testing
+  molecule_integration: true
+
+  # Run as part of CI/CD pipeline
+  ci_cd_integration: true
+
+  # Notification settings
+  notifications:
+    slack_webhook: ""
+    email_recipients: []
+# Debugging and troubleshooting
+debugging:
+  # Enable debug mode for failed tests
+  debug_failures: true
+
+  # Collect system logs on failure
+  collect_logs: true
+
+  # Create system snapshots for comparison
+  create_snapshots: false

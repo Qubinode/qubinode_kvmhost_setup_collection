@@ -1,0 +1,63 @@
+---
+# =============================================================================
+# KVMHOST USER CONFIG ROLE - DEPENDENCY VALIDATION
+# =============================================================================
+# Validates that required dependencies are met for user configuration
+
+- name: Check if system is supported
+  ansible.builtin.fail:
+    msg: User config role requires RHEL/CentOS/Rocky/AlmaLinux
+  when: ansible_os_family != "RedHat"
+
+- name: Verify target user is defined
+  ansible.builtin.fail:
+    msg: Target user must be specified (kvmhost_user_config_target_user)
+  when:
+    - kvmhost_user_config_target_user is not defined
+    - kvmhost_user_config_target_user | length == 0
+
+- name: Check if bash is available
+  ansible.builtin.command:
+    cmd: which bash
+  register: bash_check
+  failed_when: bash_check.rc != 0
+  changed_when: false
+  when: kvmhost_user_config_shell_type == "bash"
+
+- name: Verify SSH client is available
+  ansible.builtin.command:
+    cmd: which ssh
+  register: ssh_check
+  failed_when: ssh_check.rc != 0
+  changed_when: false
+  when: kvmhost_user_config_ssh_enabled | bool
+
+- name: Check if sudo is available
+  ansible.builtin.command:
+    cmd: which sudo
+  register: sudo_check
+  failed_when: false
+  changed_when: false
+  when: kvmhost_user_config_sudo_enabled | bool
+
+- name: Warn if sudo not available but sudo configuration enabled
+  ansible.builtin.debug:
+    msg: "Warning: sudo not available but sudo configuration is enabled"
+  when:
+    - kvmhost_user_config_sudo_enabled | bool
+    - sudo_check.rc != 0
+
+- name: Validate SSH key type
+  ansible.builtin.fail:
+    msg: "Invalid SSH key type: {{ kvmhost_user_config_ssh_key_type }}. Supported: rsa, ed25519, ecdsa"
+  when:
+    - kvmhost_user_config_ssh_generate_keys | bool
+    - kvmhost_user_config_ssh_key_type not in ['rsa', 'ed25519', 'ecdsa']
+
+- name: Check for conflicting shell configuration
+  ansible.builtin.fail:
+    msg: Cannot configure both starship and custom prompt simultaneously
+  when:
+    - kvmhost_user_config_starship_enabled | bool
+    - kvmhost_user_config_prompt_style == "custom"
+    - kvmhost_user_config_prompt_style != "starship"

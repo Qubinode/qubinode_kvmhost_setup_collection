@@ -1,0 +1,107 @@
+---
+# Test Inventory Variables
+# Sanitized version of ../qubinode_navigator/inventories/rhel9-equinix/group_vars/all.yml
+
+# System Configuration
+project_dir: /opt/qubinode-installer
+admin_user: test-user
+domain: example.com
+rhel_version: "9.0"
+
+# RHPDS Settings
+run_on_rhpds: false
+run_kni_lab_on_rhpds: false
+one_redhat: false
+
+# Application Dependencies
+ansible_automation_platform: false
+enable_ceph_deployment: false
+
+# Networking
+kvm_host_ip: 192.168.1.100
+kvm_host_netmask: 255.255.255.0
+kvm_host_gateway: 192.168.1.1
+kvm_host_gw: "{{ kvm_host_gateway }}"
+kvm_host_dns: 8.8.8.8
+kvm_host_bridge: br0
+kvm_host_interface: eth0
+kvm_host_mac: "02:00:00:00:00:01"
+kvm_host_macaddr: "02:00:00:00:00:02"
+kvm_host_mask_prefix: 24
+qubinode_ptr: example.in-addr.arpa
+dns_forwarder: 8.8.8.8
+convert_dhcp_to_static: true
+kvm_host_bootproto: static
+kvm_bridge_type: bridge
+qubinet: qubinode-net
+
+# Subscription Management
+rhsm_reg_method: ""
+rhsm_setup_insights_client: false
+
+# LVM Configuration
+logical_volumes:
+  - name: test_images
+    size: +10G
+    mount_dir: /var/lib/libvirt/images
+    fstype: xfs
+
+# User Configuration
+users:
+  - "{{ admin_user }}"
+
+# Required Packages  
+required_rpm_packages:
+  - virt-install
+  - libvirt-daemon-config-network
+  - libvirt-daemon-kvm
+  - libguestfs-tools
+  - libvirt-client
+  - qemu-kvm
+  - nfs-utils
+  - libvirt-daemon
+  - virt-top
+  - tuned
+  - openssh-server
+  - wget
+  - git
+  - net-tools
+  - bind-utils
+  - yum-utils
+  - iptables-services
+  - bash-completion
+  - kexec-tools
+  - sos
+  - psacct
+  - vim
+  - device-mapper-event-libs
+  - device-mapper-libs
+  - httpd-tools
+  - tmux
+  - python3-dns
+  - python3-lxml
+  - cockpit-machines
+  - bc
+  - nmap
+  - ncurses-devel
+  - curl
+
+# set path to libvirt images
+kvm_host_libvirt_dir: /var/lib/libvirt/images
+
+## deploy-kvm-vm role uses this var
+kvm_vm_pool_dir: "{{ kvm_host_libvirt_dir }}"
+
+host_device: "{{ kvm_host_libvirt_extra_disk | default('nvme0n1') }}"
+vg_name: vg_qubi
+vm_libvirt_net_check: true
+# set storage device to dedicate to /var/lib/libvirt/images
+kvm_host_libvirt_extra_disk: nvme0n1
+
+setup_nfs: true
+remove_nfs: false
+
+# use by funciton check_hardware_resources
+libvirt_pool_name: default
+
+qubinode_installer_host_completed: false

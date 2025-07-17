@@ -1,4 +1,3 @@
----
 - name: Enable EPEL repository using DNF module (ADR-0001 compliant)
   ansible.builtin.dnf:
     name: epel-release
@@ -19,7 +18,7 @@
 - name: Create list of missing packages
   ansible.builtin.set_fact:
     missing_packages: >-
-      {{ required_rpm_packages           | difference(current_packages.packages.keys())   }}
+      {{ required_rpm_packages | difference(current_packages.packages.keys()) }}
 
 - name: Display missing packages
   ansible.builtin.debug:
@@ -28,7 +27,7 @@
 
 - name: Install required packages
   ansible.builtin.dnf:
-    name: '{{ missing_packages }}'
+    name: "{{ missing_packages }}"
     state: present
   register: package_install
   when: missing_packages | length > 0
@@ -45,7 +44,7 @@
 
 - name: Enable required services
   ansible.builtin.ansible.builtin.systemd:
-    name: '{{ item }}'
+    name: "{{ item }}"
     state: started
     enabled: true
   loop: "{{ libvirt_services }}"
@@ -56,7 +55,7 @@
 
 - name: Verify services are running
   ansible.builtin.ansible.builtin.systemd:
-    name: '{{ item }}'
+    name: "{{ item }}"
   register: service_check
   failed_when: >-
     service_check.status.ActiveState != "active" or

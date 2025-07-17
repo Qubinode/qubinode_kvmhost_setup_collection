@@ -1,0 +1,115 @@
+---
+# Molecule Prepare Playbook
+# Purpose: Pre-configure testing environment with EPEL GPG keys
+# Related: docs/research/epel-gpg-verification-in-container-testing.md
+# ADR References: ADR-0012 (Container Security), ADR-0011 (Local Testing)
+
+- name: Prepare testing environment
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    # EPEL GPG keys for different RHEL versions
+    epel_gpg_keys:
+      - url: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+        key_id: "8"
+        applicable_versions: ["8"]
+      - url: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+        key_id: "9"
+        applicable_versions: ["9", "10"]
+
+  tasks:
+    - name: Display testing environment information
+      ansible.builtin.debug:
+        msg: |
+          Preparing testing environment for: {{ inventory_hostname }}
+          OS Family: {{ ansible_os_family }}
+          Distribution: {{ ansible_distribution }}
+          Version: {{ ansible_distribution_major_version }}
+
+    - name: Ensure basic packages are available
+      ansible.builtin.package:
+        name:
+          - curl
+          - gnupg2
+          - rpm
+        state: present
+      ignore_errors: true
+
+    # Research Finding: Container environments require manual GPG key import
+    # Evidence: GitHub Issue #20711, Ansible 2.9.13+ breaking changes
+    - name: Pre-import EPEL GPG keys for container testing
+      block:
+        - name: Import EPEL GPG key for RHEL/Rocky/AlmaLinux 8
+          ansible.builtin.rpm_key:
+            key: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+            state: present
+          when: ansible_distribution_major_version == "8"
+          ignore_errors: true
+
+        - name: Import EPEL GPG key for RHEL/Rocky/AlmaLinux 9+
+          ansible.builtin.rpm_key:
+            key: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+            state: present
+          when: ansible_distribution_major_version in ["9", "10"]
+          ignore_errors: true
+
+        # Fallback method based on research evidence
+        - name: Fallback GPG key import using rpm command (RHEL 8)
+          ansible.builtin.shell: |
+            curl -sSL https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8 | rpm --import -
+          when:
+            - ansible_distribution_major_version == "8"
+          ignore_errors: true
+          changed_when: false
+
+        - name: Fallback GPG key import using rpm command (RHEL 9+)
+          ansible.builtin.shell: |
+            curl -sSL https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 | rpm --import -
+          when:
+            - ansible_distribution_major_version in ["9", "10"]
+          ignore_errors: true
+          changed_when: false
+
+      rescue:
+        - name: Log GPG import failure
+          ansible.builtin.debug:
+            msg: |
+              GPG key import failed - this is expected in some container environments.
+              Tests will use disable_gpg_check workaround per research findings.
+
+    # Workaround for container testing per research evidence
+    - name: Configure yum/dnf to handle GPG verification gracefully
+      community.general.ini_file:
+        path: /etc/dnf/dnf.conf
+        section: main
+        option: gpgcheck
+        value: "1"
+        backup: false
+      ignore_errors: true
+
+    - name: Verify GPG key import status
+      ansible.builtin.shell: rpm -q gpg-pubkey --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n'
+      register: gpg_keys_status
+      changed_when: false
+      ignore_errors: true
+
+    - name: Display GPG key status
+      ansible.builtin.debug:
+        var: gpg_keys_status.stdout_lines
+      when: gpg_keys_status.stdout_lines is defined
+
+    - name: Ensure systemd is functional (for systemd-enabled containers)
+      ansible.builtin.service:
+        name: systemd-logind
+        state: started
+      ignore_errors: true
+      when:
+        - ansible_service_mgr == "systemd"
+        - ansible_virtualization_type == "container"
+
+    - name: Create testing marker file
+      ansible.builtin.file:
+        path: /tmp/molecule-prepare-complete
+        state: touch
+        mode: "0644"

@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# KVMHOST USER CONFIG ROLE - SSH CONFIGURATION
+# =============================================================================
+# Configures SSH access and key management
+
+- name: Placeholder for SSH configuration
+  ansible.builtin.debug:
+    msg: "SSH configuration tasks will be implemented here"
+
+# TODO: Implement SSH configuration and key management tasks

@@ -1,0 +1,98 @@
+---
+# =============================================================================
+# KVMHOST COCKPIT ROLE - FIREWALL CONFIGURATION
+# =============================================================================
+# Configures firewall rules for Cockpit web interface access
+
+- name: Check if firewalld is running
+  ansible.builtin.ansible.builtin.systemd:
+    name: firewalld
+  register: firewalld_status
+  failed_when: false
+
+- name: Start firewalld if not running
+  ansible.builtin.ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+  when:
+    - firewalld_status.status is defined
+    - firewalld_status.status.ActiveState != "active"
+
+- name: Configure firewall for Cockpit (default port)
+  ansible.posix.ansible.posix.firewalld:
+    ansible.builtin.ansible.builtin.service: cockpit
+    permanent: true
+    immediate: true
+    state: enabled
+    zone: "{{ kvmhost_cockpit_firewall_zone }}"
+  when: kvmhost_cockpit_port == 9090
+
+- name: Configure firewall for Cockpit (custom port)
+  ansible.posix.ansible.posix.firewalld:
+    port: "{{ kvmhost_cockpit_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+    zone: "{{ kvmhost_cockpit_firewall_zone }}"
+  when: kvmhost_cockpit_port != 9090
+
+- name: Configure additional firewall rules
+  ansible.posix.ansible.posix.firewalld:
+    rich_rule: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+    zone: "{{ kvmhost_cockpit_firewall_zone }}"
+  loop: "{{ kvmhost_cockpit_firewall_rich_rules }}"
+  when: kvmhost_cockpit_firewall_rich_rules | length > 0
+
+- name: Restrict access to specific source IPs (if configured)
+  ansible.posix.ansible.posix.firewalld:
+    rich_rule: "rule family='ipv4' source address='{{ item }}' port protocol='tcp' port='{{ kvmhost_cockpit_port }}' accept"
+    permanent: true
+    immediate: true
+    state: enabled
+    zone: "{{ kvmhost_cockpit_firewall_zone }}"
+  loop: "{{ kvmhost_cockpit_allowed_ips }}"
+  when:
+    - kvmhost_cockpit_allowed_ips | length > 0
+    - kvmhost_cockpit_restrict_access | bool
+
+- name: Remove general Cockpit access when IP restriction is enabled
+  ansible.posix.ansible.posix.firewalld:
+    ansible.builtin.ansible.builtin.service: cockpit
+    permanent: true
+    immediate: true
+    state: disabled
+    zone: "{{ kvmhost_cockpit_firewall_zone }}"
+  when:
+    - kvmhost_cockpit_allowed_ips | length > 0
+    - kvmhost_cockpit_restrict_access | bool
+    - kvmhost_cockpit_port == 9090
+
+- name: Remove general custom port access when IP restriction is enabled
+  ansible.posix.ansible.posix.firewalld:
+    port: "{{ kvmhost_cockpit_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: disabled
+    zone: "{{ kvmhost_cockpit_firewall_zone }}"
+  when:
+    - kvmhost_cockpit_allowed_ips | length > 0
+    - kvmhost_cockpit_restrict_access | bool
+    - kvmhost_cockpit_port != 9090
+
+- name: Verify firewall configuration
+  ansible.builtin.command:
+    cmd: firewall-cmd --list-all --zone={{ kvmhost_cockpit_firewall_zone }}
+  register: firewall_config
+  changed_when: false
+
+- name: Display firewall configuration
+  ansible.builtin.debug:
+    msg:
+      - "Firewall configured for Cockpit"
+      - "Zone: {{ kvmhost_cockpit_firewall_zone }}"
+      - "Port: {{ kvmhost_cockpit_port }}/tcp"
+      - "Configuration: {{ firewall_config.stdout_lines }}"

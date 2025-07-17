@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KVM Host Base Configuration Schema",
+  "description": "Schema for validating kvmhost_base role variables",
+  "type": "object",
+  "properties": {
+    "cicd_test": {
+      "type": "boolean",
+      "description": "Flag to indicate CI/CD test environment"
+    },
+    "testing_mode": {
+      "type": "boolean",
+      "description": "Flag to enable testing mode with reduced strictness"
+    },
+    "supported_os_families": {
+      "type": "array",
+      "description": "List of supported OS families",
+      "items": {
+        "type": "string",
+        "enum": ["RedHat", "CentOS", "Rocky", "AlmaLinux", "Fedora"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "supported_major_versions": {
+      "type": "array",
+      "description": "List of supported major OS versions",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "base_packages_common": {
+      "type": "array",
+      "description": "Common packages for all distributions",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "base_packages_rhel_family": {
+      "type": "array",
+      "description": "RHEL family specific packages",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "enable_epel": {
+      "type": "boolean",
+      "description": "Whether to enable EPEL repository"
+    },
+    "epel_installation_method": {
+      "type": "string",
+      "description": "Method for EPEL installation (ADR-0001 compliance)",
+      "enum": ["dnf_module", "rpm", "package"],
+      "default": "dnf_module"
+    },
+    "base_services_enabled": {
+      "type": "array",
+      "description": "List of base services to enable",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "supported_os_families",
+    "supported_major_versions",
+    "base_packages_common",
+    "enable_epel",
+    "epel_installation_method"
+  ],
+  "additionalProperties": true,
+  "adr_compliance": {
+    "adr_001": {
+      "property": "epel_installation_method",
+      "requirement": "Must use 'dnf_module' for ADR-0001 compliance"
+    },
+    "adr_002": {
+      "description": "Variables follow modular role architecture pattern"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+---
+# defaults file for edge_hosts_validate
+libvirt_install_dir: /var/lib/libvirt/images
+libvirt_host_networks: []
+libvirt_pkgs: []
+project_dir: /root/openshift-home-lab

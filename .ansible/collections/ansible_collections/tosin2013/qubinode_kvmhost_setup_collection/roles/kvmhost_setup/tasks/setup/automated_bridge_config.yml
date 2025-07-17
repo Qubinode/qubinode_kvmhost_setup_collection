@@ -1,0 +1,228 @@
+---
+# Automated Bridge Configuration for ADR-0007
+# Modern NetworkManager-based bridge setup for RHEL 9/10 and compatible distributions
+
+- name: Automated Bridge Configuration - Pre-flight Checks
+  ansible.builtin.debug:
+    msg: Starting automated bridge configuration for {{ inventory_hostname }}
+
+- name: Detect primary network interface
+  ansible.builtin.set_fact:
+    primary_interface: "{{ ansible_default_ipv4.interface }}"
+    primary_ip: "{{ ansible_default_ipv4.address }}"
+    primary_gateway: "{{ ansible_default_ipv4.gateway }}"
+    primary_netmask: "{{ ansible_default_ipv4.netmask }}"
+  when: not qubinode_bridge_interface is defined
+
+- name: Override primary interface if specified
+  ansible.builtin.set_fact:
+    primary_interface: "{{ qubinode_bridge_interface }}"
+  when: qubinode_bridge_interface is defined
+
+- name: Validate network interface exists
+  ansible.builtin.assert:
+    that:
+      - primary_interface in ansible_interfaces
+    fail_msg: "Primary interface {{ primary_interface }} not found in system interfaces: {{ ansible_interfaces }}"
+    success_msg: Primary interface {{ primary_interface }} validated successfully
+
+- name: Check if bridge already exists
+  ansible.builtin.command: nmcli connection show {{ qubinode_bridge_name           | default('qubibr0')   }}
+  register: bridge_exists_check
+  failed_when: false
+  changed_when: false
+
+- name: Set bridge existence fact
+  ansible.builtin.set_fact:
+    bridge_already_exists: "{{ bridge_exists_check.rc == 0 }}"
+
+- name: Display bridge status
+  ansible.builtin.debug:
+    msg: |
+      Bridge Configuration Status:
+      - Primary Interface: {{ primary_interface }}
+      - Bridge Name: {{ qubinode_bridge_name | default('qubibr0') }}
+      - Bridge Exists: {{ bridge_already_exists }}
+      - Primary IP: {{ primary_ip | default('N/A') }}
+      - Gateway: {{ primary_gateway | default('N/A') }}
+
+- name: Backup current network configuration
+  ansible.builtin.command: nmcli connection show --active
+  register: network_backup
+  changed_when: false
+  when: not bridge_already_exists
+
+- name: Save network backup to file
+  ansible.builtin.ansible.builtin.copy:
+    content: |
+      # Network configuration backup - {{ ansible_date_time.iso8601 }}
+      # Host: {{ inventory_hostname }}
+
+      {{ network_backup.stdout }}
+    dest: /tmp/network_backup_{{ ansible_date_time.epoch }}.txt
+    mode: "0644"
+  when: not bridge_already_exists
+
+- name: Get current connection details for primary interface
+  ansible.builtin.shell: |
+    nmcli -t -f connection.id,connection.uuid,ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns \
+    connection show "$(nmcli -t -f device,connection device | grep '^{{ primary_interface }}:' | cut -d: -f2)"
+  register: current_connection_details
+  changed_when: false
+  when: not bridge_already_exists
+
+- name: Parse current network configuration
+  ansible.builtin.set_fact:
+    current_connection_uuid: "{{ current_connection_details.stdout | regex_search('connection.uuid:([^\\n]+)', '\\1') | first
+      | default('') }}"
+    current_ipv4_method: "{{ current_connection_details.stdout | regex_search('ipv4.method:([^\\n]+)', '\\1') | first | default('auto')
+      }}"
+    current_ipv4_addresses: "{{ current_connection_details.stdout | regex_search('ipv4.addresses:([^\\n]+)', '\\1') | first
+      | default('') }}"
+    current_ipv4_gateway: "{{ current_connection_details.stdout | regex_search('ipv4.gateway:([^\\n]+)', '\\1') | first |
+      default('') }}"
+    current_ipv4_dns: "{{ current_connection_details.stdout | regex_search('ipv4.dns:([^\\n]+)', '\\1') | first | default('')
+      }}"
+  when: not bridge_already_exists
+
+- name: Create bridge connection
+  ansible.builtin.command: >
+    nmcli connection add
+    type bridge
+    con-name {{ qubinode_bridge_name           | default('qubibr0')   }}
+    ifname {{ qubinode_bridge_name           | default('qubibr0')   }}
+    autoconnect yes
+    save yes
+  register: bridge_creation
+  when: not bridge_already_exists
+
+- name: Configure bridge IP settings (static)
+  ansible.builtin.command: >
+    nmcli connection modify {{ qubinode_bridge_name           | default('qubibr0')   }}
+    ipv4.method manual
+    ipv4.addresses {{ current_ipv4_addresses or (primary_ip + '/24') }}
+    ipv4.gateway {{ current_ipv4_gateway or primary_gateway }}
+    ipv4.dns "{{ qubinode_dns_servers      | default(['1.1.1.1', '8.8.8.8'])                |   join(',')    }}"
+  when:
+    - not bridge_already_exists
+    - current_ipv4_method == "manual" or qubinode_bridge_static_ip | default(false)
+
+- name: Configure bridge IP settings (DHCP)
+  ansible.builtin.command: >
+    nmcli connection modify {{ qubinode_bridge_name           | default('qubibr0')   }}
+    ipv4.method auto
+    ipv4.dns "{{ qubinode_dns_servers      | default(['1.1.1.1', '8.8.8.8'])                |   join(',')    }}"
+  when:
+    - not bridge_already_exists
+    - current_ipv4_method == "auto" and not qubinode_bridge_static_ip | default(false)
+
+- name: Configure bridge STP settings
+  ansible.builtin.command: >
+    nmcli connection modify {{ qubinode_bridge_name           | default('qubibr0')   }}
+    bridge.stp yes
+    bridge.priority {{ qubinode_bridge_priority           | default(32768)   }}
+    bridge.forward-delay {{ qubinode_bridge_forward_delay           | default(15)   }}
+    bridge.hello-time {{ qubinode_bridge_hello_time           | default(2)   }}
+    bridge.max-age {{ qubinode_bridge_max_age           | default(20)   }}
+  when: not bridge_already_exists
+
+- name: Add physical interface as bridge slave
+  ansible.builtin.command: >
+    nmcli connection add
+    type bridge-slave
+    con-name {{ qubinode_bridge_name           | default('qubibr0')   }}-slave-{{ primary_interface }}
+    ifname {{ primary_interface }}
+    master {{ qubinode_bridge_name           | default('qubibr0')   }}
+    autoconnect yes
+  register: bridge_slave_creation
+  when: not bridge_already_exists
+
+- name: Bring up bridge connection
+  ansible.builtin.command: nmcli connection up {{ qubinode_bridge_name           | default('qubibr0')   }}
+  register: bridge_activation
+  when: not bridge_already_exists
+
+- name: Wait for bridge to be active
+  ansible.builtin.pause:
+    seconds: 5
+  when: not bridge_already_exists
+
+- name: Verify bridge connectivity
+  ansible.builtin.command: ping -c 3 {{ primary_gateway           | default('8.8.8.8')   }}
+  register: connectivity_test
+  changed_when: false
+  when: not bridge_already_exists
+
+- name: Validate bridge configuration
+  ansible.builtin.command: nmcli connection show {{ qubinode_bridge_name           | default('qubibr0')   }}
+  register: bridge_validation
+  changed_when: false
+
+- name: Get bridge interface details
+  ansible.builtin.command: ip addr show {{ qubinode_bridge_name           | default('qubibr0')   }}
+  register: bridge_interface_details
+  changed_when: false
+
+- name: Display bridge configuration results
+  ansible.builtin.debug:
+    msg: |
+      Bridge Configuration Complete:
+
+      Bridge Name: {{ qubinode_bridge_name | default('qubibr0') }}
+      Status: {{ 'Already Existed' if bridge_already_exists else 'Created Successfully' }}
+      Physical Interface: {{ primary_interface }}
+
+      {% if not bridge_already_exists %}
+      Creation Results:
+      - Bridge Creation: {{ 'Success' if bridge_creation.rc == 0 else 'Failed' }}
+      - Slave Addition: {{ 'Success' if bridge_slave_creation.rc == 0 else 'Failed' }}
+      - Activation: {{ 'Success' if bridge_activation.rc == 0 else 'Failed' }}
+      - Connectivity Test: {{ 'Success' if connectivity_test.rc == 0 else 'Failed' }}
+      {% endif %}
+
+      Bridge Details:
+      {{ bridge_interface_details.stdout | indent(2) }}
+
+- name: Set bridge facts for other tasks
+  ansible.builtin.set_fact:
+    qubinode_bridge_configured: true
+    qubinode_bridge_name_fact: "{{ qubinode_bridge_name | default('qubibr0') }}"
+    qubinode_bridge_interface_fact: "{{ primary_interface }}"
+
+- name: Create bridge validation script
+  ansible.builtin.ansible.builtin.template:
+    src: bridge_validation.sh.j2
+    dest: /usr/local/bin/qubinode-bridge-validate
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Register bridge configuration in system facts
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+    path: /etc/qubinode/bridge.conf
+    line: BRIDGE_NAME={{ qubinode_bridge_name | default('qubibr0') }}
+    create: true
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Register bridge interface in system facts
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+    path: /etc/qubinode/bridge.conf
+    line: BRIDGE_INTERFACE={{ primary_interface }}
+
+- name: Register bridge configuration timestamp
+  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+    path: /etc/qubinode/bridge.conf
+    line: BRIDGE_CONFIGURED={{ ansible_date_time.iso8601 }}
+
+- name: Success message
+  ansible.builtin.debug:
+    msg: |
+      ✅ Automated bridge configuration completed successfully!
+
+      Bridge {{ qubinode_bridge_name           | default('qubibr0)   }} is now active and ready for KVM virtualization.
+      Physical interface {{ primary_interface }} has been added as a bridge slave.
+
+      Use 'qubinode-bridge-validate' to check bridge status at any time.
+      Configuration saved to /etc/qubinode/bridge.conf
