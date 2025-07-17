@@ -1,8 +1,7 @@
----
 # Base Service Management
 
 - name: 'Enable base services'
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: '{{ item }}'
     enabled: true
   loop: "{{ base_services_enabled }}"

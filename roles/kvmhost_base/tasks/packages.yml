@@ -1,4 +1,3 @@
----
 # Base Package Management
 # Based on ADR-0001: DNF Module for EPEL Installation
 
@@ -49,7 +48,7 @@
 - name: 'Create list of missing packages'
   ansible.builtin.set_fact:
     missing_packages: >-
-      {{ all_base_packages           | difference(ansible_facts.packages.keys())   }}
+      {{ all_base_packages | difference(ansible_facts.packages.keys()) }}
 
 - name: 'Display missing packages'
   ansible.builtin.debug:
