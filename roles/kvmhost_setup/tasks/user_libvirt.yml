@@ -1,4 +1,3 @@
----
 - name: Add user to libvirt group
   ansible.builtin.user:
     name: "{{ admin_user }}"

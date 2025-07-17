@@ -1,0 +1,30 @@
+<network>
+  <name>{{ net_name }}</name>
+  <forward mode='{{ net_mode }}'{% if net_mode == 'bridge' %} bridge='{{ net_bridge_device }}'{% endif %}/>
+  {% if net_mode == 'bridge' %}
+  <bridge name='{{ net_bridge_device }}'/>
+  {% else %}
+  <bridge name='{{ net_bridge_device }}' stp='on' delay='0'/>
+  <ip address='{{ net_ip | default("192.168.122.1") }}' netmask='{{ net_netmask | default("255.255.255.0") }}'>
+    {% if net_dhcp_start is defined and net_dhcp_end is defined %}
+    <dhcp>
+      <range start='{{ net_dhcp_start }}' end='{{ net_dhcp_end }}'/>
+    </dhcp>
+    {% endif %}
+  </ip>
+  {% endif %}
+  {% if net_domain is defined %}
+  <domain name='{{ net_domain }}'/>
+  {% endif %}
+  {% if net_dns_servers is defined %}
+  <dns>
+    {% for dns_server in net_dns_servers %}
+    <forwarder addr='{{ dns_server }}'/>
+    {% endfor %}
+  </dns>
+  {% endif %}
+</network>ork connections='1'>
+  <name>{{ net_name }}</name>
+  <forward mode='{{ net_mode }}'/>
+  <bridge name='{{ net_bridge_device }}'/>
+</network>

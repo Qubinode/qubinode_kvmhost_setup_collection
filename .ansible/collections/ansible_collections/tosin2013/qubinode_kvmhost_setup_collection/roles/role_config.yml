@@ -1,0 +1,227 @@
+---
+# Qubinode KVM Host Setup - Role Dependency Management
+# Based on ADR-0002: Ansible Role-Based Modular Architecture
+
+# Role execution order and dependencies
+role_execution_order:
+  1:
+    name: kvmhost_base
+    description: "Base system configuration and OS detection"
+    dependencies: []
+    tags:
+      - base
+      - os_detection
+      - packages
+
+  2:
+    name: kvmhost_networking
+    description: "Network bridge configuration and validation"
+    dependencies:
+      - kvmhost_base
+    tags:
+      - networking
+      - bridge
+      - validation
+
+  3:
+    name: kvmhost_libvirt
+    description: "Libvirt services, storage pools, and virtualization"
+    dependencies:
+      - kvmhost_base
+      - kvmhost_networking
+    tags:
+      - libvirt
+      - storage
+      - virtualization
+      - kvm
+
+  4:
+    name: kvmhost_storage
+    description: "Advanced storage management including LVM and performance optimization"
+    dependencies:
+      - kvmhost_base
+      - kvmhost_libvirt
+    tags:
+      - storage
+      - lvm
+      - performance
+      - monitoring
+
+  5:
+    name: kvmhost_cockpit
+    description: "Cockpit web management interface configuration"
+    dependencies:
+      - kvmhost_base
+    optional_dependencies:
+      - kvmhost_libvirt
+      - kvmhost_networking
+    tags:
+      - cockpit
+      - web_interface
+      - management
+      - monitoring
+
+  6:
+    name: kvmhost_user_config
+    description: "User shell environments, SSH access, and permissions"
+    dependencies:
+      - kvmhost_base
+    tags:
+      - users
+      - shell
+      - ssh
+      - environment
+
+  7:
+    name: kvmhost_setup
+    description: "Legacy role - to be decomposed"
+    dependencies:
+      - kvmhost_base
+      - kvmhost_networking
+      - kvmhost_libvirt
+      - kvmhost_storage
+    tags:
+      - legacy
+      - cockpit
+      - user_config
+
+# Role compatibility matrix
+role_compatibility:
+  kvmhost_base:
+    min_ansible_version: "2.9"
+    max_ansible_version: "7.x"
+    supported_os:
+      - "RedHat"
+      - "CentOS"
+      - "Rocky"
+      - "AlmaLinux"
+    supported_versions:
+      - "8"
+      - "9"
+      - "10"
+
+  kvmhost_libvirt:
+    min_ansible_version: "2.9"
+    max_ansible_version: "7.x"
+    requires_packages:
+      - libvirt-daemon
+      - libvirt-client
+      - qemu-kvm
+      - virt-install
+    supported_os:
+      - "RedHat"
+      - "CentOS"
+      - "Rocky"
+      - "AlmaLinux"
+    supported_versions:
+      - "8"
+      - "9"
+      - "10"
+
+  kvmhost_storage:
+    min_ansible_version: "2.9"
+    max_ansible_version: "7.x"
+    requires_packages:
+      - lvm2
+      - xfsprogs
+    supported_os:
+      - "RedHat"
+      - "CentOS"
+      - "Rocky"
+      - "AlmaLinux"
+    supported_versions:
+      - "8"
+      - "9"
+      - "10"
+
+  kvmhost_networking:
+    min_ansible_version: "2.9"
+    max_ansible_version: "7.x"
+    requires_packages:
+      - NetworkManager
+      - bridge-utils
+    supported_os:
+      - "RedHat"
+      - "CentOS"
+      - "Rocky"
+      - "AlmaLinux"
+    supported_versions:
+      - "8"
+      - "9"
+      - "10"
+
+  kvmhost_cockpit:
+    min_ansible_version: "2.9"
+    max_ansible_version: "7.x"
+    requires_packages:
+      - cockpit
+      - cockpit-system
+      - cockpit-ws
+    supported_os:
+      - "RedHat"
+      - "CentOS"
+      - "Rocky"
+      - "AlmaLinux"
+    supported_versions:
+      - "8"
+      - "9"
+      - "10"
+
+  kvmhost_user_config:
+    min_ansible_version: "2.9"
+    max_ansible_version: "7.x"
+    requires_packages:
+      - bash
+      - openssh-server
+      - openssh-clients
+    supported_os:
+      - "RedHat"
+      - "CentOS"
+      - "Rocky"
+      - "AlmaLinux"
+    supported_versions:
+      - "8"
+      - "9"
+      - "10"
+
+# Feature toggles
+role_features:
+  kvmhost_base:
+    epel_installation: true
+    os_validation: true
+    package_management: true
+    service_management: true
+
+  kvmhost_libvirt:
+    libvirt_service_management: true
+    storage_pool_management: true
+    network_management: true
+    user_access_control: true
+    virtualization_validation: true
+
+  kvmhost_storage:
+    lvm_management: true
+    performance_optimization: true
+    advanced_storage_pools: true
+    storage_monitoring: true
+    backup_management: true
+
+  kvmhost_networking:
+    bridge_configuration: true
+    network_validation: true
+    firewall_integration: true
+    backup_config: true
+
+  kvmhost_cockpit:
+    ssl_configuration: true
+    authentication_management: true
+    firewall_integration: true
+    module_management: true
+    access_control: true
+
+  kvmhost_user_config:
+    shell_customization: true
+    ssh_key_management: true
+    environment_configuration: true
+    dotfiles_management: true
+    permission_management: true

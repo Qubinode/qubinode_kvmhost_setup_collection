@@ -1,0 +1,34 @@
+{
+ "collection_info": {
+  "namespace": "tosin2013",
+  "name": "qubinode_kvmhost_setup_collection",
+  "version": "0.9.0",
+  "authors": [
+   "Tosin Akinosho (github.com/tosin2013)",
+   "Rodrique Heron (github.com/flyemsafe)"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "kvm",
+   "libvirt",
+   "kvmhost",
+   "linux"
+  ],
+  "description": "This Ansible Collection for Virtual Machines Setup provides a set of roles for configuring and managing KVM hosts in baremetal servers using RHEL-based Linux operating systems.",
+  "license": [],
+  "license_file": "LICENSE",
+  "dependencies": {},
+  "repository": "https://github.com/Qubinode/qubinode_kvmhost_setup_collection",
+  "documentation": null,
+  "homepage": "https://github.com/Qubinode/qubinode_kvmhost_setup_collection",
+  "issues": "https://github.com/Qubinode/qubinode_kvmhost_setup_collection/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "0dfe589ea3e27aa966f86662052df04aca6bed73a865e07441eca40a737a1619",
+  "format": 1
+ },
+ "format": 1
+}

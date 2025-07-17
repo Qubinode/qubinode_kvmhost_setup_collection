@@ -1,0 +1,14 @@
+
+# =============================================================================
+# SUDO CONFIG VALIDATION HELPER
+# =============================================================================
+# Validates sudo configuration
+
+- name: Validate sudo timeout range
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [sudo_timeout_error_msg] }}"
+  vars:
+    sudo_timeout_error_msg: "kvmhost_user_config validation error: Sudo timeout '{{ kvmhost_user_config_vars.sudo_configuration.sudo_timeout }}' must be between 0 and 60 minutes"
+  when: 
+    - kvmhost_user_config_vars.sudo_configuration.sudo_timeout is defined
+    - (kvmhost_user_config_vars.sudo_configuration.sudo_timeout | int < 0 or kvmhost_user_config_vars.sudo_configuration.sudo_timeout | int > 60)

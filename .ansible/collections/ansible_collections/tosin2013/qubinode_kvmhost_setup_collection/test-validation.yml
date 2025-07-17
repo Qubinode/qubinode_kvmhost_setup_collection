@@ -1,0 +1,74 @@
+---
+# Test playbook for demonstrating new validation features
+# Usage: ansible-playbook -i inventories/local/hosts test-validation.yml --tags preflight
+
+- name: Test KVM Host Setup Validation Features
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  vars:
+    # Example variables for testing
+    libvirt_host_storage_pools:
+      - name: default
+        path: /var/lib/libvirt/images
+        state: active
+        autostart: true
+
+    libvirt_host_networks:
+      - name: default
+        mode: nat
+        create: true
+
+  tasks:
+    - name: === Pre-flight Validation Demo ===
+      ansible.builtin.debug:
+        msg: |
+          This playbook demonstrates the new validation features:
+          1. Pre-flight system validation
+          2. RHEL version detection and conditional logic
+          3. KVM host validation checks
+
+          Run with different tags to test specific validations:
+          --tags preflight        # Pre-flight validation only
+          --tags rhel_detection   # RHEL version detection only
+          --tags kvm_validation   # KVM validation only
+          --tags validation       # All validation tasks
+
+    - name: Include RHEL version detection
+      ansible.builtin.include_tasks: roles/kvmhost_setup/tasks/rhel_version_detection.yml
+      tags:
+        - rhel_detection
+        - validation
+
+    - name: Include pre-flight validation
+      ansible.builtin.include_tasks: roles/kvmhost_setup/tasks/validation/preflight.yml
+      tags:
+        - preflight
+        - validation
+
+    - name: Include KVM host validation
+      ansible.builtin.include_tasks: roles/kvmhost_setup/tasks/kvm_host_validation.yml
+      tags:
+        - kvm_validation
+        - validation
+      when:
+        - kvmhost_os_is_rhel_compatible | default(false)
+        - ansible_virtualization_role != "guest"
+
+    - name: === Validation Summary ===
+      ansible.builtin.debug:
+        msg: |
+          Validation Complete!
+
+          Results Summary:
+          - OS: {{ kvmhost_os_family | default('Unknown') }} {{ kvmhost_os_full_version | default('Unknown') }}
+          - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible | default('Unknown') }}
+          - Package Manager: {{ kvmhost_package_manager | default('Unknown') }}
+          - Validation Status: All checks passed!
+
+          Next steps: Run the full kvmhost_setup role
+      tags:
+        - validation
+        - summary

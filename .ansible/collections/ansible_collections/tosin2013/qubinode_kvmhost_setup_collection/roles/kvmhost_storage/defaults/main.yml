@@ -1,0 +1,107 @@
+---
+# =============================================================================
+# KVMHOST STORAGE CONFIGURATION
+# =============================================================================
+kvmhost_storage_enabled: true
+kvmhost_storage_require_base: true
+kvmhost_storage_require_libvirt: true
+
+# =============================================================================
+# LVM STORAGE CONFIGURATION
+# =============================================================================
+kvmhost_storage_lvm_enabled: false
+kvmhost_storage_lvm_device: ""  # e.g., "vdb", "sdb"
+kvmhost_storage_lvm_vg_name: 'libvirt'
+kvmhost_storage_lvm_force_create: false
+
+# LVM logical volumes for specialized storage
+kvmhost_storage_lvm_volumes:
+  - name: vm_images
+    size: "50%VG"
+    mount_dir: "/var/lib/libvirt/images"
+    fstype: "xfs"
+    enabled: true
+  - name: vm_backups
+    size: "30%VG"
+    mount_dir: "/var/lib/libvirt/backups"
+    fstype: "xfs"
+    enabled: false
+  - name: vm_snapshots
+    size: "20%VG"
+    mount_dir: "/var/lib/libvirt/snapshots"
+    fstype: "xfs"
+    enabled: false
+
+# =============================================================================
+# ADVANCED STORAGE POOLS
+# =============================================================================
+kvmhost_storage_pools_enabled: true
+kvmhost_storage_advanced_pools:
+  - name: performance
+    type: dir
+    path: '/var/lib/libvirt/performance'
+    target_mode: '0711'
+    autostart: true
+    enabled: false
+  - name: backup
+    type: dir
+    path: '/var/lib/libvirt/backups'
+    target_mode: '0711'
+    autostart: false
+    enabled: false
+
+# =============================================================================
+# STORAGE PERFORMANCE OPTIMIZATION
+# =============================================================================
+kvmhost_storage_performance_enabled: true
+
+# I/O scheduler optimization
+kvmhost_storage_io_scheduler: "mq-deadline"  # none, mq-deadline, bfq, kyber
+kvmhost_storage_queue_depth: 32
+
+# Filesystem mount options for performance
+kvmhost_storage_mount_options:
+  xfs: "defaults,noatime,nodiratime,logbsize=256k,allocsize=1m"
+  ext4: "defaults,noatime,nodiratime,commit=60"
+
+# =============================================================================
+# STORAGE MONITORING AND ALERTING
+# =============================================================================
+kvmhost_storage_monitoring_enabled: true
+kvmhost_storage_space_threshold: 80  # Percentage
+kvmhost_storage_inode_threshold: 80  # Percentage
+
+# Storage health checks
+kvmhost_storage_health_checks:
+  - disk_usage
+  - inode_usage
+  - lvm_health
+  - filesystem_errors
+
+# =============================================================================
+# BACKUP AND SNAPSHOT CONFIGURATION
+# =============================================================================
+kvmhost_storage_backup_enabled: false
+kvmhost_storage_backup_retention_days: 7
+kvmhost_storage_snapshot_enabled: false
+
+# =============================================================================
+# STORAGE VALIDATION
+# =============================================================================
+kvmhost_storage_validation_enabled: true
+kvmhost_storage_minimum_free_space: 10  # GB
+
+# =============================================================================
+# LEGACY COMPATIBILITY
+# =============================================================================
+# Support for swygue_lvm role variables
+device: "{{ kvmhost_storage_lvm_device }}"
+vg_name: '{{ kvmhost_storage_lvm_vg_name }}'
+host_device: "{{ kvmhost_storage_lvm_device }}"
+create_vg: "{{ kvmhost_storage_lvm_enabled }}"
+logical_volumes: "{{ kvmhost_storage_lvm_volumes }}"
+
+# Support for original kvmhost_setup variables
+kvm_host_libvirt_dir: "/var/lib/libvirt/images"
+libvirt_images_dir: "/var/lib/libvirt/images"
+create_libvirt_storage: "{{ kvmhost_storage_enabled }}"

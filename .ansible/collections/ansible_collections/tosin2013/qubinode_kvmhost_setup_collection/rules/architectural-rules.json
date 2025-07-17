@@ -1,0 +1,180 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "name": "Qubinode Architectural Rules",
+    "description": "Architectural rule set for Qubinode KVM Host Setup Collection derived from ADRs",
+    "created": "2025-07-11T14:55:55.076Z",
+    "lastModified": "2025-07-11T14:55:55.076Z",
+    "author": "Generated from ADR Analysis",
+    "tags": ["architecture", "ansible", "kvm", "rhel", "quality"]
+  },
+  "rules": [
+    {
+      "id": "ADR001-DNF-MODULE",
+      "name": "Use DNF Module for EPEL Repository Installation",
+      "category": "deployment",
+      "description": "All EPEL repository installations must use DNF module commands rather than direct RPM installation",
+      "severity": "error",
+      "pattern": "dnf.*module.*enable.*epel",
+      "message": "Use 'dnf module enable epel' instead of direct RPM installation for EPEL repositories",
+      "source": "ADR-0001"
+    },
+    {
+      "id": "ADR002-MODULAR-ROLES",
+      "name": "Ansible Role-Based Modular Architecture",
+      "category": "architecture",
+      "description": "All automation must be organized into discrete, reusable Ansible roles with clear interfaces",
+      "severity": "error",
+      "pattern": "roles/[a-z_]+/(tasks|defaults|handlers|meta|vars)/main\\.yml",
+      "message": "Ansible automation must follow role-based modular architecture pattern",
+      "source": "ADR-0002"
+    },
+    {
+      "id": "ADR003-KVM-PLATFORM",
+      "name": "KVM Virtualization Platform Selection",
+      "category": "infrastructure",
+      "description": "KVM must be used as the virtualization platform for all virtualization tasks",
+      "severity": "error",
+      "pattern": "libvirt|qemu-kvm|virt-manager",
+      "message": "Use KVM/libvirt for virtualization instead of other hypervisors",
+      "source": "ADR-0003"
+    },
+    {
+      "id": "ADR004-IDEMPOTENT-TASKS",
+      "name": "Idempotent Task Design Pattern",
+      "category": "process",
+      "description": "All Ansible tasks must be idempotent and safe to run multiple times",
+      "severity": "error",
+      "pattern": "state=present|state=absent|creates=|removes=",
+      "message": "Tasks must be idempotent with proper state management",
+      "source": "ADR-0004"
+    },
+    {
+      "id": "ADR005-MOLECULE-TESTING",
+      "name": "Molecule Testing Framework Integration",
+      "category": "testing",
+      "description": "All roles must include Molecule testing scenarios for validation",
+      "severity": "error",
+      "pattern": "molecule/.*/(molecule\\.yml|converge\\.yml|verify\\.yml)",
+      "message": "Include Molecule testing framework for role validation",
+      "source": "ADR-0005"
+    },
+    {
+      "id": "ADR006-CONFIG-MANAGEMENT",
+      "name": "Configuration Management Patterns",
+      "category": "architecture",
+      "description": "Follow standardized variable hierarchy and naming conventions",
+      "severity": "error",
+      "pattern": "(defaults|vars)/main\\.yml|group_vars|host_vars",
+      "message": "Use standardized configuration management patterns and variable hierarchy",
+      "source": "ADR-0006"
+    },
+    {
+      "id": "ADR007-BRIDGE-NETWORKING",
+      "name": "Bridge-Based Network Architecture",
+      "category": "infrastructure",
+      "description": "Use bridge-based networking for VM connectivity",
+      "severity": "warning",
+      "pattern": "bridge|br0|network.*bridge",
+      "message": "Implement bridge-based networking for VM connectivity",
+      "source": "ADR-0007"
+    },
+    {
+      "id": "ADR008-RHEL-SUPPORT",
+      "name": "RHEL 8/9/10 Multi-Version Support Strategy",
+      "category": "compatibility",
+      "description": "Support RHEL 8, 9, and 10 with conditional logic for version-specific features",
+      "severity": "error",
+      "pattern": "ansible_facts\\['distribution'\\]|when:.*ansible_distribution_major_version",
+      "message": "Implement conditional logic for multi-RHEL version support",
+      "source": "ADR-0008"
+    },
+    {
+      "id": "ADR009-DEPENDABOT-AUTOMATION",
+      "name": "GitHub Actions Dependabot Auto-Updates Strategy",
+      "category": "devops",
+      "description": "Use Dependabot for automated dependency management across multiple registries",
+      "severity": "warning",
+      "pattern": "\\.github/dependabot\\.yml",
+      "message": "Configure Dependabot for automated dependency updates",
+      "source": "ADR-0009"
+    },
+    {
+      "id": "ADR010-REPEATABILITY",
+      "name": "End-User Repeatability and Solution Reproducibility",
+      "category": "quality",
+      "description": "Ensure consistent, repeatable, and reproducible outcomes across all environments",
+      "severity": "error",
+      "pattern": "pre.*flight|validation|rollback|documentation",
+      "message": "Implement comprehensive validation and documentation for repeatability",
+      "source": "ADR-0010"
+    }
+  ],
+  "categories": [
+    {
+      "name": "deployment",
+      "description": "Package management and deployment rules",
+      "priority": "high",
+      "ruleCount": 1
+    },
+    {
+      "name": "architecture",
+      "description": "Architectural design and organization rules",
+      "priority": "high",
+      "ruleCount": 2
+    },
+    {
+      "name": "infrastructure",
+      "description": "Infrastructure and platform selection rules",
+      "priority": "high",
+      "ruleCount": 2
+    },
+    {
+      "name": "process",
+      "description": "Development process and workflow rules",
+      "priority": "high",
+      "ruleCount": 1
+    },
+    {
+      "name": "testing",
+      "description": "Testing framework and validation rules",
+      "priority": "high",
+      "ruleCount": 1
+    },
+    {
+      "name": "compatibility",
+      "description": "Multi-version and cross-platform compatibility rules",
+      "priority": "high",
+      "ruleCount": 1
+    },
+    {
+      "name": "devops",
+      "description": "CI/CD and automation pipeline rules",
+      "priority": "medium",
+      "ruleCount": 1
+    },
+    {
+      "name": "quality",
+      "description": "Quality assurance and reproducibility rules",
+      "priority": "high",
+      "ruleCount": 1
+    }
+  ],
+  "dependencies": [
+    {
+      "ruleId": "ADR002-MODULAR-ROLES",
+      "dependsOn": ["ADR006-CONFIG-MANAGEMENT"],
+      "relationship": "requires"
+    },
+    {
+      "ruleId": "ADR005-MOLECULE-TESTING",
+      "dependsOn": ["ADR002-MODULAR-ROLES"],
+      "relationship": "validates"
+    },
+    {
+      "ruleId": "ADR010-REPEATABILITY",
+      "dependsOn": ["ADR004-IDEMPOTENT-TASKS"],
+      "relationship": "enhances"
+    }
+  ]
+}

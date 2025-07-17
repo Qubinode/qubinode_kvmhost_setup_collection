@@ -1,31 +1,31 @@
 # Base Service Management
 
-- name: 'Enable base services'
+- name: "Enable base services"
   ansible.builtin.systemd:
-    name: '{{ item }}'
+    name: "{{ item }}"
     enabled: true
   loop: "{{ base_services_enabled }}"
   become: true
   register: service_enable
   failed_when: false
 
-- name: 'Start base services'
-  ansible.builtin.ansible.builtin.systemd:
-    name: '{{ item }}'
+- name: "Start base services"
+  ansible.builtin.systemd:
+    name: "{{ item }}"
     state: started
   loop: "{{ base_services_started }}"
   become: true
   register: service_start
   failed_when: false
 
-- name: 'Verify service status'
-  ansible.builtin.ansible.builtin.systemd:
-    name: '{{ item }}'
+- name: "Verify service status"
+  ansible.builtin.systemd:
+    name: "{{ item }}"
   register: service_status
   loop: "{{ base_services_enabled }}"
   become: true
 
-- name: 'Display service status'
+- name: "Display service status"
   ansible.builtin.debug:
     msg: |
       Service {{ item.item }} status:

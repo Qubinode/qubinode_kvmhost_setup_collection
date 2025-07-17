@@ -1,4 +1,3 @@
----
 - name: Check system architecture
   ansible.builtin.assert:
     that: ansible_architecture == "x86_64"

@@ -1,0 +1,43 @@
+---
+# OS Detection and Version Facts
+# Based on ADR-0008: RHEL 9/10 Support Strategy
+
+- name: Detect OS family and version
+  ansible.builtin.set_fact:
+    kvmhost_os_family: "{{ ansible_distribution }}"
+    kvmhost_os_major_version: "{{ ansible_distribution_major_version }}"
+    kvmhost_os_full_version: "{{ ansible_distribution_version }}"
+    kvmhost_os_is_rhel_compatible: "{{ ansible_distribution in supported_os_families }}"
+
+- name: Set RHEL version-specific facts
+  ansible.builtin.set_fact:
+    kvmhost_is_rhel8: "{{ kvmhost_os_major_version == '8' and kvmhost_os_is_rhel_compatible }}"
+    kvmhost_is_rhel9: "{{ kvmhost_os_major_version == '9' and kvmhost_os_is_rhel_compatible }}"
+    kvmhost_is_rhel10: "{{ kvmhost_os_major_version == '10' and kvmhost_os_is_rhel_compatible }}"
+
+- name: Set package manager facts based on OS version
+  ansible.builtin.set_fact:
+    kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version           | int>= 8 else 'yum'   }}"
+    kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version           | int>= 8 else 'python'   }}"
+    kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version           | int>= 8 else 'pip'   }}"
+
+- name: Set architecture facts
+  ansible.builtin.set_fact:
+    kvmhost_architecture: "{{ ansible_architecture }}"
+    kvmhost_is_x86_64: "{{ ansible_architecture == 'x86_64' }}"
+
+- name: Display OS detection results
+  ansible.builtin.debug:
+    msg: |
+      OS Detection Results:
+      - Distribution: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
+      - Major Version: {{ kvmhost_os_major_version }}
+      - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible }}
+      - RHEL 8: {{ kvmhost_is_rhel8 }}
+      - RHEL 9: {{ kvmhost_is_rhel9 }}
+      - RHEL 10: {{ kvmhost_is_rhel10 }}
+      - Package Manager: {{ kvmhost_package_manager }}
+      - Python: {{ kvmhost_python_executable }}
+      - Architecture: {{ kvmhost_architecture }}
+  tags:
+    - debug

@@ -1,0 +1,20 @@
+{
+  "kvm_feature_detection_report": {
+    "generated": "{{ detection_timestamp }}",
+    "host_information": {{ host_info | to_nice_json }},
+    "kvm_capabilities": {{ features | to_nice_json }},
+    "optimization_recommendations": {{ kvm_optimization_recommendations | default([]) | to_nice_json }},
+    "system_specs": {
+      "cpu_cores": {{ cpu_cores | default(0) }},
+      "cpu_threads_per_core": {{ cpu_threads | default(0) }},
+      "total_vcpus": {{ total_vcpus | default(0) }},
+      "memory_total_mb": {{ ansible_memtotal_mb | default(0) }},
+      "storage_devices": {{ storage_devices | default([]) | to_nice_json }}
+    },
+    "detected_versions": {
+      "libvirt": "{{ libvirt_version.stdout | default('unknown') }}",
+      "qemu": "{{ qemu_version.stdout | default('unknown') }}",
+      "kernel": "{{ ansible_kernel | default('unknown') }}"
+    }
+  }
+}

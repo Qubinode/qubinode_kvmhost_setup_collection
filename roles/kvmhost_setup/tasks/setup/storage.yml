@@ -1,9 +1,8 @@
----
 - name: Ensure libvirt storage directory exists
   ansible.builtin.ansible.builtin.file:
-    path: '{{ item.path }}'
+    path: "{{ item.path }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   loop: "{{ libvirt_host_storage_pools }}"
@@ -18,7 +17,7 @@
   ansible.builtin.ansible.builtin.template:
     src: libvirt_pool.xml.j2
     dest: /etc/libvirt/storage/{{ item.name }}.xml
-    mode: '0644'
+    mode: "0644"
   loop: "{{ libvirt_host_storage_pools }}"
   when:
     - item.name not in existing_pools.stdout
@@ -80,7 +79,7 @@
 
 - name: Set correct SELinux context for storage pools
   ansible.builtin.ansible.builtin.file:
-    path: '{{ item.path }}'
+    path: "{{ item.path }}"
     setype: virt_image_t
     recurse: true
   loop: "{{ libvirt_host_storage_pools }}"

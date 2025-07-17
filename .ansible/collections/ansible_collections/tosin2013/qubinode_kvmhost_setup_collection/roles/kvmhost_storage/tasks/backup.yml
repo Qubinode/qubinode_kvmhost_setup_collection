@@ -1,0 +1,69 @@
+---
+# =============================================================================
+# BACKUP AND SNAPSHOT CONFIGURATION
+# =============================================================================
+# Configure storage backup and snapshot capabilities
+
+- name: Display backup configuration
+  ansible.builtin.debug:
+    msg:
+      - "Configuring storage backup and snapshots"
+      - "Backup enabled: {{ kvmhost_storage_backup_enabled }}"
+      - "Snapshot enabled: {{ kvmhost_storage_snapshot_enabled }}"
+      - "Retention: {{ kvmhost_storage_backup_retention_days }} days"
+  when: kvmhost_storage_debug_enabled | default(false)
+
+- name: Create backup directories
+  ansible.builtin.ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  loop:
+    - /var/lib/libvirt/backups
+    - /var/lib/libvirt/snapshots
+  become: true
+  when: kvmhost_storage_backup_enabled | default(false)
+
+- name: Create VM backup script
+  ansible.builtin.ansible.builtin.template:
+    src: vm_backup.sh.j2
+    dest: /usr/local/bin/kvmhost-vm-backup
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+  when: kvmhost_storage_backup_enabled | default(false)
+
+- name: Create VM snapshot management script
+  ansible.builtin.ansible.builtin.template:
+    src: vm_snapshot.sh.j2
+    dest: /usr/local/bin/kvmhost-vm-snapshot
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+  when: kvmhost_storage_snapshot_enabled | default(false)
+
+- name: Configure backup cleanup cron job
+  ansible.builtin.cron:
+    name: 'KVM Storage Backup Cleanup'
+    minute: "0"
+    hour: "2"
+    job: "find /var/lib/libvirt/backups -type f -mtime +{{ kvmhost_storage_backup_retention_days }} -delete"
+    user: root
+    state: present
+  become: true
+  when: kvmhost_storage_backup_enabled | default(false)
+
+- name: Display backup setup completion
+  ansible.builtin.debug:
+    msg:
+      - "Backup and snapshot configuration completed"
+      - "Backup directory: /var/lib/libvirt/backups"
+      - "Snapshot directory: /var/lib/libvirt/snapshots"
+      - "Retention policy: {{ kvmhost_storage_backup_retention_days }} days"
+  when:
+    - kvmhost_storage_debug_enabled | default(false)
+    - kvmhost_storage_backup_enabled | default(false)

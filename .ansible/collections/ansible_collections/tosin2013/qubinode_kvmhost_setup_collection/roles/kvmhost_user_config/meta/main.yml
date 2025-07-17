@@ -1,0 +1,47 @@
+---
+# =============================================================================
+# KVMHOST USER CONFIG ROLE METADATA
+# =============================================================================
+galaxy_info:
+  role_name: kvmhost_user_config
+  author: Qubinode Project
+  description: Configures user shell environments, SSH access, and permissions for KVM hosts
+  company: Community
+  license: MIT
+  min_ansible_version: "2.12"
+
+  platforms:
+    - name: EL
+      versions:
+        - all
+        - all
+        - all
+    - name: Fedora
+      versions:
+        - "36"
+        - "37"
+        - "38"
+        - "39"
+        - "40"
+
+  galaxy_tags:
+    - system
+    - kvm
+    - virtualization
+    - users
+    - shell
+    - ssh
+    - rhel
+    - centos
+    - rocky
+    - alma
+
+# Role dependencies
+dependencies:
+  - role: kvmhost_base
+    when: kvmhost_user_config_require_base | default(true)
+
+# Collections this role depends on
+collections:
+  - ansible.posix
+  - community.general

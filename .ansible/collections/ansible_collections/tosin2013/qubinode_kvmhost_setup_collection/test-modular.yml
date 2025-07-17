@@ -1,0 +1,98 @@
+---
+# Modular KVM Host Setup Test Playbook
+# Based on ADR-0002: Ansible Role-Based Modular Architecture
+
+- name: Test Modular Qubinode KVM Host Setup
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # Test configuration
+    testing_mode: true
+    cicd_test: true
+    network_validation_enabled: true
+
+    # Role feature toggles
+    enable_base_config: true
+    enable_networking: true
+    enable_legacy_kvmhost: false # Disable until fully refactored
+
+  pre_tasks:
+    - name: Create test user for validation
+      ansible.builtin.user:
+        name: test-user
+        state: present
+        create_home: true
+        shell: /bin/bash
+        system: false
+        generate_ssh_key: true
+        groups: wheel
+        append: true
+        home: /home/test-user
+        umask: "0022"
+      when: testing_mode | default(false)
+
+    - name: Load role configuration
+      ansible.builtin.include_vars:
+        file: roles/role_config.yml
+        name: role_config
+
+    - name: Display role execution plan
+      ansible.builtin.debug:
+        msg: |
+          Role Execution Plan:
+          {% for order, role_info in role_config.role_execution_order.items() %}
+          {{ order }}. {{ role_info.name }} - {{ role_info.description }}
+             Dependencies: {{ role_info.dependencies | join(', ') if role_info.dependencies else 'None' }}
+             Tags: {{ role_info.tags | join(', ') }}
+          {% endfor %}
+
+  roles:
+    # Phase 1: Base system configuration
+    - role: kvmhost_base
+      when: enable_base_config | default(true)
+      tags:
+        - base
+        - foundation
+
+    # Phase 2: Network configuration
+    - role: kvmhost_networking
+      when: enable_networking | default(true)
+      tags:
+        - networking
+        - bridge
+
+    # Phase 3: Legacy role (to be decomposed)
+    - role: kvmhost_setup
+      when: enable_legacy_kvmhost | default(false)
+      tags:
+        - legacy
+        - kvmhost
+
+    # Phase 4: Validation roles
+    - role: edge_hosts_validate
+      when: testing_mode | default(false)
+      tags:
+        - validation
+        - edge_hosts
+
+  post_tasks:
+    - name: Validate modular role execution
+      ansible.builtin.debug:
+        msg: |
+          Modular Role Execution Complete:
+          - Base Configuration: {{ 'COMPLETED' if enable_base_config else 'SKIPPED' }}
+          - Network Configuration: {{ 'COMPLETED' if enable_networking else 'SKIPPED' }}
+          - Legacy KVM Setup: {{ 'COMPLETED' if enable_legacy_kvmhost else 'SKIPPED' }}
+          - Host: {{ inventory_hostname }}
+          - OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+
+    - name: Create completion marker
+      ansible.builtin.file:
+        path: /var/lib/qubinode_modular_setup_complete
+        state: touch
+        mode: "0644"
+        owner: root
+        group: root
+      become: true

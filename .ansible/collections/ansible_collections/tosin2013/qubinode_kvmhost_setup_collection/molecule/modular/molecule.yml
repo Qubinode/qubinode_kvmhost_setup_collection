@@ -1,0 +1,123 @@
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+driver:
+  name: podman
+  options:
+    podman_binary: /usr/bin/podman
+    podman_extra_args: --log-level=info
+    manage_etc_hosts: false
+
+platforms:
+  # RHEL 9 compatible - Rocky Linux 9
+  - name: modular-rocky-9
+    image: docker.io/rockylinux/rockylinux:9-ubi-init
+    systemd: always
+    command: /usr/sbin/init
+    capabilities:
+      - SYS_ADMIN
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - rhel9_compatible
+      - modular_testing
+
+  # AlmaLinux 9 for additional compatibility testing
+  - name: modular-alma-9
+    image: docker.io/almalinux/almalinux:9-init
+    systemd: always
+    command: /usr/sbin/init
+    capabilities:
+      - SYS_ADMIN
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - rhel9_compatible
+      - modular_testing
+
+  # RHEL 8 compatible - Rocky Linux 8
+  - name: modular-rocky-8
+    image: docker.io/rockylinux/rockylinux:8-ubi-init
+    systemd: always
+    command: /usr/sbin/init
+    capabilities:
+      - SYS_ADMIN
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - rhel8_compatible
+      - modular_testing
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_FORCE_COLOR: "true"
+    ANSIBLE_VERBOSITY: "2"
+    ANSIBLE_COLLECTIONS_PATH: ~/.ansible/collections
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      callback_whitelist: profile_tasks, timer, yaml
+      host_key_checking: false
+      deprecation_warnings: false
+      display_skipped_hosts: false
+      display_ok_hosts: true
+    ssh_connection:
+      pipelining: true
+  inventory:
+    links:
+      hosts: ../../inventories/test/hosts
+      group_vars: ../../inventories/test/group_vars/
+  playbooks:
+    converge: converge-modular.yml
+    verify: verify-modular.yml
+
+lint: |
+  set -e
+  yamllint .
+  ansible-lint roles/ --exclude .github/ --exclude molecule/
+
+verifier:
+  name: ansible
+  options:
+    verbose: true
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
+  create_sequence:
+    - dependency
+    - create
+    - prepare
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+  destroy_sequence:
+    - cleanup
+    - destroy
+  check_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - create
+    - prepare
+    - converge
+    - check
+    - destroy

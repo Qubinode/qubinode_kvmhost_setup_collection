@@ -1,0 +1,119 @@
+ M .github/dependabot.yml
+ M roles/edge_hosts_validate/meta/main.yml
+ M roles/edge_hosts_validate/tasks/validate_fs.yml
+ M roles/edge_hosts_validate/tasks/validate_pkgs.yml
+ M roles/kvmhost_base/meta/main.yml
+ M roles/kvmhost_base/tasks/main.yml
+ M roles/kvmhost_base/tasks/os_detection.yml
+ M roles/kvmhost_base/tasks/packages.yml
+ M roles/kvmhost_base/tasks/services.yml
+ M roles/kvmhost_base/tasks/system_prep.yml
+ M roles/kvmhost_base/tasks/validate_os.yml
+ M roles/kvmhost_base/tasks/validation/main.yml
+ M roles/kvmhost_cockpit/defaults/main.yml
+ M roles/kvmhost_cockpit/handlers/main.yml
+ M roles/kvmhost_cockpit/meta/main.yml
+ M roles/kvmhost_cockpit/tasks/configuration/authentication.yml
+ M roles/kvmhost_cockpit/tasks/configuration/firewall.yml
+ M roles/kvmhost_cockpit/tasks/configuration/service.yml
+ M roles/kvmhost_cockpit/tasks/configuration/ssl.yml
+ M roles/kvmhost_cockpit/tasks/setup/packages.yml
+ M roles/kvmhost_cockpit/tasks/validation/cockpit.yml
+ M roles/kvmhost_cockpit/tasks/validation/dependencies.yml
+ M roles/kvmhost_libvirt/defaults/main.yml
+ M roles/kvmhost_libvirt/handlers/main.yml
+ M roles/kvmhost_libvirt/meta/main.yml
+ M roles/kvmhost_libvirt/tasks/create_network.yml
+ M roles/kvmhost_libvirt/tasks/main.yml
+ M roles/kvmhost_libvirt/tasks/networks.yml
+ M roles/kvmhost_libvirt/tasks/services.yml
+ M roles/kvmhost_libvirt/tasks/storage.yml
+ M roles/kvmhost_libvirt/tasks/user_access.yml
+ M roles/kvmhost_libvirt/tasks/validation.yml
+ M roles/kvmhost_networking/defaults/main.yml
+ M roles/kvmhost_networking/meta/main.yml
+ M roles/kvmhost_networking/tasks/bridge_config.yml
+ M roles/kvmhost_networking/tasks/interface_detection.yml
+ M roles/kvmhost_networking/tasks/main.yml
+ M roles/kvmhost_networking/tasks/network_validation.yml
+ M roles/kvmhost_networking/tasks/preflight.yml
+ M roles/kvmhost_networking/tasks/validation/main.yml
+ M roles/kvmhost_networking/tasks/validation/validate_dhcp_item.yml
+ M roles/kvmhost_networking/tasks/validation/validate_network_item.yml
+ M roles/kvmhost_setup/defaults/main.yml
+ M roles/kvmhost_setup/handlers/main.yml
+ M roles/kvmhost_setup/meta/main.yml
+ M roles/kvmhost_setup/tasks/bridge_interface.yml
+ M roles/kvmhost_setup/tasks/build_user_home_dir.yml
+ M roles/kvmhost_setup/tasks/cockpit_setup.yml
+ M roles/kvmhost_setup/tasks/configuration/cockpit.yml
+ M roles/kvmhost_setup/tasks/configuration/remote.yml
+ M roles/kvmhost_setup/tasks/configuration/shell.yml
+ M roles/kvmhost_setup/tasks/configure_remote_user.yml
+ M roles/kvmhost_setup/tasks/configure_shell.yml
+ M roles/kvmhost_setup/tasks/gpg_verification.yml
+ M roles/kvmhost_setup/tasks/kvm_feature_detection.yml
+ M roles/kvmhost_setup/tasks/kvm_host_validation.yml
+ M roles/kvmhost_setup/tasks/libvirt_setup.yml
+ M roles/kvmhost_setup/tasks/main.yml
+ M roles/kvmhost_setup/tasks/networks.yml
+ M roles/kvmhost_setup/tasks/performance_optimization.yml
+ M roles/kvmhost_setup/tasks/rhel_version_detection.yml
+ M roles/kvmhost_setup/tasks/rhpds_instance.yml
+ M roles/kvmhost_setup/tasks/rocky_linux.yml
+ M roles/kvmhost_setup/tasks/setup/automated_bridge_config.yml
+ M roles/kvmhost_setup/tasks/setup/k9s.yml
+ M roles/kvmhost_setup/tasks/setup/libvirt.yml
+ M roles/kvmhost_setup/tasks/setup/network_validation.yml
+ M roles/kvmhost_setup/tasks/setup/networking.yml
+ M roles/kvmhost_setup/tasks/setup/packages.yml
+ M roles/kvmhost_setup/tasks/setup/storage.yml
+ M roles/kvmhost_setup/tasks/storage_pool.yml
+ M roles/kvmhost_setup/tasks/user_libvirt.yml
+ M roles/kvmhost_setup/tasks/user_shell_configs.yml
+ M roles/kvmhost_setup/tasks/validation/main.yml
+ M roles/kvmhost_setup/tasks/validation/preflight.yml
+ M roles/kvmhost_setup/tasks/validation/prerequisites.yml
+ M roles/kvmhost_setup/tasks/validation/variables.yml
+ M roles/kvmhost_setup/tasks/verify_variables.yml
+ M roles/kvmhost_storage/defaults/main.yml
+ M roles/kvmhost_storage/handlers/main.yml
+ M roles/kvmhost_storage/meta/main.yml
+ M roles/kvmhost_storage/tasks/advanced_pools.yml
+ M roles/kvmhost_storage/tasks/backup.yml
+ M roles/kvmhost_storage/tasks/lvm_setup.yml
+ M roles/kvmhost_storage/tasks/main.yml
+ M roles/kvmhost_storage/tasks/monitoring.yml
+ M roles/kvmhost_storage/tasks/performance.yml
+ M roles/kvmhost_storage/tasks/validation.yml
+ M roles/kvmhost_user_config/defaults/main.yml
+ M roles/kvmhost_user_config/handlers/main.yml
+ M roles/kvmhost_user_config/meta/main.yml
+ M roles/kvmhost_user_config/tasks/home/directory_setup.yml
+ M roles/kvmhost_user_config/tasks/main.yml
+ M roles/kvmhost_user_config/tasks/shell/configuration.yml
+ M roles/kvmhost_user_config/tasks/validation/dependencies.yml
+ M roles/role_config.yml
+ M roles/swygue_lvm/defaults/main.yml
+ M roles/swygue_lvm/meta/main.yml
+ M roles/swygue_lvm/tasks/deploy.yml
+ M roles/swygue_lvm/vars/main.yml
+?? .github/ansible-lint-automation-config.yml
+?? .github/workflows/automated-ansible-lint-fixes.yml
+?? COMMIT_MESSAGE.md
+?? PRODUCTION_DEPLOYMENT_SUMMARY.md
+?? docs/ANSIBLE_LINT_AUTOMATION.md
+?? docs/AUTOMATION_SUCCESS_REPORT.md
+?? docs/DEPENDABOT_SETUP_GUIDE.md
+?? roles/kvmhost_base/tasks/validation/validation/
+?? roles/kvmhost_networking/tasks/validation/validation/
+?? roles/kvmhost_setup/tasks/validation/validation/
+?? scripts/ansible_lint_toolkit.sh
+?? scripts/automation_dashboard.sh
+?? scripts/fix_ansible_lint.py
+?? scripts/fix_ansible_lint_advanced.py
+?? scripts/fix_escape_chars.py
+?? scripts/fix_yaml_parsing.py
+?? scripts/validate_automation_toolkit.sh
+?? scripts/verify_github_actions.sh
+?? verification_backup_1752683344/

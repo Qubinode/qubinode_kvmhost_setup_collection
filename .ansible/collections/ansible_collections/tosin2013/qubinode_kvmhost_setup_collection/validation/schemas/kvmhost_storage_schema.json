@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KVM Host Storage Configuration Schema",
+  "description": "Schema for validating kvmhost_storage role variables",
+  "type": "object",
+  "properties": {
+    "kvm_host_libvirt_dir": {
+      "type": "string",
+      "description": "Base libvirt directory path",
+      "pattern": "^/[a-zA-Z0-9/_-]+$",
+      "minLength": 1
+    },
+    "libvirt_host_storage_pools": {
+      "type": "array",
+      "description": "List of libvirt storage pools to configure",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Storage pool name",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "description": "Storage pool type",
+            "enum": ["dir", "fs", "netfs", "logical", "disk", "iscsi", "scsi", "mpath", "rbd", "sheepdog", "gluster", "zfs"]
+          },
+          "path": {
+            "type": "string",
+            "description": "Storage pool path",
+            "pattern": "^/[a-zA-Z0-9/_-]+$"
+          },
+          "target": {
+            "type": "object",
+            "description": "Target configuration",
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^/[a-zA-Z0-9/_-]+$"
+              },
+              "permissions": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "pattern": "^[0-7]{3,4}$"
+                  },
+                  "owner": {
+                    "type": "string"
+                  },
+                  "group": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "autostart": {
+            "type": "boolean",
+            "description": "Whether to autostart the pool"
+          },
+          "capacity": {
+            "type": ["string", "integer"],
+            "description": "Pool capacity (for applicable types)"
+          }
+        },
+        "required": ["name", "type", "path"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "storage_performance_tuning": {
+      "type": "object",
+      "description": "Storage performance tuning options",
+      "properties": {
+        "enable_io_scheduler": {
+          "type": "boolean"
+        },
+        "io_scheduler": {
+          "type": "string",
+          "enum": ["noop", "deadline", "cfq", "mq-deadline", "kyber", "bfq"]
+        },
+        "enable_transparent_hugepages": {
+          "type": "boolean"
+        }
+      }
+    },
+    "lvm_configuration": {
+      "type": "object",
+      "description": "LVM-specific configuration",
+      "properties": {
+        "volume_groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+              },
+              "devices": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^/dev/[a-zA-Z0-9/_-]+$"
+                }
+              }
+            },
+            "required": ["name", "devices"]
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "kvm_host_libvirt_dir",
+    "libvirt_host_storage_pools"
+  ],
+  "additionalProperties": true,
+  "adr_compliance": {
+    "adr_003": {
+      "description": "KVM/libvirt storage architecture compliance"
+    }
+  }
+}

@@ -1,4 +1,3 @@
----
 - name: Create k9s installation directory
   ansible.builtin.ansible.builtin.file:
     path: /tmp/k9s

@@ -1,0 +1,33 @@
+---
+# OS Detection and Base System Configuration
+# Based on ADR-0008: RHEL 9/10 Support Strategy
+
+- name: Base Configuration - OS Detection
+  ansible.builtin.include_tasks: os_detection.yml
+  tags:
+    - always
+    - os_detection
+
+- name: Base Configuration - Validate OS Support
+  ansible.builtin.include_tasks: validate_os.yml
+  tags:
+    - always
+    - validation
+
+- name: Base Configuration - Package Management
+  ansible.builtin.include_tasks: packages.yml
+  tags:
+    - packages
+    - base_packages
+
+- name: Base Configuration - Service Management
+  ansible.builtin.include_tasks: services.yml
+  tags:
+    - services
+    - base_services
+
+- name: Base Configuration - System Preparation
+  ansible.builtin.include_tasks: system_prep.yml
+  tags:
+    - system_prep
+    - preparation

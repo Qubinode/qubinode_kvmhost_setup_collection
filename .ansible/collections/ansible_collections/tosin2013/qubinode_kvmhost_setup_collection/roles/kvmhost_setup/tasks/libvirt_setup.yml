@@ -1,0 +1,126 @@
+- name: Validate virtualization extensions are available to this host
+  ansible.builtin.include_tasks: validate.yml
+  when: not cicd_test|bool
+
+- name: Enable libvirt services
+  ansible.builtin.ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  with_items: "{{ libvirt_services }}"
+
+- name: Check current tuned profile
+  ansible.builtin.command: tuned-adm active
+  register: current_tuned_profile
+  changed_when: false
+
+- name: Start tuned profile virtual-host (idempotent)
+  ansible.builtin.command: tuned-adm profile virtual-host
+  when: "'virtual-host' not in current_tuned_profile.stdout"
+  register: tuned_profile_changed
+
+- name: Return bridge status
+  ansible.builtin.command: ifconfig {{ qubinode_bridge_name }}
+  register: bridge_interface
+  ignore_errors: true
+  check_mode: true
+  changed_when: false
+
+- name: Get Bridge Status
+  ansible.builtin.set_fact:
+    bridge_interface_status: "{{ bridge_interface }}"
+
+- name: Print the bridge info
+  ansible.builtin.debug:
+    msg: System {{ inventory_hostname }} has bridge {{ bridge_interface_status.stdout }}
+
+- name: Set flag for Fedora 38
+  ansible.builtin.set_fact:
+    is_fedora_38: >-
+      {{ ansible_distribution == 'Fedora'
+        and ansible_distribution_major_version == '38'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge }}
+
+- name: Set flag for Fedora 37
+  ansible.builtin.set_fact:
+    is_fedora_37: >-
+      {{ ansible_distribution == 'Fedora'
+        and ansible_distribution_major_version == '37'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge }}
+
+- name: Set flag for CentOS 9
+  ansible.builtin.set_fact:
+    is_centos_9: >-
+      {{ ansible_distribution == 'CentOS'
+        and ansible_distribution_major_version == '9'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge }}
+
+- name: Set flag for RedHat 8
+  ansible.builtin.set_fact:
+    is_redhat_8: >-
+      {{ ansible_distribution == 'RedHat'
+        and ansible_distribution_major_version == '8'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge }}
+
+- name: Set flag for RedHat 9
+  ansible.builtin.set_fact:
+    is_redhat_9: >-
+      {{ ansible_distribution == 'RedHat'
+        and ansible_distribution_major_version == '9'
+        and bridge_interface_status.stdout == ''
+        and configure_bridge }}
+
+- name: Configure bridge interface for libvirt
+  ansible.builtin.import_role:
+    name: linux-system-roles.network
+  vars:
+    network_provider: nm
+    network_connections:
+      - name: "{{ qubinode_bridge_name }}"
+        type: bridge
+        state: up
+        ip:
+          route_metric4: 100
+          dhcp4: false
+          gateway4: "{{ kvm_host_gw }}"
+          dns:
+            - "{{ primary_dns_server }}"
+            - "{{ dns_forwarder }}"
+          dns_search:
+            - "{{ domain }}"
+          address:
+            - "{{ kvm_host_ip }}/{{ kvm_host_mask_prefix }}"
+      - name: eno1
+        state: up
+        type: ethernet
+        interface_name: "{{ kvm_host_interface }}"
+        controller: "{{ qubinode_bridge_name }}"
+        port_type: bridge
+  when: is_fedora_38 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9
+
+- name: Configure bridge interface for libvirt
+  ansible.builtin.include_tasks: bridge_interface.yml
+  loop: "{{ libvirt_host_networks }}"
+  loop_control:
+    index_var: type_idx
+    loop_var: bridge_item
+
+- name: Configure libvirt network
+  loop: "{{ libvirt_host_networks }}"
+  loop_control:
+    index_var: libvirt_idx
+    loop_var: libvirt_item
+  ansible.builtin.include_tasks: networks.yml
+  when: not cicd_test|bool
+
+- name: Configure libvirt storage pool
+  ansible.builtin.include_tasks: storage_pool.yml
+  when: not cicd_test|bool
+
+- name: Make libvirt accessible by non-root user
+  ansible.builtin.include_tasks: validate.yml
+  when: enable_libvirt_admin_user|bool

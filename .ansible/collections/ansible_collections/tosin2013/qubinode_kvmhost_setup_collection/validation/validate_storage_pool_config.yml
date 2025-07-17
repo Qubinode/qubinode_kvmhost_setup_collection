@@ -1,0 +1,68 @@
+
+# =============================================================================
+# STORAGE POOL CONFIG VALIDATION HELPER
+# =============================================================================
+# Validates individual storage pool configuration items
+
+- name: Validate storage pool required fields
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [pool_error_msg] }}"
+  vars:
+    pool_error_msg: "kvmhost_storage validation error: Storage pool '{{ pool_item.name | default('unnamed') }}' missing required field '{{ required_field }}'"
+  when: 
+    - pool_item[required_field] is not defined or pool_item[required_field] | length == 0
+  loop:
+    - name
+    - type
+    - path
+  loop_control:
+    loop_var: required_field
+
+- name: Validate storage pool name pattern
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [name_error_msg] }}"
+  vars:
+    name_error_msg: "kvmhost_storage validation error: Storage pool name '{{ pool_item.name }}' does not match naming pattern"
+  when: 
+    - pool_item.name is defined
+    - not (pool_item.name | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
+
+- name: Validate storage pool type
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [type_error_msg] }}"
+  vars:
+    type_error_msg: "kvmhost_storage validation error: Storage pool '{{ pool_item.name }}' has invalid type '{{ pool_item.type }}'"
+    valid_types: ["dir", "fs", "netfs", "logical", "disk", "iscsi", "scsi", "mpath", "rbd", "sheepdog", "gluster", "zfs"]
+  when: 
+    - pool_item.type is defined
+    - pool_item.type not in valid_types
+
+- name: Validate storage pool path format
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [path_error_msg] }}"
+  vars:
+    path_error_msg: "kvmhost_storage validation error: Storage pool '{{ pool_item.name }}' path '{{ pool_item.path }}' must be an absolute path"
+  when: 
+    - pool_item.path is defined
+    - not (pool_item.path | regex_search('^/[a-zA-Z0-9/_-]+$'))
+
+- name: Validate target path if present
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [target_path_error_msg] }}"
+  vars:
+    target_path_error_msg: "kvmhost_storage validation error: Storage pool '{{ pool_item.name }}' target path '{{ pool_item.target.path }}' must be an absolute path"
+  when: 
+    - pool_item.target is defined
+    - pool_item.target.path is defined
+    - not (pool_item.target.path | regex_search('^/[a-zA-Z0-9/_-]+$'))
+
+- name: Validate target permissions if present
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + [permissions_error_msg] }}"
+  vars:
+    permissions_error_msg: "kvmhost_storage validation error: Storage pool '{{ pool_item.name }}' target permissions mode '{{ pool_item.target.permissions.mode }}' must be octal format"
+  when: 
+    - pool_item.target is defined
+    - pool_item.target.permissions is defined
+    - pool_item.target.permissions.mode is defined
+    - not (pool_item.target.permissions.mode | regex_search('^[0-7]{3,4}$'))

@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# KVMHOST USER CONFIG ROLE - USER ACCOUNT MANAGEMENT
+# =============================================================================
+# Creates and configures user accounts
+
+- name: Placeholder for user account management
+  ansible.builtin.debug:
+    msg: "User account management tasks will be implemented here"
+
+# TODO: Implement user account creation and management tasks

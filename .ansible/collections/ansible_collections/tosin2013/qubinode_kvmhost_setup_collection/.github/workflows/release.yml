@@ -1,0 +1,100 @@
+name: Release and Deploy collection
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  releaseanddeploy:
+    runs-on: ubuntu-latest
+    if: github.repository == 'Qubinode/qubinode_kvmhost_setup_collection'
+    strategy:
+      matrix:
+        python-version: [3.11]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@main
+
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+          # Optionally strip `v` prefix
+          strip_v: true
+
+      - name: Use tag
+        run: echo ${{steps.tag.outputs.tag}}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade ansible
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Copy files and directories to source
+        run: |
+          ls -lath .
+          mkdir -p build/src
+          cp $files build/src
+          cp -rf $directories build/src
+          mkdir -p release/
+        env:
+          files: README.md LICENSE ansible.cfg galaxy.yml
+          directories: inventories roles meta
+
+      - name: Build Ansible Collection
+        run: ansible-galaxy collection build build/src --force
+
+      - name: Show Build information
+        run: |
+          ls -lath .
+          ls -lath ./build
+          ls -R build
+          pwd
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          files: tosin2013-qubinode_kvmhost_setup_collection-${{steps.tag.outputs.tag}}.tar.gz
+          body: |
+            # Ansible Collection: tosin2013.qubinode_kvmhost_setup_collection
+            ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/release.yml/badge.svg)
+            To install without requirements.yml file:
+            ```sh
+            ansible-galaxy collection install tosin2013.qubinode_kvmhost_setup_collection
+            ```
+            Install with requirements.yml file:
+            ```sh
+            ansible-galaxy collection install -r requirements.yml -f
+            ```
+            The requirements.yml needs to have the following format and content:
+            ```yaml
+            ---
+            collections:
+                - tosin2013.qubinode_kvmhost_setup_collection
+            ```
+            For Development use the below command:
+            ```sh
+            ---
+            collections:
+              - name: https://github.com/Qubinode/qubinode_kvmhost_setup_collection.git
+                type: git
+                version: main
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Deploy Ansible collection to Galaxy
+        run: |
+          ls -lath . 
+          ls -lath ./meta
+          cat ./meta/runtime.yml
+          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{steps.tag.outputs.tag}}.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}

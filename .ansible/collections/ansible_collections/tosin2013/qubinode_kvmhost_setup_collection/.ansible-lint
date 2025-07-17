@@ -1,0 +1,18 @@
+# https://ansible-lint.readthedocs.io/configuring/#specifying-configuration-files
+
+# profile:  min, basic, moderate,safety, shared, production
+profile: production
+
+use_default_rules: true
+
+skip_list:
+  - var-naming
+  - command-instead-of-module
+  - risky-file-permissions
+
+# Ansible-lint does not fail on warnings from the rules or tags listed below
+warn_list:
+  - experimental # experimental is included in the implicit list
+  - var-naming[no-role-prefix] # 
+  # - role-name
+  # - yaml[document-start]  #

@@ -1,4 +1,3 @@
----
 # =============================================================================
 # LIBVIRT NETWORK CREATION
 # =============================================================================
@@ -22,7 +21,7 @@
 - name: Create bridge mode network
   community.libvirt.virt_net:
     command: define
-    name: '{{ network_item.name }}'
+    name: "{{ network_item.name }}"
     xml: '{{ lookup("template", "libvirt_net_bridge.xml.j2") }}'
   become: true
   when:
@@ -33,7 +32,7 @@
 - name: Create NAT mode network
   community.libvirt.virt_net:
     command: define
-    name: '{{ network_item.name }}'
+    name: "{{ network_item.name }}"
     xml: '{{ lookup("template", "libvirt_net_nat.xml.j2") }}'
   become: true
   when:
@@ -44,7 +43,7 @@
 - name: Create isolated mode network
   community.libvirt.virt_net:
     command: define
-    name: '{{ network_item.name }}'
+    name: "{{ network_item.name }}"
     xml: '{{ lookup("template", "libvirt_net_isolated.xml.j2") }}'
   become: true
   when:
@@ -55,14 +54,14 @@
 - name: Start libvirt network
   community.libvirt.virt_net:
     state: active
-    name: '{{ network_item.name }}'
+    name: "{{ network_item.name }}"
   become: true
   register: network_started
 
 - name: Configure network autostart
   community.libvirt.virt_net:
-    autostart: "{{ network_item.autostart           | default(true)   }}"
-    name: '{{ network_item.name }}'
+    autostart: "{{ network_item.autostart | default(true) }}"
+    name: "{{ network_item.name }}"
   become: true
   when: network_item.autostart is defined
 
@@ -71,7 +70,6 @@
     msg: "Network {{ network_item.name }} configured successfully"
   when:
     - kvmhost_libvirt_debug_enabled | default(false)
-    - (bridge_network_created is defined and bridge_network_created.changed) or
-      (nat_network_created is defined and nat_network_created.changed) or
-      (isolated_network_created is defined and isolated_network_created.changed) or
+    - (bridge_network_created is defined and bridge_network_created.changed) or (nat_network_created is defined and
+      nat_network_created.changed) or (isolated_network_created is defined and isolated_network_created.changed) or
       network_exists_check.rc == 0

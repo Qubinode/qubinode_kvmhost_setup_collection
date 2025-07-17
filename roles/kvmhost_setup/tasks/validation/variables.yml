@@ -1,4 +1,3 @@
----
 - name: Validate required variables are defined
   ansible.builtin.assert:
     that:
@@ -25,7 +24,7 @@
       - item.name is defined
       - item.mode is defined
       - item.bridge_device is defined
-    fail_msg: Invalid network configuration for {{ item.name           | default('unnamed network')   }}
+    fail_msg: Invalid network configuration for {{ item.name | default('unnamed network') }}
     success_msg: Network configuration for {{ item.name }} is valid
   loop: "{{ libvirt_host_networks }}"
   when: libvirt_host_networks is defined
@@ -38,7 +37,7 @@
       - libvirt_host_storage_pools | length > 0
       - item.name is defined
       - item.path is defined
-    fail_msg: Invalid storage pool configuration for {{ item.name           | default('unnamed pool')   }}
+    fail_msg: Invalid storage pool configuration for {{ item.name | default('unnamed pool') }}
     success_msg: Storage pool configuration for {{ item.name }} is valid
   loop: "{{ libvirt_host_storage_pools }}"
   when: libvirt_host_storage_pools is defined
@@ -52,8 +51,8 @@
       - enable_libvirt_admin_user | type_debug == "bool"
     fail_msg: |
       Invalid boolean flags:
-      lib_virt_setup must be boolean: {{ lib_virt_setup           | type_debug   }}
-      enable_cockpit must be boolean: {{ enable_cockpit           | type_debug   }}
-      configure_shell must be boolean: {{ configure_shell           | type_debug   }}
-      enable_libvirt_admin_user must be boolean: {{ enable_libvirt_admin_user           | type_debug   }}
+      lib_virt_setup must be boolean: {{ lib_virt_setup | type_debug }}
+      enable_cockpit must be boolean: {{ enable_cockpit | type_debug }}
+      configure_shell must be boolean: {{ configure_shell | type_debug }}
+      enable_libvirt_admin_user must be boolean: {{ enable_libvirt_admin_user | type_debug }}
     success_msg: All boolean flags are properly defined

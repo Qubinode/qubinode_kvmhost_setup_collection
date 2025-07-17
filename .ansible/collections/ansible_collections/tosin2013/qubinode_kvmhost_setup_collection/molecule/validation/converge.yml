@@ -1,0 +1,25 @@
+---
+- name: Converge - Validation Testing
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    # Basic configuration for validation testing
+    admin_user: molecule
+    domain: test.local
+
+    # Validation-specific variables
+    libvirt_pkgs:
+      - libvirt-daemon
+      - libvirt-daemon-driver-qemu
+      - qemu-kvm
+
+  tasks:
+    - name: Debug validation test environment
+      ansible.builtin.debug:
+        msg: Validation test - checking system requirements
+
+    - name: Include edge hosts validation role
+      ansible.builtin.include_role:
+        name: edge_hosts_validate
+      when: ansible_facts['distribution'] in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux']

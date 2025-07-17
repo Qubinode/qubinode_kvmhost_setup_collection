@@ -1,0 +1,72 @@
+=============================================================================
+COCKPIT VALIDATION REPORT
+=============================================================================
+Generated: {{ ansible_date_time.iso8601 }}
+Host: {{ ansible_fqdn }} ({{ ansible_default_ipv4.address }})
+Role: kvmhost_cockpit
+
+CONFIGURATION SUMMARY
+=============================================================================
+Cockpit Enabled: {{ kvmhost_cockpit_enabled | default(false) }}
+Port: {{ kvmhost_cockpit_port | default(9090) }}
+SSL Enabled: {{ kvmhost_cockpit_ssl_enabled | default(false) }}
+Firewall Enabled: {{ kvmhost_cockpit_firewall_enabled | default(true) }}
+
+SERVICE STATUS
+=============================================================================
+Socket Status: {{ cockpit_socket_status | default('Unknown') }}
+Port Accessible: {{ port_accessible | default(false) }}
+Web Interface: {{ 'Responsive' if web_interface_responsive else 'Not Responsive' }}
+
+SSL CONFIGURATION
+=============================================================================
+SSL Enabled: {{ ssl_configured | default(false) }}
+{% if ssl_configured %}
+SSL Test Result: {{ 'Passed' if ssl_test_result == 0 else 'Failed' if ssl_test_result != 'N/A' else 'Not Tested' }}
+{% endif %}
+
+API ENDPOINTS
+=============================================================================
+API Responsive: {{ 'Yes' if api_responsive == 200 else 'No' if api_responsive != 'N/A' else 'Not Tested' }}
+
+LOADED MODULES
+=============================================================================
+{% if modules_loaded | length > 0 %}
+{% for module in modules_loaded %}
+- {{ module }}
+{% endfor %}
+{% else %}
+No modules information available
+{% endif %}
+
+ACCESS INFORMATION
+=============================================================================
+Access URL: {{ 'https' if ssl_configured else 'http' }}://{{ ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port | default(9090) }}
+{% if kvmhost_cockpit_allowed_users is defined and kvmhost_cockpit_allowed_users | length > 0 %}
+Allowed Users: {{ kvmhost_cockpit_allowed_users | join(', ') }}
+{% endif %}
+{% if kvmhost_cockpit_admin_users is defined and kvmhost_cockpit_admin_users | length > 0 %}
+Admin Users: {{ kvmhost_cockpit_admin_users | join(', ') }}
+{% endif %}
+
+VALIDATION STATUS
+=============================================================================
+Overall Status: {{ 'PASSED' if (cockpit_socket_status == 'active' and port_accessible and web_interface_responsive) else 'FAILED' }}
+
+{% if not (cockpit_socket_status == 'active' and port_accessible and web_interface_responsive) %}
+ISSUES DETECTED
+=============================================================================
+{% if cockpit_socket_status != 'active' %}
+- Cockpit socket is not active ({{ cockpit_socket_status }})
+{% endif %}
+{% if not port_accessible %}
+- Port {{ kvmhost_cockpit_port | default(9090) }} is not accessible
+{% endif %}
+{% if not web_interface_responsive %}
+- Web interface is not responding properly
+{% endif %}
+{% endif %}
+
+=============================================================================
+End of Report
+=============================================================================

@@ -1,0 +1,34 @@
+---
+# Network Validation Report Template
+
+# Network Validation Report
+Generated: {{ ansible_date_time.iso8601 }}
+Host: {{ inventory_hostname }}
+Bridge: {{ qubinode_bridge_name }}
+
+## Bridge Configuration
+{% if bridge_link_status is defined %}
+Interface Status: {{ 'UP' if bridge_link_status.rc == 0 and 'UP' in bridge_link_status.stdout else 'DOWN' }}
+{% endif %}
+
+{% if bridge_ip_status is defined %}
+IP Configuration:
+{{ bridge_ip_status.stdout }}
+{% endif %}
+
+## Network Connectivity Tests
+{% if ping_tests is defined %}
+{% for test in ping_tests.results %}
+- {{ test.item }}: {{ 'PASS' if test.rc == 0 else 'FAIL' }}
+{% endfor %}
+{% endif %}
+
+## System Information
+Primary Interface: {{ primary_interface | default('N/A') }}
+Primary IP: {{ primary_ip | default('N/A') }}
+Gateway: {{ primary_gateway | default('N/A') }}
+
+## Available Network Interfaces
+{% for interface in ansible_interfaces %}
+- {{ interface }}
+{% endfor %}

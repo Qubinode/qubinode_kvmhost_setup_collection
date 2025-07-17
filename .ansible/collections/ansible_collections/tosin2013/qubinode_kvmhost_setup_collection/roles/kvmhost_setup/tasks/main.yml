@@ -1,0 +1,93 @@
+- name: Detect RHEL version and set conditional facts
+  ansible.builtin.include_tasks: rhel_version_detection.yml
+  tags:
+    - always
+    - rhel_detection
+
+- name: Enhanced GPG Key Verification (ADR-0001 Compliance)
+  ansible.builtin.include_tasks: gpg_verification.yml
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
+- name: Display all variables/facts known for a host
+  ansible.builtin.debug:
+    var: libvirt_host_networks
+  register: myresults
+
+- name: Validate variables are defined
+  ansible.builtin.include_tasks: verify_variables.yml
+
+- name: Ensure required packages are installed with GPG verification (ADR-0001)
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+    disable_gpg_check: "{{ ansible_virtualization_type == 'container' }}" # Container workaround per research findings
+  loop: "{{ kvmhost_packages_current           | default(required_rpm_packages)   }}"
+  register: package_install_result
+  failed_when:
+    - package_install_result.failed is defined
+    - package_install_result.failed
+    - "'No package' not in (package_install_result.msg | default(''))"
+    - "'GPG' not in (package_install_result.msg | default(''))" # Allow GPG-related failures to be handled
+  ignore_errors: true
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
+- name: Display package installation results
+  ansible.builtin.debug:
+    msg: |
+      Package Installation Summary:
+      {% for result in package_install_result.results %}
+      - {{ result.item }}: {{ 'INSTALLED' if result.changed else ('SKIPPED' if result.failed else 'ALREADY PRESENT') }}
+      {% if result.failed and 'No package' in (result.msg | default('')) %}
+        (Package not available in repos - this is expected for some platforms)
+      {% endif %}
+      {% endfor %}
+  when: package_install_result is defined
+
+- name: Configure shell extras
+  ansible.builtin.include_tasks: configure_shell.yml
+  when: configure_shell|bool
+
+- name: Setup Cockpit
+  ansible.builtin.include_tasks: cockpit_setup.yml
+  when: enable_cockpit|bool and ansible_distribution != "Rocky"
+
+- name: Setup Rocky Linux
+  ansible.builtin.include_tasks: rocky_linux.yml
+  when: enable_cockpit|bool and (ansible_distribution == "Rocky")
+
+- name: Run the next task if GUID is set
+  ansible.builtin.debug:
+    msg: "GUID is set and its value is {{ lookup('env', 'GUID', default='') }}"
+  when: lookup('env', 'GUID', default='') != ""
+
+- name: Setup xRDP on RHPDS
+  ansible.builtin.include_tasks: rhpds_instance.yml
+  when: enable_cockpit|bool and lookup('env', 'GUID', default='') != ""
+
+- name: Setup Remote User for XRDP
+  ansible.builtin.include_tasks: configure_remote_user.yml
+  when: enable_cockpit|bool and lookup('env', 'GUID', default='') != ""
+
+- name: Setup Libvirt
+  ansible.builtin.include_tasks: libvirt_setup.yml
+  when: lib_virt_setup|bool
+
+- name: Detect KVM Features and Capabilities
+  ansible.builtin.include_tasks: kvm_feature_detection.yml
+  when: lib_virt_setup|bool
+  tags:
+    - detection
+    - kvm-features
+
+- name: Optimize KVM Performance
+  ansible.builtin.include_tasks: performance_optimization.yml
+  when: enable_kvm_performance_optimization|default(true)|bool
+  tags:
+    - performance
+    - kvm-optimization

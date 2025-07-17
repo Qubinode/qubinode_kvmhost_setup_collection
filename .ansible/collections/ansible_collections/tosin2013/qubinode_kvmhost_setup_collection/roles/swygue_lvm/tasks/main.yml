@@ -1,0 +1,7 @@
+---
+# tasks file for swygue-lvm
+- name: Check system file system
+  ansible.builtin.include_tasks: precheck.yml
+
+- name: Deploy lvm filesystem
+  ansible.builtin.include_tasks: deploy.yml

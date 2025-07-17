@@ -1,0 +1,148 @@
+---
+# Verify playbook for idempotency testing scenario
+# This verifies that all roles passed idempotency tests
+- name: "Verify Idempotency Test Results"
+  hosts: all
+  gather_facts: false
+  become: false
+  
+  tasks:
+    - name: "Check if idempotency results are available"
+      ansible.builtin.assert:
+        that:
+          - idempotency_results is defined
+        fail_msg: "Idempotency test results not found. Converge playbook may have failed."
+        success_msg: "Idempotency test results found, proceeding with verification."
+    
+    - name: "Verify edge_hosts_validate role idempotency"
+      ansible.builtin.assert:
+        that:
+          - idempotency_results.edge_hosts_validate.idempotent | default(false)
+        fail_msg: |
+          ❌ edge_hosts_validate role FAILED idempotency test:
+          - First run changed: {{ idempotency_results.edge_hosts_validate.first_run_changed }}
+          - Second run changed: {{ idempotency_results.edge_hosts_validate.second_run_changed }}
+          This indicates the role is not properly idempotent.
+        success_msg: "✅ edge_hosts_validate role PASSED idempotency test"
+    
+    - name: "Verify swygue_lvm role idempotency"
+      ansible.builtin.assert:
+        that:
+          - idempotency_results.swygue_lvm.idempotent | default(false)
+        fail_msg: |
+          ❌ swygue_lvm role FAILED idempotency test:
+          - First run changed: {{ idempotency_results.swygue_lvm.first_run_changed }}
+          - Second run changed: {{ idempotency_results.swygue_lvm.second_run_changed }}
+          This indicates the role is not properly idempotent.
+        success_msg: "✅ swygue_lvm role PASSED idempotency test"
+    
+    - name: "Verify kvmhost_setup role idempotency"
+      ansible.builtin.assert:
+        that:
+          - idempotency_results.kvmhost_setup.idempotent | default(false)
+        fail_msg: |
+          ❌ kvmhost_setup role FAILED idempotency test:
+          - First run changed: {{ idempotency_results.kvmhost_setup.first_run_changed }}
+          - Second run changed: {{ idempotency_results.kvmhost_setup.second_run_changed }}
+          This indicates the role is not properly idempotent.
+        success_msg: "✅ kvmhost_setup role PASSED idempotency test"
+    
+    - name: "Calculate overall idempotency test results"
+      ansible.builtin.set_fact:
+        total_roles_tested: "{{ idempotency_results | length }}"
+        passed_roles: "{{ idempotency_results.values() | selectattr('idempotent', 'equalto', true) | list | length }}"
+        failed_roles: "{{ idempotency_results.values() | selectattr('idempotent', 'equalto', false) | list | length }}"
+    
+    - name: "Calculate success rate"
+      ansible.builtin.set_fact:
+        success_rate: "{{ (passed_roles | int / total_roles_tested | int * 100) | round(2) }}"
+        overall_success: "{{ failed_roles | int == 0 }}"
+    
+    - name: "Display comprehensive test results"
+      ansible.builtin.debug:
+        msg: |
+          
+          ========================================
+          IDEMPOTENCY TEST VERIFICATION RESULTS
+          ========================================
+          
+          Host: {{ inventory_hostname }}
+          Total Roles Tested: {{ total_roles_tested }}
+          Passed: {{ passed_roles }}
+          Failed: {{ failed_roles }}
+          Success Rate: {{ success_rate }}%
+          
+          Individual Role Results:
+          {% for role_name, result in idempotency_results.items() %}
+          - {{ role_name }}: {{ '✅ PASS' if result.idempotent else '❌ FAIL' }}
+          {% endfor %}
+          
+          Overall Result: {{ '✅ ALL TESTS PASSED' if overall_success else '❌ SOME TESTS FAILED' }}
+          ADR-0004 Compliance: {{ '✅ COMPLIANT' if overall_success else '❌ NON-COMPLIANT' }}
+          
+          ========================================
+    
+    - name: "Verify ADR-0004 compliance (100% idempotency required)"
+      ansible.builtin.assert:
+        that:
+          - overall_success | bool
+        fail_msg: |
+          ❌ ADR-0004 COMPLIANCE FAILURE
+          
+          The project requires 100% idempotency compliance per ADR-0004.
+          {{ failed_roles }} out of {{ total_roles_tested }} roles failed idempotency tests.
+          
+          Failed roles must be fixed before proceeding:
+          {% for role_name, result in idempotency_results.items() %}
+          {% if not result.idempotent %}
+          - {{ role_name }}: Tasks changed on second run
+          {% endif %}
+          {% endfor %}
+          
+          Please review the architectural rules and fix non-idempotent tasks.
+        success_msg: |
+          ✅ ADR-0004 COMPLIANCE SUCCESS
+          
+          All {{ total_roles_tested }} roles passed idempotency tests.
+          The collection is fully compliant with ADR-0004 requirements.
+    
+    - name: "Check quality threshold (95% minimum for non-critical scenarios)"
+      ansible.builtin.debug:
+        msg: |
+          Quality Threshold Check:
+          Success Rate: {{ success_rate }}%
+          Minimum Required: 95%
+          Status: {{ 'MEETS THRESHOLD' if success_rate | float >= 95 else 'BELOW THRESHOLD' }}
+      when: not overall_success
+    
+    - name: "Generate test summary for CI/CD integration"
+      ansible.builtin.set_fact:
+        test_summary:
+          framework: "molecule-idempotency"
+          host: "{{ inventory_hostname }}"
+          timestamp: "{{ ansible_date_time.iso8601 }}"
+          results:
+            total_roles: "{{ total_roles_tested | int }}"
+            passed: "{{ passed_roles | int }}"
+            failed: "{{ failed_roles | int }}"
+            success_rate: "{{ success_rate | float }}"
+            overall_success: "{{ overall_success | bool }}"
+            adr_0004_compliant: "{{ overall_success | bool }}"
+          details: "{{ idempotency_results }}"
+    
+    - name: "Save test results for external processing"
+      ansible.builtin.copy:
+        content: "{{ test_summary | to_nice_json }}"
+        dest: "/tmp/idempotency_test_{{ inventory_hostname }}.json"
+        mode: '0644'
+      delegate_to: localhost
+      
+    - name: "Final verification message"
+      ansible.builtin.debug:
+        msg: |
+          🎉 Idempotency verification completed successfully!
+          
+          All roles in the Qubinode KVM Host Setup Collection are properly idempotent.
+          The collection meets ADR-0004 architectural requirements.
+          
+          Test results saved to: /tmp/idempotency_test_{{ inventory_hostname }}.json

@@ -1,0 +1,46 @@
+- name: Enable EPEL repository using DNF module (ADR-0001 compliant)
+  ansible.builtin.dnf:
+    name: "epel-release"
+    state: present
+  become: true
+
+- name: Verify EPEL repository is enabled
+  ansible.builtin.command: dnf repolist enabled
+  register: enabled_repos
+  changed_when: false
+  failed_when: "'epel' not in enabled_repos.stdout"
+
+- name: Install Server group
+  ansible.builtin.dnf:
+    name: "@Server"
+    state: present
+  become: true
+
+- name: Install xrdp package
+  ansible.builtin.dnf:
+    name: xrdp
+    state: present
+  become: true
+
+- name: Enable and start xrdp service
+  ansible.builtin.ansible.builtin.systemd:
+    name: xrdp
+    enabled: true
+    state: started
+  become: true
+
+- name: Configure firewall
+  ansible.posix.ansible.posix.firewalld:
+    port: 3389/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true
+
+- name: Configure Firewall for Web Console
+  ansible.posix.ansible.posix.firewalld:
+    port: 9090/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true

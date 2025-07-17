@@ -1,0 +1,12 @@
+- name: Validate system is registered to Red Hat
+  ansible.builtin.shell: >
+    set -o pipefail
+    subscription-manager status| grep ^Overall
+  register: edge_hosts_validate_subscription_status
+  become: true
+  ignore_errors: true
+  failed_when: "'Current' not in edge_hosts_validate_subscription_status.stdout"
+  changed_when: false
+  tags:
+    - validate
+    - validate_rhsm

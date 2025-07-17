@@ -1,4 +1,3 @@
----
 - name: Include pre-flight validation tasks
   ansible.builtin.include_tasks: preflight.yml
   tags:

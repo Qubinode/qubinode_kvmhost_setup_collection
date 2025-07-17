@@ -1,0 +1,195 @@
+---
+#######################
+# Configurable Variables
+###
+
+# Set to true when host is virtual or running in a container
+cicd_test: false
+
+# Set to true to enable libvirt and kvm
+lib_virt_setup: true
+
+# Set to true to enable cockpit
+enable_cockpit: true
+
+# Configure the user bash shell login prompt
+# This will overwrite your existing .bashrc, .vimrc and other terminal configuration files
+configure_shell: true
+
+# Path to starship configuration template
+starship_config: "{{ role_path }}/templates/starship.toml.j2"
+
+# Libvirt network and storage
+# ---------------------------
+kvm_host_libvirt_dir: /var/lib/libvirt/images
+kvmhost_bridge_device: vmbr0
+kvm_host_domain: example.com
+qubinode_bridge_name: qubibr0
+
+## *****************************
+## Optional User Configurations
+## dictionary of libvirt networks to create
+libvirt_host_networks:
+  - name: "{{ vm_libvirt_net      | default(qubinet) }}"
+    create: true
+    mode: bridge
+    bridge_device: "{{ kvm_host_bridge_name      | default(qubinode_bridge_name) }}"
+    ifcfg_type: "{{ kvm_bridge_type }}"
+    ifcfg_bootproto: "{{ kvm_host_bootproto }}"
+    bridge_slave_dev: "{{ kvm_host_interface }}"
+    gateway: "{{ kvm_host_gw }}"
+    mask_prefix: "{{ kvm_host_mask_prefix }}"
+    ipaddress: "{{ kvm_host_ip }}"
+    mask: "{{ kvm_host_netmask }}"
+    subnet: not currently in use
+    mac: "{{ kvm_host_macaddr }}"
+
+# The the primary dns server to the dns_forwarder
+primary_dns_server: "{{ dns_forwarder | default('1.1.1.1') }}"
+kvm_host_dns_server: "{{ primary_dns_server | default('1.1.1.1') }}"
+search_domains:
+  - "{{ domain }}"
+
+libvirt_networks:
+  - name: vmnetbr0
+    create: true
+    mode: bridge
+    bridge_name: "{{ kvmhost_bridge_device }}"
+
+libvirt_host_storage_pools:
+  - name: default
+    state: active
+    autostart: true
+    path: "{{ kvm_host_libvirt_dir }}"
+
+######################
+## Libvirt Storage
+##
+## Set to no if you don't want to configure libvirt storage
+create_libvirt_storage: true
+## Where to store libvirt VMs disk images
+libvirt_images_dir: /var/lib/libvirt/images
+## Libvirt pool name
+libvirt_pool_name: default
+
+# Set to yes to add the admin_user to the libvirt group
+# and change libvirt to be accessible user
+enable_libvirt_admin_user: true
+
+# The actual libvirt group, users added to this group will have admin access to KVM
+# when enable_libvirt_admin_user is set
+kvm_host_group: libvirt
+
+# User to get regular access to libvirt
+admin_user: ""
+
+# users whose shell will be configured
+shell_users:
+  - "{{ admin_user }}"
+
+#############################
+# None configurable variables
+###
+libvirt_services:
+  - libvirtd
+  - tuned
+
+# synth shell global directory
+synth_shell_dir: /etc
+
+# Required RPM packages
+# ---------------------
+required_rpm_packages:
+  - virt-install
+  - libvirt-daemon-config-network
+  - libvirt-daemon-kvm
+  - libguestfs-tools
+  - libvirt-client
+  - qemu-kvm
+  - nfs-utils
+  - libvirt-daemon
+  - libvirt-client
+  - virt-top
+  - tuned
+  - openssh-server
+  - wget
+  - bc
+  - git
+  - net-tools
+  - bind-utils
+  - dnf-utils
+  - firewalld
+  - bash-completion
+  - kexec-tools
+  - sos
+  - psacct
+  - vim
+  - device-mapper-event-libs
+  - device-mapper-libs
+  - httpd-tools
+  - tmux
+  - python3-dns
+  - python3-pip
+  - python3-lxml
+  - cargo
+  - lm_sensors
+  - python3-netaddr
+  - cockpit-machines
+  - bc
+  - nmap
+  - ncurses-devel
+  - podman
+  - container-selinux
+  - k9s
+
+download_vim_url: https://bafybeidtsvqcatb5wpowh7u7pskho3qi6crxgpl7dbc62hwdflhnq3ru5i.ipfs.w3s.link/vim.zip
+
+# KVM Performance Optimization Settings
+# Based on research findings for enterprise KVM hosts
+# ---------------------
+enable_kvm_performance_optimization: true
+
+# Hugepages configuration (percentage of total memory, default 25%)
+kvm_hugepages_percent: 25
+
+# CPU optimization settings
+kvm_cpu_governor: performance
+kvm_enable_cpu_isolation: true
+
+# Memory optimization settings
+kvm_enable_ksm: true
+kvm_ksm_pages_to_scan: 100
+kvm_ksm_sleep_millisecs: 1000
+
+# Nested virtualization (auto-detected based on CPU capabilities)
+kvm_enable_nested_virtualization: true
+
+# Network performance optimizations
+kvm_optimize_network_performance: true
+
+# Sysctl optimizations for virtualization workloads
+kvm_performance_sysctls:
+  # Memory management
+  vm.swappiness: 1
+  vm.vfs_cache_pressure: 50
+  vm.dirty_background_ratio: 5
+  vm.dirty_ratio: 10
+  vm.dirty_writeback_centisecs: 500
+  vm.dirty_expire_centisecs: 3000
+
+  # Network performance
+  net.core.default_qdisc: fq_codel
+  net.ipv4.tcp_congestion_control: bbr
+  net.core.rmem_max: 268435456
+  net.core.wmem_max: 268435456
+  net.core.rmem_default: 65536
+  net.core.wmem_default: 65536
+  net.core.netdev_max_backlog: 5000
+
+  # Bridge optimizations
+  net.bridge.bridge-nf-call-ip6tables: 0
+  net.bridge.bridge-nf-call-iptables: 0
+  net.bridge.bridge-nf-call-arptables: 0
+
+# Performance monitoring
+kvm_enable_performance_monitoring: true

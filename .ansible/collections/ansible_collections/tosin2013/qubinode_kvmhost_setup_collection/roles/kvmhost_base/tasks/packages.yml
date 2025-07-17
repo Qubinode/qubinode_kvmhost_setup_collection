@@ -1,0 +1,80 @@
+---
+# Base Package Management
+# Based on ADR-0001: DNF Module for EPEL Installation
+
+- name: 'Enable EPEL repository using DNF module (ADR-0001 compliant)'
+  ansible.builtin.dnf:
+    name: 'epel-release'
+    state: present
+  when:
+    - enable_epel
+    - kvmhost_os_is_rhel_compatible
+    - kvmhost_package_manager == 'dnf'
+  become: true
+  register: epel_install
+  retries: 3
+  delay: 5
+  until: epel_install is success
+
+- name: 'Verify EPEL repository is available'
+  ansible.builtin.command: "dnf repolist epel"
+  register: epel_check
+  changed_when: false
+  failed_when: false
+  when:
+    - enable_epel
+    - kvmhost_os_is_rhel_compatible
+
+- name: 'Display EPEL status'
+  ansible.builtin.debug:
+    msg: "EPEL repository status: {{ 'Available' if epel_check.rc == 0 else 'Not available' }}"
+  when:
+    - enable_epel
+    - kvmhost_os_is_rhel_compatible
+
+- name: 'Update package cache'
+  ansible.builtin.dnf:
+    update_cache: true
+  changed_when: false
+  become: true
+
+- name: 'Check current package state'
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: 'Combine base package lists'
+  ansible.builtin.set_fact:
+    all_base_packages: "{{ base_packages_common + base_packages_rhel_family + python_packages }}"
+
+- name: 'Create list of missing packages'
+  ansible.builtin.set_fact:
+    missing_packages: >-
+      {{ all_base_packages           | difference(ansible_facts.packages.keys())   }}
+
+- name: 'Display missing packages'
+  ansible.builtin.debug:
+    msg: "Missing packages to be installed: {{ missing_packages }}"
+  when: missing_packages | length > 0
+
+- name: 'Install missing base packages'
+  ansible.builtin.dnf:
+    name: '{{ missing_packages }}'
+    state: present
+  register: package_install
+  when: missing_packages | length > 0
+  retries: 3
+  delay: 5
+  until: package_install is success
+  become: true
+
+- name: 'Verify all required packages are installed'
+  ansible.builtin.package_facts:
+    manager: auto
+  register: final_package_check
+
+- name: 'Assert all packages are installed'
+  ansible.builtin.assert:
+    that: item in final_package_check.ansible_facts.packages
+    fail_msg: "Failed to install ansible.builtin.ansible.builtin.package: {{ item }}"
+    success_msg: "Successfully installed: {{ item }}"
+  loop: "{{ all_base_packages }}"

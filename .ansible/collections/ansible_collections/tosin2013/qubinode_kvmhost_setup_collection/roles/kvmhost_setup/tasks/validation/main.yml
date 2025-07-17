@@ -1,0 +1,27 @@
+---
+- name: Include pre-flight validation tasks
+  ansible.builtin.include_tasks: preflight.yml
+  tags:
+    - preflight
+    - validation
+
+- name: Include schema validation framework (ADR-0006)
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/validation/schema_validation.yml"
+  vars:
+    validation_scope: "{{ validation_scope           | default('all_roles')   }}"
+  tags:
+    - schema_validation
+    - adr_compliance
+    - validation
+
+- name: Include variable validation tasks
+  ansible.builtin.include_tasks: variables.yml
+
+- name: Include system prerequisites tasks
+  ansible.builtin.include_tasks: prerequisites.yml
+
+- name: Include KVM host validation tasks
+  ansible.builtin.include_tasks: ../kvm_host_validation.yml
+  tags:
+    - kvm_validation
+    - validation

@@ -1,0 +1,190 @@
+# GitHub Runner Configuration
+# This file manages multiple self-hosted runners for the Ansible collection
+
+# Global settings
+global:
+  python_version: "3.11"
+  ansible_version: "2.17"
+  runner_version: "2.317.0"
+  log_level: "info"
+  
+# Default runner configuration
+defaults:
+  user: "github-runner"
+  home: "/home/github-runner"
+  work_dir: "_work"
+  labels:
+    - "self-hosted"
+    - "linux"
+    - "ansible"
+    - "podman"
+  
+# Environment variables for all runners
+environment:
+  PYTHON_VERSION: "3.11"
+  ANSIBLE_PYTHON_INTERPRETER: "/home/github-runner/ansible-venv/bin/python3.11"
+  PY_COLORS: "1"
+  ANSIBLE_FORCE_COLOR: "1"
+  CONTAINER_RUNTIME: "podman"
+  MOLECULE_DEBUG: "false"
+  ANSIBLE_VERBOSITY: "1"
+
+# Predefined runner configurations for different purposes
+templates:
+  # Standard runner for general CI/CD
+  standard:
+    labels:
+      - "self-hosted"
+      - "linux"
+      - "ansible"
+      - "standard"
+    description: "General purpose runner for CI/CD pipeline"
+    
+  # Specialized runner for molecule testing
+  molecule:
+    labels:
+      - "self-hosted"
+      - "linux"
+      - "ansible"
+      - "molecule"
+      - "podman"
+    description: "Specialized runner for Molecule testing with container support"
+    environment:
+      MOLECULE_DEBUG: "true"
+      ANSIBLE_VERBOSITY: "2"
+      
+  # Security-focused runner
+  security:
+    labels:
+      - "self-hosted"
+      - "linux"
+      - "ansible"
+      - "security"
+    description: "Security-focused runner with enhanced scanning tools"
+    environment:
+      BANDIT_CONFIG: "/home/github-runner/.bandit"
+      SAFETY_DB_CACHE: "/home/github-runner/.safety"
+      
+  # Performance testing runner
+  performance:
+    labels:
+      - "self-hosted"
+      - "linux"
+      - "ansible" 
+      - "performance"
+    description: "Performance testing runner with monitoring tools"
+    
+# Repository-specific configurations
+repositories:
+  qubinode_kvmhost_setup_collection:
+    url: "https://github.com/Qubinode/qubinode_kvmhost_setup_collection"
+    runners:
+      - name: "kvmhost-main"
+        template: "standard"
+        priority: 1
+      - name: "kvmhost-molecule"
+        template: "molecule"
+        priority: 2
+      - name: "kvmhost-security"
+        template: "security"
+        priority: 3
+
+# Monitoring and health check settings
+monitoring:
+  health_check_interval: "5m"
+  log_retention_days: 7
+  max_job_duration: "60m"
+  alert_on_failure: true
+  
+# Maintenance windows
+maintenance:
+  # Time windows when runners can be updated (UTC)
+  allowed_windows:
+    - "02:00-04:00"  # 2 AM - 4 AM UTC
+    - "14:00-16:00"  # 2 PM - 4 PM UTC
+  update_frequency: "weekly"
+  auto_update_enabled: true
+
+# Security settings
+security:
+  # Allowed repository patterns
+  allowed_repos:
+    - "Qubinode/*"
+    - "qubinode/*"
+  
+  # Blocked patterns
+  blocked_patterns:
+    - "*/malicious-*"
+    - "*/test-exploit*"
+    
+  # Required labels for sensitive operations
+  security_labels:
+    - "security-approved"
+    - "maintainer-verified"
+
+# Resource limits
+resources:
+  max_parallel_jobs: 2
+  disk_cleanup_threshold: "80%"
+  memory_limit: "8GB"
+  cpu_quota: "80%"
+
+# Logging configuration
+logging:
+  level: "info"
+  format: "json"
+  output:
+    - "file"
+    - "systemd"
+  rotation:
+    max_size: "100MB"
+    max_files: 10
+
+# Backup and recovery
+backup:
+  enabled: true
+  location: "/var/backup/github-runners"
+  retention_days: 30
+  include:
+    - "config"
+    - "logs"
+    - "work_directories"
+
+# Custom hooks
+hooks:
+  pre_job:
+    - "source ~/.runner-env"
+    - "ansible --version"
+    - "molecule --version"
+  post_job:
+    - "docker system prune -f"
+    - "podman system prune -f"
+  on_failure:
+    - "journalctl -u github-runner -n 50"
+    - "df -h"
+    - "free -m"
+
+# Integration settings
+integrations:
+  slack:
+    enabled: false
+    webhook_url: ""
+    channels:
+      alerts: "#ci-alerts"
+      status: "#ci-status"
+  
+  email:
+    enabled: false
+    smtp_server: ""
+    recipients:
+      - "admin@example.com"
+
+# Feature flags
+features:
+  auto_scaling: false
+  spot_instances: false
+  multi_arch_support: true
+  container_caching: true
+  artifact_cleanup: true
+
+runners: []

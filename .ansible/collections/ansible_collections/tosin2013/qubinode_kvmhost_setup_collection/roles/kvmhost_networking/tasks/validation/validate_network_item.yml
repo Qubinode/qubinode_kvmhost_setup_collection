@@ -1,0 +1,35 @@
+---
+# =============================================================================
+# NETWORK ITEM VALIDATION HELPER
+# =============================================================================
+# Validates individual network configuration items
+
+- name: Validate network item required fields
+  ansible.builtin.assert:
+    that:
+      - network_config.name is defined
+      - network_config.name | length > 0
+      - network_config.mode is defined
+      - network_config.bridge_device is defined
+    fail_msg: "Network '{{ network_config.name | default('unnamed') }}' missing required fields"
+    success_msg: "Network '{{ network_config.name }}' has all required fields"
+
+- name: Validate network mode
+  ansible.builtin.assert:
+    that:
+      - network_config.mode in ['bridge', 'nat', 'route', 'isolated']
+    fail_msg: "Network '{{ network_config.name }}' has invalid mode '{{ network_config.mode }}'"
+    success_msg: "Network '{{ network_config.name }}' mode is valid"
+
+- name: Validate bridge device naming
+  ansible.builtin.assert:
+    that:
+      - network_config.bridge_device | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$')
+    fail_msg: "Network '{{ network_config.name }}' bridge device '{{ network_config.bridge_device }}' has invalid naming"
+    success_msg: "Network '{{ network_config.name }}' bridge device naming is valid"
+
+- name: Validate DHCP configuration if present
+  ansible.builtin.include_tasks: validate_dhcp_item.yml
+  when:
+    - network_config.dhcp is defined
+    - network_config.dhcp.enabled | default(false)
