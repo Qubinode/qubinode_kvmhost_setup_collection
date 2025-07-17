@@ -1,6 +1,6 @@
 # Enhanced Network Configuration with ADR-0007 Bridge Automation
 - name: Network Setup - Get network interface facts
-  ansible.builtin.ansible.builtin.setup:
+  ansible.builtin.setup:
     gather_subset:
       - network
   register: network_facts
@@ -42,7 +42,7 @@
   when: libvirt_host_networks is defined
 
 - name: Create network bridge interface configuration
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: libvirt_net_bridge.xml.j2
     dest: /etc/libvirt/qemu/networks/{{ item.name }}.xml
     mode: "0644"
@@ -83,7 +83,7 @@
   when: item.create | default(true)
 
 - name: Configure network bridge interface
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: bridge_interface.j2
     dest: /etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_device }}
     mode: "0644"
@@ -94,7 +94,7 @@
   notify: Restart NetworkManager
 
 - name: Configure bridge slave interface
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: bridge_slave.j2
     dest: /etc/sysconfig/network-scripts/ifcfg-{{ item.bridge_slave_dev }}
     mode: "0644"
@@ -105,7 +105,7 @@
   notify: Restart NetworkManager
 
 - name: Update resolv.conf
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
     mode: "0644"

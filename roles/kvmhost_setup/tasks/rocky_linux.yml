@@ -23,14 +23,14 @@
   become: true
 
 - name: Enable and start xrdp service
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: xrdp
     enabled: true
     state: started
   become: true
 
 - name: Configure firewall
-  ansible.posix.ansible.posix.firewalld:
+  ansible.posix.firewalld:
     port: 3389/tcp
     permanent: true
     state: enabled
@@ -38,7 +38,7 @@
   become: true
 
 - name: Configure Firewall for Web Console
-  ansible.posix.ansible.posix.firewalld:
+  ansible.posix.firewalld:
     port: 9090/tcp
     permanent: true
     state: enabled

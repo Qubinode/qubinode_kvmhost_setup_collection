@@ -74,6 +74,6 @@
 - name: "Assert all packages are installed"
   ansible.builtin.assert:
     that: item in final_package_check.ansible_facts.packages
-    fail_msg: "Failed to install ansible.builtin.ansible.builtin.package: {{ item }}"
+    fail_msg: "Failed to install ansible.builtin.package: {{ item }}"
     success_msg: "Successfully installed: {{ item }}"
   loop: "{{ all_base_packages }}"

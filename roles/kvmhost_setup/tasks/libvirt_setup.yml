@@ -3,7 +3,7 @@
   when: not cicd_test|bool
 
 - name: Enable libvirt services
-  ansible.builtin.ansible.builtin.service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: true
     state: started

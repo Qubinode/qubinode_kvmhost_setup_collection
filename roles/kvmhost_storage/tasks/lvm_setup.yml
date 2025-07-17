@@ -50,7 +50,7 @@
   register: fs_creation_result
 
 - name: Create mount point directories
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: "{{ item.mount_dir }}"
     state: directory
     mode: "0755"
@@ -61,7 +61,7 @@
   become: true
 
 - name: Configure mount points in fstab and mount
-  ansible.posix.ansible.posix.mount:
+  ansible.posix.mount:
     name: "{{ item.mount_dir }}"
     src: "/dev/mapper/{{ kvmhost_storage_lvm_vg_name }}-lv_{{ item.name }}"
     fstype: "{{ item.fstype }}"
@@ -75,7 +75,7 @@
   register: mount_result
 
 - name: Set correct ownership for libvirt directories
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: "{{ item.mount_dir }}"
     owner: root
     group: root

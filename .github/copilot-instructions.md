@@ -175,20 +175,170 @@ verifier:
         fail_msg: "KVM host configuration validation failed"
 ```
 
-### 6. Automated Fix Tools (Use as Last Resort)
+### 6. Common Ansible-Lint Issues and Manual Fixes
+
+**Critical Issues Requiring Manual Intervention:**
+
+**A. Document Start Issues (`yaml[document-start]`)**
+```bash
+# ISSUE: Production profile forbids "---" at file start
+# SOLUTION: Remove document start markers from all files
+find roles/kvmhost_cockpit/ -name "*.yml" -exec sed -i '1{/^---$/d;}' {} \;
+
+# Verify removal
+grep -r "^---$" roles/kvmhost_cockpit/ || echo "All document start markers removed"
+```
+
+**B. Line Length Issues (`yaml[line-length]`)**
+```yaml
+# ❌ BEFORE: Long lines (>120 characters)
+- name: "Display message"
+  debug:
+    msg: "Very long message that exceeds the 120 character limit and needs to be broken into multiple lines"
+
+# ✅ AFTER: Multiline YAML syntax
+- name: "Display message"
+  ansible.builtin.debug:
+    msg: >-
+      Very long message that exceeds the 120 character limit
+      and needs to be broken into multiple lines
+```
+
+**C. Schema Issues (`schema[meta]`)**
+```yaml
+# ❌ BEFORE: Invalid platform name
+platforms:
+  - name: AIX  # Invalid platform
+
+# ✅ AFTER: Valid platform names
+platforms:
+  - name: EL
+    versions:
+      - "8"
+      - "9"
+```
+
+**D. Double FQCN Prefix Issues**
+```bash
+# Fix double ansible.builtin prefixes
+find roles/ -name "*.yml" -type f -exec \
+  sed -i 's/ansible\.builtin\.ansible\.builtin\./ansible.builtin./g' {} \;
+
+# Fix specific module errors
+sed -i 's/ansible\.builtin\.lineinansible\.builtin\.file/ansible.builtin.lineinfile/g' \
+  roles/kvmhost_cockpit/tasks/configuration/authentication.yml
+```
+
+### 7. Automated Fix Tools (Use as Last Resort)
 
 When manual fixes following Ansible standards are not feasible, these tools can help:
 
 ```bash
-# Use ansible-lint's built-in auto-fix capabilities
-ansible-lint --fix <file_path>
+# ⚠️ IMPORTANT: Ensure fixes are applied to SOURCE files, not cached collections
+# Clear ansible-compat cache first to avoid fixing wrong files
+rm -rf ~/.cache/ansible-compat/ 2>/dev/null || true
+
+# Set environment to work with source files
+export ANSIBLE_COLLECTIONS_PATH=""
+export ANSIBLE_ROLES_PATH=""
+
+# Use ansible-lint's built-in auto-fix capabilities on specific files
+ansible-lint --fix roles/kvmhost_cockpit/tasks/main.yml
+ansible-lint --fix roles/kvmhost_cockpit/meta/main.yml
 
 # For legacy code cleanup (use sparingly)
 python3 fix_yaml.py <file_path>  # For escaped quote issues
 ./fix_all_yaml.sh               # Bulk fixes
 
-# Module prefix cleanup (manual verification required)
-sed -i 's/ansible\.builtin\.ansible\.builtin\./ansible.builtin./g' <file_path>
+# Use the project-specific fix script (handles most issues automatically)
+./fix-lint-source.sh  # Ensures fixes are applied to source files
+```
+
+**⚠️ Critical Issue**: ansible-lint may install and fix cached collection copies instead of source files. Always:
+1. Clear ansible-compat cache: `rm -rf ~/.cache/ansible-compat/`
+2. Set empty collection paths: `export ANSIBLE_COLLECTIONS_PATH=""`
+3. Verify fixes are applied to `roles/` directory, not `~/.ansible/` or cache
+4. Use specific file paths: `ansible-lint --fix roles/role_name/tasks/main.yml`
+
+### 8. Manual Fix Script for Remaining Issues
+
+Create and run this comprehensive fix script:
+
+```bash
+#!/bin/bash
+# manual-lint-fixes.sh - Fix remaining ansible-lint issues
+
+echo "🔧 Applying manual fixes for remaining ansible-lint issues..."
+
+# 1. Remove all document start markers
+echo "📋 Removing document start markers..."
+find roles/kvmhost_cockpit/ -name "*.yml" -exec sed -i '1{/^---$/d;}' {} \;
+
+# 2. Fix schema issue in meta.yml
+echo "🛠️ Fixing meta.yml schema issue..."
+sed -i '/platforms:/,/galaxy_tags:/{
+  s/- name: AIX/- name: EL/
+}' roles/kvmhost_cockpit/meta/main.yml
+
+# 3. Fix double FQCN prefixes
+echo "🔧 Fixing double FQCN prefixes..."
+find roles/kvmhost_cockpit/ -name "*.yml" -exec \
+  sed -i 's/ansible\.builtin\.ansible\.builtin\./ansible.builtin./g' {} \;
+
+# Fix specific lineinfile module error
+sed -i 's/ansible\.builtin\.lineinansible\.builtin\.file/ansible.builtin.lineinfile/g' \
+  roles/kvmhost_cockpit/tasks/configuration/authentication.yml
+
+# 4. Fix line length issues with multiline YAML
+echo "📏 Fixing line length issues..."
+
+# Fix authentication.yml long debug messages
+cat > /tmp/auth_fix.yml << 'EOF'
+- name: "Display authentication configuration"
+  ansible.builtin.debug:
+    msg:
+      - "Cockpit authentication configured"
+      - >-
+        Auth methods: {{ kvmhost_cockpit_auth_methods | join(', ')
+        if kvmhost_cockpit_auth_methods | length > 0 else 'Default' }}
+      - >-
+        Allowed users: {{ kvmhost_cockpit_allowed_users | join(', ')
+        if kvmhost_cockpit_allowed_users | length > 0 else 'All system users' }}
+      - >-
+        Admin users: {{ kvmhost_cockpit_admin_users | join(', ')
+        if kvmhost_cockpit_admin_users | length > 0 else 'Default wheel group members' }}
+EOF
+
+# Apply the fix by replacing the entire debug task
+sed -i '/^- name: "Display authentication configuration"/,/wheel group members.*$/c\
+- name: "Display authentication configuration"\
+  ansible.builtin.debug:\
+    msg:\
+      - "Cockpit authentication configured"\
+      - >-\
+        Auth methods: {{ kvmhost_cockpit_auth_methods | join('"'"', '"'"')\
+        if kvmhost_cockpit_auth_methods | length > 0 else '"'"'Default'"'"' }}\
+      - >-\
+        Allowed users: {{ kvmhost_cockpit_allowed_users | join('"'"', '"'"')\
+        if kvmhost_cockpit_allowed_users | length > 0 else '"'"'All system users'"'"' }}\
+      - >-\
+        Admin users: {{ kvmhost_cockpit_admin_users | join('"'"', '"'"')\
+        if kvmhost_cockpit_admin_users | length > 0 else '"'"'Default wheel group members'"'"' }}' \
+  roles/kvmhost_cockpit/tasks/configuration/authentication.yml
+
+# Fix cockpit.yml validation message
+sed -i '/Access URL:/c\
+      - >-\
+        Access URL: {{ '"'"'https'"'"' if kvmhost_cockpit_ssl_enabled else '"'"'http'"'"' }}://{{ ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port }}' \
+  roles/kvmhost_cockpit/tasks/validation/cockpit.yml
+
+echo "✅ Manual fixes completed!"
+
+# 5. Verify fixes
+echo "🔍 Verifying fixes..."
+ansible-lint roles/kvmhost_cockpit/ --profile production || echo "Some issues may remain"
+
+echo "📝 Manual fixes script completed!"
 ```
 
 **⚠️ Important:** Always review automated fixes to ensure they maintain Ansible best practices and don't introduce regressions.

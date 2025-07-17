@@ -12,7 +12,7 @@
   when: kvmhost_storage_debug_enabled | default(false)
 
 - name: Create storage monitoring script
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: storage_monitor.sh.j2
     dest: /usr/local/bin/kvmhost-storage-monitor
     mode: "0755"
@@ -21,7 +21,7 @@
   become: true
 
 - name: Create storage health check script
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: storage_health_check.sh.j2
     dest: /usr/local/bin/kvmhost-storage-health
     mode: "0755"

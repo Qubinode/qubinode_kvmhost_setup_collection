@@ -163,7 +163,7 @@
         success_msg: Package manager {{ ansible_pkg_mgr }} available
 
     - name: Test package manager connectivity
-      ansible.builtin.ansible.builtin.package:
+      ansible.builtin.package:
         name: which
         state: present
       check_mode: true

@@ -33,7 +33,7 @@
   ignore_errors: true
 
 - name: Configure kernel parameters for storage performance
-  ansible.posix.ansible.posix.sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
     state: present
@@ -47,7 +47,7 @@
   become: true
 
 - name: Configure storage-related kernel parameters in grub
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/default/grub
     regexp: ^GRUB_CMDLINE_LINUX=
     line: GRUB_CMDLINE_LINUX="elevator={{ kvmhost_storage_io_scheduler }} transparent_hugepage=never"

@@ -30,7 +30,7 @@
     - backup_existing_config
 
 - name: "Save network backup to file"
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       # Network configuration backup - {{ ansible_date_time.iso8601 }}
       # Host: {{ inventory_hostname }}

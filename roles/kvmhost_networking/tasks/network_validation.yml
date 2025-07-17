@@ -35,7 +35,7 @@
   when: ping_test_hosts | length > 0
 
 - name: "Generate network validation report"
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: network_validation_report.j2
     dest: "/tmp/network_validation_{{ ansible_date_time.epoch }}.txt"
     mode: "0644"

@@ -61,7 +61,7 @@
     success_msg: "Storage space validation passed. Available: {{ available_space_check.stdout }}GB"
 
 - name: Check for required LVM packages
-  ansible.builtin.ansible.builtin.package:
+  ansible.builtin.package:
     name:
       - lvm2
       - xfsprogs

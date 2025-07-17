@@ -1,10 +1,11 @@
+---
 # =============================================================================
 # KVMHOST COCKPIT ROLE - AUTHENTICATION CONFIGURATION
 # =============================================================================
 # Configures authentication methods and user access for Cockpit
 
 - name: Configure Cockpit authentication methods
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: cockpit-auth.conf.j2
     dest: /etc/cockpit/cockpit.conf.d/auth.conf
     mode: "0644"
@@ -15,7 +16,7 @@
   when: kvmhost_cockpit_auth_methods | length > 0
 
 - name: Create cockpit configuration directory
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: /etc/cockpit/cockpit.conf.d
     state: directory
     mode: "0755"
@@ -23,7 +24,7 @@
     group: root
 
 - name: Configure Cockpit user access restrictions
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: access.conf.j2
     dest: /etc/cockpit/cockpit.conf.d/access.conf
     mode: "0644"
@@ -47,7 +48,7 @@
   when: kvmhost_cockpit_admin_users | length > 0
 
 - name: Configure PAM for Cockpit authentication
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/pam.d/cockpit
     line: "{{ item }}"
     create: true

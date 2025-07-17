@@ -1,3 +1,4 @@
+---
 galaxy_info:
   role_name: kvmhost_cockpit
   author: Qubinode Community
@@ -9,44 +10,16 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
-        - "all"
-        - "all"
-        - "all"
-    - name: CentOS
-      versions:
-        - "all"
-    - name: Rocky
-      versions:
-        - "all"
-        - "all"
-    - name: AlmaLinux
-      versions:
-        - "all"
-        - "all"
-    - name: Fedora
-      versions:
-        - "37"
-        - "38"
-        - "39"
-        - "40"
+        - "8"
+        - "9"
 
   galaxy_tags:
     - cockpit
-    - web
-    - management
     - kvm
-    - libvirt
-    - monitoring
-    - rhel
-    - rocky
-    - centos
+    - virtualization
+    - web-interface
+    - management
+    - ssl
+    - authentication
 
-dependencies:
-  - role: kvmhost_base
-    when: kvmhost_cockpit_require_base | default(true)
-  - role: kvmhost_libvirt
-    when: kvmhost_cockpit_require_libvirt | default(true)
-
-collections:
-  - fedora.linux_system_roles
-  - ansible.posix
+dependencies: []

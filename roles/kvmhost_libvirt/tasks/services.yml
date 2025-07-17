@@ -4,7 +4,7 @@
 # Configure and start libvirt and related services
 
 - name: Enable and start libvirt services
-  ansible.builtin.ansible.builtin.service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ kvmhost_libvirt_autostart }}"
     state: started
@@ -26,7 +26,7 @@
 
 - name: Display current tuned profile
   ansible.builtin.debug:
-    msg: "Current tuned proansible.builtin.ansible.builtin.file: {{ current_tuned_profile.stdout }}"
+    msg: "Current tuned proansible.builtin.file: {{ current_tuned_profile.stdout }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Set tuned profile for virtualization (idempotent)

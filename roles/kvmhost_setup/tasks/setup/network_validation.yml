@@ -6,7 +6,7 @@
     msg: Starting comprehensive network validation for {{ inventory_hostname }}
 
 - name: Create network validation results directory
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: /tmp/network_validation
     state: directory
     mode: "0755"
@@ -223,7 +223,7 @@
 
 # Generate validation report
 - name: Generate network validation report
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: network_validation_report.j2
     dest: /tmp/network_validation/network_validation_{{ ansible_date_time.epoch }}.json
     mode: "0644"

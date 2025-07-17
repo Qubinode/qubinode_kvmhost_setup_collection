@@ -12,7 +12,7 @@ kvmhost_libvirt_services:
   - tuned
 
 # Tuned profile for virtualization
-kvmhost_libvirt_tuned_proansible.builtin.ansible.builtin.file: virtual-host
+kvmhost_libvirt_tuned_proansible.builtin.file: virtual-host
 
 # =============================================================================
 # STORAGE POOL CONFIGURATION

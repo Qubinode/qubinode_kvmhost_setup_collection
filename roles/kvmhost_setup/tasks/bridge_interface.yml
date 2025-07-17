@@ -34,7 +34,7 @@
     - name: Setup bridge interface
       vars:
         bridge_idx: "{{ type_idx }}"
-      ansible.builtin.ansible.builtin.template:
+      ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
         mode: "0640"
@@ -44,7 +44,7 @@
     - name: Setup ethernet device interface
       vars:
         bridge_idx: "{{ type_idx }}"
-      ansible.builtin.ansible.builtin.template:
+      ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
         mode: "0640"
@@ -58,7 +58,7 @@
     # connectivity and the bridge interface comes up.
 
     - name: Restart network service for older systems
-      ansible.builtin.ansible.builtin.systemd:
+      ansible.builtin.systemd:
         name: "{{ item }}"
         state: restarted
       changed_when: false
@@ -70,7 +70,7 @@
         undefined))
 
     - name: Restart network service
-      ansible.builtin.ansible.builtin.systemd:
+      ansible.builtin.systemd:
         name: "{{ item }}"
         state: restarted
       changed_when: false
@@ -95,7 +95,7 @@
       failed_when: true
 
 - name: Update /etc/resolv.conf
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
     mode: "0644"

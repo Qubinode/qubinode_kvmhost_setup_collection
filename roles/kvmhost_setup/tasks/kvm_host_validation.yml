@@ -100,7 +100,7 @@
 
   block:
     - name: Check libvirtd service status
-      ansible.builtin.ansible.builtin.systemd:
+      ansible.builtin.systemd:
         name: libvirtd
       register: libvirtd_status
       ignore_errors: true
@@ -112,7 +112,7 @@
       failed_when: false
 
     - name: Start libvirtd if not running
-      ansible.builtin.ansible.builtin.systemd:
+      ansible.builtin.systemd:
         name: libvirtd
         state: started
         enabled: true
@@ -211,7 +211,7 @@
       ignore_errors: true
 
     - name: Verify storage pool directory
-      ansible.builtin.ansible.builtin.file:
+      ansible.builtin.file:
         path: /var/lib/libvirt/images
         state: directory
         mode: "0711"
@@ -268,7 +268,7 @@
       ✓ KVM device: {{ '/dev/kvm available' if kvm_device.stat.exists else 'Not available' }}
       ✓ libvirt version: {{ libvirt_version.stdout }}
       ✓ QEMU version: {{ qemu_version.stdout }}
-      ✓ libvirtd ansible.builtin.ansible.builtin.service: {{ libvirtd_active.stdout           | default('checking...)   }}
+      ✓ libvirtd ansible.builtin.service: {{ libvirtd_active.stdout           | default('checking...)   }}
 
       KVM host validation completed successfully!
       System is ready for virtual machine deployment.

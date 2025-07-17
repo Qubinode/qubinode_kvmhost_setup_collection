@@ -62,7 +62,7 @@
   when: kvmhost_libvirt_storage_enabled | default(true)
 
 - name: Create storage pool directories if missing
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: "{{ item.item.path }}"
     state: directory
     mode: "0711"

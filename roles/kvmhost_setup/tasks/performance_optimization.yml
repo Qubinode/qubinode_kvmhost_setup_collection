@@ -51,7 +51,7 @@
   when: not is_container_environment
 
 - name: Configure hugepages for KVM performance
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/default/grub
     regexp: ^GRUB_CMDLINE_LINUX=
     line: GRUB_CMDLINE_LINUX="hugepages={{ recommended_hugepages }} default_hugepagesz=2M hugepagesz=2M
@@ -85,7 +85,7 @@
   notify: reboot system
 
 - name: Configure CPU governor for performance
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       #!/bin/bash
       # Set CPU governor to performance for KVM hosts
@@ -101,7 +101,7 @@
   when: not is_container_environment
 
 - name: Create systemd service for CPU performance
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       [Unit]
       Description=Set CPU Performance Governor
@@ -122,7 +122,7 @@
   when: not is_container_environment
 
 - name: Enable and start CPU performance service
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: cpu-performance
     enabled: true
     state: started
@@ -132,7 +132,7 @@
     - not is_container_environment
 
 - name: Configure kernel same-page merging (KSM) for memory optimization
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /sys/kernel/mm/ksm/run
     line: "1"
     create: false
@@ -140,7 +140,7 @@
   when: not is_container_environment
 
 - name: Create KSM systemd service for persistent configuration
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       [Unit]
       Description=Kernel Samepage Merging
@@ -163,7 +163,7 @@
   when: not is_container_environment
 
 - name: Enable and start KSM service
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: ksm
     enabled: true
     state: started
@@ -174,7 +174,7 @@
   ignore_errors: true
 
 - name: Configure libvirt for optimal performance
-  ansible.builtin.blockinansible.builtin.ansible.builtin.file:
+  ansible.builtin.blockinansible.builtin.file:
     path: /etc/libvirt/qemu.conf
     block: |
       # Performance optimizations based on research findings
@@ -212,7 +212,7 @@
   when: not is_container_environment
 
 - name: Enable nested virtualization for Intel
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/modprobe.d/kvm.conf
     line: options kvm_intel nested=1
     create: true
@@ -224,7 +224,7 @@
   register: intel_nested
 
 - name: Enable nested virtualization for AMD
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/modprobe.d/kvm.conf
     line: options kvm_amd nested=1
     create: true
@@ -236,7 +236,7 @@
   register: amd_nested
 
 - name: Configure virtio optimization settings
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       # Virtio performance optimizations
       # These settings will be applied to all VMs using virtio devices
@@ -274,7 +274,7 @@
   register: bridge_module_check
 
 - name: Optimize libvirt network performance
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       # Increase network buffer sizes
       net.core.rmem_max = 268435456
@@ -304,7 +304,7 @@
   ignore_errors: true
 
 - name: Create performance monitoring script
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       #!/bin/bash
       # KVM Performance Monitoring Script
@@ -339,7 +339,7 @@
       echo
 
       echo "=== Performance Tuning Status ==="
-      echo "Tuned Proansible.builtin.ansible.builtin.file: $(tuned-adm active)"
+      echo "Tuned Proansible.builtin.file: $(tuned-adm active)"
       echo "Nested Virtualization (Intel): $(cat /sys/module/kvm_intel/parameters/nested 2>/dev/null || echo 'N/A')"
       echo "Nested Virtualization (AMD): $(cat /sys/module/kvm_amd/parameters/nested 2>/dev/null || echo 'N/A')"
     dest: /usr/local/bin/kvm-perf-status.sh

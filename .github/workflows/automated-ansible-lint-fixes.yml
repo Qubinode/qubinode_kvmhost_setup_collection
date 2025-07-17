@@ -105,29 +105,49 @@ jobs:
         uses: google-gemini/gemini-cli-action@main
         id: gemini
         with:
-          api-key: ${{ secrets.GEMINI_API_KEY }}
-          model: 'gemini-pro'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          settings_json: |
+            {
+              "coreTools": [
+                "run_shell_command(echo)",
+                "run_shell_command(cat)",
+                "run_shell_command(grep)",
+                "run_shell_command(sed)",
+                "run_shell_command(ansible-lint)",
+                "write_file"
+              ],
+              "telemetry": {
+                "enabled": false
+              },
+              "sandbox": false
+            }
           prompt: |
             You are an expert Ansible developer tasked with analyzing ansible-lint issues and providing fix recommendations.
             
-            Please analyze the following ansible-lint issues and provide:
-            1. A summary of the most critical issues
-            2. Recommended fix strategies following Ansible best practices
-            3. Priority order for fixing issues (critical, high, medium, low)
-            4. Any potential breaking changes to watch for
+            The lint issues have been scanned and saved to lint-output.txt. Please:
+            1. Run: cat lint-output.txt to see the ansible-lint issues
+            2. Analyze the common patterns in the issues
+            3. Generate specific fix commands for the most common issues
+            4. Write a comprehensive fix script
             
-            Ansible-lint issues found:
-            ${{ steps.scan.outputs.issues }}
+            Common issue patterns to address:
+            - yaml[document-start]: Remove "---" from file beginnings (production profile requirement)
+            - yaml[line-length]: Break long lines using multiline YAML (>- syntax)
+            - schema[meta]: Fix invalid platform names (AIX → EL in meta.yml)
+            - Double FQCN prefixes: ansible.builtin.ansible.builtin → ansible.builtin
+            - Module name errors: ansible.builtin.lineinansible.builtin.file → ansible.builtin.lineinfile
             
-            Please respond in JSON format with the following structure:
-            {
-              "summary": "Brief overview of issues",
-              "critical_issues": ["list of critical issues"],
-              "recommended_fixes": ["list of specific fix recommendations"],
-              "priority_order": ["ordered list of issues by priority"],
-              "breaking_change_warnings": ["potential breaking changes to watch for"],
-              "fix_commands": ["specific ansible-lint and sed commands to apply"]
-            }
+            Please create a fix script by running:
+            write_file("gemini-fix-script.sh", "<comprehensive bash script to fix the issues>")
+            
+            The script should:
+            1. Remove document start markers from YAML files
+            2. Fix the meta.yml platform configuration
+            3. Clean up double FQCN prefixes
+            4. Fix line length issues with multiline YAML syntax
+            5. Correct any malformed module names
+            
+            Make the script executable and focused on the specific issues found.
 
       - name: Upload analysis artifacts
         uses: actions/upload-artifact@v4
@@ -137,6 +157,7 @@ jobs:
             lint-output.txt
             issues.json
             issue-types.txt
+            gemini-fix-script.sh
           retention-days: 7
 
   apply-lint-fixes:
@@ -190,16 +211,34 @@ jobs:
         run: |
           echo "🤖 Applying Gemini-recommended fixes..."
           
-          # Parse Gemini analysis if available
-          if [ -f gemini-analysis.json ]; then
-            echo "Gemini analysis found, applying recommended fixes..."
-            # Extract fix commands from Gemini analysis
-            jq -r '.fix_commands[]' gemini-analysis.json > fix-commands.sh
-            chmod +x fix-commands.sh
-            ./fix-commands.sh || echo "Some fixes may have failed"
+          # Check if Gemini generated a fix script
+          if [ -f gemini-fix-script.sh ]; then
+            echo "Gemini fix script found, applying recommended fixes..."
+            chmod +x gemini-fix-script.sh
+            ./gemini-fix-script.sh || echo "Some fixes may have failed"
           else
-            echo "No Gemini analysis found, falling back to auto-fix"
-            ansible-lint --fix roles/ validation/ .github/workflows/ || true
+            echo "No Gemini fix script found, applying manual fixes..."
+            
+            # Apply known fixes for common issues
+            echo "🔧 Removing document start markers..."
+            find roles/kvmhost_cockpit/ -name "*.yml" -exec sed -i '1{/^---$/d;}' {} \;
+            
+            echo "🔧 Fixing meta.yml schema issue..."
+            if [ -f roles/kvmhost_cockpit/meta/main.yml ]; then
+              # Replace AIX with EL platform
+              sed -i 's/name: AIX/name: EL/' roles/kvmhost_cockpit/meta/main.yml
+            fi
+            
+            echo "🔧 Fixing double FQCN prefixes..."
+            find roles/kvmhost_cockpit/ -name "*.yml" -exec \
+              sed -i 's/ansible\.builtin\.ansible\.builtin\./ansible.builtin./g' {} \;
+            
+            # Fix specific module errors
+            sed -i 's/ansible\.builtin\.lineinansible\.builtin\.file/ansible.builtin.lineinfile/g' \
+              roles/kvmhost_cockpit/tasks/configuration/authentication.yml
+            
+            echo "🔧 Running ansible-lint --fix for remaining issues..."
+            ansible-lint --fix roles/kvmhost_cockpit/ || true
           fi
 
       - name: Apply automatic fixes
@@ -210,15 +249,19 @@ jobs:
           # Create backup
           git stash push -m "backup-before-lint-$(date +%s)" || true
           
-          # Apply fixes for different file types
+          # Apply comprehensive fixes using the dedicated script
+          echo "🔧 Running comprehensive fix script..."
+          if [ -f scripts/comprehensive-lint-fixes.sh ]; then
+            ./scripts/comprehensive-lint-fixes.sh
+          else
+            echo "Warning: Comprehensive fix script not found, using basic fixes"
+            ./fix-lint-source.sh || echo "Fix script completed with warnings"
+          fi
+          
+          # Apply additional ansible-lint fixes
           ansible-lint --fix roles/ || true
           ansible-lint --fix validation/ || true
           ansible-lint --fix .github/workflows/ || true
-          
-          # Apply yamllint fixes
-          find . -name "*.yml" -o -name "*.yaml" | grep -v ".git" | while read -r file; do
-            yamllint --no-warnings "$file" || echo "YAML issues in $file"
-          done
 
       - name: Apply manual review fixes
         if: github.event.inputs.fix_mode == 'manual-review'

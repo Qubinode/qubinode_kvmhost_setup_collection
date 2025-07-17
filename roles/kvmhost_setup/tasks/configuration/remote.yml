@@ -1,5 +1,5 @@
 - name: Configure remote access
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/ssh/sshd_config
     regexp: "^PermitRootLogin"
     line: "PermitRootLogin no"

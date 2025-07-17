@@ -1,3 +1,4 @@
+---
 # =============================================================================
 # KVMHOST COCKPIT ROLE - COCKPIT VALIDATION
 # =============================================================================
@@ -38,7 +39,7 @@
 
 - name: Check Cockpit modules availability
   ansible.builtin.command:
-    cmd: "systemctl list-units --type=service --state=loaded | grep cockpit"
+    cmd: systemctl list-units --type=service --state=loaded | grep cockpit
   register: cockpit_modules
   changed_when: false
   failed_when: false
@@ -81,7 +82,7 @@
 - name: Display validation results
   ansible.builtin.debug:
     msg:
-      - "Cockpit validation completed"
+      - Cockpit validation completed
       - "Socket status: {{ cockpit_socket_check.status.ActiveState }}"
       - "Port {{ kvmhost_cockpit_port }} accessible: {{ port_test is succeeded }}"
       - "Web interface responsive: {{ web_test.status == 200 }}"

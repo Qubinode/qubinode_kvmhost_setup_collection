@@ -1,7 +1,7 @@
 # Network Pre-flight Checks
 
 - name: "Verify NetworkManager is running"
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: NetworkManager
   register: nm_status
   become: true

@@ -1,3 +1,4 @@
+---
 # =============================================================================
 # KVMHOST COCKPIT ROLE - PACKAGE INSTALLATION
 # =============================================================================
@@ -33,7 +34,7 @@
 - name: Display installed Cockpit packages
   ansible.builtin.debug:
     msg:
-      - "Cockpit packages installed successfully"
+      - Cockpit packages installed successfully
       - "Base packages: {{ kvmhost_cockpit_packages | join(', ') }}"
       - >-
         Additional packages: {{

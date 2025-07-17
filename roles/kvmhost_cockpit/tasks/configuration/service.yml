@@ -1,10 +1,11 @@
+---
 # =============================================================================
 # KVMHOST COCKPIT ROLE - SERVICE CONFIGURATION
 # =============================================================================
 # Configures and starts Cockpit service with proper systemd management
 
 - name: Create Cockpit configuration directory
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: /etc/cockpit
     state: directory
     mode: "0755"
@@ -12,7 +13,7 @@
     group: root
 
 - name: Configure Cockpit main settings
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: cockpit.conf.j2
     dest: /etc/cockpit/cockpit.conf
     mode: "0644"
@@ -22,10 +23,10 @@
   notify: restart cockpit
 
 - name: Configure Cockpit port (if different from default)
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/systemd/system/cockpit.socket.d/listen.conf
-    line: "ListenStream={{ kvmhost_cockpit_port }}"
-    regexp: "^ListenStream="
+    line: ListenStream={{ kvmhost_cockpit_port }}
+    regexp: ^ListenStream=
     create: true
     mode: "0644"
     owner: root
@@ -36,7 +37,7 @@
     - restart cockpit
 
 - name: Create systemd override directory for cockpit.socket
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: /etc/systemd/system/cockpit.socket.d
     state: directory
     mode: "0755"
@@ -45,14 +46,14 @@
   when: kvmhost_cockpit_port != 9090
 
 - name: Enable and start cockpit.socket
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: cockpit.socket
     enabled: true
     state: started
     daemon_reload: true
 
 - name: Verify Cockpit socket is active
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: cockpit.socket
   register: cockpit_socket_status
 

@@ -52,7 +52,7 @@
   when: not bridge_already_exists
 
 - name: Save network backup to file
-  ansible.builtin.ansible.builtin.copy:
+  ansible.builtin.copy:
     content: |
       # Network configuration backup - {{ ansible_date_time.iso8601 }}
       # Host: {{ inventory_hostname }}
@@ -189,7 +189,7 @@
     qubinode_bridge_interface_fact: "{{ primary_interface }}"
 
 - name: Create bridge validation script
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: bridge_validation.sh.j2
     dest: /usr/local/bin/qubinode-bridge-validate
     mode: "0755"
@@ -197,7 +197,7 @@
     group: root
 
 - name: Register bridge configuration in system facts
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/qubinode/bridge.conf
     line: BRIDGE_NAME={{ qubinode_bridge_name | default('qubibr0') }}
     create: true
@@ -206,12 +206,12 @@
     group: root
 
 - name: Register bridge interface in system facts
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/qubinode/bridge.conf
     line: BRIDGE_INTERFACE={{ primary_interface }}
 
 - name: Register bridge configuration timestamp
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /etc/qubinode/bridge.conf
     line: BRIDGE_CONFIGURED={{ ansible_date_time.iso8601 }}
 

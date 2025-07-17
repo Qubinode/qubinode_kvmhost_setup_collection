@@ -1,5 +1,5 @@
 - name: Ensure libvirt storage directory exists
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     mode: "0755"
@@ -14,7 +14,7 @@
   changed_when: false
 
 - name: Create storage pool XML configurations
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: libvirt_pool.xml.j2
     dest: /etc/libvirt/storage/{{ item.name }}.xml
     mode: "0644"
@@ -78,7 +78,7 @@
   when: item.state | default('active') != 'absent'
 
 - name: Set correct SELinux context for storage pools
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     setype: virt_image_t
     recurse: true

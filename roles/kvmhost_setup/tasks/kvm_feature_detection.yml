@@ -128,7 +128,7 @@
         qemu: "{{ qemu_version.stdout | default('unknown') }}"
 
 - name: Generate KVM feature detection report
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: kvm_feature_report.j2
     dest: /var/log/kvm-feature-detection.json
     mode: "0644"

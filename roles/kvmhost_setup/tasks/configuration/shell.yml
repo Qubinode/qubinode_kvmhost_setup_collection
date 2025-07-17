@@ -1,5 +1,5 @@
 - name: Configure user shell environment
-  ansible.builtin.ansible.builtin.template:
+  ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "0644"
@@ -15,7 +15,7 @@
   when: configure_shell | bool
 
 - name: Ensure correct permissions for shell files
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: "{{ item }}"
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
@@ -44,7 +44,7 @@
   when: configure_shell | bool
 
 - name: Add starship to shell configuration
-  ansible.builtin.lineinansible.builtin.ansible.builtin.file:
+  ansible.builtin.lineinansible.builtin.file:
     path: /home/{{ admin_user }}/.bashrc
     regexp: ^eval "\$(starship init bash)"
     line: eval "$(starship init bash)"

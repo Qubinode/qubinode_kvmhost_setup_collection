@@ -1,3 +1,4 @@
+---
 # =============================================================================
 # KVMHOST COCKPIT ROLE - DEPENDENCY VALIDATION
 # =============================================================================
@@ -57,7 +58,7 @@
 - name: Fail if SSL files don't exist (when SSL enabled)
   ansible.builtin.fail:
     msg: SSL certificate file {{ item.item }} does not exist
-  loop: "{{ ssl_cert_check.results           | default([])   }}"
+  loop: "{{ ssl_cert_check.results | default([]) }}"
   when:
     - kvmhost_cockpit_ssl_enabled | bool
     - not item.stat.exists
