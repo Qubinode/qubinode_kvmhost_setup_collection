@@ -80,7 +80,7 @@
 - name: "Configure bridge settings"
   ansible.builtin.command: >
     nmcli connection modify {{ qubinode_bridge_name }}
-    bridge.stp {{ bridge_interface_settings.stp           | lower   }}
+    bridge.stp {{ bridge_interface_settings.stp | lower }}
     bridge.forward-delay {{ bridge_interface_settings.forward_delay }}
     bridge.hello-time {{ bridge_interface_settings.hello_time }}
     bridge.max-age {{ bridge_interface_settings.max_age }}
@@ -91,7 +91,7 @@
 - name: "Configure bridge IP settings based on current interface"
   ansible.builtin.command: >
     nmcli connection modify {{ qubinode_bridge_name }}
-    ipv4.method {{ current_ipv4_method           | default('auto')   }}
+    ipv4.method {{ current_ipv4_method | default('auto') }}
     {% if current_ipv4_addresses %}ipv4.addresses {{ current_ipv4_addresses }}{% endif %}
     {% if current_ipv4_gateway %}ipv4.gateway {{ current_ipv4_gateway }}{% endif %}
     {% if current_ipv4_dns %}ipv4.dns {{ current_ipv4_dns }}{% endif %}

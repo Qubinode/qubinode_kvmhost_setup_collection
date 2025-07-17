@@ -109,27 +109,29 @@ validate_file_content() {
 validate_role_structure() {
     local role_name="$1"
     local role_dir="roles/$role_name"
-    
+
     log_info "Validating role: $role_name"
-    
+
     # Check main role directory
     validate_directory "$role_dir" "Role $role_name directory"
-    
+
     # Check required role subdirectories
     validate_directory "$role_dir/tasks" "Role $role_name tasks directory"
     validate_directory "$role_dir/defaults" "Role $role_name defaults directory"
     validate_directory "$role_dir/meta" "Role $role_name meta directory"
-    validate_directory "$role_dir/handlers" "Role $role_name handlers directory" "false"
-    validate_directory "$role_dir/templates" "Role $role_name templates directory" "false"
-    validate_directory "$role_dir/files" "Role $role_name files directory" "false"
-    validate_directory "$role_dir/vars" "Role $role_name vars directory" "false"
-    
+
+    # Check optional role subdirectories (don't fail on missing optional dirs)
+    validate_directory "$role_dir/handlers" "Role $role_name handlers directory" "false" || true
+    validate_directory "$role_dir/templates" "Role $role_name templates directory" "false" || true
+    validate_directory "$role_dir/files" "Role $role_name files directory" "false" || true
+    validate_directory "$role_dir/vars" "Role $role_name vars directory" "false" || true
+
     # Check required role files
     validate_file "$role_dir/tasks/main.yml" "Role $role_name main tasks file"
     validate_file "$role_dir/defaults/main.yml" "Role $role_name defaults file"
     validate_file "$role_dir/meta/main.yml" "Role $role_name meta file"
-    validate_file "$role_dir/README.md" "Role $role_name README" "false"
-    
+    validate_file "$role_dir/README.md" "Role $role_name README" "false" || true
+
     # Check content quality
     validate_file_content "$role_dir/tasks/main.yml" "Role $role_name main tasks" 5
     validate_file_content "$role_dir/defaults/main.yml" "Role $role_name defaults" 3
@@ -145,7 +147,7 @@ validate_molecule_structure() {
     validate_directory "$molecule_dir" "Molecule scenario $scenario directory"
     validate_file "$molecule_dir/molecule.yml" "Molecule scenario $scenario config file"
     validate_file "$molecule_dir/converge.yml" "Molecule scenario $scenario converge playbook"
-    validate_file "$molecule_dir/verify.yml" "Molecule scenario $scenario verify playbook" "false"
+    validate_file "$molecule_dir/verify.yml" "Molecule scenario $scenario verify playbook" "false" || true
     
     # Check molecule.yml for ADR-0013 compliance (systemd configuration)
     if [[ -f "$PROJECT_ROOT/$molecule_dir/molecule.yml" ]]; then
@@ -176,7 +178,7 @@ validate_documentation_structure() {
     
     # ADR documentation (ADR-0010)
     validate_directory "docs/adrs" "ADR documentation directory"
-    validate_file "docs/adrs/README.md" "ADR index/README" "false"
+    validate_file "docs/adrs/README.md" "ADR index/README" "false" || true
     
     # Role documentation (ADR-0002)
     validate_file "docs/role_interface_standards.md" "Role interface standards"
@@ -202,7 +204,7 @@ validate_validation_framework() {
     log_info "Validating validation framework structure"
     
     validate_directory "validation" "Validation framework directory"
-    validate_directory "validation/schemas" "Validation schemas directory" "false"
+    validate_directory "validation/schemas" "Validation schemas directory" "false" || true
     validate_file "validation/configuration_drift_detection.yml" "Configuration drift detection"
     validate_file "validation/cross_role_validation.yml" "Cross-role validation"
     
@@ -276,8 +278,8 @@ validate_inventory_structure() {
     
     validate_directory "inventories" "Inventories directory"
     validate_directory "inventories/templates" "Inventory templates directory"
-    validate_directory "inventories/local" "Local inventory directory" "false"
-    validate_directory "inventories/test" "Test inventory directory" "false"
+    validate_directory "inventories/local" "Local inventory directory" "false" || true
+    validate_directory "inventories/test" "Test inventory directory" "false" || true
 }
 
 # Function to validate test structure
@@ -285,8 +287,8 @@ validate_test_structure() {
     log_info "Validating test structure"
     
     validate_directory "tests" "Tests directory"
-    validate_directory "tests/integration" "Integration tests directory" "false"
-    validate_directory "tests/units" "Unit tests directory" "false"
+    validate_directory "tests/integration" "Integration tests directory" "false" || true
+    validate_directory "tests/units" "Unit tests directory" "false" || true
     validate_directory "tests/idempotency" "Idempotency tests directory"
 }
 

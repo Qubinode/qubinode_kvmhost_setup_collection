@@ -32,7 +32,7 @@
 
 # Bridge Configuration Validation
 - name: Validate - Check if bridge exists
-  ansible.builtin.command: nmcli connection show {{ qubinode_bridge_name           | default('qubibr0')   }}
+  ansible.builtin.command: nmcli connection show {{ qubinode_bridge_name | default('qubibr0') }}
   register: bridge_exists_validation
   failed_when: false
   changed_when: false
@@ -52,7 +52,7 @@
 
 # Bridge Interface Status Validation
 - name: Validate - Check bridge interface status
-  ansible.builtin.command: ip link show {{ qubinode_bridge_name           | default('qubibr0')   }}
+  ansible.builtin.command: ip link show {{ qubinode_bridge_name | default('qubibr0') }}
   register: bridge_status_validation
   failed_when: false
   changed_when: false
@@ -90,7 +90,7 @@
 
 # IP Configuration Validation
 - name: Validate - Check bridge IP configuration
-  ansible.builtin.shell: ip addr show {{ qubinode_bridge_name           | default('qubibr0')   }} | grep 'inet '
+  ansible.builtin.shell: ip addr show {{ qubinode_bridge_name | default('qubibr0') }} | grep 'inet '
   register: bridge_ip_validation
   failed_when: false
   changed_when: false
@@ -156,7 +156,7 @@
 
 # Libvirt Network Validation
 - name: Validate - Check libvirt bridge network
-  ansible.builtin.shell: virsh net-list --all | grep {{ qubinode_bridge_name           | default('qubibr0')   }}
+  ansible.builtin.shell: virsh net-list --all | grep {{ qubinode_bridge_name | default('qubibr0') }}
   register: libvirt_network_validation
   failed_when: false
   changed_when: false
