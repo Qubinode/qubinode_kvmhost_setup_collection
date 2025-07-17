@@ -1,4 +1,3 @@
----
 - name: Include package management tasks
   ansible.builtin.include_tasks: packages.yml
 

@@ -1,4 +1,3 @@
----
 # =============================================================================
 # KVMHOST USER CONFIG CONFIGURATION
 # =============================================================================
@@ -13,7 +12,7 @@ kvmhost_user_config_target_user: "{{ ansible_user_id }}"
 
 # User account configuration
 kvmhost_user_config_users:
-  - name: '{{ kvmhost_user_config_target_user }}'
+  - name: "{{ kvmhost_user_config_target_user }}"
     shell: /bin/bash
     groups:
       - wheel
@@ -129,7 +128,7 @@ kvmhost_user_config_dotfiles_enabled: true
 
 # Git configuration
 kvmhost_user_config_git_enabled: true
-kvmhost_user_config_git_user_name: ''
+kvmhost_user_config_git_user_name: ""
 kvmhost_user_config_git_user_email: ""
 kvmhost_user_config_git_default_branch: main
 
@@ -219,7 +218,7 @@ kvmhost_user_config_validation_enabled: true
 # LEGACY COMPATIBILITY
 # =============================================================================
 # Support for original kvmhost_setup variables
-user_name: '{{ kvmhost_user_config_target_user }}'
+user_name: "{{ kvmhost_user_config_target_user }}"
 admin_user: "{{ kvmhost_user_config_target_user }}"
 create_user_dir: "{{ kvmhost_user_config_home_setup }}"
 setup_shell: "{{ kvmhost_user_config_shell_enabled }}"

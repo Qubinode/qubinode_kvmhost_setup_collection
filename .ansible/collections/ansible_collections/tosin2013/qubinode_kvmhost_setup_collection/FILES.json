@@ -379,6 +379,13 @@
    "format": 1
   },
   {
+   "name": ".ansible/collections/ansible_collections/tosin2013",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
    "name": "test-modular-roles-2.yml",
    "ftype": "file",
    "chksum_type": "sha256",
@@ -543,7 +550,7 @@
    "name": "roles/swygue_lvm/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "fbdf2f211f5097800e406a41babc589e2e82e27dfe5cf61653b6153ffa2efc39",
+   "chksum_sha256": "a766a111608606f8403683f0c52c10eb15a5db340f2e979a51c9f0d6ef371b44",
    "format": 1
   },
   {
@@ -557,7 +564,7 @@
    "name": "roles/swygue_lvm/vars/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "3c853d7364f2879b9dfdb505e395d3a906c6829d9ce500c29443353e53354da5",
+   "chksum_sha256": "a44a9edef4987d3d05f5cd7a2a2b4810f3483dadb0cd174fd2d6c14ab4cd3d90",
    "format": 1
   },
   {
@@ -599,21 +606,21 @@
    "name": "roles/swygue_lvm/tasks/deploy.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "d695789d88865d9f083d59c4947ff689c7ca6c5c1fa9e5e08b1153bebfe756d6",
+   "chksum_sha256": "4c2e901dbfc4fda4592f33d6fa2340126f1c0cbf00ef59e64264de4aec0e980b",
    "format": 1
   },
   {
    "name": "roles/swygue_lvm/tasks/precheck.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "896f784c2a77583a51cb63befd3786e0c16a4625cd1bae09807100f52985bdb5",
+   "chksum_sha256": "1e26c12e092353c8bb0f3d90a3971e93a3aa9a986e5172e7bd2035d22beee7e3",
    "format": 1
   },
   {
    "name": "roles/swygue_lvm/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "7f5e1f78deda75f9791cd82283440a59b05ba1fb1753d40786802536a93e4539",
+   "chksum_sha256": "f42438d631d6aee97a6be83115eed1c8ddbe6d6b7b15e1b9491bc769aaf01a34",
    "format": 1
   },
   {
@@ -627,7 +634,7 @@
    "name": "roles/role_config.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a97da7b3017b02e0d3b21069efecf085defd9cdc8e790031af53bb8bb6bf235a",
+   "chksum_sha256": "07910f4f2de0b83aef14a496b9c3b25215657b786780f8c2c2cd8124734c5600",
    "format": 1
   },
   {
@@ -648,7 +655,7 @@
    "name": "roles/edge_hosts_validate/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "596dd5eb331d6f7f9423d5aeb4e434cd618b5ee989cf44110ed11ffc21b85ee4",
+   "chksum_sha256": "8a0ece86d6185005ab8ef0a028d5e4840192e29f04908910c1fca81c2af54aa0",
    "format": 1
   },
   {
@@ -662,7 +669,7 @@
    "name": "roles/edge_hosts_validate/vars/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "03221163cba0cdf71a7f3b73f93e61c27df27de512ee04407072ca8e34a7ddf5",
+   "chksum_sha256": "03e3bffc24854e286e1a2d4e3b454ac640d38744566715304d7d1bab13e829e6",
    "format": 1
   },
   {
@@ -676,7 +683,7 @@
    "name": "roles/edge_hosts_validate/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "c28bc077aff50986e5dc03ad29ca1ad910fb10a796c4809b674b00dc990a7360",
+   "chksum_sha256": "11048f0ab8ec8f821902f62a33a43efaaa8379f8430b2effeb9881abb1e7f73f",
    "format": 1
   },
   {
@@ -690,7 +697,7 @@
    "name": "roles/edge_hosts_validate/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "55a632f2d3887c7c734928351c0259dfcac4f901dff6f85af0f086ba74c704cd",
+   "chksum_sha256": "6aeb317b7e62379da6daaf5f7337dae12c668072c2a40e7b69a7ba8d8b6920d1",
    "format": 1
   },
   {
@@ -704,7 +711,7 @@
    "name": "roles/edge_hosts_validate/tasks/validate_pkgs.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "aeae2e74b7343359f164fe1c0ce646eccf829d0b9818a02199ab399443b58e08",
+   "chksum_sha256": "4906ccf6bd23d273738e455b8974b8eaabbdd3e9bfe1452ffc937d26dc4c0f79",
    "format": 1
   },
   {
@@ -718,14 +725,14 @@
    "name": "roles/edge_hosts_validate/tasks/validate_fs.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "46c1af5282deeb356aaa109c819b51b26008c68c82d03daab18840be94c05de3",
+   "chksum_sha256": "d51609a53655314c2ee1bac21bdc72ead77fd8165b7b57e713a8a55959b433ec",
    "format": 1
   },
   {
    "name": "roles/edge_hosts_validate/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "fc6a78426f33eb1b0ea5e418eb2f5c28862d2a2107466aee3faad2fe5b36a33f",
+   "chksum_sha256": "5c22465453405f86e31944faaad94dcd7fc50386447018efa965f63adb8a9acf",
    "format": 1
   },
   {
@@ -753,7 +760,7 @@
    "name": "roles/kvmhost_cockpit/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "f1e81defaa428ab88962a53afda949f1d1eb07ddcda6228c8279a44c152cec1c",
+   "chksum_sha256": "6d1056b0d5ff3a1dbe41e97781dc731a009d8934b6c9a6be18ffa5c7a17b643c",
    "format": 1
   },
   {
@@ -767,7 +774,7 @@
    "name": "roles/kvmhost_cockpit/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "e544f691e71d243776ce2ee4a810929ff77ddbaef2022710039289431f079c3e",
+   "chksum_sha256": "8ecf3ebee340f64e80796faeac66e600cbd1ff90d02cad710f92947d07c585ca",
    "format": 1
   },
   {
@@ -781,7 +788,7 @@
    "name": "roles/kvmhost_cockpit/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "3a4b9e9a306bf972d73bc13c8c12371621733f78a9f5ea8682277b018e616bc3",
+   "chksum_sha256": "878d06871a2be9eaabaa176f1d91977333044d7ce709f1fe39ceee6299c764d4",
    "format": 1
   },
   {
@@ -802,14 +809,14 @@
    "name": "roles/kvmhost_cockpit/tasks/validation/dependencies.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "6e68e98eaa61844d2c22131ac6b96808802f5dcf01ba62f778edfe873194a1d4",
+   "chksum_sha256": "6c4b00ce6189a78e4d72de646e74614eb8f620cc70000b8ff346830d2719a507",
    "format": 1
   },
   {
    "name": "roles/kvmhost_cockpit/tasks/validation/cockpit.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "04bd76bbff133b8376ad10e4b2d54cbb3065b4ede1749365fc7608b3e50a786a",
+   "chksum_sha256": "2d8f8027269467967ec97c1fd57cd82a28cfd37ec86ae133256ca8b56e513ec6",
    "format": 1
   },
   {
@@ -823,7 +830,7 @@
    "name": "roles/kvmhost_cockpit/tasks/setup/packages.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "888524a9037cc1e19e45b97ce7e24d8edc2828d0aff84b1aca9bb84b2e1d4060",
+   "chksum_sha256": "b681ce10dead13e925a02806c76060135408b14ccede1330cb628c7e99eb58ed",
    "format": 1
   },
   {
@@ -837,35 +844,35 @@
    "name": "roles/kvmhost_cockpit/tasks/configuration/service.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "178cb2bbf47bd98243a2dfd080fc4dbdb11a14f72256853231cb027badd772f6",
+   "chksum_sha256": "0cd38158f846772cfc97296db852c9c239b716a3659b086ae3b1a92b8e01de75",
    "format": 1
   },
   {
    "name": "roles/kvmhost_cockpit/tasks/configuration/ssl.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "2b0cbc604087ac1514f59b1c4918fa2d3e8f49839af234e9d6cca9f3e6a33ec5",
+   "chksum_sha256": "2feea1f06e2bfc5c0a5dc9136a96470716cf79b585cacef9351352a0bf298949",
    "format": 1
   },
   {
    "name": "roles/kvmhost_cockpit/tasks/configuration/firewall.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a95b29cdf978e62a3a7fe1e649715df589e0e0098aeccbadac342cda2f519b22",
+   "chksum_sha256": "d642313dc0dbe9acd6dbba863d7e31169694a8f97d40ada94c360045c843e21e",
    "format": 1
   },
   {
    "name": "roles/kvmhost_cockpit/tasks/configuration/authentication.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "d77ab4db15781fc989115a70b7f0c1ed3f1cbc30356c42ba8b5bd7192d80b228",
+   "chksum_sha256": "0df24e542471190904da09112a7132bd5870b2802cfea21c9c014c9aabcbbc42",
    "format": 1
   },
   {
    "name": "roles/kvmhost_cockpit/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "004b0432919145a2addc0442b93e7bd8312f47e801f24ab3d6bab14678e8c5b7",
+   "chksum_sha256": "89ddf1ba307e4c6830d41eb010583d102c05cfa333e06d07a9622239554e55fa",
    "format": 1
   },
   {
@@ -928,7 +935,7 @@
    "name": "roles/kvmhost_libvirt/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "4ef252cbf6ad912bd4d382c4bc504940b2b04bafab85c2488f4c6dcb991dc327",
+   "chksum_sha256": "222d0a5ae8aac7c90e6cfbf089e4310d71b76036231862dbf89c6b9f62c0341f",
    "format": 1
   },
   {
@@ -942,7 +949,7 @@
    "name": "roles/kvmhost_libvirt/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "bb18198ea317d879c6d7f9ebe9238992a07fcd391c3ea311fcbaccaf0aa7665d",
+   "chksum_sha256": "1dff5e37cf17d29c49f7f1d0f939ae1c157bc512be8aab7671d2f608ca50306a",
    "format": 1
   },
   {
@@ -956,7 +963,7 @@
    "name": "roles/kvmhost_libvirt/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "d44831046d16850aba5aefc3b3daa6aa5b9e0a91d236191c8c20b605e8a5302a",
+   "chksum_sha256": "d3b3f0eaed924e4fbc44058593eb46ca3c4d151ce4ee4c5ac50d269dfc0f8b81",
    "format": 1
   },
   {
@@ -970,49 +977,49 @@
    "name": "roles/kvmhost_libvirt/tasks/services.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a6b9f63fc464f41d4b7803ea153e935a16897d5415b2d6c077463b67d10a8677",
+   "chksum_sha256": "063f37a50ee8f82f35f50a9c5404d0812cfad05eb2b4dcd71b345abaf56bdd81",
    "format": 1
   },
   {
    "name": "roles/kvmhost_libvirt/tasks/storage.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "76db9ef9d9dcf6292308908bef52cf343ffe3b38723228d2623e358f4f607f64",
+   "chksum_sha256": "6c2700891247643cd65913073991e77fffe4c92785fade79750aa978279e7d16",
    "format": 1
   },
   {
    "name": "roles/kvmhost_libvirt/tasks/create_network.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "35fa8c67a0b6f95cd2c044bf4dc3d29f896225c7424eb7d84b26bd8e53b1555f",
+   "chksum_sha256": "3d5240b5cc78944d3e210fcf940ed576c32816f92fc8073e5f03e18443484e3d",
    "format": 1
   },
   {
    "name": "roles/kvmhost_libvirt/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "6be97d35ebf1c0adb47487d31ef4b66a006aa7d86d5d73bd2e656812f9f1c282",
+   "chksum_sha256": "7bf5cd4d3ca1b634f10d98d4dc2adf99c7211e5312d77b3cdd478d93b9034a61",
    "format": 1
   },
   {
    "name": "roles/kvmhost_libvirt/tasks/user_access.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "0c7aa6228cef426dffa6b4b13cd7fbd50d7a64ad2460c343b07d776f73c053b8",
+   "chksum_sha256": "58b008b7709c7fcccbbd0a0eb5a476ec39c6812e3dba8b4f2f71dea6cf1e47ec",
    "format": 1
   },
   {
    "name": "roles/kvmhost_libvirt/tasks/networks.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "d12b3c128f11aac7fed22d955e0cc30387005d8474cec6645a2f86d91b9ea817",
+   "chksum_sha256": "f968d8b585eae19f77777d5112ddb4aac176fafbecbb7c66f5c5f172413c279d",
    "format": 1
   },
   {
    "name": "roles/kvmhost_libvirt/tasks/validation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "2361d772eac1c7322d8f904a7d76fdf950fc0e1dc35e4d7d29d37e85728fcb4d",
+   "chksum_sha256": "0dc1a7bd82ff7872a6b181e18c540dda62ff077e893290eeca7d52128309b07b",
    "format": 1
   },
   {
@@ -1075,7 +1082,7 @@
    "name": "roles/kvmhost_networking/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "5ce6ebb082b5a7811268f641ca177f10e4a8a9cf065219902520b4b83c7afb58",
+   "chksum_sha256": "a9295cc37f54cce1a0641813958f0db5c591c124cc08733f3f9e2a59878c0905",
    "format": 1
   },
   {
@@ -1103,7 +1110,7 @@
    "name": "roles/kvmhost_networking/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "6e3a93834afd71f66a6fb6a99725169432ec684cd608284e4bb4e65682d3430e",
+   "chksum_sha256": "926270f5b3cbbcefae5f45fcc6c70e13689ebafc5f0f468973beadaa582582db",
    "format": 1
   },
   {
@@ -1131,63 +1138,63 @@
    "name": "roles/kvmhost_networking/tasks/validation/validation/schema_validation_networking.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "9ca97cde7e3a7f1970fc3e0197f83b05b7d3657cb176716d4ea2861360e729e9",
+   "chksum_sha256": "d1dfd3a8fceb3198c5676262c2db22593cf1c2d277e4b91d1124e7965da303a6",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/validation/validate_network_item.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "f534e8ee5509d42c097ebe5aece7ec758321c535cf0bcbcd01c9f8418c34fb61",
+   "chksum_sha256": "c8f1e44fccaf1482dd30b692c82d42a3cef0c8360d259c12b5a723dbf81924b0",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/validation/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "4b2819bf37f1e2399f5719fe8a16a5d4c79206b968ba6c61a8d71d3aed38cc03",
+   "chksum_sha256": "6ae56ca9e81f534d5afe278fdd0020c0c4fe82fb2170a528a5d35c956d6670f1",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/validation/validate_dhcp_item.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "5dd4cb71a75778a745b198f30ce8c1c720fa14a1f76eb9275789fa170669e9fa",
+   "chksum_sha256": "22eea59f0d6bca0064c067b3de20716e9e0a6ba2d3d58b56d310beb966f51111",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/interface_detection.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "20b095266d8189705fcf3ee3683e60fa9301aeaa2b0a7d2d45faac9aa54ff8a9",
+   "chksum_sha256": "0fbc716634911408bfafa8301b90d0a093fb28ff193c35a95468e3f1c71f7709",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/preflight.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "6a4b7bdb0adc3dedd707ec7c3abf9b12a8af725c3ec082832acb898e6f55a384",
+   "chksum_sha256": "eaa3fb2ececf1f3658bfd5566ebeb149364da8a6d090fc37f409cc68de199345",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/network_validation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "aa5234e67b053752c0581bd33b5f0b1af2399838da1d6b1337d75f7f452493b0",
+   "chksum_sha256": "53d8cf257c042d18ac219ad495953c127fba7efaaf270bb45465dec063fae462",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/bridge_config.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "23dc069f3ced581c2ae90b46d018fb8888b65cf131e2e7bded26087bea726e30",
+   "chksum_sha256": "322021727d24cdabc9a8935437740c77af8a6539a48d4c9e6929c39dffd52676",
    "format": 1
   },
   {
    "name": "roles/kvmhost_networking/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "37b777ffafbb1389f95406dd191872aaf343e37612d8850645cf822f52bba94e",
+   "chksum_sha256": "b97bc3bf1af11172e8cc15fbe7b150d969d2e658052282e69617337c8d8a1e2d",
    "format": 1
   },
   {
@@ -1229,7 +1236,7 @@
    "name": "roles/kvmhost_storage/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a4b566eb12248d23ca64e217f58acd93d229d20f445b722bc0f92e0c361ca619",
+   "chksum_sha256": "9006cb2757650de6d584b423576db74024f5db25b77d949ef261e50ce48e3817",
    "format": 1
   },
   {
@@ -1243,7 +1250,7 @@
    "name": "roles/kvmhost_storage/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "dbc4d5a4dc71d0243d4768ed94af5153320887bffdecf049540d50431db0edc3",
+   "chksum_sha256": "5a3adee20246a1df1e6b9f8881d2d539d67b9cf05e288ab36c7b4acd98676f6f",
    "format": 1
   },
   {
@@ -1257,7 +1264,7 @@
    "name": "roles/kvmhost_storage/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "0184aaebd3f719bea1ced02fdc648bc6599edb938025dbcd9b790ba579040046",
+   "chksum_sha256": "4722a6d08e3087e5f98eb2eb56c3c77e1cc9caae3c939f9aec9baedd14f109fa",
    "format": 1
   },
   {
@@ -1271,49 +1278,49 @@
    "name": "roles/kvmhost_storage/tasks/advanced_pools.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "b7795b7b5f8ac1bf5a3c2a701960d8004cd67e4fc8cfbbfedf6cf9dd0eba05e2",
+   "chksum_sha256": "a56c92652fe923747a452ca9be78b64b717ec240bae905f621cfed660c0719ca",
    "format": 1
   },
   {
    "name": "roles/kvmhost_storage/tasks/backup.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "dcf53c0729e8417f5927f0bc3f65a1e7177abd34a22e5ba93ab61480238ddda7",
+   "chksum_sha256": "3147076ec56672138e60a7064fda7d307ba15d25425179ae1e678adc88a57199",
    "format": 1
   },
   {
    "name": "roles/kvmhost_storage/tasks/performance.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "ddaa777beb9426d0a86aa1d4bb5081961cf2b5bbc7ff6a3fcbb6486346b22151",
+   "chksum_sha256": "c90d8ed53c7cb66f3a6a9550bff32a633234dff5aec134578c245560d89f567e",
    "format": 1
   },
   {
    "name": "roles/kvmhost_storage/tasks/monitoring.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "9a621ab5496910b42870653a82d46113a23790dd609ca2f13ee50295dc7b0147",
+   "chksum_sha256": "262fb6000f81868da644927934f640ee964999a947d8d927666742d70a0d82ec",
    "format": 1
   },
   {
    "name": "roles/kvmhost_storage/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "6807b5818932db4e6d25b345b4e77f2aef5a0079d6a34aba82809076485e90cf",
+   "chksum_sha256": "e667676b5377b13b7dfe6235e43970ec8c5a1b161898011cf70da4dc6cd7234c",
    "format": 1
   },
   {
    "name": "roles/kvmhost_storage/tasks/validation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "68b658ffda6893c9c869b697f9d0a869e6292fb4c6df37ee79229d342163a062",
+   "chksum_sha256": "424bff1b1ef017f6b8e8dd85d901f20c2450efa9d6ea059b86a3b602c878dfa0",
    "format": 1
   },
   {
    "name": "roles/kvmhost_storage/tasks/lvm_setup.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "dcf50f87977ad55f214afddae64d45522732429d565e50c1cc50d4c6dec39085",
+   "chksum_sha256": "3a0314cef42e4ce67bc563404c14bad81d4be693e69b3ed5a098a5f88fa75698",
    "format": 1
   },
   {
@@ -1369,7 +1376,7 @@
    "name": "roles/kvmhost_setup/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "f809262f09381ee39618390e863f5f302c4b121f01f76f0b2628461390450680",
+   "chksum_sha256": "5d3d64e8e39102a26dff2d82f59608d09ba8e2ac7022ff6856b57b035035bb54",
    "format": 1
   },
   {
@@ -1383,7 +1390,7 @@
    "name": "roles/kvmhost_setup/vars/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "cbee519df778040876c0cf9fd27e3ad0c0489d04e383230f012d68b584579594",
+   "chksum_sha256": "5f7cc68eceecdf409370bc0ef607517ac76937dd51a535f9df2680c3b0400cb6",
    "format": 1
   },
   {
@@ -1397,7 +1404,7 @@
    "name": "roles/kvmhost_setup/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "b74b94ffc37076989ed69cce3708959c3a46f4c1ea8b72683173f1a37bf87caa",
+   "chksum_sha256": "008e3411c3db17625cd057d444aa77c09ddae9fb2a4fd552d41d02598906eeca",
    "format": 1
   },
   {
@@ -1411,7 +1418,7 @@
    "name": "roles/kvmhost_setup/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "d43593cc316eeed6a7c1919c0d7f4582c944f44ec3a2ef7a716a95794a1129b2",
+   "chksum_sha256": "740109da5c13470cbf916c057d7d4f86e8260a0acd67dd21ba78c96d2539912d",
    "format": 1
   },
   {
@@ -1460,35 +1467,35 @@
    "name": "roles/kvmhost_setup/tasks/validation/validation/schema_validation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "9ca97cde7e3a7f1970fc3e0197f83b05b7d3657cb176716d4ea2861360e729e9",
+   "chksum_sha256": "d1dfd3a8fceb3198c5676262c2db22593cf1c2d277e4b91d1124e7965da303a6",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/validation/variables.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "dc2f3b665753856ed95b648c49cff6da3bedc010a44e0f3b94f4c5e9cee7556f",
+   "chksum_sha256": "9f4f3e5b2bb2dea5d75c883635e520a6ba1b1d2f4d35dfea8b8c30f768d3035e",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/validation/preflight.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "eb6c9b2ed0d3237f5d46fc013f5be173923ad5d13ffe4a147af3a90339f9864f",
+   "chksum_sha256": "8849330c2a8b2a9a35ea890e03d37004637bfc5df5e03e2cb16dfdceed9ba2f8",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/validation/prerequisites.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "4cb033df565d28e9e8c633c64ef0f6b95d05d1743a510a98aabb2e1638e3d2b5",
+   "chksum_sha256": "707cd4a5987a19a796617f4b4c855a1cacd1844df40dea42aa8d1229c3e07afb",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/validation/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "0059044d5859dcfe85f718ee529e26f1adb3fff347e297e6573c8ac71545c449",
+   "chksum_sha256": "68be787114644647f1493b2d755b600a2fe58142c6d783bb26265946c5b6e986",
    "format": 1
   },
   {
@@ -1516,63 +1523,63 @@
    "name": "roles/kvmhost_setup/tasks/setup/libvirt.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "2f01f1912aab1faabd8d094c5f3e222f8daaa9c34ced6a2e5b2af51cac030fd2",
+   "chksum_sha256": "13a5df0dd8c81979c09efda1304a6667c04f487aee4fda028602e20899130cc6",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/k9s.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "9de691b3f19f651f7225ee7a0f3224533deff6e6bd1d9ef639b98e602d9e9704",
+   "chksum_sha256": "4ecac0f6685bbde9e72f4fd986b69d0b812ef06c36bd330a829d765df6552a27",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/storage.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "8e4030219b3047f3c7518842aec2867d2b9f4a776e9484d0abd64c0b21caa48c",
+   "chksum_sha256": "a0c65bdc10055b30cf056a8edf9b85d243fc3585daf7d0a5ec5927d274b527cf",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/packages.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "ab1b3b2328c31c3e120d1e3ce1d3bd9898ae3319bd7d56aad49931c96af9a3b8",
+   "chksum_sha256": "ccd31020edcf7a9d5664882680262ee638adba3c2a5f5e2b084041c6cca97630",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/networking.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a98164f42c8d8f7e0c9f2480cdfc5ed7769ebb9cc6e71ada466f3ced12762459",
+   "chksum_sha256": "3e007dd8b4e249ba75d87f9b3a632e82ad35d7949269c9ace3dbd9372685b265",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/network_validation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "f55d8116e23a585d974a68fb0f0a23812b2a4dafde439f3f1c6a3cf3c59b4574",
+   "chksum_sha256": "c5dab616cb49d1a5a4ad13ce5f18a3085c065c2db4eb8093aafa273963632946",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/automated_bridge_config.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "52944eadde0e60f80ebdfee3e4b278d14359191710eb16f070a606b698683400",
+   "chksum_sha256": "0b557f7040898500bcb706ede9dcd14e49db3957d428c3db2ce176bc09abd166",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/setup/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "ea85b12177e4968b1fe7568391e05789c3ef0eab9d8d356ac5191d13d2591e1a",
+   "chksum_sha256": "62f0a64b6885587404fe00d0dac940019298b205f5c0eaec019bc814ddbf7796",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/user_libvirt.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "9542c048d166829b7dfaa00867b89f05517fc3cf147fef23bec9050eac12606d",
+   "chksum_sha256": "7c4fe144a47a9dd87df6766300ffd49bd9efbdc23573c687aa8f298cedd94229",
    "format": 1
   },
   {
@@ -1628,7 +1635,7 @@
    "name": "roles/kvmhost_setup/tasks/configuration/shell.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "882f509cf6e19875beb6ef45a3730026fbf6b1e20914a1b6d83ba2ad28c89d5c",
+   "chksum_sha256": "ed728e7a5701acdfd58cc4ebfac2314ecba3d1948ef03c96a5497c6d754be947",
    "format": 1
   },
   {
@@ -1642,14 +1649,14 @@
    "name": "roles/kvmhost_setup/tasks/configuration/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "4e6d418cb4febad789a08022cb415bfc43702ccb1898f490432d8e70f7261cbd",
+   "chksum_sha256": "7a0d536b96dc5e0cbea4ebbb1a9b1146f57726ccb1d1c1bba30f47503668fc53",
    "format": 1
   },
   {
    "name": "roles/kvmhost_setup/tasks/configuration/cockpit.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "3f0691874c72786c4863b83bd2642df552d8a1bc53a2ad8825ce3d4bde9ccb37",
+   "chksum_sha256": "32b599e5a5b15f610936bfe1ed0c2507a9b50b10666777dbc18bfd74b34cde8e",
    "format": 1
   },
   {
@@ -1684,7 +1691,7 @@
    "name": "roles/kvmhost_setup/tasks/kvm_host_validation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "5ad047db380ee5d5a3a7ca6874c6a3eb312f8c00d0c6cf961e8ea6ab21509b04",
+   "chksum_sha256": "58b57d5b0f8f54b0ab3a1cb953be3252e762c757616fa553788578cbee25095f",
    "format": 1
   },
   {
@@ -1726,7 +1733,7 @@
    "name": "roles/kvmhost_setup/collection/requirements.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "2bbadbf482d5dddc9ec77c6dbce7402f511bdc318ddea040b0859588fcb47fe5",
+   "chksum_sha256": "e5bc2ef02cbcdd5cb13fb273d0bc61c9ab7ab85b7af9eacc6558336fc0c07107",
    "format": 1
   },
   {
@@ -1838,7 +1845,7 @@
    "name": "roles/kvmhost_base/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "b9259068595298daa5e4a886fee1b2fe4b6818cd65f50edb5b2c3374383fea42",
+   "chksum_sha256": "a84b30c9ad6e0862893e25215bd234b4d47e6297aa9a30a200900b33d958c72b",
    "format": 1
   },
   {
@@ -1852,7 +1859,7 @@
    "name": "roles/kvmhost_base/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "19c059fae477b9fdf0601f889fe98f77adbebc0e426780c1d9582194692f0048",
+   "chksum_sha256": "fb4cf1550aad742f0188cc048514b67f90f552508a7c1271589fdf24076cf841",
    "format": 1
   },
   {
@@ -1866,7 +1873,7 @@
    "name": "roles/kvmhost_base/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "0bf660cbb2cbc909a784c8d79801e12c3c07035b795242860a44c67965572fb0",
+   "chksum_sha256": "3c817130fc06cd9587e95ebf87ce3298b5e456f10ffb548502da5aa6598aa7a6",
    "format": 1
   },
   {
@@ -1880,7 +1887,7 @@
    "name": "roles/kvmhost_base/tasks/validate_os.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "04a1876b7ee843fffe8d64a956332ba5b0c89f821c3ec3e3a6f333b9f346326c",
+   "chksum_sha256": "fc7a5d2cdd3a8d77ddde3d4b5e3998a6b1f83e06e24d3b8a7ccf18013d1c50ad",
    "format": 1
   },
   {
@@ -1901,49 +1908,49 @@
    "name": "roles/kvmhost_base/tasks/validation/validation/schema_validation_base.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "2b2f06c5cf12e511131fd714781191e59ceb8ec92fd3001a4282d16d303e6039",
+   "chksum_sha256": "34df36806c5130005d8e7f4352959876c7b4c59ac5883a5cd64b687a4c5c8fbb",
    "format": 1
   },
   {
    "name": "roles/kvmhost_base/tasks/validation/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "157ee053d24875a30a3957357cd79bcdc4c95c5a690c550f4f1ddb4195528336",
+   "chksum_sha256": "bfbc123b65189ef5ea45e30fadd312163e50a446c5ec2bb759a2f841c27812d6",
    "format": 1
   },
   {
    "name": "roles/kvmhost_base/tasks/services.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "1407c48b30a30a70b44c12ccad076c36103083de42f81ffb359510543307c94d",
+   "chksum_sha256": "2ad88f2bf69dd1621e03940867e4dbee2bcb0a68674f0adf8922e40b9e7ef217",
    "format": 1
   },
   {
    "name": "roles/kvmhost_base/tasks/os_detection.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "c7b7e3c9846bc67ebf54ab6bc9ea5fbd871a2e61539740724a8cc86ba427f228",
+   "chksum_sha256": "966acdf0a2cbb7be26e4b571ea0bde51e76e1da72576b6a6765165e5c25d8e66",
    "format": 1
   },
   {
    "name": "roles/kvmhost_base/tasks/packages.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "c6c787884e1abed5987d69a195ca974fd82b142936744f911ed392feb9beecb7",
+   "chksum_sha256": "b2a9b636596da0644fd6f0c34c0f4c544e7ddd9dfd133ecf7f5f39502fcfdfca",
    "format": 1
   },
   {
    "name": "roles/kvmhost_base/tasks/system_prep.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "74f4f0c775e6d39aec4ea62f5d32719ac19aec227c63561f37fc3601d7f5e825",
+   "chksum_sha256": "ac21419a3495c5707689444e37d5c0505e52a80ad13292bd7cb582a44c3c624c",
    "format": 1
   },
   {
    "name": "roles/kvmhost_base/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "01ae050b1d0a58468d1e58ae8eeee4f12cbcd3b36977fa70879900b5efe6a490",
+   "chksum_sha256": "63a6992ef6e97bd2afc4be0b380333018933dfaaf495ca77cf1aea9695e3b148",
    "format": 1
   },
   {
@@ -1971,7 +1978,7 @@
    "name": "roles/kvmhost_user_config/defaults/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "c7907590c5a5f368b4a2db48ad464571cd678fcc6c5510ed6b0a866a072fcc57",
+   "chksum_sha256": "6b92f0d5e1e6adb173cfa2abe65261f9252c2d77d0934c0b5191f47136893a61",
    "format": 1
   },
   {
@@ -1999,7 +2006,7 @@
    "name": "roles/kvmhost_user_config/handlers/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "3a0b35b821a72303b49a574648f0635dfbf1b690f4c2fcdb427016d42a71dbb2",
+   "chksum_sha256": "1b333cce650c3284a9f5d079645b13a303d60d00668e623ce56a9aa5278cf24c",
    "format": 1
   },
   {
@@ -2013,7 +2020,7 @@
    "name": "roles/kvmhost_user_config/meta/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "ac4fcc20945da2c79da474ccd511b0df1950bd9e78023a489cd0390618b786a4",
+   "chksum_sha256": "e6e120b63830f09cfa6fbccd3adbfa17b925b5796172ad9e9b8b6e84a3f10e67",
    "format": 1
   },
   {
@@ -2034,14 +2041,14 @@
    "name": "roles/kvmhost_user_config/tasks/validation/user_config.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "5c18471d2e0187804d14d6dc91715e51d2cbbeca84807c32d53ffa93e5e5ed62",
+   "chksum_sha256": "aa180a8d04eae7322c44b86a8dcebf36550cc4a761000dea2a0545f43ef4f579",
    "format": 1
   },
   {
    "name": "roles/kvmhost_user_config/tasks/validation/dependencies.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "39b81b1e6f827fd15fbe312bdb3522c5e44008abd6fb47b1499f125e6081d5ab",
+   "chksum_sha256": "52917331f927dcac99cd1195990cab5c0abe942e6e6ea2219c214bcc5058ee1d",
    "format": 1
   },
   {
@@ -2055,7 +2062,7 @@
    "name": "roles/kvmhost_user_config/tasks/home/directory_setup.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a89ac482e91fe439252377f6b2226d76ea075fcba296639941239ec66d267578",
+   "chksum_sha256": "3aa40cbefee4cfb18c36c1ccc07e80c2f6cb70be82c4f9c27c52f5c2cf0f4bf7",
    "format": 1
   },
   {
@@ -2069,7 +2076,7 @@
    "name": "roles/kvmhost_user_config/tasks/environment/variables.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "42440f2e5c8ffee42309ee9068ae3a6b5e0330e5fdbd7b085242fd89846906f8",
+   "chksum_sha256": "8a15b466a073f21eb1fa94e9c8b9ba75fd71d98deabaa642c7dfea9f922e682f",
    "format": 1
   },
   {
@@ -2083,7 +2090,7 @@
    "name": "roles/kvmhost_user_config/tasks/shell/configuration.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "30ce10c451f9ca26561aaacb057afc135611e6a55063dbba4650b151a3b052e2",
+   "chksum_sha256": "fd7fd6b82e2b4d9aa127642fc23d3f43b25d1f59ddc959869b4ae6e4411d561d",
    "format": 1
   },
   {
@@ -2097,14 +2104,14 @@
    "name": "roles/kvmhost_user_config/tasks/users/permissions.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "f1c0e75dabb2f614eda2ca6f23f952350ecca9d5102e4f089f38788e21b65ebe",
+   "chksum_sha256": "9d77bcef87bd8d694ce3b6ec271c05affd2d5f80301f233a78d8c395ee0d9343",
    "format": 1
   },
   {
    "name": "roles/kvmhost_user_config/tasks/users/account_management.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "a091a8a7b8cb387e9193fcd946910da500270d4d8c97904c4603fe288cdab855",
+   "chksum_sha256": "b23689e26b6bbc3f697775497ce3957a6a43d0efc6ad8113c4b6f9477b67bf82",
    "format": 1
   },
   {
@@ -2118,7 +2125,7 @@
    "name": "roles/kvmhost_user_config/tasks/tools/installation.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "8a0696029cc57ed8076cf78ff1b6be714d9e77a63e5b2d006b459f65ad32762b",
+   "chksum_sha256": "1b34cb2b8f0a85c7a497bb7437780c33e30ef6e891235505412f966b7c9e02e1",
    "format": 1
   },
   {
@@ -2132,7 +2139,7 @@
    "name": "roles/kvmhost_user_config/tasks/ssh/configuration.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "0b0d6a56b1f494c9934b79cddc07175b59034fd993cb06976ef9cc639ebc304e",
+   "chksum_sha256": "ade2dd02f454d426cd21dc74c1994be228ed31a16bfa0222d4b9f203b480551f",
    "format": 1
   },
   {
@@ -2146,14 +2153,14 @@
    "name": "roles/kvmhost_user_config/tasks/dotfiles/setup.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "c671a6b9e074a32b72c9e4d2aab2eab76b78029a53d35ccc8e698ca4895e8cf7",
+   "chksum_sha256": "8bb228d0e4202d613919ea3759023c6cefba629ee8bcc4af97224c8cae1a3ff3",
    "format": 1
   },
   {
    "name": "roles/kvmhost_user_config/tasks/main.yml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "51a208225e0dab15eaa733f57702f25b0807513293cba4de8652dfdbe88924ff",
+   "chksum_sha256": "298cb8a92fe6fd0beaf53f74951f2aeaf3167cec806d6af50e4562602cfef91f",
    "format": 1
   },
   {

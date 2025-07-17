@@ -1,4 +1,3 @@
----
 # List of Python packages to install on KVM host
 kvmhost_pip_packages:
   - httpie # Command line HTTP client

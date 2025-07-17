@@ -1,4 +1,3 @@
----
 # Enhanced Network Configuration with ADR-0007 Bridge Automation
 - name: Network Setup - Get network interface facts
   ansible.builtin.ansible.builtin.setup:

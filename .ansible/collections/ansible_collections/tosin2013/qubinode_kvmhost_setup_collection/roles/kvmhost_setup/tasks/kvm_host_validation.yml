@@ -1,4 +1,3 @@
----
 # KVM Host Validation Checks
 # Based on ADR-0003: KVM Virtualization Platform Selection
 
@@ -39,7 +38,7 @@
 
     - name: Load KVM modules if available but not loaded
       community.general.community.general.modprobe:
-        name: '{{ item }}'
+        name: "{{ item }}"
         state: present
       loop:
         - kvm
@@ -215,7 +214,7 @@
       ansible.builtin.ansible.builtin.file:
         path: /var/lib/libvirt/images
         state: directory
-        mode: '0711'
+        mode: "0711"
         owner: root
         group: root
       become: true

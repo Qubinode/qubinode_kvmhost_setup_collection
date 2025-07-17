@@ -1,4 +1,3 @@
----
 # OS Detection and Version Facts
 # Based on ADR-0008: RHEL 9/10 Support Strategy
 
@@ -17,9 +16,9 @@
 
 - name: Set package manager facts based on OS version
   ansible.builtin.set_fact:
-    kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version           | int>= 8 else 'yum'   }}"
-    kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version           | int>= 8 else 'python'   }}"
-    kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version           | int>= 8 else 'pip'   }}"
+    kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version | int >= 8 else 'yum' }}"
+    kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version | int >= 8 else 'python' }}"
+    kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version | int >= 8 else 'pip' }}"
 
 - name: Set architecture facts
   ansible.builtin.set_fact:
