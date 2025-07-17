@@ -7,16 +7,10 @@ galaxy_info:
   min_ansible_version: "2.9"
 
   platforms:
-    - name: RedHat
+    - name: EL
       versions:
         - all
-    - name: Fedora
-      versions:
-        - "37"
-        - "38"
-        - "39"
-        - "40"
-
+  
   galaxy_tags:
     - libvirt
     - kvm

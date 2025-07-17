@@ -80,7 +80,7 @@ kvmhost_user_config_sudo_commands: [] # Specific commands, empty = all
 # =============================================================================
 # HOME DIRECTORY CONFIGURATION
 # =============================================================================
-kvmhost_user_config_home_ansible.builtin.setup: true
+kvmhost_user_config_home_setup: true
 
 # Directory structure
 kvmhost_user_config_create_directories:

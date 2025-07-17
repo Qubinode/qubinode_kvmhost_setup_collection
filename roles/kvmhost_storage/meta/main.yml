@@ -9,26 +9,7 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
-        - all
-        - all
-        - all
-    - name: CentOS
-      versions:
-        - all
-    - name: Rocky
-      versions:
-        - all
-        - all
-    - name: AlmaLinux
-      versions:
-        - all
-        - all
-    - name: Fedora
-      versions:
-        - "37"
-        - "38"
-        - "39"
-        - "40"
+        - "all"
 
   galaxy_tags:
     - storage

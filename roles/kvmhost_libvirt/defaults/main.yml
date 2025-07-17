@@ -12,7 +12,7 @@ kvmhost_libvirt_services:
   - tuned
 
 # Tuned profile for virtualization
-kvmhost_libvirt_tuned_proansible.builtin.file: virtual-host
+kvmhost_libvirt_tuned_profile: virtual-host
 
 # =============================================================================
 # STORAGE POOL CONFIGURATION
@@ -79,10 +79,10 @@ kvmhost_libvirt_cpu_overcommit: false
 # =============================================================================
 kvmhost_libvirt_dns_forwarder: 1.1.1.1
 kvmhost_libvirt_search_domains:
-  - "{{ kvm_host_domain           | default('example.com')   }}"
+  - "{{ kvm_host_domain | default('example.com') }}"
 
 # Legacy compatibility
 primary_dns_server: "{{ kvmhost_libvirt_dns_forwarder }}"
 dns_forwarder: "{{ kvmhost_libvirt_dns_forwarder }}"
-domain: "{{ kvm_host_domain           | default('example.com')   }}"
+domain: "{{ kvm_host_domain | default('example.com') }}"
 search_domains: "{{ kvmhost_libvirt_search_domains }}"
