@@ -102,7 +102,7 @@ jobs:
 
       - name: Analyze with Google Gemini
         if: steps.scan.outputs.fix-needed == 'true' && github.event.inputs.fix_mode == 'gemini-assisted'
-        uses: google-gemini/gemini-cli-action@v1
+        uses: google-gemini/gemini-cli-action@main
         id: gemini
         with:
           api-key: ${{ secrets.GEMINI_API_KEY }}
