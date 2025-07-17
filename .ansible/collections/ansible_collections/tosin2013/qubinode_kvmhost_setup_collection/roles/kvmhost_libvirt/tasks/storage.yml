@@ -1,4 +1,3 @@
----
 # =============================================================================
 # LIBVIRT STORAGE POOL CONFIGURATION
 # =============================================================================
@@ -6,13 +5,13 @@
 
 - name: Display storage pools to configure
   ansible.builtin.debug:
-    msg: "Configuring storage pools: {{ kvmhost_libvirt_storage_pools      | map(attribute='name')                |   join(', ')    }}"
+    msg: "Configuring storage pools: {{ kvmhost_libvirt_storage_pools | map(attribute='name') | join(', ') }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Ensure libvirt storage pools are defined
   community.libvirt.virt_pool:
     command: define
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
     xml: '{{ lookup("template", "libvirt_pool.xml.j2") }}'
   loop: "{{ kvmhost_libvirt_storage_pools }}"
   become: true
@@ -21,7 +20,7 @@
 - name: Ensure libvirt storage pools are active
   community.libvirt.virt_pool:
     state: "{{ item.state }}"
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
   loop: "{{ kvmhost_libvirt_storage_pools }}"
   become: true
   register: pool_active_result
@@ -29,7 +28,7 @@
 - name: Configure storage pool autostart
   community.libvirt.virt_pool:
     autostart: "{{ item.autostart }}"
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
   loop: "{{ kvmhost_libvirt_storage_pools }}"
   become: true
   register: pool_autostart_result
@@ -63,7 +62,8 @@
 
 - name: Display storage space information
   ansible.builtin.debug:
-    msg: "Storage space for {{ item.item.path }}: {{ item.stdout_lines[1] if item.stdout_lines           | length> 1 else 'Unknown'   }}"
+    msg: "Storage space for {{ item.item.path }}: {{ item.stdout_lines[1] if item.stdout_lines | length > 1 else 'Unknown'
+      }}"
   loop: "{{ storage_space_check.results }}"
   when:
     - kvmhost_libvirt_debug_enabled | default(false)

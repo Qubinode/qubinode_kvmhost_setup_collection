@@ -1,9 +1,8 @@
----
 - name: Configure user shell environment
   ansible.builtin.ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: '0644'
+    mode: "0644"
   loop:
     - src: bash_profile.j2
       dest: /home/{{ admin_user }}/.bash_profile
@@ -17,10 +16,10 @@
 
 - name: Ensure correct permissions for shell files
   ansible.builtin.ansible.builtin.file:
-    path: '{{ item }}'
+    path: "{{ item }}"
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
-    mode: '0644'
+    mode: "0644"
   loop:
     - /home/{{ admin_user }}/.bash_profile
     - /home/{{ admin_user }}/.bashrc
@@ -32,7 +31,7 @@
   ansible.builtin.get_url:
     url: https://starship.rs/install.sh
     dest: /tmp/starship-install.sh
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
 
@@ -50,7 +49,7 @@
     regexp: ^eval "\$(starship init bash)"
     line: eval "$(starship init bash)"
     create: true
-    mode: '0644'
+    mode: "0644"
   when: configure_shell | bool
 
 - name: Verify shell configuration

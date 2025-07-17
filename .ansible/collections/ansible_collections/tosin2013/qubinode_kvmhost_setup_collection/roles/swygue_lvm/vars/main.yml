@@ -1,15 +1,14 @@
----
 # Variables for LVM configuration
 
 # Volume group configuration
 swygue_lvm_vg:
-  name: ''
+  name: ""
   physical_volumes: []
   size: ""
 
 # Logical volume configuration
 swygue_lvm_lv:
-  name: ''
+  name: ""
   size: ""
   mount_point: ""
   filesystem: ""

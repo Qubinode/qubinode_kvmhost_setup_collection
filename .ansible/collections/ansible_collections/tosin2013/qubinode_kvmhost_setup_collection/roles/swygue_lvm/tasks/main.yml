@@ -1,4 +1,3 @@
----
 # tasks file for swygue-lvm
 - name: Check system file system
   ansible.builtin.include_tasks: precheck.yml

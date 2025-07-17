@@ -1,4 +1,3 @@
----
 # =============================================================================
 # KVMHOST BASE ROLE - VALIDATION TASKS
 # =============================================================================
@@ -25,15 +24,18 @@
   ansible.builtin.assert:
     that:
       - ansible_distribution_major_version in supported_major_versions
-    fail_msg: "Current OS major version '{{ ansible_distribution_major_version }}' is not in supported list: {{ supported_major_versions
-      }}"
+    fail_msg: >
+      Current OS major version '{{ ansible_distribution_major_version }}'
+      is not in supported list: {{ supported_major_versions }}
     success_msg: OS major version '{{ ansible_distribution_major_version }}' is supported
 
 - name: Validate EPEL configuration (ADR-0001 compliance)
   ansible.builtin.assert:
     that:
       - epel_installation_method == 'dnf_module'
-    fail_msg: "ADR-0001 violation: epel_installation_method must be 'dnf_module', found '{{ epel_installation_method }}'"
+    fail_msg: >
+      ADR-0001 violation: epel_installation_method must be 'dnf_module',
+      found '{{ epel_installation_method }}'
     success_msg: EPEL installation method is ADR-0001 compliant
   when: enable_epel | bool
 

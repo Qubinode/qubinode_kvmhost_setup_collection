@@ -1,4 +1,3 @@
----
 # tasks file for edge_hosts_validate
 - name: Validate system is registered to Red Hat
   ansible.builtin.include_tasks: validate_rhsm.yml

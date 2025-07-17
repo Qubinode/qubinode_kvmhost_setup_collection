@@ -1,8 +1,7 @@
----
 # System Preparation Tasks
 
 - name: Configure kernel modules for KVM
-  ansible.builtin.community.general.community.general.modprobe:
+  community.general.modprobe:
     name: "{{ item }}"
     state: present
   loop:
@@ -27,7 +26,7 @@
       {{ kvm_support.stdout if kvm_support.stdout else 'Check BIOS settings for virtualization support' }}
 
 - name: Set kernel parameters for KVM
-  ansible.posix.ansible.posix.sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
     state: present
@@ -40,7 +39,7 @@
   failed_when: false
 
 - name: Create system preparation completion marker
-  ansible.builtin.ansible.builtin.file:
+  ansible.builtin.file:
     path: /var/lib/kvmhost_base_prepared
     state: touch
     mode: "0644"
