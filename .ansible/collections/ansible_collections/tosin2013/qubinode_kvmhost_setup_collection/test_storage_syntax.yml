@@ -1,9 +1,0 @@
----
-- name: Test kvmhost_storage role syntax
-  hosts: localhost
-  gather_facts: false
-  vars:
-    cicd_test: true
-    kvmhost_storage_lvm_enabled: false # Don't require actual storage device
-  roles:
-    - kvmhost_storage

@@ -1,5 +1,0 @@
-- name: Configure Cockpit
-  ansible.builtin.ansible.builtin.service:
-    name: cockpit
-    state: started
-    enabled: true

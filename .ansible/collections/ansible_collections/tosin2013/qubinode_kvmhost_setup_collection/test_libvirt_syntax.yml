@@ -1,9 +1,0 @@
----
-- name: Test kvmhost_libvirt role syntax
-  hosts: localhost
-  gather_facts: false
-  vars:
-    cicd_test: true
-    kvmhost_libvirt_skip_vt_check: true
-  roles:
-    - kvmhost_libvirt

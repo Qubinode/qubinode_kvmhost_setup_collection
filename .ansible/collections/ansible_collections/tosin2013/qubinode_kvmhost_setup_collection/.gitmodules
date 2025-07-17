@@ -1,3 +1,0 @@
-[submodule "roles/linux-system-roles.network"]
-	path = roles/linux-system-roles.network
-	url = https://github.com/linux-system-roles/network.git

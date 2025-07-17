@@ -1,5 +1,0 @@
-<network>
-  <name>{{ network_item.name }}</name>
-  <forward mode='bridge'/>
-  <bridge name='{{ network_item.bridge_name | default(kvmhost_bridge_device) }}'/>
-</network>

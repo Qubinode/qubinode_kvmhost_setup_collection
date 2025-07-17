@@ -1,9 +1,0 @@
----
-- name: Test Container Detection Logic
-  hosts: rocky-9,alma-9
-  become: true
-  gather_facts: true
-  tasks:
-    - name: Include advanced container detection task only
-      include_tasks: roles/kvmhost_setup/tasks/performance_optimization.yml
-      tags: performance
