@@ -17,15 +17,14 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Installation/Setup",
     "Topic :: System :: Systems Administration",
 ]
 keywords = ["ansible", "kvm", "virtualization", "rhel", "rocky", "centos"]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
     "ansible-core>=2.17.0,<2.19.0",
     "ansible-lint>=6.0.0",
@@ -110,7 +109,7 @@ addopts = "-v --tb=short"
 
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ['py311']
 include = '\.pyi?$'
 extend-exclude = """
 /(

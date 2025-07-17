@@ -257,13 +257,13 @@ validate_scripts_structure() {
         local total_scripts=0
         for script in "$PROJECT_ROOT/scripts"/*.sh; do
             if [[ -f "$script" ]]; then
-                ((total_scripts++))
+                total_scripts=$((total_scripts + 1))
                 if [[ -x "$script" ]]; then
-                    ((executable_count++))
+                    executable_count=$((executable_count + 1))
                 fi
             fi
         done
-        
+
         if [[ $executable_count -eq $total_scripts ]] && [[ $total_scripts -gt 0 ]]; then
             log_pass "All $total_scripts shell scripts are executable"
         elif [[ $total_scripts -gt 0 ]]; then
@@ -354,7 +354,7 @@ main() {
     
     log_header "Scripts Structure (ADR-0011)"
     validate_scripts_structure
-    
+
     log_header "Inventory Structure"
     validate_inventory_structure
     
