@@ -41,7 +41,7 @@ kvmhost_libvirt_networks:
   - name: 'vmnetbr0'
     create: true
     mode: bridge
-    bridge_name: '{{ kvmhost_bridge_device           | default(\'vmbr0\'\)   }}'
+    bridge_name: '{{ kvmhost_bridge_device | default("vmbr0") }}'
 
 # Legacy compatibility
 kvmhost_bridge_device: "vmbr0"

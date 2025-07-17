@@ -41,7 +41,7 @@ base_packages_rhel_family:
 
 # Repository configuration
 enable_epel: true
-epel_installation_method: "dnf_module"  # ADR-0001 compliant
+epel_installation_method: dnf_module # ADR-0001 compliant
 
 # Service management
 base_services_enabled:

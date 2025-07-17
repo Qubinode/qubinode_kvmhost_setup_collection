@@ -158,7 +158,7 @@ jobs:
       - name: Verify ansible-lint compliance
         run: |
           echo "🔍 Verifying ansible-lint compliance..."
-          ansible-lint roles/ --parseable --quiet || exit_code=$?
+          ansible-lint roles/ --parseable || exit_code=$?
           
           if [ ${exit_code:-0} -eq 0 ]; then
             echo "✅ All Ansible files are compliant"

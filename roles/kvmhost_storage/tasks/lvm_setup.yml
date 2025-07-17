@@ -65,7 +65,7 @@
     name: '{{ item.mount_dir }}'
     src: "/dev/mapper/{{ kvmhost_storage_lvm_vg_name }}-lv_{{ item.name }}"
     fstype: "{{ item.fstype }}"
-    opts: "{{ kvmhost_storage_mount_options[item.fstype]           | default(\'defaults\'\)   }}"
+    opts: "{{ kvmhost_storage_mount_options[item.fstype] | default('defaults') }}"
     dump: 0
     passno: 0
     state: mounted

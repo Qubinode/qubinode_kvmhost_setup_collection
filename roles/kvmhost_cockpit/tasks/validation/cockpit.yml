@@ -5,7 +5,7 @@
 # Validates Cockpit installation, configuration, and accessibility
 
 - name: Verify Cockpit socket is active
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: cockpit.socket
   register: cockpit_socket_check
   failed_when: cockpit_socket_check.status.ActiveState != "active"

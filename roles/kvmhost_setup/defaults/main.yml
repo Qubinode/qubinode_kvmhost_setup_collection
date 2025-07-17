@@ -7,7 +7,7 @@
 cicd_test: false
 
 # Set to true to enable libvirt and kvm
-lib_virt_ansible.builtin.ansible.builtin.setup: true
+lib_virt_setup: true
 
 # Set to true to enable cockpit
 enable_cockpit: true
@@ -30,10 +30,10 @@ qubinode_bridge_name: qubibr0
 ## Optional User Configurations
 ## dictionary of libvirt networks to create
 libvirt_host_networks:
-  - name: '{{ vm_libvirt_net           | default(qubinet)   }}'
+  - name: '{{ vm_libvirt_net      | default(qubinet) }}'
     create: true
     mode: bridge
-    bridge_device: "{{ kvm_host_bridge_name           | default(qubinode_bridge_name)   }}"
+    bridge_device: "{{ kvm_host_bridge_name      | default(qubinode_bridge_name) }}"
     ifcfg_type: "{{ kvm_bridge_type }}"
     ifcfg_bootproto: "{{ kvm_host_bootproto }}"
     bridge_slave_dev: "{{ kvm_host_interface }}"
@@ -45,8 +45,8 @@ libvirt_host_networks:
     mac: "{{ kvm_host_macaddr }}"
 
 # The the primary dns server to the dns_forwarder
-primary_dns_server: "{{ dns_forwarder      | default(\'1.1.1.1\'\)   }}"
-kvm_host_dns_server: "{{ primary_dns_server      | default(\'1.1.1.1\'\)   }}"
+primary_dns_server: "{{ dns_forwarder | default('1.1.1.1') }}"
+kvm_host_dns_server: "{{ primary_dns_server | default('1.1.1.1') }}"
 search_domains:
   - "{{ domain }}"
 
