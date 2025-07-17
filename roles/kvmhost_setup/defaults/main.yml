@@ -30,7 +30,7 @@ qubinode_bridge_name: qubibr0
 ## Optional User Configurations
 ## dictionary of libvirt networks to create
 libvirt_host_networks:
-  - name: '{{ vm_libvirt_net      | default(qubinet) }}'
+  - name: "{{ vm_libvirt_net      | default(qubinet) }}"
     create: true
     mode: bridge
     bridge_device: "{{ kvm_host_bridge_name      | default(qubinode_bridge_name) }}"
@@ -54,13 +54,13 @@ libvirt_networks:
   - name: vmnetbr0
     create: true
     mode: bridge
-    bridge_name: '{{ kvmhost_bridge_device }}'
+    bridge_name: "{{ kvmhost_bridge_device }}"
 
 libvirt_host_storage_pools:
   - name: default
     state: active
     autostart: true
-    path: '{{ kvm_host_libvirt_dir }}'
+    path: "{{ kvm_host_libvirt_dir }}"
 
 ######################
 ## Libvirt Storage

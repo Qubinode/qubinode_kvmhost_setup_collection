@@ -1,4 +1,3 @@
----
 - name: Verify that Virtualization Technology (VT) is enabled
   ansible.builtin.command: grep -c -E 'svm|vmx' /proc/cpuinfo
   changed_when: false

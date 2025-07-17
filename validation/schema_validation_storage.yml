@@ -1,4 +1,3 @@
-
 # =============================================================================
 # SCHEMA VALIDATION FOR KVMHOST_STORAGE ROLE
 # =============================================================================
@@ -23,7 +22,7 @@
     validation_errors: "{{ validation_errors + [error_msg] }}"
   vars:
     error_msg: "kvmhost_storage validation error: Required property '{{ item }}' is missing or empty"
-  when: 
+  when:
     - kvmhost_storage_schema.required is defined
     - item in kvmhost_storage_schema.required
     - kvmhost_storage_vars[item] is not defined or kvmhost_storage_vars[item] | length == 0
@@ -33,8 +32,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [libvirt_dir_error_msg] }}"
   vars:
-    libvirt_dir_error_msg: "kvmhost_storage validation error: libvirt directory '{{ kvmhost_storage_vars.kvm_host_libvirt_dir }}' must be an absolute path"
-  when: 
+    libvirt_dir_error_msg: "kvmhost_storage validation error: libvirt directory '{{ kvmhost_storage_vars.kvm_host_libvirt_dir
+      }}' must be an absolute path"
+  when:
     - kvmhost_storage_vars.kvm_host_libvirt_dir | length > 0
     - not (kvmhost_storage_vars.kvm_host_libvirt_dir | regex_search('^/[a-zA-Z0-9/_-]+$'))
 
@@ -58,7 +58,7 @@
     validation_warnings: "{{ validation_warnings + [kvm_compliance_msg] }}"
   vars:
     kvm_compliance_msg: "ADR-0003 compliance: KVM/libvirt storage architecture validated"
-  when: 
+  when:
     - kvmhost_storage_vars.libvirt_host_storage_pools | length > 0
     - kvmhost_storage_vars.kvm_host_libvirt_dir | length > 0
 

@@ -2,13 +2,13 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, stable-* ]
+    branches: [main, stable-*]
     tags:
-      - 'v*'
+      - v*
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -43,8 +43,8 @@ jobs:
     strategy:
       matrix:
         # Updated to support latest Ansible-core versions (based on research)
-        ansible-version: ['2.17', '2.18']
-        python-version: ['3.11']
+        ansible-version: ["2.17", "2.18"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,10 +68,10 @@ jobs:
           export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
           molecule test
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DEBUG: 'true'
-          ANSIBLE_VERBOSITY: '2'
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          MOLECULE_DEBUG: "true"
+          ANSIBLE_VERBOSITY: "2"
       - name: Run Playbook tests
         run: |
           # Use Python 3.11 interpreter for consistency

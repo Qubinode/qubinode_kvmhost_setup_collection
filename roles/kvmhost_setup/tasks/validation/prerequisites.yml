@@ -3,13 +3,13 @@
   ansible.builtin.assert:
     that: ansible_architecture == "x86_64"
     fail_msg: "This role requires x86_64 architecture. Current: {{ ansible_architecture }}"
-    success_msg: "System architecture is compatible"
+    success_msg: System architecture is compatible
 
 - name: Check minimum memory requirements
   ansible.builtin.assert:
     that: ansible_memtotal_mb >= 4096
     fail_msg: "Minimum 4GB RAM required. Available: {{ ansible_memtotal_mb }}MB"
-    success_msg: "System has sufficient memory"
+    success_msg: System has sufficient memory
 
 - name: Check OS distribution
   ansible.builtin.assert:
@@ -19,7 +19,7 @@
     fail_msg: |
       Unsupported distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}
       This role requires RedHat or Rocky Linux 8 or later
-    success_msg: "OS distribution is supported"
+    success_msg: OS distribution is supported
 
 - name: Check for virtualization support
   ansible.builtin.command: grep -E 'svm|vmx' /proc/cpuinfo
@@ -30,8 +30,8 @@
 - name: Verify virtualization support
   ansible.builtin.assert:
     that: virt_support.rc == 0
-    fail_msg: "CPU does not support hardware virtualization"
-    success_msg: "Hardware virtualization is supported"
+    fail_msg: CPU does not support hardware virtualization
+    success_msg: Hardware virtualization is supported
 
 - name: Check SELinux status
   ansible.builtin.command: getenforce
@@ -42,8 +42,8 @@
 - name: Verify SELinux is not disabled
   ansible.builtin.assert:
     that: selinux_status.stdout != "Disabled"
-    fail_msg: "SELinux is disabled. Please enable SELinux for proper security"
-    success_msg: "SELinux is properly configured"
+    fail_msg: SELinux is disabled. Please enable SELinux for proper security
+    success_msg: SELinux is properly configured
 
 - name: Check available disk space
   ansible.builtin.command: df -BG {{ kvm_host_libvirt_dir           | dirname   }}
@@ -53,8 +53,8 @@
 - name: Verify sufficient disk space
   ansible.builtin.assert:
     that: disk_space.stdout_lines[1].split()[3] | replace('G', '') | int >= 20
-    fail_msg: "Insufficient disk space. Minimum 20GB required in {{ kvm_host_libvirt_dir           | dirname   }}"
-    success_msg: "Sufficient disk space available"
+    fail_msg: Insufficient disk space. Minimum 20GB required in {{ kvm_host_libvirt_dir | dirname }}
+    success_msg: Sufficient disk space available
 
 - name: Check network connectivity
   ansible.builtin.wait_for:
@@ -67,5 +67,5 @@
 - name: Verify network connectivity
   ansible.builtin.assert:
     that: network_check is success
-    fail_msg: "Cannot reach DNS server {{ dns_forwarder }}"
-    success_msg: "Network connectivity verified"
+    fail_msg: Cannot reach DNS server {{ dns_forwarder }}
+    success_msg: Network connectivity verified

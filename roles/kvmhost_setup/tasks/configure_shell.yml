@@ -1,13 +1,12 @@
----
 - name: Define temp dir
   ansible.builtin.set_fact:
     tempdir_kvmhost_path: /tmp/kvmhost_setup
 
 - name: Create temp directory
   ansible.builtin.ansible.builtin.file:
-    path: '{{ tempdir_kvmhost_path }}'
+    path: "{{ tempdir_kvmhost_path }}"
     state: directory
-    mode: '0777'
+    mode: "0777"
 
 - name: Extract synth-shell
   ansible.builtin.unarchive:
@@ -19,7 +18,7 @@
   ansible.builtin.ansible.builtin.template:
     src: bashrc.j2
     dest: "/etc/profile.d/qubinode.sh"
-    mode: '0644'
+    mode: "0644"
 
 - name: Download startship
   ansible.builtin.unarchive:
@@ -48,19 +47,19 @@
         dest: "{{ tempdir_kvmhost_path }}/z"
         force: true
         update: false
-        version: 'master'
+        version: "master"
 
     - name: Copy z man page
       ansible.builtin.ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.1"
         dest: /usr/local/share/man/man1/z.1
-        mode: '0644'
+        mode: "0644"
 
     - name: Copy z cli tool to /usr/local/bin
       ansible.builtin.ansible.builtin.copy:
         src: "{{ tempdir_kvmhost_path }}/z/z.sh"
         dest: /usr/local/bin/z.sh
-        mode: '0644'
+        mode: "0644"
 
 - name: Install additional cli tools via python
   ansible.builtin.pip:
@@ -77,7 +76,7 @@
 
 - name: Remove temp directory
   ansible.builtin.ansible.builtin.file:
-    path: '{{ tempdir_kvmhost_path }}'
+    path: "{{ tempdir_kvmhost_path }}"
     state: absent
   when: tempdir_kvmhost_path is defined
   changed_when: false

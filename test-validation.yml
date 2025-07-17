@@ -22,14 +22,14 @@
         create: true
 
   tasks:
-    - name: "=== Pre-flight Validation Demo ==="
+    - name: === Pre-flight Validation Demo ===
       ansible.builtin.debug:
         msg: |
           This playbook demonstrates the new validation features:
           1. Pre-flight system validation
           2. RHEL version detection and conditional logic
           3. KVM host validation checks
-          
+
           Run with different tags to test specific validations:
           --tags preflight        # Pre-flight validation only
           --tags rhel_detection   # RHEL version detection only
@@ -53,21 +53,21 @@
       tags:
         - kvm_validation
         - validation
-      when: 
+      when:
         - kvmhost_os_is_rhel_compatible | default(false)
         - ansible_virtualization_role != "guest"
 
-    - name: "=== Validation Summary ==="
+    - name: === Validation Summary ===
       ansible.builtin.debug:
         msg: |
           Validation Complete!
-          
+
           Results Summary:
           - OS: {{ kvmhost_os_family | default('Unknown') }} {{ kvmhost_os_full_version | default('Unknown') }}
           - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible | default('Unknown') }}
           - Package Manager: {{ kvmhost_package_manager | default('Unknown') }}
           - Validation Status: All checks passed!
-          
+
           Next steps: Run the full kvmhost_setup role
       tags:
         - validation

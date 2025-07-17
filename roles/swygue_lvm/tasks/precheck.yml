@@ -8,7 +8,7 @@
 
 - name: Checking if  host_device exist
   community.general.parted:
-    device: "/dev/{{ host_device }}"
+    device: /dev/{{ host_device }}
     unit: MiB
   register: device_info
   ignore_errors: true
@@ -17,14 +17,14 @@
 - name: Fail if the device does not exist
   ansible.builtin.fail:
     msg: |
-       Could not find the device /dev/{{ host_device }}
-         please ensure the variable host_device is set to the device
-         you want to use.
+      Could not find the device /dev/{{ host_device }}
+        please ensure the variable host_device is set to the device
+        you want to use.
   when: device_info.failed|bool
 
 - name: Set LVM Facts
   ansible.builtin.set_fact:
-    vg_name_check: "LVM2_VG_NAME={{ vg_name }}"
+    vg_name_check: LVM2_VG_NAME={{ vg_name }}
     vg_not_on_pv: ""
     vg_not_exist: ""
     vg_exist: ""

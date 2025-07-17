@@ -1,4 +1,3 @@
-
 # =============================================================================
 # CONFIGURATION DRIFT DETECTION
 # =============================================================================
@@ -13,8 +12,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [epel_drift_msg] }}"
   vars:
-    epel_drift_msg: "Configuration drift detected: EPEL installation method is '{{ epel_installation_method }}' but ADR-0001 requires 'dnf_module'"
-  when: 
+    epel_drift_msg: "Configuration drift detected: EPEL installation method is '{{ epel_installation_method }}' but ADR-0001
+      requires 'dnf_module'"
+  when:
     - drift_detection_enabled
     - enable_epel | default(false)
     - epel_installation_method is defined
@@ -24,8 +24,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [bridge_naming_drift_msg] }}"
   vars:
-    bridge_naming_drift_msg: "Configuration drift detected: Bridge device '{{ kvmhost_bridge_device }}' doesn't follow recommended naming pattern (virbr*)"
-  when: 
+    bridge_naming_drift_msg: "Configuration drift detected: Bridge device '{{ kvmhost_bridge_device }}' doesn't follow recommended
+      naming pattern (virbr*)"
+  when:
     - drift_detection_enabled
     - kvmhost_bridge_device is defined
     - not (kvmhost_bridge_device | regex_search('^virbr[0-9]+$'))
@@ -34,8 +35,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [libvirt_dir_drift_msg] }}"
   vars:
-    libvirt_dir_drift_msg: "Configuration drift detected: Libvirt directory '{{ kvm_host_libvirt_dir }}' is not the standard '/var/lib/libvirt'"
-  when: 
+    libvirt_dir_drift_msg: "Configuration drift detected: Libvirt directory '{{ kvm_host_libvirt_dir }}' is not the standard
+      '/var/lib/libvirt'"
+  when:
     - drift_detection_enabled
     - kvm_host_libvirt_dir is defined
     - kvm_host_libvirt_dir != '/var/lib/libvirt'
@@ -45,7 +47,7 @@
     configuration_drifts: "{{ configuration_drifts + [cockpit_port_drift_msg] }}"
   vars:
     cockpit_port_drift_msg: "Configuration drift detected: Cockpit port '{{ kvmhost_cockpit_port }}' is not the default 9090"
-  when: 
+  when:
     - drift_detection_enabled
     - enable_cockpit | default(false)
     - kvmhost_cockpit_port is defined
@@ -56,7 +58,7 @@
     configuration_drifts: "{{ configuration_drifts + [ssh_port_drift_msg] }}"
   vars:
     ssh_port_drift_msg: "Configuration drift detected: SSH port '{{ ssh_configuration.ssh_port }}' is not the default 22"
-  when: 
+  when:
     - drift_detection_enabled
     - ssh_configuration is defined
     - ssh_configuration.ssh_port is defined
@@ -67,7 +69,7 @@
     configuration_drifts: "{{ configuration_drifts + [admin_user_drift_msg] }}"
   vars:
     admin_user_drift_msg: "Configuration drift detected: Admin user '{{ admin_user }}' doesn't follow recommended naming (admin/qubinode)"
-  when: 
+  when:
     - drift_detection_enabled
     - admin_user is defined
     - admin_user not in ['admin', 'qubinode']
@@ -76,8 +78,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [storage_type_drift_msg] }}"
   vars:
-    storage_type_drift_msg: "Configuration drift detected: Storage pool '{{ item.name }}' uses type '{{ item.type }}' instead of recommended 'dir'"
-  when: 
+    storage_type_drift_msg: "Configuration drift detected: Storage pool '{{ item.name }}' uses type '{{ item.type }}' instead
+      of recommended 'dir'"
+  when:
     - drift_detection_enabled
     - libvirt_host_storage_pools is defined
     - item.type != 'dir'
@@ -85,7 +88,7 @@
 
 - name: Check environment template consistency
   ansible.builtin.include_tasks: validate_environment_template_consistency.yml
-  when: 
+  when:
     - drift_detection_enabled
     - inventory_environment is defined
 
@@ -106,6 +109,6 @@
 - name: Add drift detection to warnings
   ansible.builtin.set_fact:
     validation_warnings: "{{ validation_warnings + configuration_drifts }}"
-  when: 
+  when:
     - drift_detection_enabled
     - configuration_drifts | length > 0

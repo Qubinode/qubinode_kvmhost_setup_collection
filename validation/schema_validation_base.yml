@@ -1,4 +1,3 @@
-
 # =============================================================================
 # SCHEMA VALIDATION FOR KVMHOST_BASE ROLE
 # =============================================================================
@@ -28,18 +27,20 @@
     validation_errors: "{{ validation_errors + [error_msg] }}"
   vars:
     error_msg: "kvmhost_base validation error: Required property '{{ item }}' is missing or empty"
-  when: 
+  when:
     - kvmhost_base_schema.required is defined
     - item in kvmhost_base_schema.required
-    - kvmhost_base_vars[item] is not defined or (kvmhost_base_vars[item] | type_debug == 'list' and kvmhost_base_vars[item] | length == 0)
+    - kvmhost_base_vars[item] is not defined or (kvmhost_base_vars[item] | type_debug == 'list' and 
+      kvmhost_base_vars[item] | length == 0)
   loop: "{{ kvmhost_base_schema.required }}"
 
 - name: Validate epel_installation_method (ADR-0001 compliance)
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [adr_error_msg] }}"
   vars:
-    adr_error_msg: "ADR-0001 violation: epel_installation_method must be 'dnf_module', found '{{ kvmhost_base_vars.epel_installation_method }}'"
-  when: 
+    adr_error_msg: "ADR-0001 violation: epel_installation_method must be 'dnf_module', found '{{ kvmhost_base_vars.epel_installation_method
+      }}'"
+  when:
     - kvmhost_base_vars.epel_installation_method is defined
     - kvmhost_base_vars.epel_installation_method != 'dnf_module'
 
@@ -48,8 +49,8 @@
     validation_errors: "{{ validation_errors + [os_error_msg] }}"
   vars:
     os_error_msg: "kvmhost_base validation error: Unsupported OS family '{{ item }}' in supported_os_families"
-    valid_os_families: ["RedHat", "CentOS", "Rocky", "AlmaLinux", "Fedora"]
-  when: 
+    valid_os_families: [RedHat, CentOS, Rocky, AlmaLinux, Fedora]
+  when:
     - kvmhost_base_vars.supported_os_families is defined
     - item not in valid_os_families
   loop: "{{ kvmhost_base_vars.supported_os_families }}"
@@ -59,7 +60,7 @@
     validation_errors: "{{ validation_errors + [version_error_msg] }}"
   vars:
     version_error_msg: "kvmhost_base validation error: Invalid major version format '{{ item }}', must be numeric"
-  when: 
+  when:
     - kvmhost_base_vars.supported_major_versions is defined
     - not (item | string | regex_search('^[0-9]+$'))
   loop: "{{ kvmhost_base_vars.supported_major_versions }}"

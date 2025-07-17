@@ -1,4 +1,3 @@
----
 - name: Detect RHEL version and set conditional facts
   ansible.builtin.include_tasks: rhel_version_detection.yml
   tags:
@@ -22,16 +21,16 @@
 
 - name: Ensure required packages are installed with GPG verification (ADR-0001)
   ansible.builtin.dnf:
-    name: '{{ item }}'
+    name: "{{ item }}"
     state: present
-    disable_gpg_check: "{{ ansible_virtualization_type == 'container' }}"  # Container workaround per research findings
+    disable_gpg_check: "{{ ansible_virtualization_type == 'container' }}" # Container workaround per research findings
   loop: "{{ kvmhost_packages_current           | default(required_rpm_packages)   }}"
   register: package_install_result
   failed_when:
     - package_install_result.failed is defined
     - package_install_result.failed
-    - "'No package' not in (package_install_result.msg | default(\'\'\))"
-    - "'GPG' not in (package_install_result.msg | default(\'\'\))"  # Allow GPG-related failures to be handled
+    - "'No package' not in (package_install_result.msg | default(''))"
+    - "'GPG' not in (package_install_result.msg | default(''))" # Allow GPG-related failures to be handled
   ignore_errors: true
   tags:
     - security
@@ -44,7 +43,7 @@
       Package Installation Summary:
       {% for result in package_install_result.results %}
       - {{ result.item }}: {{ 'INSTALLED' if result.changed else ('SKIPPED' if result.failed else 'ALREADY PRESENT') }}
-      {% if result.failed and 'No package' in (result.msg | default(\'\'\)) %}
+      {% if result.failed and 'No package' in (result.msg | default('')) %}
         (Package not available in repos - this is expected for some platforms)
       {% endif %}
       {% endfor %}

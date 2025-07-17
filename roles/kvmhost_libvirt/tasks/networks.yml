@@ -6,7 +6,7 @@
 
 - name: Display networks to configure
   ansible.builtin.debug:
-    msg: "Configuring libvirt networks: {{ kvmhost_libvirt_networks      | map(attribute='name')                |   join(', ')    }}"
+    msg: "Configuring libvirt networks: {{ kvmhost_libvirt_networks | map(attribute='name') | join(', ') }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Include network creation tasks
@@ -18,7 +18,7 @@
   when: network_item.create | default(true)
 
 - name: Verify libvirt networks are active
-  ansible.builtin.command: "virsh net-info {{ item.name }}"
+  ansible.builtin.command: virsh net-info {{ item.name }}
   register: network_info_check
   changed_when: false
   failed_when: false
@@ -30,7 +30,7 @@
     msg:
       - "Network: {{ item.item.name }}"
       - "Status: {{ 'Active' if 'State:     active' in item.stdout else 'Inactive' }}"
-      - "Mode: {{ item.item.mode           | default(\'bridge\'\)   }}"
+      - "Mode: {{ item.item.mode | default('bridge') }}"
   loop: "{{ network_info_check.results }}"
   when:
     - kvmhost_libvirt_debug_enabled | default(false)

@@ -1,4 +1,3 @@
----
 # KVM Feature Detection Automation
 # Based on research findings for optimal KVM host configuration
 
@@ -63,22 +62,22 @@
 
 - name: Parse CPU capabilities
   ansible.builtin.set_fact:
-    cpu_capabilities: "{{ cpu_info_detailed.stdout_lines      | select('match', '.*Flags.*')                |                list    }}"
+    cpu_capabilities: "{{ cpu_info_detailed.stdout_lines | select('match', '.*Flags.*') | list }}"
     cpu_cores: "{{ ansible_processor_cores }}"
     cpu_threads: "{{ ansible_processor_threads_per_core }}"
     total_vcpus: "{{ ansible_processor_vcpus }}"
 
 - name: Check for hardware performance features
   ansible.builtin.set_fact:
-    supports_ept: "{{ 'ept' in cpu_capabilities           | join(' ')   }}"
-    supports_vpid: "{{ 'vpid' in cpu_capabilities           | join(' ')   }}"
-    supports_unrestricted_guest: "{{ 'unrestricted_guest' in cpu_capabilities           | join(' ')   }}"
-    supports_pae: "{{ 'pae' in cpu_capabilities           | join(' ')   }}"
-    supports_nx: "{{ 'nx' in cpu_capabilities           | join(' ')   }}"
+    supports_ept: "{{ 'ept' in cpu_capabilities | join(' ') }}"
+    supports_vpid: "{{ 'vpid' in cpu_capabilities | join(' ') }}"
+    supports_unrestricted_guest: "{{ 'unrestricted_guest' in cpu_capabilities | join(' ') }}"
+    supports_pae: "{{ 'pae' in cpu_capabilities | join(' ') }}"
+    supports_nx: "{{ 'nx' in cpu_capabilities | join(' ') }}"
 
 - name: Detect memory configuration
   ansible.builtin.set_fact:
-    total_memory_gb: "{{ (ansible_memtotal_mb / 1024)           | round(1)   }}"
+    total_memory_gb: "{{ (ansible_memtotal_mb / 1024) | round(1) }}"
     recommended_hugepage_size: "{{ '1G' if ansible_memtotal_mb > 8192 else '2M' }}"
     can_use_large_hugepages: "{{ ansible_memtotal_mb > 8192 }}"
 
@@ -109,11 +108,11 @@
     kvm_feature_flags:
       virtualization_supported: "{{ virtualization_supported }}"
       cpu_vendor: "{{ 'Intel' if has_intel_vt else 'AMD' if has_amd_v else 'Unknown' }}"
-      nested_virtualization: "{{ nested_virt_status.stdout           | default(\'disabled\'\)   }}"
-      iommu_available: "{{ iommu_support.stdout           | length> 0   }}"
-      hugepage_support: "{{ hugepage_support.stdout           | length> 0   }}"
+      nested_virtualization: "{{ nested_virt_status.stdout | default('disabled') }}"
+      iommu_available: "{{ iommu_support.stdout | length > 0 }}"
+      hugepage_support: "{{ hugepage_support.stdout | length > 0 }}"
       ssd_storage: "{{ has_ssd_storage }}"
-      sriov_capable: "{{ sriov_devices.stdout           | length> 0   }}"
+      sriov_capable: "{{ sriov_devices.stdout | length > 0 }}"
       performance_features:
         ept_support: "{{ supports_ept }}"
         vpid_support: "{{ supports_vpid }}"
@@ -125,18 +124,18 @@
         recommended_hugepage_size: "{{ recommended_hugepage_size }}"
         can_use_large_hugepages: "{{ can_use_large_hugepages }}"
       versions:
-        libvirt: "{{ libvirt_version.stdout           | default(\'unknown\'\)   }}"
-        qemu: "{{ qemu_version.stdout           | default(\'unknown\'\)   }}"
+        libvirt: "{{ libvirt_version.stdout | default('unknown') }}"
+        qemu: "{{ qemu_version.stdout | default('unknown') }}"
 
 - name: Generate KVM feature detection report
   ansible.builtin.ansible.builtin.template:
     src: kvm_feature_report.j2
     dest: /var/log/kvm-feature-detection.json
-    mode: '0644'
+    mode: "0644"
   vars:
     detection_timestamp: "{{ ansible_date_time.iso8601 }}"
     host_info:
-      hostname: '{{ inventory_hostname }}'
+      hostname: "{{ inventory_hostname }}"
       os: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
       kernel: "{{ ansible_kernel }}"
       architecture: "{{ ansible_architecture }}"
@@ -175,9 +174,15 @@
 - name: Create optimization recommendations
   ansible.builtin.set_fact:
     kvm_optimization_recommendations:
-      - "{{ 'Enable hugepages for better memory performance' if kvm_feature_flags.hugepage_support else 'Hugepages not supported on this system' }}"
-      - "{{ 'Configure CPU isolation for dedicated VM performance' if total_vcpus           | int> 4 else 'Single/dual core system - CPU isolation not recommended'   }}"
-      - "{{ 'Enable nested virtualization for development workloads' if virtualization_supported else 'Nested virtualization not available' }}"
-      - "{{ 'Configure SR-IOV for high-performance networking' if kvm_feature_flags.sriov_capable else 'SR-IOV not available - use virtio for networking' }}"
-      - "{{ 'Optimize for SSD storage performance' if has_ssd_storage else 'Consider SSD storage for better VM performance' }}"
-      - "{{ 'Enable IOMMU for device passthrough capabilities' if kvm_feature_flags.iommu_available else 'IOMMU not available - limited device passthrough' }}"
+      - "{{ 'Enable hugepages for better memory performance' if kvm_feature_flags.hugepage_support else 'Hugepages not supported
+        on this system' }}"
+      - "{{ 'Configure CPU isolation for dedicated VM performance' if total_vcpus | int > 4 else 'Single/dual core system
+        - CPU isolation not recommended' }}"
+      - "{{ 'Enable nested virtualization for development workloads' if virtualization_supported else 'Nested virtualization
+        not available' }}"
+      - "{{ 'Configure SR-IOV for high-performance networking' if kvm_feature_flags.sriov_capable else 'SR-IOV not available
+        - use virtio for networking' }}"
+      - "{{ 'Optimize for SSD storage performance' if has_ssd_storage else 'Consider SSD storage for better VM performance'
+        }}"
+      - "{{ 'Enable IOMMU for device passthrough capabilities' if kvm_feature_flags.iommu_available else 'IOMMU not available
+        - limited device passthrough' }}"

@@ -1,21 +1,21 @@
 ---
 - name: Ensure libvirt group exists
   ansible.builtin.group:
-    name: '{{ kvm_host_group }}'
+    name: "{{ kvm_host_group }}"
     state: present
 
 - name: Add admin user to libvirt group
   ansible.builtin.user:
-    name: '{{ admin_user }}'
+    name: "{{ admin_user }}"
     groups: "{{ kvm_host_group }}"
     append: true
   when: enable_libvirt_admin_user | bool
 
 - name: Create libvirt images directory
   ansible.builtin.ansible.builtin.file:
-    path: '{{ kvm_host_libvirt_dir }}'
+    path: "{{ kvm_host_libvirt_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
 
@@ -70,7 +70,7 @@
 
 - name: Ensure correct SELinux context for libvirt directory
   ansible.builtin.ansible.builtin.file:
-    path: '{{ kvm_host_libvirt_dir }}'
+    path: "{{ kvm_host_libvirt_dir }}"
     setype: virt_image_t
     recurse: true
   when: ansible_selinux.status == "enabled"
@@ -79,14 +79,14 @@
   ansible.builtin.ansible.builtin.template:
     src: libvirt_net_bridge.xml.j2
     dest: /etc/libvirt/qemu/networks/{{ item.name }}.xml
-    mode: '0644'
+    mode: "0644"
   loop: "{{ libvirt_host_networks }}"
   when: libvirt_host_networks is defined
   notify: Restart libvirtd
 
 - name: Start and enable libvirt services
   ansible.builtin.ansible.builtin.systemd:
-    name: '{{ item }}'
+    name: "{{ item }}"
     state: started
     enabled: true
   loop: "{{ libvirt_services }}"

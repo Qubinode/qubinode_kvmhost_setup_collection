@@ -1,4 +1,3 @@
-
 # =============================================================================
 # VARIABLE VALIDATION FRAMEWORK
 # =============================================================================
@@ -8,7 +7,7 @@
 
 - name: Initialize validation framework
   ansible.builtin.set_fact:
-    validation_framework_version: "1.0.0"
+    validation_framework_version: 1.0.0
     validation_errors: []
     validation_warnings: []
 

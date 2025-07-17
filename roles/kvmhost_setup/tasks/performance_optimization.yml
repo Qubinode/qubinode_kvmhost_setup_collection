@@ -1,4 +1,3 @@
----
 # KVM Performance Optimization Tasks
 # Based on research findings and enterprise best practices
 
@@ -15,9 +14,9 @@
   ansible.builtin.debug:
     msg: |
       🐳 Container Testing Mode Detected
-      Virtualization Type: {{ ansible_virtualization_type           | default(\'unknown\')   }}
+      Virtualization Type: {{ ansible_virtualization_type           | default('unknown)   }}
       Container Detection: {{ is_container_environment }}
-      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default(\'N/A\')   }}
+      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default('N/A)   }}
 
       Performance optimization tasks will be skipped in container environments.
       This is expected behavior for Molecule testing scenarios.
@@ -27,9 +26,9 @@
   ansible.builtin.debug:
     msg: |
       🖥️  Physical/VM Host Environment Detected
-      Virtualization Type: {{ ansible_virtualization_type           | default(\'unknown\')   }}
+      Virtualization Type: {{ ansible_virtualization_type           | default('unknown)   }}
       Container Detection: {{ is_container_environment }}
-      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default(\'N/A\')   }}
+      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default('N/A)   }}
 
       Full KVM performance optimization will be applied.
   when: not is_container_environment
@@ -42,8 +41,8 @@
 
 - name: Calculate recommended hugepage count (25% of total memory)
   ansible.builtin.set_fact:
-    recommended_hugepages: "{{ (ansible_memtotal_mb * 0.25 / 2)           | int   }}"
-    current_hugepages_count: "{{ current_hugepages.stdout           | int   }}"
+    recommended_hugepages: "{{ (ansible_memtotal_mb * 0.25 / 2) | int }}"
+    current_hugepages_count: "{{ current_hugepages.stdout | int }}"
 
 - name: Check if GRUB configuration file exists
   ansible.builtin.stat:
@@ -54,8 +53,10 @@
 - name: Configure hugepages for KVM performance
   ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX='
-    line: 'GRUB_CMDLINE_LINUX="hugepages={{ recommended_hugepages }} default_hugepagesz=2M hugepagesz=2M transparent_hugepage=never isolcpus=1-{{ ansible_processor_vcpus - 1 }} rcu_nocbs=1-{{ ansible_processor_vcpus - 1 }}"'
+    regexp: ^GRUB_CMDLINE_LINUX=
+    line: GRUB_CMDLINE_LINUX="hugepages={{ recommended_hugepages }} default_hugepagesz=2M hugepagesz=2M
+      transparent_hugepage=never isolcpus=1-{{ ansible_processor_vcpus - 1 }} rcu_nocbs=1-{{ ansible_processor_vcpus - 1
+      }}"
     backup: true
   register: grub_config_changed
   when:
@@ -94,7 +95,7 @@
           fi
       done
     dest: /usr/local/bin/set-cpu-performance.sh
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   when: not is_container_environment
@@ -116,7 +117,7 @@
     dest: /etc/systemd/system/cpu-performance.service
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   register: cpu_performance_service
   when: not is_container_environment
 
@@ -157,7 +158,7 @@
     dest: /etc/systemd/system/ksm.service
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   register: ksm_service
   when: not is_container_environment
 
@@ -213,7 +214,7 @@
 - name: Enable nested virtualization for Intel
   ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/modprobe.d/kvm.conf
-    line: "options kvm_intel nested=1"
+    line: options kvm_intel nested=1
     create: true
   when:
     - not is_container_environment
@@ -225,7 +226,7 @@
 - name: Enable nested virtualization for AMD
   ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/modprobe.d/kvm.conf
-    line: "options kvm_amd nested=1"
+    line: options kvm_amd nested=1
     create: true
   when:
     - not is_container_environment
@@ -256,7 +257,7 @@
     dest: /etc/sysctl.d/99-kvm-performance.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   register: sysctl_kvm_config
   when: not is_container_environment
 
@@ -291,7 +292,7 @@
     dest: /etc/sysctl.d/99-kvm-network.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   register: sysctl_network_config
   when: not is_container_environment
 
@@ -342,7 +343,7 @@
       echo "Nested Virtualization (Intel): $(cat /sys/module/kvm_intel/parameters/nested 2>/dev/null || echo 'N/A')"
       echo "Nested Virtualization (AMD): $(cat /sys/module/kvm_amd/parameters/nested 2>/dev/null || echo 'N/A')"
     dest: /usr/local/bin/kvm-perf-status.sh
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
 
@@ -350,12 +351,12 @@
   ansible.builtin.debug:
     msg:
       - "KVM Performance Optimization Summary:"
-      - "✓ Hugepages configured: {{ recommended_hugepages }} pages ({{ (recommended_hugepages           | int* 2)   }}MB)"
-      - "✓ CPU governor set to performance mode"
-      - "✓ Kernel Same-page Merging (KSM) enabled"
-      - "✓ Virtio optimizations applied"
-      - "✓ Network performance tuning enabled"
+      - "✓ Hugepages configured: {{ recommended_hugepages }} pages ({{ (recommended_hugepages | int * 2) }}MB)"
+      - ✓ CPU governor set to performance mode
+      - ✓ Kernel Same-page Merging (KSM) enabled
+      - ✓ Virtio optimizations applied
+      - ✓ Network performance tuning enabled
       - "✓ Performance monitoring script: /usr/local/bin/kvm-perf-status.sh"
       - ""
       - "⚠️  Note: Some optimizations require a reboot to take effect"
-      - "📊 Run 'kvm-perf-status.sh' to check current performance status"
+      - 📊 Run 'kvm-perf-status.sh' to check current performance status

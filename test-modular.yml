@@ -2,24 +2,24 @@
 # Modular KVM Host Setup Test Playbook
 # Based on ADR-0002: Ansible Role-Based Modular Architecture
 
-- name: "Test Modular Qubinode KVM Host Setup"
+- name: Test Modular Qubinode KVM Host Setup
   hosts: all
   become: true
   gather_facts: true
-  
+
   vars:
     # Test configuration
     testing_mode: true
     cicd_test: true
     network_validation_enabled: true
-    
+
     # Role feature toggles
     enable_base_config: true
     enable_networking: true
-    enable_legacy_kvmhost: false  # Disable until fully refactored
-    
+    enable_legacy_kvmhost: false # Disable until fully refactored
+
   pre_tasks:
-    - name: "Create test user for validation"
+    - name: Create test user for validation
       ansible.builtin.user:
         name: test-user
         state: present
@@ -30,15 +30,15 @@
         groups: wheel
         append: true
         home: /home/test-user
-        umask: '0022'
+        umask: "0022"
       when: testing_mode | default(false)
 
-    - name: "Load role configuration"
+    - name: Load role configuration
       ansible.builtin.include_vars:
         file: roles/role_config.yml
         name: role_config
 
-    - name: "Display role execution plan"
+    - name: Display role execution plan
       ansible.builtin.debug:
         msg: |
           Role Execution Plan:
@@ -78,7 +78,7 @@
         - edge_hosts
 
   post_tasks:
-    - name: "Validate modular role execution"
+    - name: Validate modular role execution
       ansible.builtin.debug:
         msg: |
           Modular Role Execution Complete:
@@ -88,11 +88,11 @@
           - Host: {{ inventory_hostname }}
           - OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
 
-    - name: "Create completion marker"
+    - name: Create completion marker
       ansible.builtin.file:
-        path: "/var/lib/qubinode_modular_setup_complete"
+        path: /var/lib/qubinode_modular_setup_complete
         state: touch
-        mode: '0644'
+        mode: "0644"
         owner: root
         group: root
       become: true

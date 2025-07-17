@@ -69,9 +69,9 @@
     port_accessible: "{{ port_test is succeeded }}"
     web_interface_responsive: "{{ web_test.status == 200 }}"
     ssl_configured: "{{ kvmhost_cockpit_ssl_enabled }}"
-    ssl_test_result: "{{ ssl_test.rc           | default(\'N/A\'\)   }}"
-    api_responsive: "{{ api_test.status           | default(\'N/A\'\)   }}"
-    modules_loaded: "{{ cockpit_modules.stdout_lines           | default([])   }}"
+    ssl_test_result: "{{ ssl_test.rc | default('N/A') }}"
+    api_responsive: "{{ api_test.status | default('N/A') }}"
+    modules_loaded: "{{ cockpit_modules.stdout_lines | default([]) }}"
 
 - name: Display validation results
   ansible.builtin.debug:

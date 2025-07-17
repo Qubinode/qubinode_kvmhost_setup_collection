@@ -8,8 +8,8 @@
   ansible.builtin.debug:
     msg:
       - "Creating network: {{ network_item.name }}"
-      - "Mode: {{ network_item.mode           | default(\'bridge\'\)   }}"
-      - "Bridge: {{ network_item.bridge_name           | default(\'N/A\'\)   }}"
+      - "Mode: {{ network_item.mode | default('bridge') }}"
+      - "Bridge: {{ network_item.bridge_name | default('N/A') }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Check if network already exists
@@ -27,7 +27,7 @@
   become: true
   when:
     - network_exists_check.rc != 0
-    - network_item.mode | default(\'bridge\'\) == 'bridge'
+    - network_item.mode | default('bridge') == 'bridge'
   register: bridge_network_created
 
 - name: Create NAT mode network
@@ -38,7 +38,7 @@
   become: true
   when:
     - network_exists_check.rc != 0
-    - network_item.mode | default(\'bridge\'\) == 'nat'
+    - network_item.mode | default('bridge') == 'nat'
   register: nat_network_created
 
 - name: Create isolated mode network
@@ -49,7 +49,7 @@
   become: true
   when:
     - network_exists_check.rc != 0
-    - network_item.mode | default(\'bridge\'\) == 'isolated'
+    - network_item.mode | default('bridge') == 'isolated'
   register: isolated_network_created
 
 - name: Start libvirt network

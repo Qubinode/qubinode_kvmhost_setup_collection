@@ -1,7 +1,7 @@
 ---
 # Network Interface Detection
 
-- name: 'Detect primary network interface'
+- name: Detect primary network interface
   ansible.builtin.set_fact:
     primary_interface: "{{ ansible_default_ipv4.interface }}"
     primary_ip: "{{ ansible_default_ipv4.address }}"
@@ -11,30 +11,30 @@
     - auto_detect_interface
     - not qubinode_bridge_interface
 
-- name: 'Override primary interface if specified'
+- name: Override primary interface if specified
   ansible.builtin.set_fact:
     primary_interface: "{{ qubinode_bridge_interface }}"
   when: qubinode_bridge_interface | length > 0
 
-- name: 'Validate network interface exists'
+- name: Validate network interface exists
   ansible.builtin.assert:
     that:
       - primary_interface in ansible_interfaces
     fail_msg: "Primary interface {{ primary_interface }} not found in system interfaces: {{ ansible_interfaces }}"
-    success_msg: "Primary interface {{ primary_interface }} validated successfully"
+    success_msg: Primary interface {{ primary_interface }} validated successfully
 
-- name: 'Get current interface configuration'
-  ansible.builtin.command: "nmcli connection show {{ primary_interface }}"
+- name: Get current interface configuration
+  ansible.builtin.command: nmcli connection show {{ primary_interface }}
   register: interface_config
   failed_when: false
   changed_when: false
 
-- name: 'Display interface detection results'
+- name: Display interface detection results
   ansible.builtin.debug:
     msg: |
       Interface Detection Results:
       - Primary Interface: {{ primary_interface }}
-      - Primary IP: {{ primary_ip           | default(\'N/A\')   }}
-      - Gateway: {{ primary_gateway           | default(\'N/A\')   }}
-      - Netmask: {{ primary_netmask           | default(\'N/A\')   }}
+      - Primary IP: {{ primary_ip           | default('N/A)   }}
+      - Gateway: {{ primary_gateway           | default('N/A)   }}
+      - Netmask: {{ primary_netmask           | default('N/A)   }}
       - Available Interfaces: {{ ansible_interfaces           | join(', ')   }}

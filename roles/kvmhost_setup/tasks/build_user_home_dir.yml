@@ -1,4 +1,3 @@
----
 - name: Get home directory for {{ shell_user }}
   ansible.builtin.set_fact:
     qubinode_kvmhost_setup_current_user_homedir: "{{ lookup('env', 'HOME') }}"

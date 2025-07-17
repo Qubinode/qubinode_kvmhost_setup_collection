@@ -25,7 +25,8 @@
   ansible.builtin.assert:
     that:
       - ansible_distribution_major_version in supported_major_versions
-    fail_msg: "Current OS major version '{{ ansible_distribution_major_version }}' is not in supported list: {{ supported_major_versions }}"
+    fail_msg: "Current OS major version '{{ ansible_distribution_major_version }}' is not in supported list: {{ supported_major_versions
+      }}"
     success_msg: OS major version '{{ ansible_distribution_major_version }}' is supported
 
 - name: Validate EPEL configuration (ADR-0001 compliance)

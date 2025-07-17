@@ -5,25 +5,25 @@
 # Service management handlers for Cockpit configuration changes
 
 - name: Restart cockpit
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: cockpit.socket
     state: restarted
     daemon_reload: true
   listen: restart cockpit
 
 - name: Reload systemd
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   listen: reload systemd
 
 - name: Restart firewalld
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: firewalld
     state: restarted
   listen: restart firewalld
 
 - name: Reload cockpit config
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: cockpit.socket
     state: reloaded
   listen: reload cockpit config

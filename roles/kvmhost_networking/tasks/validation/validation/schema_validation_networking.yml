@@ -4,8 +4,8 @@
 # TODO: Implement proper schema validation logic
 
 - name: Schema validation placeholder
-  debug:
-    msg: "Schema validation not yet implemented"
+  ansible.builtin.debug:
+    msg: Schema validation not yet implemented
   tags:
     - validation
     - schema

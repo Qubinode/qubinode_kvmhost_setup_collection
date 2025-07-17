@@ -1,4 +1,3 @@
-
 # =============================================================================
 # SHARED VALIDATION UTILITIES
 # =============================================================================
@@ -60,7 +59,7 @@
     is_unique_list: "{{ target_list | length == target_list | unique | length }}"
   vars:
     target_list: "{{ validation_list }}"
-  when: 
+  when:
     - validation_list is defined
     - validation_list | type_debug == 'list'
 
@@ -83,7 +82,8 @@
 # Domain name validation utility
 - name: Validate domain name format
   ansible.builtin.set_fact:
-    is_valid_domain: "{{ target_domain | regex_search('^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$') and target_domain | length >= 3 }}"
+    is_valid_domain: "{{ target_domain | regex_search('^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$') and target_domain | length
+      >= 3 }}"
   vars:
     target_domain: "{{ validation_domain }}"
   when: validation_domain is defined

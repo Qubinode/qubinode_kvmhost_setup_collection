@@ -1,4 +1,3 @@
-
 # =============================================================================
 # VOLUME GROUP CONFIG VALIDATION HELPER
 # =============================================================================
@@ -8,9 +7,11 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [vg_error_msg] }}"
   vars:
-    vg_error_msg: "kvmhost_storage validation error: Volume group '{{ vg_item.name | default('unnamed') }}' missing required field '{{ required_field }}'"
-  when: 
-    - vg_item[required_field] is not defined or (vg_item[required_field] | type_debug == 'list' and vg_item[required_field] | length == 0)
+    vg_error_msg: "kvmhost_storage validation error: Volume group '{{ vg_item.name | default('unnamed') }}' missing required
+      field '{{ required_field }}'"
+  when:
+    - vg_item[required_field] is not defined or (vg_item[required_field] | type_debug == 'list' and 
+      vg_item[required_field] | length == 0)
   loop:
     - name
     - devices
@@ -22,7 +23,7 @@
     validation_errors: "{{ validation_errors + [vg_name_error_msg] }}"
   vars:
     vg_name_error_msg: "kvmhost_storage validation error: Volume group name '{{ vg_item.name }}' does not match naming pattern"
-  when: 
+  when:
     - vg_item.name is defined
     - not (vg_item.name | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$'))
 
@@ -30,8 +31,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [device_error_msg] }}"
   vars:
-    device_error_msg: "kvmhost_storage validation error: Volume group '{{ vg_item.name }}' device '{{ item }}' must be an absolute path under /dev/"
-  when: 
+    device_error_msg: "kvmhost_storage validation error: Volume group '{{ vg_item.name }}' device '{{ item }}' must be an
+      absolute path under /dev/"
+  when:
     - vg_item.devices is defined
     - not (item | regex_search('^/dev/[a-zA-Z0-9/_-]+$'))
   loop: "{{ vg_item.devices }}"

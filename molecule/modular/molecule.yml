@@ -1,4 +1,3 @@
----
 dependency:
   name: galaxy
   options:
@@ -16,7 +15,7 @@ platforms:
   - name: modular-rocky-9
     image: docker.io/rockylinux/rockylinux:9-ubi-init
     systemd: always
-    command: "/usr/sbin/init"
+    command: /usr/sbin/init
     capabilities:
       - SYS_ADMIN
     cgroupns_mode: host
@@ -25,12 +24,12 @@ platforms:
     groups:
       - rhel9_compatible
       - modular_testing
-    
+
   # AlmaLinux 9 for additional compatibility testing
   - name: modular-alma-9
     image: docker.io/almalinux/almalinux:9-init
     systemd: always
-    command: "/usr/sbin/init"
+    command: /usr/sbin/init
     capabilities:
       - SYS_ADMIN
     cgroupns_mode: host
@@ -39,12 +38,12 @@ platforms:
     groups:
       - rhel9_compatible
       - modular_testing
-      
+
   # RHEL 8 compatible - Rocky Linux 8
   - name: modular-rocky-8
     image: docker.io/rockylinux/rockylinux:8-ubi-init
     systemd: always
-    command: "/usr/sbin/init"
+    command: /usr/sbin/init
     capabilities:
       - SYS_ADMIN
     cgroupns_mode: host
@@ -59,7 +58,7 @@ provisioner:
   env:
     ANSIBLE_FORCE_COLOR: "true"
     ANSIBLE_VERBOSITY: "2"
-    ANSIBLE_COLLECTIONS_PATH: "~/.ansible/collections"
+    ANSIBLE_COLLECTIONS_PATH: ~/.ansible/collections
   config_options:
     defaults:
       interpreter_python: auto_silent

@@ -9,7 +9,7 @@
     msg:
       - "Configuring libvirt user access"
       - "Admin group: {{ kvmhost_libvirt_admin_group }}"
-      - "Admin users: {{ kvmhost_libvirt_admin_users      | join(', ') if kvmhost_libvirt_admin_users else admin_user                |   default(\'None\'\)    }}"
+      - "Admin users: {{ kvmhost_libvirt_admin_users | join(', ') if kvmhost_libvirt_admin_users else admin_user | default('None') }}"
   when: kvmhost_libvirt_debug_enabled | default(false)
 
 - name: Add specified users to libvirt group
@@ -80,7 +80,7 @@
 
 - name: Display libvirt access test result
   ansible.builtin.debug:
-    msg: "Libvirt access test for {{ ansible_user           | default(\'current user\'\)   }}: {{ 'Success' if user_libvirt_test.rc == 0 else 'Failed - may need to log out and back in' }}"
+    msg: "Libvirt access test for {{ ansible_user           | default('current user')   }}: {{ 'Success' if user_libvirt_test.rc == 0 else 'Failed - may need to log out and back in' }}"
   when:
     - kvmhost_libvirt_debug_enabled | default(false)
     - user_libvirt_test is defined

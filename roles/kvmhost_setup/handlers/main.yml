@@ -1,13 +1,13 @@
 ---
 - name: Reload libvirtd service
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: libvirtd
     daemon_reload: true
     state: restarted
   become: true
 
 - name: Restart libvirtd
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: libvirtd
     state: restarted
   become: true

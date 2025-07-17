@@ -1,10 +1,11 @@
+---
 # Test Inventory Variables
 # Sanitized version of ../qubinode_navigator/inventories/rhel9-equinix/group_vars/all.yml
 
 # System Configuration
 project_dir: /opt/qubinode-installer
 admin_user: test-user
-domain: "example.com"
+domain: example.com
 rhel_version: "9.0"
 
 # RHPDS Settings
@@ -28,7 +29,7 @@ kvm_host_mac: "02:00:00:00:00:01"
 kvm_host_macaddr: "02:00:00:00:00:02"
 kvm_host_mask_prefix: 24
 qubinode_ptr: example.in-addr.arpa
-dns_forwarder: "8.8.8.8"
+dns_forwarder: 8.8.8.8
 convert_dhcp_to_static: true
 kvm_host_bootproto: static
 kvm_bridge_type: bridge
@@ -41,8 +42,8 @@ rhsm_setup_insights_client: false
 # LVM Configuration
 logical_volumes:
   - name: test_images
-    size: "+10G"
-    mount_dir: "/var/lib/libvirt/images"
+    size: +10G
+    mount_dir: /var/lib/libvirt/images
     fstype: xfs
 
 # User Configuration

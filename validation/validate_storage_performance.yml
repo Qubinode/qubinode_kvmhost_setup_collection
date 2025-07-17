@@ -1,4 +1,3 @@
-
 # =============================================================================
 # STORAGE PERFORMANCE VALIDATION HELPER
 # =============================================================================
@@ -8,9 +7,10 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [io_scheduler_error_msg] }}"
   vars:
-    io_scheduler_error_msg: "kvmhost_storage validation error: Invalid IO scheduler '{{ kvmhost_storage_vars.storage_performance_tuning.io_scheduler }}'"
-    valid_schedulers: ["noop", "deadline", "cfq", "mq-deadline", "kyber", "bfq"]
-  when: 
+    io_scheduler_error_msg: "kvmhost_storage validation error: Invalid IO scheduler '{{ kvmhost_storage_vars.storage_performance_tuning.io_scheduler
+      }}'"
+    valid_schedulers: [noop, deadline, cfq, mq-deadline, kyber, bfq]
+  when:
     - kvmhost_storage_vars.storage_performance_tuning.io_scheduler is defined
     - kvmhost_storage_vars.storage_performance_tuning.io_scheduler not in valid_schedulers
 
@@ -18,8 +18,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [io_scheduler_consistency_error_msg] }}"
   vars:
-    io_scheduler_consistency_error_msg: "kvmhost_storage validation error: io_scheduler specified but enable_io_scheduler is false"
-  when: 
+    io_scheduler_consistency_error_msg: "kvmhost_storage validation error: io_scheduler specified but enable_io_scheduler
+      is false"
+  when:
     - kvmhost_storage_vars.storage_performance_tuning.enable_io_scheduler is defined
     - not kvmhost_storage_vars.storage_performance_tuning.enable_io_scheduler
     - kvmhost_storage_vars.storage_performance_tuning.io_scheduler is defined

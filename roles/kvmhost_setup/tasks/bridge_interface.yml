@@ -1,7 +1,6 @@
----
 - name: Checking libvirt_host_networks[type_idx].bridge_device variable
   ansible.builtin.fail:
-    msg: "Bailing out. this play requires libvirt_host_networks[type_idx].bridge_device"
+    msg: Bailing out. this play requires libvirt_host_networks[type_idx].bridge_device
   with_items: "{{ libvirt_host_networks[type_idx] }}"
   when:
     - libvirt_host_networks[type_idx].bridge_device | length == 0
@@ -9,7 +8,7 @@
 
 - name: Check _networks[type_idx].bridge_slave_dev variable
   ansible.builtin.fail:
-    msg: "Bailing out. this play requires libvirt_host_networks[type_idx].bridge_slave_dev"
+    msg: Bailing out. this play requires libvirt_host_networks[type_idx].bridge_slave_dev
   with_items: "{{ libvirt_host_networks[type_idx] }}"
   when:
     - libvirt_host_networks[type_idx].bridge_slave_dev | length == 0
@@ -24,12 +23,12 @@
   block:
     - name: Setting bridge name
       ansible.builtin.set_fact:
-        bridge_name: '{{ qubinode_bridge_fact }}'
+        bridge_name: "{{ qubinode_bridge_fact }}"
       failed_when: false
 
     - name: Display message when bridge_name is undefined
       ansible.builtin.debug:
-        msg: "Bridge name is not defined, configuration is required."
+        msg: Bridge name is not defined, configuration is required.
       when: not bridge_name | bool or bridge_name is undefined
 
     - name: Setup bridge interface
@@ -38,7 +37,7 @@
       ansible.builtin.ansible.builtin.template:
         src: templates/ifcfg_bridge_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_device }}
-        mode: '0640'
+        mode: "0640"
       with_items: "{{ libvirt_host_networks[type_idx] }}"
       when: not bridge_name | bool or bridge_name is undefined
 
@@ -48,7 +47,7 @@
       ansible.builtin.ansible.builtin.template:
         src: templates/ifcfg_device_template.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-{{ libvirt_host_networks[type_idx].bridge_slave_dev }}
-        mode: '0640'
+        mode: "0640"
       with_items: "{{ libvirt_host_networks[type_idx] }}"
       register: create_slave_device
       when: not bridge_name | bool or bridge_name is undefined
@@ -60,52 +59,56 @@
 
     - name: Restart network service for older systems
       ansible.builtin.ansible.builtin.systemd:
-        name: '{{ item }}'
+        name: "{{ item }}"
         state: restarted
       changed_when: false
       with_items:
         - network
         - NetworkManager
         - libvirtd
-      when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is undefined))
+      when: (("RedHat" and ansible_distribution_major_version == '7') and (not bridge_name | bool or bridge_name is
+        undefined))
 
     - name: Restart network service
       ansible.builtin.ansible.builtin.systemd:
-        name: '{{ item }}'
+        name: "{{ item }}"
         state: restarted
       changed_when: false
       with_items:
         - NetworkManager
         - libvirtd
-      when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
+      when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is
+        undefined))
 
     - name: Active bridge connection
-      ansible.builtin.command: "nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}"
+      ansible.builtin.command: nmcli connection up {{ libvirt_host_networks[type_idx].bridge_device }}
       changed_when: false
-      when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is undefined))
+      when: (("RedHat" and ansible_distribution_major_version == '8') and (not bridge_name | bool or bridge_name is
+        undefined))
 
     - name: Disable old connection
-      ansible.builtin.command: "sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}"
+      ansible.builtin.command: sudo nmcli connection down {{ libvirt_host_networks[type_idx].bridge_slave_dev }}
 
       changed_when: false
-      when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is undefined))
+      when: (("RedHat" and ansible_distribution_major_version == '8')  and (not bridge_name | bool or bridge_name is
+        undefined))
       failed_when: true
 
 - name: Update /etc/resolv.conf
   ansible.builtin.ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
-    mode: '0644'
+    mode: "0644"
   when: not bridge_name | bool or bridge_name is undefined
 
 - name: Ensure libvirt bridge network is defined
   vars:
-    net_name: '{{ libvirt_host_networks[type_idx].name }}'
-    net_mode: '{{ libvirt_host_networks[type_idx].mode }}'
+    net_name: "{{ libvirt_host_networks[type_idx].name }}"
+    net_mode: "{{ libvirt_host_networks[type_idx].mode }}"
     net_bridge_device: "{{ libvirt_host_networks[type_idx].bridge_device }}"
     net_create: "{{ libvirt_host_networks[type_idx].create }}"
   community.libvirt.virt_net:
-    name: '{{ net_name }}'
+    name: "{{ net_name }}"
     command: define
     xml: '{{ (lookup("template", "libvirt_net_bridge.xml.j2")) }}'
   when: net_create|bool

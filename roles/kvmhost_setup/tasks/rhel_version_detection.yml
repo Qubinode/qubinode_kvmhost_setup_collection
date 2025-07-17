@@ -1,8 +1,11 @@
----
 # RHEL version detection and conditional logic
 # Based on ADR-0008: RHEL 9/10 Support Strategy
 
 - name: Detect RHEL/CentOS/Rocky/AlmaLinux version and set facts
+  tags:
+    - rhel_detection
+    - os_facts
+
   block:
     - name: Set OS family facts
       ansible.builtin.set_fact:
@@ -19,9 +22,9 @@
 
     - name: Set package manager facts based on OS version
       ansible.builtin.set_fact:
-        kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version          | int>= 8 else 'yum'   }}"
-        kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version          | int>= 8 else 'python'   }}"
-        kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version          | int>= 8 else 'pip'   }}"
+        kvmhost_package_manager: "{{ 'dnf' if kvmhost_os_major_version | int >= 8 else 'yum' }}"
+        kvmhost_python_executable: "{{ 'python3' if kvmhost_os_major_version | int >= 8 else 'python' }}"
+        kvmhost_pip_executable: "{{ 'pip3' if kvmhost_os_major_version | int >= 8 else 'pip' }}"
 
     - name: Display OS detection results
       ansible.builtin.debug:
@@ -35,10 +38,6 @@
           - RHEL 10: {{ kvmhost_is_rhel10 }}
           - Package Manager: {{ kvmhost_package_manager }}
           - Python: {{ kvmhost_python_executable }}
-
-  tags:
-    - rhel_detection
-    - os_facts
 
 - name: Set version-specific package names
   ansible.builtin.set_fact:
@@ -157,14 +156,14 @@
   ansible.builtin.set_fact:
     kvmhost_repos:
       rhel8:
-        epel: "epel-release"
-        codeready: "codeready-builder-for-rhel-8-x86_64-rpms"
+        epel: epel-release
+        codeready: codeready-builder-for-rhel-8-x86_64-rpms
       rhel9:
-        epel: "epel-release"
-        codeready: "codeready-builder-for-rhel-9-x86_64-rpms"
+        epel: epel-release
+        codeready: codeready-builder-for-rhel-9-x86_64-rpms
       rhel10:
-        epel: "epel-release"
-        codeready: "codeready-builder-for-rhel-10-x86_64-rpms"
+        epel: epel-release
+        codeready: codeready-builder-for-rhel-10-x86_64-rpms
   tags:
     - rhel_repos
 

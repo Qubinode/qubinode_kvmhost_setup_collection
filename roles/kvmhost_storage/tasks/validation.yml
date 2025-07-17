@@ -6,7 +6,7 @@
 
 - name: Check if LVM device exists
   ansible.builtin.stat:
-    path: '/dev/{{ kvmhost_storage_lvm_device }}'
+    path: /dev/{{ kvmhost_storage_lvm_device }}
   register: lvm_device_check
   when:
     - kvmhost_storage_lvm_enabled | default(false)
@@ -14,14 +14,14 @@
 
 - name: Validate LVM device availability
   ansible.builtin.fail:
-    msg: "LVM device /dev/{{ kvmhost_storage_lvm_device }} not found"
+    msg: LVM device /dev/{{ kvmhost_storage_lvm_device }} not found
   when:
     - kvmhost_storage_lvm_enabled | default(false)
     - kvmhost_storage_lvm_device | length > 0
     - not lvm_device_check.stat.exists
 
 - name: Check if LVM device is already in use
-  ansible.builtin.shell: "pvdisplay /dev/{{ kvmhost_storage_lvm_device }}"
+  ansible.builtin.command: pvdisplay /dev/{{ kvmhost_storage_lvm_device }}
   register: pv_check
   changed_when: false
   failed_when: false
@@ -40,7 +40,7 @@
     - kvmhost_storage_debug_enabled | default(false)
 
 - name: Check current disk space for storage directories
-  ansible.builtin.shell: "df -h {{ item.path if item.path is defined else item.mount_dir }}"
+  ansible.builtin.command: df -h {{ item.path if item.path is defined else item.mount_dir }}
   register: storage_space_check
   changed_when: false
   failed_when: false
@@ -57,7 +57,8 @@
   ansible.builtin.assert:
     that:
       - available_space_check.stdout | int >= kvmhost_storage_minimum_free_space
-    fail_msg: "Insufficient storage space. Available: {{ available_space_check.stdout }}GB, Required: {{ kvmhost_storage_minimum_free_space }}GB"
+    fail_msg: "Insufficient storage space. Available: {{ available_space_check.stdout }}GB, Required: {{ kvmhost_storage_minimum_free_space
+      }}GB"
     success_msg: "Storage space validation passed. Available: {{ available_space_check.stdout }}GB"
 
 - name: Check for required LVM packages

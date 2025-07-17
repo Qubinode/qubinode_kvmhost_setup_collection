@@ -19,8 +19,8 @@
       - Primary Interface: {{ primary_interface }}
       - Bridge Name: {{ qubinode_bridge_name }}
       - Bridge Exists: {{ bridge_already_exists }}
-      - Primary IP: {{ primary_ip           | default(\'N/A\'\)   }}
-      - Gateway: {{ primary_gateway           | default(\'N/A\'\)   }}
+      - Primary IP: {{ primary_ip           | default('N/A')   }}
+      - Gateway: {{ primary_gateway           | default('N/A')   }}
 
 - name: 'Backup current network configuration'
   ansible.builtin.command: "nmcli connection show --active"
@@ -54,11 +54,11 @@
 
 - name: 'Parse current network configuration'
   ansible.builtin.set_fact:
-    current_connection_uuid: "{{ current_connection_details.stdout      | regex_search('connection.uuid:([^\\n]+)', '\\1')      |      first           |  default(\'\'\)    }}"
-    current_ipv4_method: "{{ current_connection_details.stdout      | regex_search('ipv4.method:([^\\n]+)', '\\1')      |      first           |  default(\'auto\'\)    }}"
-    current_ipv4_addresses: "{{ current_connection_details.stdout      | regex_search('ipv4.addresses:([^\\n]+)', '\\1')      |      first           |  default(\'\'\)    }}"
-    current_ipv4_gateway: "{{ current_connection_details.stdout      | regex_search('ipv4.gateway:([^\\n]+)', '\\1')      |      first           |  default(\'\'\)    }}"
-    current_ipv4_dns: "{{ current_connection_details.stdout      | regex_search('ipv4.dns:([^\\n]+)', '\\1')      |      first           |  default(\'\'\)    }}"
+    current_connection_uuid: "{{ current_connection_details.stdout | regex_search('connection.uuid:([^\\n]+)', '\\1') | first | default('') }}"
+    current_ipv4_method: "{{ current_connection_details.stdout | regex_search('ipv4.method:([^\\n]+)', '\\1') | first | default('auto') }}"
+    current_ipv4_addresses: "{{ current_connection_details.stdout | regex_search('ipv4.addresses:([^\\n]+)', '\\1') | first | default('') }}"
+    current_ipv4_gateway: "{{ current_connection_details.stdout | regex_search('ipv4.gateway:([^\\n]+)', '\\1') | first | default('') }}"
+    current_ipv4_dns: "{{ current_connection_details.stdout      | regex_search('ipv4.dns:([^\\n]+)', '\\1')      |      first | default('')    }}"
   when: not bridge_already_exists
 
 - name: 'Create bridge connection'
@@ -87,7 +87,7 @@
 - name: 'Configure bridge IP settings based on current interface'
   ansible.builtin.command: >
     nmcli connection modify {{ qubinode_bridge_name }}
-    ipv4.method {{ current_ipv4_method           | default(\'auto\'\)   }}
+    ipv4.method {{ current_ipv4_method           | default('auto')   }}
     {% if current_ipv4_addresses %}ipv4.addresses {{ current_ipv4_addresses }}{% endif %}
     {% if current_ipv4_gateway %}ipv4.gateway {{ current_ipv4_gateway }}{% endif %}
     {% if current_ipv4_dns %}ipv4.dns {{ current_ipv4_dns }}{% endif %}

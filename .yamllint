@@ -19,6 +19,15 @@ rules:
   comments:
     min-spaces-from-content: 1
 
+  # Required by ansible-lint
+  braces:
+    max-spaces-inside: 1
+
+  # Required by ansible-lint
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+
   # Allow empty lines at end of document
   empty-lines:
     max-end: 1

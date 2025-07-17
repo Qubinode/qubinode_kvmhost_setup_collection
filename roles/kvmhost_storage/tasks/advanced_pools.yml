@@ -6,14 +6,14 @@
 
 - name: Display advanced pools configuration
   ansible.builtin.debug:
-    msg: "Configuring {{ kvmhost_storage_advanced_pools      | selectattr('enabled')      |      list           |  length   }} advanced storage pools"
+    msg: Configuring {{ kvmhost_storage_advanced_pools | selectattr('enabled') | list | length }} advanced storage pools
   when: kvmhost_storage_debug_enabled | default(false)
 
 - name: Create directories for advanced storage pools
-  ansible.builtin.ansible.builtin.file:
-    path: '{{ item.path }}'
+  ansible.builtin.file:
+    path: "{{ item.path }}"
     state: directory
-    mode: '{{ item.target_mode           | default(\'0711\'\)   }}'
+    mode: "{{ item.target_mode | default('0711') }}"
     owner: root
     group: root
   loop: "{{ kvmhost_storage_advanced_pools }}"
@@ -23,7 +23,7 @@
 - name: Define advanced libvirt storage pools
   community.libvirt.virt_pool:
     command: define
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
     xml: '{{ lookup("template", "advanced_pool.xml.j2") }}'
   loop: "{{ kvmhost_storage_advanced_pools }}"
   when: item.enabled | default(true)
@@ -33,18 +33,18 @@
 - name: Build storage pools (create directory structure)
   community.libvirt.virt_pool:
     command: build
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
   loop: "{{ kvmhost_storage_advanced_pools }}"
   when:
     - item.enabled | default(true)
-    - item.type | default(\'dir\'\) == 'dir'
+    - item.type | default('dir') == 'dir'
   become: true
   ignore_errors: true
 
 - name: Start advanced storage pools
   community.libvirt.virt_pool:
     state: active
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
   loop: "{{ kvmhost_storage_advanced_pools }}"
   when: item.enabled | default(true)
   become: true
@@ -52,7 +52,7 @@
 - name: Configure autostart for storage pools
   community.libvirt.virt_pool:
     autostart: "{{ item.autostart }}"
-    name: '{{ item.name }}'
+    name: "{{ item.name }}"
   loop: "{{ kvmhost_storage_advanced_pools }}"
   when:
     - item.enabled | default(true)
@@ -60,7 +60,7 @@
   become: true
 
 - name: Verify advanced storage pools
-  ansible.builtin.command: "virsh pool-info {{ item.name }}"
+  ansible.builtin.command: virsh pool-info {{ item.name }}
   register: pool_info_check
   changed_when: false
   failed_when: false
@@ -74,7 +74,7 @@
       - "Pool: {{ item.item.name }}"
       - "Status: {{ 'Active' if 'State:     running' in item.stdout else 'Inactive' }}"
       - "Path: {{ item.item.path }}"
-      - "Autostart: {{ item.item.autostart           | default(\'Not configured\'\)   }}"
+      - "Autostart: {{ item.item.autostart | default('Not configured') }}"
   loop: "{{ pool_info_check.results }}"
   when:
     - kvmhost_storage_debug_enabled | default(false)

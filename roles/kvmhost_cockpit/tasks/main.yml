@@ -9,7 +9,7 @@
 - name: Display kvmhost_cockpit role configuration
   ansible.builtin.debug:
     msg:
-      - "Starting kvmhost_cockpit role execution"
+      - Starting kvmhost_cockpit role execution
       - "Cockpit enabled: {{ kvmhost_cockpit_enabled }}"
       - "Port: {{ kvmhost_cockpit_port }}"
       - "SSL enabled: {{ kvmhost_cockpit_ssl_enabled }}"
@@ -49,6 +49,7 @@
 - name: Display completion status
   ansible.builtin.debug:
     msg:
-      - "kvmhost_cockpit role execution completed"
-      - "Cockpit web interface available at: {{ 'https' if kvmhost_cockpit_ssl_enabled else 'http' }}://{{ ansible_default_ipv4.address }}:{{ kvmhost_cockpit_port }}"
+      - kvmhost_cockpit role execution completed
+      - "Cockpit web interface available at: {{ 'https' if kvmhost_cockpit_ssl_enabled else 'http' }}://{{ ansible_default_ipv4.address
+        }}:{{ kvmhost_cockpit_port }}"
   when: kvmhost_cockpit_enabled | bool

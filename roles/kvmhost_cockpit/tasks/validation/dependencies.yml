@@ -6,12 +6,12 @@
 
 - name: Check if system is supported
   ansible.builtin.fail:
-    msg: "Cockpit role requires RHEL/CentOS/Rocky/AlmaLinux"
+    msg: Cockpit role requires RHEL/CentOS/Rocky/AlmaLinux
   when: ansible_os_family != "RedHat"
 
 - name: Verify minimum RHEL version
   ansible.builtin.fail:
-    msg: "Cockpit role requires RHEL 8 or newer"
+    msg: Cockpit role requires RHEL 8 or newer
   when:
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version | int < 8
@@ -41,14 +41,14 @@
 
 - name: Fail if port is already in use
   ansible.builtin.fail:
-    msg: "Port {{ kvmhost_cockpit_port }} is already in use by another service"
+    msg: Port {{ kvmhost_cockpit_port }} is already in use by another service
   when:
     - port_check is succeeded
     - "'cockpit' not in (ansible_facts.services | default({}))"
 
 - name: Validate SSL certificate paths (if SSL enabled)
   ansible.builtin.stat:
-    path: '{{ item }}'
+    path: "{{ item }}"
   register: ssl_cert_check
   loop:
     - "{{ kvmhost_cockpit_ssl_cert_path }}"
@@ -57,7 +57,7 @@
 
 - name: Fail if SSL files don't exist (when SSL enabled)
   ansible.builtin.fail:
-    msg: "SSL certificate file {{ item.item }} does not exist"
+    msg: SSL certificate file {{ item.item }} does not exist
   loop: "{{ ssl_cert_check.results           | default([])   }}"
   when:
     - kvmhost_cockpit_ssl_enabled | bool

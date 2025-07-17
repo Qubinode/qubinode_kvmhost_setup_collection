@@ -1,25 +1,25 @@
 ---
-- name: "Idempotency Test Converge - First Run"
+- name: Idempotency Test Converge - First Run
   hosts: all
   become: true
   gather_facts: true
-  
+
   vars:
     # Enable testing mode for all roles
     testing_mode: true
     idempotency_test: true
-    
+
     # Override potentially problematic settings for containerized testing
-    libvirt_setup_enabled: false  # Skip libvirt in containers
-    network_setup_enabled: false  # Skip network configuration in containers
-    
+    libvirt_setup_enabled: false # Skip libvirt in containers
+    network_setup_enabled: false # Skip network configuration in containers
+
   pre_tasks:
-    - name: "Update package cache"
+    - name: Update package cache
       ansible.builtin.package:
         update_cache: true
       changed_when: false
-      
-    - name: "Install basic testing dependencies"
+
+    - name: Install basic testing dependencies
       ansible.builtin.package:
         name:
           - python3
@@ -35,7 +35,7 @@
       tags:
         - edge_hosts_validate
         - validation
-      
+
     - name: "Test Role: swygue_lvm (with mock configuration) - FIRST RUN"
       ansible.builtin.include_role:
         name: swygue_lvm
@@ -47,7 +47,7 @@
       tags:
         - swygue_lvm
         - lvm
-      
+
     - name: "Test Role: kvmhost_setup (partial - container-safe tasks only) - FIRST RUN"
       ansible.builtin.include_role:
         name: kvmhost_setup
@@ -67,19 +67,19 @@
         - kvmhost_setup
         - partial
 
-- name: "Idempotency Test Converge - Second Run (Idempotency Check)"
+- name: Idempotency Test Converge - Second Run (Idempotency Check)
   hosts: all
   become: true
   gather_facts: false
-  
+
   vars:
     # Enable testing mode for all roles
     testing_mode: true
     idempotency_test: true
-    
+
     # Override potentially problematic settings for containerized testing
-    libvirt_setup_enabled: false  # Skip libvirt in containers
-    network_setup_enabled: false  # Skip network configuration in containers
+    libvirt_setup_enabled: false # Skip libvirt in containers
+    network_setup_enabled: false # Skip network configuration in containers
 
   tasks:
     - name: "Test Role: edge_hosts_validate (validation-only role) - SECOND RUN"
@@ -89,7 +89,7 @@
       tags:
         - edge_hosts_validate
         - validation
-      
+
     - name: "Test Role: swygue_lvm (with mock configuration) - SECOND RUN"
       ansible.builtin.include_role:
         name: swygue_lvm
@@ -101,7 +101,7 @@
       tags:
         - swygue_lvm
         - lvm
-      
+
     - name: "Test Role: kvmhost_setup (partial - container-safe tasks only) - SECOND RUN"
       ansible.builtin.include_role:
         name: kvmhost_setup
@@ -120,8 +120,8 @@
       tags:
         - kvmhost_setup
         - partial
-    
-    - name: "Record idempotency test results"
+
+    - name: Record idempotency test results
       ansible.builtin.set_fact:
         idempotency_results:
           edge_hosts_validate:
@@ -136,8 +136,8 @@
             first_run_changed: "{{ kvmhost_first_run.changed | default(false) }}"
             second_run_changed: "{{ kvmhost_second_run.changed | default(false) }}"
             idempotent: "{{ not (kvmhost_second_run.changed | default(false)) }}"
-    
-    - name: "Display idempotency test summary"
+
+    - name: Display idempotency test summary
       ansible.builtin.debug:
         msg: |
           Idempotency Test Summary for {{ inventory_hostname }}:

@@ -1,12 +1,11 @@
----
 # GPG Key Verification Tasks for ADR-0001 Compliance
 # Enhanced security compliance with automatic key verification
 
 - name: Ensure DNF GPG key verification is enabled globally
   ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/dnf/dnf.conf
-    regexp: '^gpgcheck='
-    line: 'gpgcheck=1'
+    regexp: ^gpgcheck=
+    line: gpgcheck=1
     backup: true
   become: true
   tags:
@@ -17,8 +16,8 @@
 - name: Ensure DNF repo GPG key verification is enabled globally
   ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/dnf/dnf.conf
-    regexp: '^repo_gpgcheck='
-    line: 'repo_gpgcheck=1'
+    regexp: ^repo_gpgcheck=
+    line: repo_gpgcheck=1
     backup: true
   become: true
   tags:
@@ -29,8 +28,8 @@
 - name: Ensure DNF local package GPG verification is enabled
   ansible.builtin.lineinansible.builtin.ansible.builtin.file:
     path: /etc/dnf/dnf.conf
-    regexp: '^localpkg_gpgcheck='
-    line: 'localpkg_gpgcheck=1'
+    regexp: ^localpkg_gpgcheck=
+    line: localpkg_gpgcheck=1
     backup: true
   become: true
   tags:
@@ -71,8 +70,8 @@
   ansible.builtin.assert:
     that:
       - "'gpgcheck = 1' in dnf_config_dump.stdout or 'gpgcheck = True' in dnf_config_dump.stdout"
-    fail_msg: "GPG checking is not properly enabled in DNF configuration"
-    success_msg: "GPG checking is properly enabled - ADR-0001 compliance verified"
+    fail_msg: GPG checking is not properly enabled in DNF configuration
+    success_msg: GPG checking is properly enabled - ADR-0001 compliance verified
   tags:
     - security
     - gpg_verification
@@ -102,12 +101,12 @@
   ansible.builtin.assert:
     that:
       - epel_info_check.rc == 0
-    fail_msg: "EPEL repository GPG verification failed"
-    success_msg: "EPEL repository GPG verification successful"
+    fail_msg: EPEL repository GPG verification failed
+    success_msg: EPEL repository GPG verification successful
   when:
     - epel_info_check is defined
     - "'epel' in enabled_repos_check.stdout | lower"
-    - not (ansible_virtualization_type | default(\'\'\) in ['container', 'docker', 'podman'])
+    - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
   tags:
     - security
     - gpg_verification
@@ -115,10 +114,10 @@
 
 - name: Skip EPEL GPG verification in container environments
   ansible.builtin.debug:
-    msg: "Skipping EPEL GPG verification - container environment detected or EPEL not configured"
+    msg: Skipping EPEL GPG verification - container environment detected or EPEL not configured
   when:
-    - ansible_virtualization_type | default(\'\'\) in ['container', 'docker', 'podman'] or
-      "'epel' not in enabled_repos_check.stdout | lower"
+    - ansible_virtualization_type | default('') in ['container', 'docker', 'podman'] or "'epel' not in
+      enabled_repos_check.stdout | lower"
   tags:
     - security
     - gpg_verification
@@ -127,8 +126,8 @@
 - name: Create GPG verification status report
   ansible.builtin.ansible.builtin.template:
     src: gpg_verification_report.j2
-    dest: "/var/log/ansible-gpg-verification-{{ ansible_date_time.epoch }}.log"
-    mode: '0644'
+    dest: /var/log/ansible-gpg-verification-{{ ansible_date_time.epoch }}.log
+    mode: "0644"
   become: true
   tags:
     - security

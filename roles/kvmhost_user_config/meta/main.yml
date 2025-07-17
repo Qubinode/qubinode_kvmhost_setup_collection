@@ -8,21 +8,21 @@ galaxy_info:
   description: Configures user shell environments, SSH access, and permissions for KVM hosts
   company: Community
   license: MIT
-  min_ansible_version: '2.12'
+  min_ansible_version: "2.12"
 
   platforms:
     - name: EL
       versions:
-        - 'all'
-        - 'all'
-        - 'all'
+        - all
+        - all
+        - all
     - name: Fedora
       versions:
-        - '36'
-        - '37'
-        - '38'
-        - '39'
-        - '40'
+        - "36"
+        - "37"
+        - "38"
+        - "39"
+        - "40"
 
   galaxy_tags:
     - system

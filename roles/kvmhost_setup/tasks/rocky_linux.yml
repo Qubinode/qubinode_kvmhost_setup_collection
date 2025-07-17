@@ -1,7 +1,6 @@
----
 - name: Enable EPEL repository using DNF module (ADR-0001 compliant)
   ansible.builtin.dnf:
-    name: 'epel-release'
+    name: "epel-release"
     state: present
   become: true
 
@@ -13,7 +12,7 @@
 
 - name: Install Server group
   ansible.builtin.dnf:
-    name: '@Server'
+    name: "@Server"
     state: present
   become: true
 

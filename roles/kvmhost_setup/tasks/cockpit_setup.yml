@@ -1,4 +1,3 @@
----
 - name: Install RHEL/Fedora Web Console (Cockpit)
   ansible.builtin.include_role:
     name: linux-system-roles.cockpit

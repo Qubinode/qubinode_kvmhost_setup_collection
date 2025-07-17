@@ -1,11 +1,10 @@
----
 - name: Validate virtualization extensions are available to this host
   ansible.builtin.include_tasks: validate.yml
   when: not cicd_test|bool
 
 - name: Enable libvirt services
   ansible.builtin.ansible.builtin.service:
-    name: '{{ item }}'
+    name: "{{ item }}"
     enabled: true
     state: started
   with_items: "{{ libvirt_services }}"
@@ -81,7 +80,7 @@
   vars:
     network_provider: nm
     network_connections:
-      - name: '{{ qubinode_bridge_name }}'
+      - name: "{{ qubinode_bridge_name }}"
         type: bridge
         state: up
         ip:
@@ -98,7 +97,7 @@
       - name: eno1
         state: up
         type: ethernet
-        interface_name: '{{ kvm_host_interface }}'
+        interface_name: "{{ kvm_host_interface }}"
         controller: "{{ qubinode_bridge_name }}"
         port_type: bridge
   when: is_fedora_38 or is_fedora_37 or is_centos_9 or is_redhat_8 or is_redhat_9

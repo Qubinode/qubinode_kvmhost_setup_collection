@@ -11,7 +11,7 @@
       - network_config.name | length > 0
       - network_config.mode is defined
       - network_config.bridge_device is defined
-    fail_msg: "Network '{{ network_config.name           | default(\'unnamed\'\)   }}' missing required fields"
+    fail_msg: "Network '{{ network_config.name | default('unnamed') }}' missing required fields"
     success_msg: "Network '{{ network_config.name }}' has all required fields"
 
 - name: Validate network mode

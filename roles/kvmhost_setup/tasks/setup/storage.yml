@@ -22,7 +22,7 @@
   loop: "{{ libvirt_host_storage_pools }}"
   when:
     - item.name not in existing_pools.stdout
-    - item.state | default(\'active\'\) != 'absent'
+    - item.state | default('active') != 'absent'
 
 - name: Define storage pools
   ansible.builtin.command: virsh pool-define /etc/libvirt/storage/{{ item.name }}.xml
@@ -34,7 +34,7 @@
   loop: "{{ libvirt_host_storage_pools }}"
   when:
     - item.name not in existing_pools.stdout
-    - item.state | default(\'active\'\) != 'absent'
+    - item.state | default('active') != 'absent'
 
 - name: Start storage pools
   ansible.builtin.command: virsh pool-start {{ item.name }}
@@ -45,7 +45,7 @@
     - '"already active" not in pool_start.stderr'
   loop: "{{ libvirt_host_storage_pools }}"
   when:
-    - item.state | default(\'active\'\) == 'active'
+    - item.state | default('active') == 'active'
     - item.autostart | default(true)
 
 - name: Mark storage pools for autostart
@@ -58,7 +58,7 @@
   loop: "{{ libvirt_host_storage_pools }}"
   when:
     - item.autostart | default(true)
-    - item.state | default(\'active\'\) != 'absent'
+    - item.state | default('active') != 'absent'
 
 - name: Verify storage pool status
   ansible.builtin.command: virsh pool-info {{ item.name }}
@@ -66,7 +66,7 @@
   changed_when: false
   failed_when: false
   loop: "{{ libvirt_host_storage_pools }}"
-  when: item.state | default(\'active\'\) != 'absent'
+  when: item.state | default('active') != 'absent'
 
 - name: Assert storage pools are properly configured
   ansible.builtin.assert:
@@ -76,7 +76,7 @@
     fail_msg: Storage pool {{ item.name }} is not properly configured
     success_msg: Storage pool {{ item.name }} is properly configured
   loop: "{{ libvirt_host_storage_pools }}"
-  when: item.state | default(\'active\'\) != 'absent'
+  when: item.state | default('active') != 'absent'
 
 - name: Set correct SELinux context for storage pools
   ansible.builtin.ansible.builtin.file:

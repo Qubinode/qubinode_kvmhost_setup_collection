@@ -1,4 +1,5 @@
-- name: 'Validate packages are installed'
+---
+- name: Validate packages are installed
   ansible.builtin.dnf:
     list: "{{ item }}"
   with_items: "{{ libvirt_pkgs }}"

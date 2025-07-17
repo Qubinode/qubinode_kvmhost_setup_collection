@@ -12,7 +12,7 @@
   listen: reload bash profile
 
 - name: Restart ssh service
-  ansible.builtin.ansible.builtin.systemd:
+  ansible.builtin.systemd:
     name: sshd
     state: restarted
   listen: restart ssh service

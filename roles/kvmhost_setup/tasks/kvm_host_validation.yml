@@ -269,7 +269,7 @@
       ✓ KVM device: {{ '/dev/kvm available' if kvm_device.stat.exists else 'Not available' }}
       ✓ libvirt version: {{ libvirt_version.stdout }}
       ✓ QEMU version: {{ qemu_version.stdout }}
-      ✓ libvirtd ansible.builtin.ansible.builtin.service: {{ libvirtd_active.stdout           | default(\'checking...\')   }}
+      ✓ libvirtd ansible.builtin.ansible.builtin.service: {{ libvirtd_active.stdout           | default('checking...)   }}
 
       KVM host validation completed successfully!
       System is ready for virtual machine deployment.

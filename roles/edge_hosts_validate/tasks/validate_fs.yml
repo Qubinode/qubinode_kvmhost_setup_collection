@@ -1,7 +1,7 @@
 ---
 - name: Validate libirt install dir exists
   ansible.builtin.stat:
-    path: '{{ libvirt_install_dir }}'
+    path: "{{ libvirt_install_dir }}"
   register: edge_hosts_validate_lvm_path
   become: true
   ignore_errors: true

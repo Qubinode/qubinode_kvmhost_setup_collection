@@ -6,7 +6,7 @@
 
 - name: Check if running in CI/CD test mode
   ansible.builtin.debug:
-    msg: "Skipping hardware validation - CI/CD test mode enabled"
+    msg: Skipping hardware validation - CI/CD test mode enabled
   when: cicd_test | default(false)
 
 - name: Verify that Virtualization Technology (VT) is enabled
@@ -28,8 +28,7 @@
 - name: Display VT status information
   ansible.builtin.debug:
     msg: >
-      Virtualization Technology (VT) status:
-      {{ 'Enabled' if kvmhost_libvirt_vt_enabled           | default(true) else 'Disabled'   }}
+      Virtualization Technology (VT) status: {{ 'Enabled' if kvmhost_libvirt_vt_enabled | default(true) else 'Disabled' }}
   when:
     - not cicd_test | default(false)
     - not kvmhost_libvirt_skip_vt_check | default(false)
@@ -58,16 +57,16 @@
 
 - name: Validate storage pool paths exist
   ansible.builtin.stat:
-    path: '{{ item.path }}'
+    path: "{{ item.path }}"
   register: storage_path_check
   loop: "{{ kvmhost_libvirt_storage_pools }}"
   when: kvmhost_libvirt_storage_enabled | default(true)
 
 - name: Create storage pool directories if missing
   ansible.builtin.ansible.builtin.file:
-    path: '{{ item.item.path }}'
+    path: "{{ item.item.path }}"
     state: directory
-    mode: '0711'
+    mode: "0711"
     owner: root
     group: root
   loop: "{{ storage_path_check.results }}"
