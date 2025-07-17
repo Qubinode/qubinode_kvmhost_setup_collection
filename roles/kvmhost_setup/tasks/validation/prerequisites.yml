@@ -45,7 +45,7 @@
     success_msg: SELinux is properly configured
 
 - name: Check available disk space
-  ansible.builtin.command: df -BG {{ kvm_host_libvirt_dir           | dirname   }}
+  ansible.builtin.command: df -BG {{ kvm_host_libvirt_dir | dirname }}
   register: disk_space
   changed_when: false
 

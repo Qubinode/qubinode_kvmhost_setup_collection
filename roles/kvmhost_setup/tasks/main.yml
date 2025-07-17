@@ -24,7 +24,7 @@
     name: "{{ item }}"
     state: present
     disable_gpg_check: "{{ ansible_virtualization_type == 'container' }}" # Container workaround per research findings
-  loop: "{{ kvmhost_packages_current           | default(required_rpm_packages)   }}"
+  loop: "{{ kvmhost_packages_current | default(required_rpm_packages) }}"
   register: package_install_result
   failed_when:
     - package_install_result.failed is defined

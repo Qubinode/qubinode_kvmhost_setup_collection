@@ -234,3 +234,4 @@ safety-report.json
 *.draft
 *-temp-*
 *-draft-*
+.aider*

@@ -112,7 +112,7 @@ addopts = "-v --tb=short"
 line-length = 88
 target-version = ['py39']
 include = '\.pyi?$'
-extend-exclude = '''
+extend-exclude = """
 /(
   # directories
   \.eggs

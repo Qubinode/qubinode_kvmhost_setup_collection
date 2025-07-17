@@ -7,21 +7,8 @@ galaxy_info:
   min_ansible_version: "2.9"
 
   platforms:
-    - name: EL
+    - name: RedHat
       versions:
-        - all
-        - all
-        - all
-    - name: CentOS
-      versions:
-        - all
-    - name: Rocky
-      versions:
-        - all
-        - all
-    - name: AlmaLinux
-      versions:
-        - all
         - all
     - name: Fedora
       versions:
