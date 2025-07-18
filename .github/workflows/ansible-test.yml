@@ -32,6 +32,10 @@ jobs:
           source venv/bin/activate
           # Updated to latest versions based on research findings
           pip install ansible-lint>=6.0.0 bandit>=1.7.0 ansible-core>=2.17.0
+      - name: Install required Ansible collections
+        run: |
+          source venv/bin/activate
+          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
       - name: Run ansible-lint
         run: |
           source venv/bin/activate

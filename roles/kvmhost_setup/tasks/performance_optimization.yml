@@ -175,7 +175,7 @@
     - not is_container_environment
 
 - name: Configure libvirt for optimal performance
-  ansible.builtin.blockinansible.builtin.file:
+  ansible.builtin.blockinfile:
     path: /etc/libvirt/qemu.conf
     block: |
       # Performance optimizations based on research findings

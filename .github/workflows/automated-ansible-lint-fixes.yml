@@ -59,6 +59,11 @@ jobs:
           echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
           echo "$(pwd)/venv/bin" >> $GITHUB_PATH
 
+      - name: Install required Ansible collections
+        run: |
+          source venv/bin/activate
+          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
+
       - name: Scan for ansible-lint issues
         id: scan
         run: |
@@ -191,6 +196,11 @@ jobs:
           pip install -r requirements.txt
           echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
           echo "$(pwd)/venv/bin" >> $GITHUB_PATH
+
+      - name: Install required Ansible collections
+        run: |
+          source venv/bin/activate
+          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
 
       - name: Create fix branch
         id: branch

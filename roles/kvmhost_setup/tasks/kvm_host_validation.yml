@@ -39,7 +39,7 @@
       changed_when: false
 
     - name: Load KVM modules if available but not loaded
-      community.general.community.general.modprobe:
+      community.general.modprobe:
         name: "{{ item }}"
         state: present
       loop:
