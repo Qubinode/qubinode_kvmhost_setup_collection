@@ -171,18 +171,48 @@
       - Please enable virtualization in BIOS/UEFI
   when: not virtualization_supported and not cicd_test | default(false)
 
-- name: Create optimization recommendations
+- name: "Set hugepage optimization recommendation"
   ansible.builtin.set_fact:
-    kvm_optimization_recommendations:
-      - "{{ 'Enable hugepages for better memory performance' if kvm_feature_flags.hugepage_support else 'Hugepages not supported
-        on this system' }}"
-      - "{{ 'Configure CPU isolation for dedicated VM performance' if total_vcpus | int > 4 else 'Single/dual core system
-        - CPU isolation not recommended' }}"
-      - "{{ 'Enable nested virtualization for development workloads' if virtualization_supported else 'Nested virtualization
-        not available' }}"
-      - "{{ 'Configure SR-IOV for high-performance networking' if kvm_feature_flags.sriov_capable else 'SR-IOV not available
-        - use virtio for networking' }}"
-      - "{{ 'Optimize for SSD storage performance' if has_ssd_storage else 'Consider SSD storage for better VM performance'
-        }}"
-      - "{{ 'Enable IOMMU for device passthrough capabilities' if kvm_feature_flags.iommu_available else 'IOMMU not available
-        - limited device passthrough' }}"
+    kvm_opt_hugepages: >-
+      {{
+        'Enable hugepages for better memory performance'
+        if kvm_feature_flags.hugepage_support
+        else 'Hugepages not supported on this system'
+      }}
+
+- name: "Set CPU isolation recommendation"
+  ansible.builtin.set_fact:
+    kvm_opt_cpu_isolation: >-
+      {{
+        'Configure CPU isolation for dedicated VM performance'
+        if total_vcpus | int > 4
+        else 'Single/dual core system - CPU isolation not recommended'
+      }}
+
+- name: "Set nested virtualization recommendation"
+  ansible.builtin.set_fact:
+    kvm_opt_nested_virt: >-
+      {{ 'Enable nested virtualization for development workloads'
+         if virtualization_supported
+         else 'Nested virtualization not available' }}
+
+- name: "Set SR-IOV networking recommendation"
+  ansible.builtin.set_fact:
+    kvm_opt_sriov: >-
+      {{ 'Configure SR-IOV for high-performance networking'
+         if kvm_feature_flags.sriov_capable
+         else 'SR-IOV not available - use virtio for networking' }}
+
+- name: "Set SSD storage optimization recommendation"
+  ansible.builtin.set_fact:
+    kvm_opt_ssd: >-
+      {{ 'Optimize for SSD storage performance'
+         if has_ssd_storage
+         else 'Consider SSD storage for better VM performance' }}
+
+- name: "Set IOMMU passthrough recommendation"
+  ansible.builtin.set_fact:
+    kvm_opt_iommu: >-
+      {{ 'Enable IOMMU for device passthrough capabilities'
+         if kvm_feature_flags.iommu_available
+         else 'IOMMU not available - limited device passthrough' }}
