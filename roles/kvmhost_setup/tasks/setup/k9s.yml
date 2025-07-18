@@ -4,15 +4,15 @@
     state: directory
     mode: "0755"
 
-- name: Download k9s binary
+- name: "Download k9s binary"
   ansible.builtin.get_url:
-    url: https://github.com/derailed/k9s/releases/download/v0.50.7/k9s_Linux_amd64.tar.gz
-    dest: /tmp/k9s.tar.gz
-    checksum: sha256:33c7699c6d71544c6704f78be928eca3445262cf462b2ac110a3284f67eb1c7b
+    url: "https://github.com/derailed/k9s/releases/download/v0.50.7/k9s_Linux_amd64.tar.gz"
+    dest: "/tmp/k9s.tar.gz"
+    checksum: "sha256:33c7699c6d71544c6704f78be928eca3445262cf462b2ac110a3284f67eb1c7b"
     timeout: 30
-    retries: 5
-    delay: 10
   register: download_result
+  retries: 5
+  delay: 10
   until: download_result is success
 
 - name: Extract k9s binary
