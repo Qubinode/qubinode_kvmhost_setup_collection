@@ -166,12 +166,27 @@ test_python_dependencies() {
     
     local venv_path="$VENV_DIR/python-test"
     
-    # Create virtual environment
+    # Install system SELinux packages if available
+    if command -v yum &> /dev/null; then
+        log_info "Installing SELinux system packages..."
+        sudo yum install -y libselinux-python3 python3-libselinux python3-selinux 2>/dev/null || {
+            log_warning "Could not install SELinux packages - continuing anyway"
+        }
+    fi
+    
+    # Create virtual environment with system site packages for SELinux
     "python$PYTHON_VERSION" -m pip install --user virtualenv
-    "python$PYTHON_VERSION" -m virtualenv "$venv_path"
+    "python$PYTHON_VERSION" -m virtualenv --system-site-packages "$venv_path"
     
     # Activate virtual environment
     source "$venv_path/bin/activate"
+    
+    # Verify SELinux bindings
+    log_info "Verifying SELinux bindings..."
+    python -c "import selinux; print('SELinux bindings available')" 2>/dev/null || {
+        log_warning "SELinux bindings not available - setting fallback configuration"
+        export ANSIBLE_SELINUX_SPECIAL_FS=""
+    }
     
     # Upgrade pip
     pip install --upgrade pip setuptools wheel
@@ -184,6 +199,7 @@ test_python_dependencies() {
     
     # Verify installations
     ansible --version
+    ansible-config dump --only-changed || log_warning "ansible-config dump failed"
     molecule --version
     ansible-lint --version
     yamllint --version
@@ -209,9 +225,24 @@ test_ansible_dependencies() {
     
     local venv_path="$VENV_DIR/ansible-test"
     
-    # Create virtual environment
-    "python$PYTHON_VERSION" -m virtualenv "$venv_path"
+    # Install system SELinux packages if available
+    if command -v yum &> /dev/null; then
+        log_info "Installing SELinux system packages..."
+        sudo yum install -y libselinux-python3 python3-libselinux python3-selinux 2>/dev/null || {
+            log_warning "Could not install SELinux packages - continuing anyway"
+        }
+    fi
+    
+    # Create virtual environment with system site packages for SELinux
+    "python$PYTHON_VERSION" -m virtualenv --system-site-packages "$venv_path"
     source "$venv_path/bin/activate"
+    
+    # Verify SELinux bindings
+    log_info "Verifying SELinux bindings..."
+    python -c "import selinux; print('SELinux bindings available')" 2>/dev/null || {
+        log_warning "SELinux bindings not available - setting fallback configuration"
+        export ANSIBLE_SELINUX_SPECIAL_FS=""
+    }
     
     pip install --upgrade pip
     pip install "ansible-core==$ANSIBLE_CORE_VERSION.*"

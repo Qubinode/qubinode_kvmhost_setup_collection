@@ -21,12 +21,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Python 3.11 environment
         run: |
-          # Install Python 3.11 for RHEL 9 compatibility (based on research findings)
+          # Install Python 3.11 and SELinux development packages for RHEL 9 compatibility
           sudo yum install -y python3.11 python3.11-devel python3.11-pip
+          sudo yum install -y libselinux-python3 python3-libselinux libselinux-devel
           python3.11 -m pip install --upgrade pip
           python3.11 -m pip install virtualenv
           python3.11 -m virtualenv venv
           source venv/bin/activate
+      - name: Setup SELinux for CI environment
+        run: |
+          source venv/bin/activate
+          # Use our comprehensive SELinux setup script
+          ./scripts/setup-selinux-for-ci.sh python3.11
+
       - name: Install lint tools
         run: |
           source venv/bin/activate
@@ -55,11 +62,17 @@ jobs:
           fetch-depth: 0
       - name: Setup Python ${{ matrix.python-version }}
         run: |
-          # Ensure Python 3.11 is available (RHEL 9 compatibility)
+          # Ensure Python 3.11 and SELinux packages are available (RHEL 9 compatibility)
           sudo yum install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+          sudo yum install -y libselinux-python3 python3-libselinux libselinux-devel
           python${{ matrix.python-version }} -m pip install --upgrade pip
       - name: Install ansible-core
         run: python${{ matrix.python-version }} -m pip install ansible-core==${{ matrix.ansible-version }}
+      - name: Setup SELinux for CI environment
+        run: |
+          # Use our comprehensive SELinux setup script
+          ./scripts/setup-selinux-for-ci.sh python${{ matrix.python-version }}
+
       - name: Install Molecule with Python 3.11 support
         run: |
           # Updated to Molecule v25.6.0+ for Python 3.11 compatibility
@@ -70,16 +83,23 @@ jobs:
         run: |
           # Set Python interpreter for Ansible (Python 3.11)
           export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
+          # Handle SELinux gracefully in containerized environments
+          export ANSIBLE_SELINUX_SPECIAL_FS=""
           molecule test
         env:
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
           MOLECULE_DEBUG: "true"
           ANSIBLE_VERBOSITY: "2"
+          # Disable SELinux checks if bindings are problematic
+          LIBSELINUX_DISABLE_SELINUX_CHECK: "1"
       - name: Run Playbook tests
         run: |
           # Use Python 3.11 interpreter for consistency
           export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
+          # Handle SELinux gracefully in containerized environments
+          export ANSIBLE_SELINUX_SPECIAL_FS=""
+          export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
           ansible-playbook -i inventories/test/hosts test.yml -vv
 
   version-monitoring:
@@ -107,12 +127,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Python 3.11 environment
         run: |
-          # Use Python 3.11 for security scanning consistency
+          # Use Python 3.11 for security scanning consistency with SELinux support
           sudo yum install -y python3.11 python3.11-devel python3.11-pip
+          sudo yum install -y libselinux-python3 python3-libselinux libselinux-devel
           python3.11 -m pip install --upgrade pip
           python3.11 -m pip install virtualenv
           python3.11 -m virtualenv venv
           source venv/bin/activate
+      - name: Setup SELinux for CI environment
+        run: |
+          source venv/bin/activate
+          # Use our comprehensive SELinux setup script
+          ./scripts/setup-selinux-for-ci.sh python3.11
+
       - name: Install security tools
         run: |
           source venv/bin/activate

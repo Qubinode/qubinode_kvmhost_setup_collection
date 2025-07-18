@@ -2,7 +2,8 @@
 # Core Ansible and testing tools
 
 # Ansible Core - updated to fix security vulnerabilities
-ansible-core>=2.17.7,<2.19.0
+# Note: 2.17+ requires Python 3.11+, 2.15+ requires Python 3.9+
+ansible-core>=2.15.0,<2.19.0
 
 # Ansible Lint - for code quality
 ansible-lint>=6.0.0
@@ -38,11 +39,8 @@ sphinx-rtd-theme
 
 # Automation and CI/CD helpers
 wheel
-setuptools
+setuptools>=45,<75.0.0
 pip-tools
-
-# AI-powered lint fixing
-aider-lint-fixer>=1.8.0
 
 # Updated dependencies to fix security vulnerabilities
 cryptography>=42.0.2
