@@ -35,26 +35,26 @@ log_info() {
 
 log_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
-    ((PASSED_STEPS++))
-    ((VALIDATION_STEPS++))
+    PASSED_STEPS=$((PASSED_STEPS + 1))
+    VALIDATION_STEPS=$((VALIDATION_STEPS + 1))
 }
 
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
-    ((WARNING_STEPS++))
-    ((VALIDATION_STEPS++))
+    WARNING_STEPS=$((WARNING_STEPS + 1))
+    VALIDATION_STEPS=$((VALIDATION_STEPS + 1))
 }
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
-    ((FAILED_STEPS++))
-    ((VALIDATION_STEPS++))
+    FAILED_STEPS=$((FAILED_STEPS + 1))
+    VALIDATION_STEPS=$((VALIDATION_STEPS + 1))
 }
 
 log_critical() {
     echo -e "${RED}[CRITICAL]${NC} $1"
-    ((FAILED_STEPS++))
-    ((VALIDATION_STEPS++))
+    FAILED_STEPS=$((FAILED_STEPS + 1))
+    VALIDATION_STEPS=$((VALIDATION_STEPS + 1))
 }
 
 # Function to setup validation environment
@@ -67,7 +67,12 @@ setup_validation_environment() {
     
     # Create isolated Python environment for testing
     if [[ ! -d "$TEMP_DIR/venv" ]]; then
-        python3 -m venv "$TEMP_DIR/venv"
+        # Use Python 3.11 for compatibility with ansible-core 2.17+
+        if command -v python3.11 &> /dev/null; then
+            python3.11 -m venv "$TEMP_DIR/venv"
+        else
+            python3 -m venv "$TEMP_DIR/venv"
+        fi
     fi
     
     source "$TEMP_DIR/venv/bin/activate"
@@ -102,13 +107,14 @@ validate_python_dependencies() {
     # Test installation of each requirements file
     for req_file in "${requirements_files[@]}"; do
         log_info "Testing installation of $req_file"
-        
-        if pip install -r "$PROJECT_ROOT/$req_file" --dry-run >/dev/null 2>&1; then
+
+        # Use timeout to prevent hanging
+        if timeout 60 pip install -r "$PROJECT_ROOT/$req_file" --dry-run >/dev/null 2>&1; then
             log_success "Dependencies in $req_file are installable"
         else
             log_error "Dependencies in $req_file have installation issues"
-            # Try to get more details
-            pip install -r "$PROJECT_ROOT/$req_file" --dry-run 2>&1 | head -20
+            # Try to get more details with timeout
+            timeout 30 pip install -r "$PROJECT_ROOT/$req_file" --dry-run 2>&1 | head -20 || echo "Dependency check timed out"
         fi
     done
     
@@ -116,14 +122,14 @@ validate_python_dependencies() {
     log_info "Testing core Ansible and Molecule dependencies"
     
     # Test Ansible installation
-    if pip install "ansible-core>=2.17,<2.19" --dry-run >/dev/null 2>&1; then
+    if timeout 60 pip install "ansible-core>=2.17,<2.19" --dry-run >/dev/null 2>&1; then
         log_success "Ansible core dependencies are compatible"
     else
         log_error "Ansible core dependency conflicts detected"
     fi
-    
+
     # Test Molecule installation
-    if pip install "molecule[podman]>=25.0" --dry-run >/dev/null 2>&1; then
+    if timeout 60 pip install "molecule[podman]>=25.0" --dry-run >/dev/null 2>&1; then
         log_success "Molecule dependencies are compatible"
     else
         log_error "Molecule dependency conflicts detected"
@@ -137,7 +143,7 @@ validate_ansible_dependencies() {
     source "$TEMP_DIR/venv/bin/activate"
     
     # Install ansible-core for galaxy operations
-    pip install ansible-core
+    timeout 120 pip install ansible-core
     
     # Check galaxy.yml
     if [[ -f "$PROJECT_ROOT/galaxy.yml" ]]; then
@@ -277,8 +283,8 @@ validate_compatibility() {
             source "$TEMP_DIR/venv-$(echo $py_version | tr '.' '-')/bin/activate"
             
             # Test basic dependency installation
-            if pip install --upgrade pip >/dev/null 2>&1 && \
-               pip install ansible-core molecule >/dev/null 2>&1; then
+            if timeout 60 pip install --upgrade pip >/dev/null 2>&1 && \
+               timeout 120 pip install ansible-core molecule >/dev/null 2>&1; then
                 log_success "$py_version compatibility confirmed"
             else
                 log_warning "$py_version compatibility issues detected"
@@ -299,7 +305,7 @@ validate_molecule_scenarios() {
     source "$TEMP_DIR/venv/bin/activate"
     
     # Install required tools
-    pip install molecule[podman] ansible-core >/dev/null 2>&1
+    timeout 120 pip install molecule[podman] ansible-core >/dev/null 2>&1
     
     if [[ -d "$PROJECT_ROOT/molecule" ]]; then
         for scenario_dir in "$PROJECT_ROOT/molecule"/*; do
@@ -343,7 +349,7 @@ generate_validation_report() {
     "passed_steps": $PASSED_STEPS,
     "failed_steps": $FAILED_STEPS,
     "warning_steps": $WARNING_STEPS,
-    "success_rate": $(( PASSED_STEPS * 100 / VALIDATION_STEPS ))
+    "success_rate": $(( VALIDATION_STEPS > 0 ? PASSED_STEPS * 100 / VALIDATION_STEPS : 0 ))
   },
   "validation_summary": {
     "overall_status": "$(if [[ $FAILED_STEPS -eq 0 ]]; then echo "PASSED"; else echo "FAILED"; fi)",
@@ -379,7 +385,7 @@ create_github_summary() {
 - **Passed**: $PASSED_STEPS ✅
 - **Failed**: $FAILED_STEPS ❌
 - **Warnings**: $WARNING_STEPS ⚠️
-- **Success Rate**: $(( PASSED_STEPS * 100 / VALIDATION_STEPS ))%
+- **Success Rate**: $(( VALIDATION_STEPS > 0 ? PASSED_STEPS * 100 / VALIDATION_STEPS : 0 ))%
 
 ## Status
 $(if [[ $FAILED_STEPS -eq 0 ]]; then echo "✅ **All validations passed!**"; else echo "❌ **$FAILED_STEPS validation(s) failed**"; fi)
@@ -438,7 +444,7 @@ main() {
     echo -e "${YELLOW}⚠️  Warnings: $WARNING_STEPS${NC}"
     echo -e "${RED}❌ Failed: $FAILED_STEPS${NC}"
     echo -e "${BLUE}📊 Total: $VALIDATION_STEPS${NC}"
-    echo -e "${BLUE}📈 Success Rate: $(( PASSED_STEPS * 100 / VALIDATION_STEPS ))%${NC}"
+    echo -e "${BLUE}📈 Success Rate: $(( VALIDATION_STEPS > 0 ? PASSED_STEPS * 100 / VALIDATION_STEPS : 0 ))%${NC}"
     
     if [[ $FAILED_STEPS -eq 0 ]]; then
         echo -e "\n${GREEN}🎉 All dependency validations passed!${NC}"

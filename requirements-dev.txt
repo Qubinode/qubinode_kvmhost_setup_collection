@@ -16,7 +16,6 @@ safety>=2.0.0
 
 # Container testing (Podman specific)
 molecule-podman
-podman-py
 
 # Documentation generation
 sphinx
