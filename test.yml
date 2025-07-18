@@ -4,7 +4,7 @@
   become: yes
   pre_tasks:
     - name: Ensure test-user exists with proper home directory
-      user:
+      ansible.builtin.user:
         name: test-user
         state: present
         create_home: yes

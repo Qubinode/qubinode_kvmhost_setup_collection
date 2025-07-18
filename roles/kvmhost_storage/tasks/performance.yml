@@ -12,7 +12,7 @@
   when: kvmhost_storage_debug_enabled | default(false)
 
 - name: Get list of block devices
-  ansible.builtin.shell: lsblk -dn -o NAME | grep -v loop
+  ansible.builtin.shell: set -o pipefail && lsblk -dn -o NAME | grep -v loop
   register: block_devices
   changed_when: false
 
@@ -23,14 +23,16 @@
     - kvmhost_storage_io_scheduler != "none"
     - block_devices.stdout_lines | length > 0
   become: true
-  ignore_errors: true
+  changed_when: false  # This is a configuration change that doesn't need reporting
+  failed_when: false  # We want to continue even if some devices don't support scheduler changes
 
 - name: Set queue depth for block devices
   ansible.builtin.shell: echo {{ kvmhost_storage_queue_depth }} > /sys/block/{{ item }}/queue/nr_requests
   loop: "{{ block_devices.stdout_lines }}"
   when: block_devices.stdout_lines | length > 0
   become: true
-  ignore_errors: true
+  changed_when: false  # This is a configuration change that doesn't need reporting
+  failed_when: false  # We want to continue even if some devices don't support queue depth changes
 
 - name: Configure kernel parameters for storage performance
   ansible.posix.sysctl:
@@ -70,13 +72,15 @@
   ansible.builtin.shell: echo never > /sys/kernel/mm/transparent_hugepage/enabled
   when: "'[never]' not in thp_status.stdout"
   become: true
+  changed_when: false  # This is a configuration change that doesn't need reporting
 
 - name: Configure readahead for storage devices
   ansible.builtin.command: blockdev --setra 4096 /dev/{{ item }}
   loop: "{{ block_devices.stdout_lines }}"
   when: block_devices.stdout_lines | length > 0
   become: true
-  ignore_errors: true
+  changed_when: false  # This is a configuration change that doesn't need reporting
+  failed_when: false  # We want to continue even if some devices don't support readahead changes
 
 - name: Display performance optimization completion
   ansible.builtin.debug:

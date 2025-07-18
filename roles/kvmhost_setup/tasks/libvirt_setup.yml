@@ -18,6 +18,7 @@
   ansible.builtin.command: tuned-adm profile virtual-host
   when: "'virtual-host' not in current_tuned_profile.stdout"
   register: tuned_profile_changed
+  changed_when: tuned_profile_changed.rc == 0
 
 - name: Return bridge status
   ansible.builtin.command: ifconfig {{ qubinode_bridge_name }}

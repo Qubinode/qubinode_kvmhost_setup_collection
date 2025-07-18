@@ -42,6 +42,7 @@
 
 - name: Check current storage usage
   ansible.builtin.shell: |
+    set -o pipefail
     df -h | grep -E "(libvirt|mapper)" || true
   register: storage_usage
   changed_when: false

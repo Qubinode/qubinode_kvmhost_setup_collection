@@ -6,8 +6,10 @@
 - name: Remount filesystem
   ansible.builtin.command: mount -o remount {{ item }}
   become: true
+  changed_when: false
 
 - name: Update grub configuration
   ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
   become: true
+  changed_when: false
   when: ansible_os_family == "RedHat"

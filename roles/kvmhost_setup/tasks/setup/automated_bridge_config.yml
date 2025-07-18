@@ -65,6 +65,7 @@
 
 - name: Get current connection details for primary interface
   ansible.builtin.shell: |
+    set -o pipefail
     nmcli -t -f connection.id,connection.uuid,ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns \
     connection show "$(nmcli -t -f device,connection device | grep '^{{ primary_interface }}:' | cut -d: -f2)"
   register: current_connection_details
@@ -93,6 +94,7 @@
     ifname {{ qubinode_bridge_name | default('qubibr0') }}
     autoconnect yes
     save yes
+  changed_when: "'successfully' in bridge_creation.stderr"
   register: bridge_creation
   when: not bridge_already_exists
 
@@ -103,6 +105,7 @@
     ipv4.addresses {{ current_ipv4_addresses or (primary_ip + '/24') }}
     ipv4.gateway {{ current_ipv4_gateway or primary_gateway }}
     ipv4.dns "{{ qubinode_dns_servers | default(['1.1.1.1', '8.8.8.8']) | join(',') }}"
+  changed_when: false
   when:
     - not bridge_already_exists
     - current_ipv4_method == "manual" or qubinode_bridge_static_ip | default(false)
@@ -112,6 +115,7 @@
     nmcli connection modify {{ qubinode_bridge_name | default('qubibr0') }}
     ipv4.method auto
     ipv4.dns "{{ qubinode_dns_servers | default(['1.1.1.1', '8.8.8.8']) | join(',') }}"
+  changed_when: false
   when:
     - not bridge_already_exists
     - current_ipv4_method == "auto" and not qubinode_bridge_static_ip | default(false)
@@ -124,6 +128,7 @@
     bridge.forward-delay {{ qubinode_bridge_forward_delay | default(15) }}
     bridge.hello-time {{ qubinode_bridge_hello_time | default(2) }}
     bridge.max-age {{ qubinode_bridge_max_age | default(20) }}
+  changed_when: false
   when: not bridge_already_exists
 
 - name: Add physical interface as bridge slave
@@ -134,11 +139,13 @@
     ifname {{ primary_interface }}
     master {{ qubinode_bridge_name | default('qubibr0') }}
     autoconnect yes
+  changed_when: "'successfully' in bridge_slave_creation.stderr"
   register: bridge_slave_creation
   when: not bridge_already_exists
 
 - name: Bring up bridge connection
   ansible.builtin.command: nmcli connection up {{ qubinode_bridge_name | default('qubibr0') }}
+  changed_when: "'successfully activated' in bridge_activation.stderr"
   register: bridge_activation
   when: not bridge_already_exists
 

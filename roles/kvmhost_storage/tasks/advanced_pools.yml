@@ -38,7 +38,7 @@
     - item.enabled | default(true)
     - item.type | default('dir') == 'dir'
   become: true
-  ignore_errors: true
+  failed_when: false
 
 - name: Start advanced storage pools
   community.libvirt.virt_pool:

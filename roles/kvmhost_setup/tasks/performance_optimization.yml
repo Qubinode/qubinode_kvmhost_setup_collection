@@ -77,6 +77,7 @@
 
 - name: Update GRUB configuration
   ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  changed_when: false  # GRUB config updates don't report changes reliably
   when:
     - grub_config_changed is changed
     - not is_container_environment
@@ -136,7 +137,7 @@
     path: /sys/kernel/mm/ksm/run
     line: "1"
     create: false
-  ignore_errors: true
+  failed_when: false
   when: not is_container_environment
 
 - name: Create KSM systemd service for persistent configuration
@@ -168,10 +169,10 @@
     enabled: true
     state: started
     daemon_reload: true
+  failed_when: false
   when:
     - ksm_service is changed
     - not is_container_environment
-  ignore_errors: true
 
 - name: Configure libvirt for optimal performance
   ansible.builtin.blockinansible.builtin.file:
@@ -263,10 +264,11 @@
 
 - name: Apply sysctl settings
   ansible.builtin.command: sysctl -p /etc/sysctl.d/99-kvm-performance.conf
+  changed_when: false  # sysctl always returns 0 even if no changes made
+  failed_when: false
   when:
     - sysctl_kvm_config is changed
     - not is_container_environment
-  ignore_errors: true
 
 - name: Check if bridge module is loaded
   ansible.builtin.stat:
@@ -298,10 +300,11 @@
 
 - name: Apply network sysctl settings
   ansible.builtin.command: sysctl -p /etc/sysctl.d/99-kvm-network.conf
+  changed_when: false  # sysctl always returns 0 even if no changes made
+  failed_when: false
   when:
     - sysctl_network_config is changed
     - not is_container_environment
-  ignore_errors: true
 
 - name: Create performance monitoring script
   ansible.builtin.copy:

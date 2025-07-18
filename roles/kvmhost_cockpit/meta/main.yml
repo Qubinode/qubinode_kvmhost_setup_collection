@@ -18,7 +18,7 @@ galaxy_info:
     - kvm
     - virtualization
     - web-interface
-    - management
+    - management-interface
     - ssl
     - authentication
 

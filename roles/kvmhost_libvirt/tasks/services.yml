@@ -33,6 +33,7 @@
   ansible.builtin.command: tuned-adm profile {{ kvmhost_libvirt_tuned_profile }}
   when: kvmhost_libvirt_tuned_profile not in current_tuned_profile.stdout
   register: tuned_profile_changed
+  changed_when: tuned_profile_changed.rc == 0
   become: true
 
 - name: Display tuned profile change result

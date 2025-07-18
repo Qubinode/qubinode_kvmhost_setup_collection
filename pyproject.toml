@@ -89,12 +89,18 @@ warn_list = [
 
 [tool.yamllint]
 extends = "default"
-rules = {
-    line-length = {max = 120},
-    indentation = {indent-sequences = true},
-    comments-indentation = "disable",
-    comments = {min-spaces-from-content = 1},
-}
+
+[tool.yamllint.rules.line-length]
+max = 120
+
+[tool.yamllint.rules.indentation]
+indent-sequences = true
+
+[tool.yamllint.rules.comments-indentation]
+disable = true
+
+[tool.yamllint.rules.comments]
+min-spaces-from-content = 1
 
 [tool.bandit]
 exclude_dirs = ["tests", "molecule"]

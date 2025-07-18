@@ -48,6 +48,7 @@
 
 - name: Validate minimum free space requirements
   ansible.builtin.shell: |
+    set -o pipefail
     df --output=avail -BG /var/lib/libvirt | tail -1 | tr -d 'G'
   register: available_space_check
   changed_when: false

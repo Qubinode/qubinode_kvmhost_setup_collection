@@ -90,7 +90,7 @@
 
 # IP Configuration Validation
 - name: Validate - Check bridge IP configuration
-  ansible.builtin.shell: ip addr show {{ qubinode_bridge_name | default('qubibr0') }} | grep 'inet '
+  ansible.builtin.shell: set -o pipefail && ip addr show {{ qubinode_bridge_name | default('qubibr0') }} | grep 'inet '
   register: bridge_ip_validation
   failed_when: false
   changed_when: false
@@ -156,7 +156,7 @@
 
 # Libvirt Network Validation
 - name: Validate - Check libvirt bridge network
-  ansible.builtin.shell: virsh net-list --all | grep {{ qubinode_bridge_name | default('qubibr0') }}
+  ansible.builtin.shell: set -o pipefail && virsh net-list --all | grep {{ qubinode_bridge_name | default('qubibr0') }}
   register: libvirt_network_validation
   failed_when: false
   changed_when: false
@@ -179,7 +179,7 @@
 
 # Network Performance Validation
 - name: Validate - Test network performance (basic)
-  ansible.builtin.shell: ping -c 5 -i 0.2 {{ ansible_default_ipv4.gateway }} | tail -1
+  ansible.builtin.shell: set -o pipefail && ping -c 5 -i 0.2 {{ ansible_default_ipv4.gateway }} | tail -1
   register: network_performance_validation
   failed_when: false
   changed_when: false

@@ -45,6 +45,7 @@
 
 - name: "Get current connection details for primary interface"
   ansible.builtin.shell: |
+    set -o pipefail
     nmcli -t -f connection.id,connection.uuid,ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns \
     connection show "$(nmcli -t -f device,connection device | grep '^{{ primary_interface }}:' | cut -d: -f2)"
   register: current_connection_details
@@ -74,6 +75,7 @@
     autoconnect yes
     save yes
   register: bridge_creation
+  changed_when: "'successfully' in bridge_creation.stderr"
   when: not bridge_already_exists
   become: true
 
@@ -85,6 +87,8 @@
     bridge.hello-time {{ bridge_interface_settings.hello_time }}
     bridge.max-age {{ bridge_interface_settings.max_age }}
     bridge.priority {{ bridge_interface_settings.priority }}
+  register: bridge_settings
+  changed_when: "'successfully' in bridge_settings.stderr"
   when: not bridge_already_exists
   become: true
 
@@ -95,6 +99,8 @@
     {% if current_ipv4_addresses %}ipv4.addresses {{ current_ipv4_addresses }}{% endif %}
     {% if current_ipv4_gateway %}ipv4.gateway {{ current_ipv4_gateway }}{% endif %}
     {% if current_ipv4_dns %}ipv4.dns {{ current_ipv4_dns }}{% endif %}
+  register: bridge_ip_settings
+  changed_when: "'successfully' in bridge_ip_settings.stderr"
   when:
     - not bridge_already_exists
     - current_ipv4_method != 'auto'
@@ -109,11 +115,15 @@
     master {{ qubinode_bridge_name }}
     autoconnect yes
     save yes
+  register: bridge_slave
+  changed_when: "'successfully' in bridge_slave.stderr"
   when: not bridge_already_exists
   become: true
 
 - name: "Bring up the bridge connection"
   ansible.builtin.command: "nmcli connection up {{ qubinode_bridge_name }}"
+  register: bridge_up
+  changed_when: "'successfully' in bridge_up.stderr"
   when: not bridge_already_exists
   become: true
 

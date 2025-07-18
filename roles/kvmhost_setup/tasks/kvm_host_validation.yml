@@ -9,6 +9,7 @@
   block:
     - name: Check CPU supports virtualization
       ansible.builtin.shell: |
+        set -o pipefail
         if egrep -c '(vmx|svm)' /proc/cpuinfo > /dev/null; then
           echo "supported"
         else
@@ -26,6 +27,7 @@
 
     - name: Check if KVM module is available
       ansible.builtin.shell: |
+        set -o pipefail
         if lsmod | grep -q kvm; then
           echo "loaded"
         elif modinfo kvm > /dev/null 2>&1; then
@@ -44,7 +46,7 @@
         - kvm
         - kvm_intel # Will fail silently on AMD
         - kvm_amd # Will fail silently on Intel
-      ignore_errors: true
+      failed_when: false  # Different CPU types will fail different modules
       become: true
       when: kvm_module_status.stdout in ["available", "loaded"]
 
@@ -68,6 +70,7 @@
   block:
     - name: Check libvirt installation and version
       ansible.builtin.shell: |
+        set -o pipefail
         if command -v virsh > /dev/null 2>&1; then
           virsh version | head -1 | awk '{print $3}'
         else
@@ -78,6 +81,7 @@
 
     - name: Check QEMU/KVM installation
       ansible.builtin.shell: |
+        set -o pipefail
         if command -v qemu-system-x86_64 > /dev/null 2>&1; then
           qemu-system-x86_64 --version | head -1 | awk '{print $4}'
         else
@@ -103,7 +107,10 @@
       ansible.builtin.systemd:
         name: libvirtd
       register: libvirtd_status
-      ignore_errors: true
+      failed_when: >
+        "'Network not found' not in virsh_net_start.stderr and
+         'already active' not in virsh_net_start.stderr"
+      register: virsh_net_start
 
     - name: Check if libvirtd is running
       ansible.builtin.command: systemctl is-active libvirtd
@@ -152,7 +159,9 @@
 
     - name: Create default network if it doesn't exist
       ansible.builtin.shell: |
+        set -o pipefail
         virsh net-define /dev/stdin <<EOF
+      changed_when: default_net_info.rc != 0
         <network>
           <name>default</name>
           <uuid>$(uuidgen)</uuid>
@@ -171,11 +180,16 @@
 
     - name: Start and autostart default network
       ansible.builtin.shell: |
+        set -o pipefail
         virsh net-start default
         virsh net-autostart default
+      changed_when: default_net_info.rc != 0
       when: default_net_info.rc != 0
       become: true
-      ignore_errors: true
+      failed_when: >
+        "'already exists' not in virsh_pool_create.stderr and
+         'pool is already active' not in virsh_pool_create.stderr"
+      register: virsh_pool_create
 
     - name: Display libvirt networks
       ansible.builtin.debug:
@@ -202,13 +216,18 @@
 
     - name: Create default storage pool if it doesn't exist
       ansible.builtin.shell: |
+        set -o pipefail
         virsh pool-define-as default dir --target /var/lib/libvirt/images
         virsh pool-build default
         virsh pool-start default
         virsh pool-autostart default
+      changed_when: default_pool_info.rc != 0
       when: default_pool_info.rc != 0
       become: true
-      ignore_errors: true
+      failed_when: >
+        "'already exists' not in virsh_pool_create.stderr and
+         'pool is already active' not in virsh_pool_create.stderr"
+      register: virsh_pool_create
 
     - name: Verify storage pool directory
       ansible.builtin.file:
@@ -233,6 +252,7 @@
   block:
     - name: Check available memory for VMs
       ansible.builtin.shell: |
+        set -o pipefail
         total_mem=$(free -m | awk '/^Mem:/{print $2}')
         used_mem=$(free -m | awk '/^Mem:/{print $3}')
         available_mem=$((total_mem - used_mem))
@@ -242,6 +262,7 @@
 
     - name: Check CPU information
       ansible.builtin.shell: |
+        set -o pipefail
         echo "CPU Model: $(cat /proc/cpuinfo | grep 'model name' | head -1 | cut -d':' -f2 | xargs)"
         echo "CPU Cores: $(nproc)"
         echo "CPU Threads: $(cat /proc/cpuinfo | grep processor | wc -l)"
