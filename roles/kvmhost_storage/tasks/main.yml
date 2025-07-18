@@ -54,9 +54,9 @@
   ansible.builtin.debug:
     msg:
       - === KVM Host Storage Configuration Complete ===
-      - "Total storage pools: {{ (kvmhost_storage_advanced_pools | selectattr('enabled') | list | length) + (kvmhost_storage_lvm_volumes
-        | selectattr('enabled') | list | length) }}"
-      - "LVM volumes: {{ kvmhost_storage_lvm_volumes | selectattr('enabled') | list | map(attribute='name') | join(', ') if
-        kvmhost_storage_lvm_enabled else 'None' }}"
+      - "Total storage pools: {{ (kvmhost_storage_advanced_pools | selectattr('enabled') | list | length) +
+          (kvmhost_storage_lvm_volumes | selectattr('enabled') | list | length) }}"
+      - "LVM volumes: {{ kvmhost_storage_lvm_volumes | selectattr('enabled') |
+          list | map(attribute='name') | join(', ') if kvmhost_storage_lvm_enabled else 'None' }}"
       - "Performance optimization: {{ 'Applied' if kvmhost_storage_performance_enabled else 'Skipped' }}"
   when: kvmhost_storage_debug_enabled | default(false)

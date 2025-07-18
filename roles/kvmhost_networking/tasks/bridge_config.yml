@@ -54,16 +54,26 @@
 
 - name: "Parse current network configuration"
   ansible.builtin.set_fact:
-    current_connection_uuid: "{{ current_connection_details.stdout | regex_search('connection.uuid:([^\\n]+)', '\\1') | first
-      | default('') }}"
-    current_ipv4_method: "{{ current_connection_details.stdout | regex_search('ipv4.method:([^\\n]+)', '\\1') | first | default('auto')
-      }}"
-    current_ipv4_addresses: "{{ current_connection_details.stdout | regex_search('ipv4.addresses:([^\\n]+)', '\\1') | first
-      | default('') }}"
-    current_ipv4_gateway: "{{ current_connection_details.stdout | regex_search('ipv4.gateway:([^\\n]+)', '\\1') | first |
-      default('') }}"
-    current_ipv4_dns: "{{ current_connection_details.stdout | regex_search('ipv4.dns:([^\\n]+)', '\\1') | first | default('')
-      }}"
+    current_connection_uuid: >-
+      {{ current_connection_details.stdout |
+      regex_search('connection.uuid:([^\\n]+)', '\\1') |
+      first | default('') }}
+    current_ipv4_method: >-
+      {{ current_connection_details.stdout |
+      regex_search('ipv4.method:([^\\n]+)', '\\1') |
+      first | default('auto') }}
+    current_ipv4_addresses: >-
+      {{ current_connection_details.stdout |
+      regex_search('ipv4.addresses:([^\\n]+)', '\\1') |
+      first | default('') }}
+    current_ipv4_gateway: >-
+      {{ current_connection_details.stdout |
+      regex_search('ipv4.gateway:([^\\n]+)', '\\1') |
+      first | default('') }}
+    current_ipv4_dns: >-
+      {{ current_connection_details.stdout |
+      regex_search('ipv4.dns:([^\\n]+)', '\\1') |
+      first | default('') }}
   when: not bridge_already_exists
 
 - name: "Create bridge connection"

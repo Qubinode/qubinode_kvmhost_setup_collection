@@ -23,8 +23,9 @@
 
 - name: Display volume group creation result
   ansible.builtin.debug:
-    msg: "Volume group {{ kvmhost_storage_lvm_vg_name }} {{ 'created' if vg_creation_result.changed else 'already exists'
-      }}"
+    msg: >-
+      Volume group {{ kvmhost_storage_lvm_vg_name }}
+      {{ 'created' if vg_creation_result.changed else 'already exists' }}
   when: kvmhost_storage_debug_enabled | default(false)
 
 - name: Create logical volumes
@@ -91,6 +92,9 @@
   ansible.builtin.debug:
     msg:
       - "LVM configuration completed"
-      - "Mounted volumes: {{ kvmhost_storage_lvm_volumes | selectattr('enabled') | list | map(attribute='mount_dir') | join(',
-        ') }}"
+      - >-
+        Mounted volumes: {{
+        kvmhost_storage_lvm_volumes | selectattr('enabled') | list |
+        map(attribute='mount_dir') | join(', ')
+        }}
   when: kvmhost_storage_debug_enabled | default(false)

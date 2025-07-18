@@ -1,9 +1,21 @@
 # https://ansible-lint.readthedocs.io/configuring/#specifying-configuration-files
 
 # profile:  min, basic, moderate,safety, shared, production
-profile: production
+# profile: production  # Removed to rely on command-line specification
 
 use_default_rules: true
+
+# Exclude paths to improve performance
+exclude_paths:
+  - .cache/
+  - .git/
+  - .github/
+  - .ansible/
+  - venv-py311/
+  - node_modules/
+  - __pycache__/
+  - changelogs/
+  - docs/
 
 skip_list:
   - var-naming
@@ -13,6 +25,6 @@ skip_list:
 # Ansible-lint does not fail on warnings from the rules or tags listed below
 warn_list:
   - experimental # experimental is included in the implicit list
-  - var-naming[no-role-prefix] # 
+  - var-naming[no-role-prefix] #
   # - role-name
   # - yaml[document-start]  #

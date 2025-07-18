@@ -228,6 +228,7 @@ adr-compliance-summary.md
 bandit-report.json
 pip-audit-report.json
 safety-report.json
+.ansible
 
 # Experimental files and drafts not ready for production
 *.experimental

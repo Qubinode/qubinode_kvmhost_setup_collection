@@ -26,10 +26,13 @@
       ansible.builtin.assert:
         that:
           - item.size_available > 53687091200 # 50GB in bytes
-        fail_msg: "Insufficient disk space in {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB
-          available, minimum 50GB required"
-        success_msg: "Disk space check passed for {{ item.mount }}: {{ (item.size_available / 1024 / 1024 / 1024) | round(2)
-          }}GB available"
+        fail_msg: >-
+          Insufficient disk space in {{ item.mount }}: 
+          {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available,
+          minimum 50GB required
+        success_msg: >-
+          Disk space check passed for {{ item.mount }}:
+          {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available
       when: item.mount == "/"
       loop: "{{ ansible_mounts }}"
 
@@ -63,8 +66,9 @@
         that:
           - ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux']
           - ansible_distribution_major_version in ['8', '9', '10']
-        fail_msg: "Unsupported OS: {{ ansible_distribution }} {{ ansible_distribution_version }}. Supported: RHEL/CentOS/Rocky/AlmaLinux
-          8/9/10"
+        fail_msg: >-
+          Unsupported OS: {{ ansible_distribution }} {{ ansible_distribution_version }}.
+          Supported: RHEL/CentOS/Rocky/AlmaLinux 8/9/10
         success_msg: "OS compatibility confirmed: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
     - name: Check kernel version for KVM support
@@ -106,7 +110,9 @@
           - ansible_default_ipv4.interface is defined
           - ansible_default_ipv4.address is defined
         fail_msg: No default network interface or IP address configured
-        success_msg: "Default network configured: {{ ansible_default_ipv4.interface }} - {{ ansible_default_ipv4.address }}"
+        success_msg: >-
+          Default network configured:
+          {{ ansible_default_ipv4.interface }} - {{ ansible_default_ipv4.address }}
 
 - name: Pre-flight validation - Storage prerequisites
   tags:
@@ -231,9 +237,10 @@
       - Memory: {{ ansible_memtotal_mb }}MB
       - CPU Cores: {{ ansible_processor_vcpus }}
       - Architecture: {{ ansible_architecture }}
-      - Default Network: {{ ansible_default_ipv4.interface           | default('N/A)   }} - {{ ansible_default_ipv4.address           | default('N/A)   }}
+      - Default Network: {{ ansible_default_ipv4.interface | default('N/A') }} -
+        {{ ansible_default_ipv4.address | default('N/A') }}
       - Package Manager: {{ ansible_pkg_mgr }}
-      - SELinux: {{ selinux_status.stdout           | default('unknown)   }}
+      - SELinux: {{ selinux_status.stdout | default('unknown') }}
 
       System is ready for KVM host setup!
   tags:

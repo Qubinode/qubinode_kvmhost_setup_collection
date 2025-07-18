@@ -14,9 +14,9 @@
   ansible.builtin.debug:
     msg: |
       🐳 Container Testing Mode Detected
-      Virtualization Type: {{ ansible_virtualization_type           | default('unknown)   }}
+      Virtualization Type: {{ ansible_virtualization_type | default('unknown') }}
       Container Detection: {{ is_container_environment }}
-      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default('N/A)   }}
+      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version | default('N/A') }}
 
       Performance optimization tasks will be skipped in container environments.
       This is expected behavior for Molecule testing scenarios.
@@ -26,9 +26,9 @@
   ansible.builtin.debug:
     msg: |
       🖥️  Physical/VM Host Environment Detected
-      Virtualization Type: {{ ansible_virtualization_type           | default('unknown)   }}
+      Virtualization Type: {{ ansible_virtualization_type | default('unknown') }}
       Container Detection: {{ is_container_environment }}
-      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version           | default('N/A)   }}
+      Distribution: {{ ansible_distribution }} {{ ansible_distribution_version | default('N/A') }}
 
       Full KVM performance optimization will be applied.
   when: not is_container_environment

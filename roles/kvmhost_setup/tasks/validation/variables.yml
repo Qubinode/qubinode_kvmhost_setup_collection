@@ -8,11 +8,11 @@
       - kvmhost_bridge_device is defined and kvmhost_bridge_device | length > 0
     fail_msg: |
       Missing required variables:
-      admin_user: {{ admin_user           | default('not defined)   }}
-      domain: {{ domain           | default('not defined)   }}
-      dns_forwarder: {{ dns_forwarder           | default('not defined)   }}
-      kvm_host_libvirt_dir: {{ kvm_host_libvirt_dir           | default('not defined)   }}
-      kvmhost_bridge_device: {{ kvmhost_bridge_device           | default('not defined)   }}
+      admin_user: {{ admin_user | default('not defined') }}
+      domain: {{ domain | default('not defined') }}
+      dns_forwarder: {{ dns_forwarder | default('not defined') }}
+      kvm_host_libvirt_dir: {{ kvm_host_libvirt_dir | default('not defined') }}
+      kvmhost_bridge_device: {{ kvmhost_bridge_device | default('not defined') }}
     success_msg: All required variables are properly defined
 
 - name: Validate network configuration variables

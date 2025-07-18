@@ -26,8 +26,11 @@
 
 - name: Display VT status information
   ansible.builtin.debug:
-    msg: >
-      Virtualization Technology (VT) status: {{ 'Enabled' if kvmhost_libvirt_vt_enabled | default(true) else 'Disabled' }}
+    msg: >-
+      Virtualization Technology (VT) status: {{
+        'Enabled' if kvmhost_libvirt_vt_enabled | default(true)
+        else 'Disabled'
+      }}
   when:
     - not cicd_test | default(false)
     - not kvmhost_libvirt_skip_vt_check | default(false)

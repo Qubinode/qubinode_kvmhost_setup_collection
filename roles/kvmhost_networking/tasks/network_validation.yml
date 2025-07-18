@@ -47,5 +47,7 @@
       Network Validation Summary:
       - Bridge Interface: {{ qubinode_bridge_name }}
       - Bridge Status: {{ 'UP' if bridge_link_status.rc == 0 and 'UP' in bridge_link_status.stdout else 'DOWN' }}
-      - Connectivity Tests: {{ ping_tests.results | selectattr('rc', 'equalto', 0) | list | length }}/{{ ping_test_hosts | length }} passed
+      - Connectivity Tests: >-
+          {{ ping_tests.results | selectattr('rc', 'equalto', 0) 
+           | list | length }}/{{ ping_test_hosts | length }} passed
       - Report saved: /tmp/network_validation_{{ ansible_date_time.epoch }}.txt

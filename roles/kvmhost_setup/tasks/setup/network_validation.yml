@@ -187,8 +187,10 @@
 
 - name: Parse network performance results
   ansible.builtin.set_fact:
-    avg_latency: "{{ network_performance_validation.stdout | regex_search('([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)', '\\2')
-      | first | default('N/A') }}"
+    avg_latency: >-
+      {{ network_performance_validation.stdout |
+      regex_search('([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)', '\\2') |
+      first | default('N/A') }}
   when:
     - ansible_default_ipv4.gateway is defined
     - network_performance_validation.rc == 0
@@ -264,7 +266,11 @@
       ADR-0007 Compliance: {{ '✅ COMPLIANT' if overall_status == 'pass' else '❌ NON-COMPLIANT' }}
 
       {% for result in network_validation_results %}
-      {{ loop.index }}. {{ result.description }}: {{ '✅' if result.status == 'pass' else '⚠️' if result.status == 'warning' else '❌' }}
+      {{ loop.index }}. {{ result.description }}: {{
+        '✅' if result.status == 'pass' else
+        '⚠️' if result.status == 'warning' else
+        '❌'
+      }}
       {% endfor %}
 
       ========================================

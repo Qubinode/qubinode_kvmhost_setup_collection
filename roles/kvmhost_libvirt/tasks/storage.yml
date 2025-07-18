@@ -62,8 +62,10 @@
 
 - name: Display storage space information
   ansible.builtin.debug:
-    msg: "Storage space for {{ item.item.path }}: {{ item.stdout_lines[1] if item.stdout_lines | length > 1 else 'Unknown'
-      }}"
+    msg: >-
+      Storage space for {{ item.item.path }}: {{
+      item.stdout_lines[1] if item.stdout_lines | length > 1 else 'Unknown'
+      }}
   loop: "{{ storage_space_check.results }}"
   when:
     - kvmhost_libvirt_debug_enabled | default(false)

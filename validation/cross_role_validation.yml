@@ -8,8 +8,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [base_dependency_error_msg] }}"
   vars:
-    base_dependency_error_msg: "Cross-role validation error: kvmhost_networking requires kvmhost_base but base_packages_common
-      is not defined"
+    base_dependency_error_msg: >-
+      Cross-role validation error: kvmhost_networking requires kvmhost_base but
+      base_packages_common is not defined
   when:
     - libvirt_host_networks is defined
     - base_packages_common is not defined
@@ -18,8 +19,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [storage_base_dependency_error_msg] }}"
   vars:
-    storage_base_dependency_error_msg: "Cross-role validation error: kvmhost_storage requires kvmhost_base but enable_epel
-      is not defined"
+    storage_base_dependency_error_msg: >-
+      Cross-role validation error: kvmhost_storage requires kvmhost_base but
+      enable_epel is not defined
   when:
     - libvirt_host_storage_pools is defined
     - enable_epel is not defined
@@ -28,8 +30,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [libvirt_network_dependency_error_msg] }}"
   vars:
-    libvirt_network_dependency_error_msg: "Cross-role validation error: kvmhost_libvirt requires kvmhost_networking but kvmhost_bridge_device
-      is not defined"
+    libvirt_network_dependency_error_msg: >-
+      Cross-role validation error: kvmhost_libvirt requires kvmhost_networking but
+      kvmhost_bridge_device is not defined
   when:
     - kvm_host_libvirt_dir is defined
     - kvmhost_bridge_device is not defined
@@ -38,8 +41,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [libvirt_storage_dependency_error_msg] }}"
   vars:
-    libvirt_storage_dependency_error_msg: "Cross-role validation error: kvmhost_libvirt requires kvmhost_storage but libvirt_host_storage_pools
-      is not defined"
+    libvirt_storage_dependency_error_msg: >-
+      Cross-role validation error: kvmhost_libvirt requires kvmhost_storage but
+      libvirt_host_storage_pools is not defined
   when:
     - kvm_host_libvirt_dir is defined
     - libvirt_host_storage_pools is not defined
@@ -48,8 +52,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [cockpit_base_dependency_error_msg] }}"
   vars:
-    cockpit_base_dependency_error_msg: "Cross-role validation error: kvmhost_cockpit requires kvmhost_base but base_packages_common
-      is not defined"
+    cockpit_base_dependency_error_msg: >-
+      Cross-role validation error: kvmhost_cockpit requires kvmhost_base but
+      base_packages_common is not defined
   when:
     - enable_cockpit is defined
     - enable_cockpit | bool
@@ -59,8 +64,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [user_config_base_dependency_error_msg] }}"
   vars:
-    user_config_base_dependency_error_msg: "Cross-role validation error: kvmhost_user_config requires kvmhost_base but supported_os_families
-      is not defined"
+    user_config_base_dependency_error_msg: >-
+      Cross-role validation error: kvmhost_user_config requires kvmhost_base but
+      supported_os_families is not defined
   when:
     - admin_user is defined
     - supported_os_families is not defined
@@ -69,8 +75,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [bridge_consistency_error_msg] }}"
   vars:
-    bridge_consistency_error_msg: "Cross-role validation error: Inconsistent bridge device names between kvmhost_bridge_device
-      and network configurations"
+    bridge_consistency_error_msg: >-
+      Cross-role validation error: Inconsistent bridge device names between
+      kvmhost_bridge_device and network configurations
   when:
     - kvmhost_bridge_device is defined
     - libvirt_host_networks is defined
@@ -81,8 +88,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [domain_consistency_error_msg] }}"
   vars:
-    domain_consistency_error_msg: "Cross-role validation error: Domain '{{ domain }}' is used in networking but admin_user
-      environment doesn't reference it"
+    domain_consistency_error_msg: >-
+      Cross-role validation error: Domain '{{ domain }}' is used in networking but
+      admin_user environment doesn't reference it
   when:
     - domain is defined
     - admin_user is defined
@@ -94,8 +102,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [libvirt_user_consistency_error_msg] }}"
   vars:
-    libvirt_user_consistency_error_msg: "Cross-role validation error: enable_libvirt_admin_user is true but admin_user is
-      not in libvirt group"
+    libvirt_user_consistency_error_msg: >-
+      Cross-role validation error: enable_libvirt_admin_user is true but
+      admin_user is not in libvirt group
   when:
     - enable_libvirt_admin_user is defined
     - enable_libvirt_admin_user | bool
@@ -107,8 +116,9 @@
   ansible.builtin.set_fact:
     validation_errors: "{{ validation_errors + [port_conflict_error_msg] }}"
   vars:
-    port_conflict_error_msg: "Cross-role validation error: Cockpit port '{{ kvmhost_cockpit_port }}' conflicts with SSH port
-      '{{ ssh_configuration.ssh_port }}'"
+    port_conflict_error_msg: >-
+      Cross-role validation error: Cockpit port '{{ kvmhost_cockpit_port }}'
+      conflicts with SSH port '{{ ssh_configuration.ssh_port }}'
   when:
     - enable_cockpit is defined
     - enable_cockpit | bool

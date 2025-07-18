@@ -9,10 +9,10 @@
   ansible.builtin.debug:
     msg: |
       Current Network Configuration:
-      - Primary Interface: {{ ansible_default_ipv4.interface           | default('N/A)   }}
-      - Primary IP: {{ ansible_default_ipv4.address           | default('N/A)   }}
-      - Gateway: {{ ansible_default_ipv4.gateway           | default('N/A)   }}
-      - DNS: {{ ansible_dns.nameservers      | default(['N/A'])                |   join(', ')    }}
+      - Primary Interface: {{ ansible_default_ipv4.interface | default('N/A') }}
+      - Primary IP: {{ ansible_default_ipv4.address | default('N/A') }}
+      - Gateway: {{ ansible_default_ipv4.gateway | default('N/A') }}
+      - DNS: {{ ansible_dns.nameservers | default(['N/A']) | join(', ') }}
 
 # ADR-0007: Automated Bridge Configuration
 - name: Network Setup - Run automated bridge configuration

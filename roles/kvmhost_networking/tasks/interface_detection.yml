@@ -17,10 +17,10 @@
 
 - name: Validate network interface exists
   ansible.builtin.assert:
-    that:
-      - primary_interface in ansible_interfaces
-    fail_msg: "Primary interface {{ primary_interface }} not found in system interfaces: {{ ansible_interfaces }}"
-    success_msg: Primary interface {{ primary_interface }} validated successfully
+  that:
+    - primary_interface in ansible_interfaces
+  fail_msg: "Primary interface {{ primary_interface }} not found in system interfaces: {{ ansible_interfaces }}"
+  success_msg: Primary interface {{ primary_interface }} validated successfully
 
 - name: Get current interface configuration
   ansible.builtin.command: nmcli connection show {{ primary_interface }}
@@ -33,7 +33,7 @@
     msg: |
       Interface Detection Results:
       - Primary Interface: {{ primary_interface }}
-      - Primary IP: {{ primary_ip           | default('N/A)   }}
-      - Gateway: {{ primary_gateway           | default('N/A)   }}
-      - Netmask: {{ primary_netmask           | default('N/A)   }}
-      - Available Interfaces: {{ ansible_interfaces           | join(', ')   }}
+      - Primary IP: {{ primary_ip | default('N/A') }}
+      - Gateway: {{ primary_gateway | default('N/A') }}
+      - Netmask: {{ primary_netmask | default('N/A') }}
+      - Available Interfaces: {{ ansible_interfaces | join(', ') }}

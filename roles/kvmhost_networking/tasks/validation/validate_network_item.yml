@@ -24,7 +24,9 @@
   ansible.builtin.assert:
     that:
       - network_config.bridge_device | regex_search('^[a-zA-Z][a-zA-Z0-9_-]*$')
-    fail_msg: "Network '{{ network_config.name }}' bridge device '{{ network_config.bridge_device }}' has invalid naming"
+    fail_msg: >-
+      Network '{{ network_config.name }}' bridge device '{{ network_config.bridge_device }}'
+      has invalid naming
     success_msg: "Network '{{ network_config.name }}' bridge device naming is valid"
 
 - name: Validate DHCP configuration if present
