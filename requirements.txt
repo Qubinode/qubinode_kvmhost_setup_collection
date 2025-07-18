@@ -41,6 +41,9 @@ wheel
 setuptools
 pip-tools
 
+# AI-powered lint fixing
+aider-lint-fixer>=1.8.0
+
 # Updated dependencies to fix security vulnerabilities
 cryptography>=42.0.2
 configobj>=5.0.9

@@ -1,56 +1,180 @@
+# Common Setup Reusable Workflow
+# 
+# This workflow provides standardized setup for Python, Ansible, and Podman
+# across different runner types (self-hosted RHEL and GitHub-hosted Ubuntu).
+#
+# Usage examples:
+# 
+# Basic Python setup:
+#   jobs:
+#     setup:
+#       uses: ./.github/workflows/common-setup.yml
+#       with:
+#         python-version: "3.11"
+#
+# Full setup with Ansible and Podman:
+#   jobs:
+#     setup:
+#       uses: ./.github/workflows/common-setup.yml
+#       with:
+#         python-version: "3.11"
+#         ansible-version: "2.17"
+#         install-podman: true
+#         runner-type: "self-hosted"
+#
+# GitHub-hosted runner setup:
+#   jobs:
+#     setup:
+#       uses: ./.github/workflows/common-setup.yml
+#       with:
+#         python-version: "3.11"
+#         runner-type: "ubuntu-latest"
+#         requirements-file: "requirements-dev.txt"
+
 name: Common Setup
 
 on:
   workflow_call:
     inputs:
       python-version:
-        required: true
+        required: false
         type: string
+        default: "3.11"
       ansible-version:
         required: false
         type: string
         default: ""
+      runner-type:
+        required: false
+        type: string
+        default: "self-hosted"
+      install-podman:
+        required: false
+        type: boolean
+        default: false
+      requirements-file:
+        required: false
+        type: string
+        default: "requirements.txt"
     secrets:
       GITHUB_TOKEN:
-        required: true
+        required: false
 
 jobs:
   setup:
-    runs-on: self-hosted
+    runs-on: ${{ inputs.runner-type }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up Python
+      - name: Set up Python (Ubuntu/GitHub-hosted)
+        if: inputs.runner-type == 'ubuntu-latest'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python-version }}
           cache: pip
           cache-dependency-path: |
-            requirements.txt
+            requirements*.txt
             pyproject.toml
 
+      - name: Set up Python (Self-hosted RHEL)
+        if: inputs.runner-type == 'self-hosted'
+        run: |
+          # Python detection and virtual environment setup for self-hosted runners
+          python_cmd=$(which python3.12 2>/dev/null || which python3.11 2>/dev/null || which python3 2>/dev/null)
+          echo "Using Python: $python_cmd"
+          $python_cmd -m pip install --upgrade pip
+          $python_cmd -m pip install virtualenv
+          $python_cmd -m virtualenv venv
+          source venv/bin/activate
+          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+
       - name: Cache Python packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('requirements.txt') }}
+          path: |
+            ~/.cache/pip
+            ./venv
+          key: pip-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles(inputs.requirements-file) }}
           restore-keys: |
             pip-${{ runner.os }}-${{ inputs.python-version }}-
 
       - name: Install base dependencies
         run: |
+          # Activate virtual environment if on self-hosted
+          if [[ "${{ inputs.runner-type }}" == "self-hosted" ]]; then
+            source venv/bin/activate
+          fi
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Podman and dependencies
-        run: |
-          sudo dnf install -y podman slirp4netns podman-docker
-          sudo mkdir -p /etc/containers
-          echo -e '[registries.search]\nregistries = ["docker.io", "quay.io"]' | sudo tee /etc/containers/registries.conf
-          echo -e '[engine]\nevents_logger = "file"\ncgroup_manager = "systemd"' | sudo tee /etc/containers/containers.conf
-          sudo systemctl enable --now podman.socket
+          if [[ -f "${{ inputs.requirements-file }}" ]]; then
+            pip install -r ${{ inputs.requirements-file }}
+          fi
 
       - name: Install Ansible (if specified)
         if: inputs.ansible-version != ''
         run: |
+          # Activate virtual environment if on self-hosted
+          if [[ "${{ inputs.runner-type }}" == "self-hosted" ]]; then
+            source venv/bin/activate
+          fi
           pip install ansible-core==${{ inputs.ansible-version }}
+
+      - name: Install Podman and dependencies (RHEL/CentOS)
+        if: inputs.install-podman == true && inputs.runner-type == 'self-hosted'
+        run: |
+          # Check if podman is already installed
+          if ! command -v podman &> /dev/null; then
+            echo "Installing Podman..."
+            # Detect OS and install appropriately
+            if command -v dnf &> /dev/null; then
+              sudo dnf install -y podman slirp4netns podman-docker
+            elif command -v yum &> /dev/null; then
+              sudo yum install -y podman slirp4netns podman-docker
+            else
+              echo "::warning::Package manager not found, skipping Podman installation"
+              exit 0
+            fi
+            
+            # Configure Podman
+            sudo mkdir -p /etc/containers
+            echo -e '[registries.search]\nregistries = ["docker.io", "quay.io"]' | sudo tee /etc/containers/registries.conf
+            echo -e '[engine]\nevents_logger = "file"\ncgroup_manager = "systemd"' | sudo tee /etc/containers/containers.conf
+            sudo systemctl enable --now podman.socket
+          else
+            echo "Podman already installed"
+          fi
+
+      - name: Install required Ansible collections
+        run: |
+          # Activate virtual environment if on self-hosted
+          if [[ "${{ inputs.runner-type }}" == "self-hosted" ]]; then
+            source venv/bin/activate
+          fi
+          
+          # Install Galaxy collections if requirements exist
+          if [[ -f "roles/kvmhost_setup/collection/requirements.yml" ]]; then
+            ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
+          elif [[ -f "requirements.yml" ]]; then
+            ansible-galaxy collection install -r requirements.yml
+          fi
+
+      - name: Validate setup
+        run: |
+          # Activate virtual environment if on self-hosted
+          if [[ "${{ inputs.runner-type }}" == "self-hosted" ]]; then
+            source venv/bin/activate
+          fi
+          
+          echo "Python version: $(python --version)"
+          echo "Pip version: $(pip --version)"
+          
+          if [[ "${{ inputs.ansible-version }}" != "" ]]; then
+            echo "Ansible version: $(ansible --version | head -1)"
+          fi
+          
+          if [[ "${{ inputs.install-podman }}" == "true" ]]; then
+            echo "Podman version: $(podman --version || echo 'Podman not available')"
+          fi

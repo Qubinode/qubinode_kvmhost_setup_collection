@@ -107,10 +107,9 @@
       ansible.builtin.systemd:
         name: libvirtd
       register: libvirtd_status
-      register: virsh_net_start
       failed_when: >
-        "'Network not found' not in virsh_net_start.stderr and
-         'already active' not in virsh_net_start.stderr"
+        "'Network not found' not in libvirtd_status.stderr and
+         'already active' not in libvirtd_status.stderr"
 
     - name: Check if libvirtd is running
       ansible.builtin.command: systemctl is-active libvirtd
@@ -289,7 +288,7 @@
       ✓ KVM device: {{ '/dev/kvm available' if kvm_device.stat.exists else 'Not available' }}
       ✓ libvirt version: {{ libvirt_version.stdout }}
       ✓ QEMU version: {{ qemu_version.stdout }}
-      ✓ libvirtd ansible.builtin.service: {{ libvirtd_active.stdout           | default('checking...)   }}
+      ✓ libvirtd service: {{ libvirtd_active.stdout | default('checking...') }}
 
       KVM host validation completed successfully!
       System is ready for virtual machine deployment.

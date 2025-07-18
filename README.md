@@ -245,6 +245,14 @@ See the [changelog](https://github.com/ansible-collections/REPONAMEHERE/tree/mai
 
 <!-- List out where the user can find additional information, such as working group meeting times, slack/IRC channels, or documentation for the product this collection automates. At a minimum, link to: -->
 
+### Collection Documentation
+
+- [Aider-Lint-Fixer Integration](docs/AIDER_LINT_INTEGRATION.md) - AI-powered automated lint fixing
+- [Ansible Lint Automation](docs/ANSIBLE_LINT_AUTOMATION.md) - Automated linting workflows
+- [DevOps Automation Framework](docs/DEVOPS_AUTOMATION_FRAMEWORK.md) - Complete automation framework
+
+### External Resources
+
 - [Ansible Collection overview](https://github.com/ansible-collections/overview)
 - [Ansible User guide](https://docs.ansible.com/ansible/devel/user_guide/index.html)
 - [Ansible Developer guide](https://docs.ansible.com/ansible/devel/dev_guide/index.html)

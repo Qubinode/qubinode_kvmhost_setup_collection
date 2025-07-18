@@ -232,7 +232,7 @@ install_security_tools() {
             safety|bandit|pip-audit)
                 log_debug "Installing Python tool: $tool"
                 # Check if we're in a virtual environment
-                if [[ -n "$VIRTUAL_ENV" ]] || [[ "$VIRTUAL_ENV" != "" ]] || python3 -c "import sys; exit(0 if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) else 1)" 2>/dev/null; then
+                if [[ -n "${VIRTUAL_ENV:-}" ]] || python3 -c "import sys; exit(0 if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) else 1)" 2>/dev/null; then
                     # In virtual environment - install normally
                     python3 -m pip install "$tool" || {
                         log_error "Failed to install $tool"

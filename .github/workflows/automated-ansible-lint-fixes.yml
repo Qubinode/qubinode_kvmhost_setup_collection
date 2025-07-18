@@ -1,5 +1,4 @@
----
-name: Automated Ansible Lint Fixes with Gemini
+name: Automated Ansible Lint Fixes with Aider
 
 on:
   workflow_dispatch:
@@ -7,9 +6,10 @@ on:
       fix_mode:
         description: 'Fix mode for ansible-lint'
         required: false
-        default: 'auto'
+        default: 'aider-assisted'
         type: choice
         options:
+          - 'aider-assisted'
           - 'auto'
           - 'manual-review'
           - 'gemini-assisted'
@@ -31,7 +31,7 @@ jobs:
       lint-issues: ${{ steps.scan.outputs.issues }}
       fix-needed: ${{ steps.scan.outputs.fix-needed }}
       gemini-analysis: ${{ steps.gemini.outputs.analysis }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,12 +50,12 @@ jobs:
             echo "No suitable Python found"
             exit 1
           fi
-          
+
           echo "Using Python: $($PYTHON_CMD --version)"
           $PYTHON_CMD -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
           echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
           echo "$(pwd)/venv/bin" >> $GITHUB_PATH
 
@@ -68,7 +68,7 @@ jobs:
         id: scan
         run: |
           echo "🔍 Scanning for ansible-lint issues..."
-          
+
           # Determine target files
           if [ -n "${{ github.event.inputs.target_files }}" ]; then
             TARGET_FILES="${{ github.event.inputs.target_files }}"
@@ -77,19 +77,19 @@ jobs:
             TARGET_FILES="roles/ validation/ .github/workflows/"
             echo "Targeting default directories: $TARGET_FILES"
           fi
-          
+
           # Run ansible-lint to capture issues
           ansible-lint --parseable $TARGET_FILES > lint-output.txt 2>&1 || true
-          
+
           # Process output
           if [ -s lint-output.txt ]; then
             echo "fix-needed=true" >> $GITHUB_OUTPUT
             # Create structured issue data
             echo "Found $(wc -l < lint-output.txt) lint issues"
-            
+
             # Extract unique issue types for analysis
             cat lint-output.txt | cut -d':' -f4 | sort | uniq > issue-types.txt
-            
+
             # Create JSON structure for Gemini analysis
             echo '{"issues": [' > issues.json
             while IFS= read -r line; do
@@ -97,7 +97,7 @@ jobs:
             done < lint-output.txt
             sed -i '$ s/,$//' issues.json
             echo ']}' >> issues.json
-            
+
             echo "issues=$(cat issues.json | tr -d '\n')" >> $GITHUB_OUTPUT
           else
             echo "fix-needed=false" >> $GITHUB_OUTPUT
@@ -127,31 +127,32 @@ jobs:
               "sandbox": false
             }
           prompt: |
-            You are an expert Ansible developer tasked with analyzing ansible-lint issues and providing fix recommendations.
-            
+            You are an expert Ansible developer tasked with analyzing ansible-lint issues and
+            providing fix recommendations.
+
             The lint issues have been scanned and saved to lint-output.txt. Please:
             1. Run: cat lint-output.txt to see the ansible-lint issues
             2. Analyze the common patterns in the issues
             3. Generate specific fix commands for the most common issues
             4. Write a comprehensive fix script
-            
+
             Common issue patterns to address:
             - yaml[document-start]: Remove "---" from file beginnings (production profile requirement)
             - yaml[line-length]: Break long lines using multiline YAML (>- syntax)
             - schema[meta]: Fix invalid platform names (AIX → EL in meta.yml)
             - Double FQCN prefixes: ansible.builtin.ansible.builtin → ansible.builtin
             - Module name errors: ansible.builtin.lineinansible.builtin.file → ansible.builtin.lineinfile
-            
+
             Please create a fix script by running:
             write_file("gemini-fix-script.sh", "<comprehensive bash script to fix the issues>")
-            
+
             The script should:
             1. Remove document start markers from YAML files
             2. Fix the meta.yml platform configuration
             3. Clean up double FQCN prefixes
             4. Fix line length issues with multiline YAML syntax
             5. Correct any malformed module names
-            
+
             Make the script executable and focused on the specific issues found.
 
       - name: Upload analysis artifacts
@@ -163,13 +164,14 @@ jobs:
             issues.json
             issue-types.txt
             gemini-fix-script.sh
+            aider-fix-report.json
           retention-days: 7
 
   apply-lint-fixes:
     runs-on: self-hosted
     needs: analyze-lint-issues
     if: needs.analyze-lint-issues.outputs.fix-needed == 'true'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -188,12 +190,12 @@ jobs:
             echo "No suitable Python found"
             exit 1
           fi
-          
+
           echo "Using Python: $($PYTHON_CMD --version)"
           $PYTHON_CMD -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
           echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
           echo "$(pwd)/venv/bin" >> $GITHUB_PATH
 
@@ -216,11 +218,70 @@ jobs:
         with:
           name: lint-analysis
 
+      - name: Apply Aider-assisted fixes
+        if: github.event.inputs.fix_mode == 'aider-assisted'
+        run: |
+          echo "🤖 Applying Aider-assisted fixes..."
+
+          # Create backup
+          git stash push -m "backup-before-aider-$(date +%s)" || true
+
+          # Determine target files
+          if [ -n "${{ github.event.inputs.target_files }}" ]; then
+            TARGET_FILES="${{ github.event.inputs.target_files }}"
+            echo "Targeting specific files: $TARGET_FILES"
+          else
+            TARGET_FILES="roles/ validation/ .github/workflows/"
+            echo "Targeting default directories: $TARGET_FILES"
+          fi
+
+          # Run aider-lint-fixer with ansible-lint
+          echo "🔧 Running aider-lint-fixer..."
+          aider-lint-fixer \
+            --linter ansible-lint \
+            --target-files "$TARGET_FILES" \
+            --fix-mode aggressive \
+            --preserve-formatting \
+            --backup-original \
+            --max-iterations 3 \
+            --output-report aider-fix-report.json \
+            --verbose
+
+          # If aider-lint-fixer fails or is not available, fall back to manual fixes
+          if [ $? -ne 0 ]; then
+            echo "⚠️  Aider-lint-fixer failed, applying manual fixes..."
+
+            # Apply known fixes for common issues
+            echo "🔧 Removing document start markers..."
+            find roles/kvmhost_cockpit/ -name "*.yml" -exec sed -i '1{/^---$/d;}' {} \;
+
+            echo "🔧 Fixing meta.yml schema issue..."
+            if [ -f roles/kvmhost_cockpit/meta/main.yml ]; then
+              # Replace AIX with EL platform
+              sed -i 's/name: AIX/name: EL/' roles/kvmhost_cockpit/meta/main.yml
+            fi
+
+            echo "🔧 Fixing double FQCN prefixes..."
+            find roles/kvmhost_cockpit/ -name "*.yml" -exec \
+              sed -i 's/ansible\.builtin\.ansible\.builtin\./ansible.builtin./g' {} \;
+
+            # Fix specific module errors
+            sed -i 's/ansible\.builtin\.lineinansible\.builtin\.file/ansible.builtin.lineinfile/g' \
+              roles/kvmhost_cockpit/tasks/configuration/authentication.yml
+
+            echo "🔧 Running ansible-lint --fix for remaining issues..."
+            ansible-lint --fix roles/kvmhost_cockpit/ || true
+          fi
+
+          # Final validation
+          echo "✅ Running final ansible-lint check..."
+          ansible-lint --profile production $TARGET_FILES || echo "Some issues may remain"
+
       - name: Apply Gemini-recommended fixes
         if: github.event.inputs.fix_mode == 'gemini-assisted'
         run: |
           echo "🤖 Applying Gemini-recommended fixes..."
-          
+
           # Check if Gemini generated a fix script
           if [ -f gemini-fix-script.sh ]; then
             echo "Gemini fix script found, applying recommended fixes..."
@@ -228,25 +289,25 @@ jobs:
             ./gemini-fix-script.sh || echo "Some fixes may have failed"
           else
             echo "No Gemini fix script found, applying manual fixes..."
-            
+
             # Apply known fixes for common issues
             echo "🔧 Removing document start markers..."
             find roles/kvmhost_cockpit/ -name "*.yml" -exec sed -i '1{/^---$/d;}' {} \;
-            
+
             echo "🔧 Fixing meta.yml schema issue..."
             if [ -f roles/kvmhost_cockpit/meta/main.yml ]; then
               # Replace AIX with EL platform
               sed -i 's/name: AIX/name: EL/' roles/kvmhost_cockpit/meta/main.yml
             fi
-            
+
             echo "🔧 Fixing double FQCN prefixes..."
             find roles/kvmhost_cockpit/ -name "*.yml" -exec \
               sed -i 's/ansible\.builtin\.ansible\.builtin\./ansible.builtin./g' {} \;
-            
+
             # Fix specific module errors
             sed -i 's/ansible\.builtin\.lineinansible\.builtin\.file/ansible.builtin.lineinfile/g' \
               roles/kvmhost_cockpit/tasks/configuration/authentication.yml
-            
+
             echo "🔧 Running ansible-lint --fix for remaining issues..."
             ansible-lint --fix roles/kvmhost_cockpit/ || true
           fi
@@ -255,10 +316,10 @@ jobs:
         if: github.event.inputs.fix_mode == 'auto'
         run: |
           echo "🔧 Applying automatic ansible-lint fixes..."
-          
+
           # Create backup
           git stash push -m "backup-before-lint-$(date +%s)" || true
-          
+
           # Apply comprehensive fixes using the dedicated script
           echo "🔧 Running comprehensive fix script..."
           if [ -f scripts/comprehensive-lint-fixes.sh ]; then
@@ -267,7 +328,7 @@ jobs:
             echo "Warning: Comprehensive fix script not found, using basic fixes"
             ./fix-lint-source.sh || echo "Fix script completed with warnings"
           fi
-          
+
           # Apply additional ansible-lint fixes
           ansible-lint --fix roles/ || true
           ansible-lint --fix validation/ || true
@@ -277,24 +338,24 @@ jobs:
         if: github.event.inputs.fix_mode == 'manual-review'
         run: |
           echo "📋 Manual review mode - generating fix suggestions..."
-          
+
           # Create a detailed report for manual review
           echo "# Ansible Lint Issues Report" > LINT_REVIEW.md
           echo "Generated: $(date)" >> LINT_REVIEW.md
           echo "" >> LINT_REVIEW.md
-          
+
           echo "## Issues Found:" >> LINT_REVIEW.md
           echo '```' >> LINT_REVIEW.md
           cat lint-output.txt >> LINT_REVIEW.md
           echo '```' >> LINT_REVIEW.md
-          
+
           echo "" >> LINT_REVIEW.md
           echo "## Recommended Actions:" >> LINT_REVIEW.md
           echo "1. Review each issue above" >> LINT_REVIEW.md
           echo "2. Apply fixes following Ansible best practices" >> LINT_REVIEW.md
           echo "3. Test changes in development environment" >> LINT_REVIEW.md
           echo "4. Re-run ansible-lint to verify fixes" >> LINT_REVIEW.md
-          
+
           git add LINT_REVIEW.md
 
       - name: Check for changes
@@ -313,19 +374,19 @@ jobs:
         if: steps.changes.outputs.changes == 'true'
         run: |
           git add .
-          
+
           # Create detailed commit message
           cat > commit_msg.txt << 'EOF'
           chore: automated ansible-lint fixes
-          
+
           Fix mode: ${{ github.event.inputs.fix_mode }}
           Target: ${{ github.event.inputs.target_files || 'default directories' }}
-          
+
           Applied fixes for ansible-lint issues
-          
+
           Automated by GitHub Actions with Gemini assistance
           EOF
-          
+
           git commit -F commit_msg.txt
 
       - name: Push changes and create PR
@@ -335,27 +396,27 @@ jobs:
         run: |
           # Push branch
           git push origin ${{ steps.branch.outputs.branch-name }}
-          
+
           # Create pull request
           cat > pr_body.txt << 'EOF'
           ## Automated Ansible Lint Fixes
-          
+
           This PR contains automated fixes for ansible-lint issues found in the repository.
-          
+
           ### Fix Details:
           - **Fix Mode**: ${{ github.event.inputs.fix_mode }}
           - **Target Files**: ${{ github.event.inputs.target_files || 'Default directories' }}
-          
+
           ### Verification:
           - [ ] Review changes for correctness
-          - [ ] Test in development environment  
+          - [ ] Test in development environment
           - [ ] Verify ansible-lint compliance
           - [ ] Check for any breaking changes
-          
+
           ---
           *This PR was created automatically by GitHub Actions. Please review carefully before merging.*
           EOF
-          
+
           gh pr create \
             --title "🤖 Automated Ansible Lint Fixes ($(date +%Y-%m-%d))" \
             --body-file pr_body.txt \
@@ -367,9 +428,10 @@ jobs:
         run: |
           echo "## Ansible Lint Fix Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.changes.outputs.changes }}" == "true" ]; then
-            echo "✅ **PR Created**: Automated fixes have been applied and a pull request created." >> $GITHUB_STEP_SUMMARY
+            echo "✅ **PR Created**: Automated fixes have been applied and a pull request created." \
+              >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Details:" >> $GITHUB_STEP_SUMMARY
             echo "- **Branch**: ${{ steps.branch.outputs.branch-name }}" >> $GITHUB_STEP_SUMMARY
@@ -381,11 +443,14 @@ jobs:
           else
             echo "✅ **No Changes**: All files are already ansible-lint compliant." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Tools Used:" >> $GITHUB_STEP_SUMMARY
           echo "- ansible-lint $(ansible-lint --version | head -1)" >> $GITHUB_STEP_SUMMARY
           echo "- yamllint $(yamllint --version)" >> $GITHUB_STEP_SUMMARY
+          if [ '${{ github.event.inputs.fix_mode }}' = 'aider-assisted' ]; then
+            echo "- aider-lint-fixer (AI-assisted linting fixes)" >> $GITHUB_STEP_SUMMARY
+          fi
           if [ '${{ github.event.inputs.fix_mode }}' = 'gemini-assisted' ]; then
             echo "- Google Gemini Pro (AI-assisted analysis)" >> $GITHUB_STEP_SUMMARY
           fi

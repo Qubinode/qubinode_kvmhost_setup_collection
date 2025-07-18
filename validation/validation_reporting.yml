@@ -35,13 +35,13 @@
       Validation Timestamp: {{ validation_summary.timestamp }}
       Environment: {{ validation_summary.environment }}
       Drift Detection: {{ validation_summary.drift_detection_enabled | ternary('Enabled', 'Disabled') }}
-      
+
       SUMMARY:
       ========
       Total Errors: {{ validation_summary.total_errors }}
       Total Warnings: {{ validation_summary.total_warnings }}
       ADR Compliance: {{ validation_summary.adr_compliance_status }}
-      
+
       {% if validation_errors | length > 0 %}
       ERRORS:
       =======
@@ -49,7 +49,7 @@
       ❌ {{ error }}
       {% endfor %}
       {% endif %}
-      
+
       {% if validation_warnings | length > 0 %}
       WARNINGS:
       =========
@@ -57,7 +57,7 @@
       ⚠️  {{ warning }}
       {% endfor %}
       {% endif %}
-      
+
       {% if validation_summary.total_errors == 0 %}
       ✅ All variable validation checks passed successfully!
       {% endif %}
