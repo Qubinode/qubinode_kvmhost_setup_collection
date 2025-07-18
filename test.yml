@@ -1,4 +1,3 @@
----
 - name: Test qubinode_kvmhost_setup_collection
   hosts: all
   become: yes

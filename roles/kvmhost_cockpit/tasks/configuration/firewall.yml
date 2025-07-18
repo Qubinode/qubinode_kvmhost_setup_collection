@@ -20,7 +20,7 @@
 
 - name: Configure firewall for Cockpit (default port)
   ansible.posix.firewalld:
-    ansible.builtin.service: cockpit
+    service: cockpit
     permanent: true
     immediate: true
     state: enabled

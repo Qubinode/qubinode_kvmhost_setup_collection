@@ -1,4 +1,3 @@
----
 # Test playbook for modular roles - Cockpit and User Config
 - name: Test kvmhost_cockpit and kvmhost_user_config roles syntax
   hosts: localhost

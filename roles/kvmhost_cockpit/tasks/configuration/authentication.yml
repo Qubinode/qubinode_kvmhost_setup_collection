@@ -62,12 +62,12 @@
   ansible.builtin.debug:
     msg:
       - Cockpit authentication configured
-      - "Auth methods: {{ kvmhost_cockpit_auth_methods | join(', ') 
-         if kvmhost_cockpit_auth_methods | length > 0 
+      - "Auth methods: {{ kvmhost_cockpit_auth_methods | join(', ')
+         if kvmhost_cockpit_auth_methods | length > 0
          else 'Default' }}"
-      - "Allowed users: {{ kvmhost_cockpit_allowed_users | join(', ') 
-         if kvmhost_cockpit_allowed_users | length > 0 
+      - "Allowed users: {{ kvmhost_cockpit_allowed_users | join(', ')
+         if kvmhost_cockpit_allowed_users | length > 0
          else 'All system users' }}"
-      - "Admin users: {{ kvmhost_cockpit_admin_users | join(', ') 
-         if kvmhost_cockpit_admin_users | length > 0 
+      - "Admin users: {{ kvmhost_cockpit_admin_users | join(', ')
+         if kvmhost_cockpit_admin_users | length > 0
          else 'Default wheel group members' }}"

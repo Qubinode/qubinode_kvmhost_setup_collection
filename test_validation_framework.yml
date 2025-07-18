@@ -1,4 +1,3 @@
----
 # =============================================================================
 # VARIABLE VALIDATION FRAMEWORK TEST PLAYBOOK
 # =============================================================================
@@ -12,7 +11,6 @@
     validation_scope: "all_roles"
     enable_drift_detection: true
     save_validation_report: false
-    
     # Sample kvmhost_base variables
     cicd_test: false
     testing_mode: false
@@ -38,7 +36,6 @@
     base_services_enabled:
       - NetworkManager
       - firewalld
-    
     # Sample kvmhost_networking variables
     kvmhost_bridge_device: "virbr0"
     dns_forwarder: "8.8.8.8"
@@ -52,7 +49,6 @@
           enabled: true
           start: "192.168.122.100"
           end: "192.168.122.200"
-    
     # Sample kvmhost_storage variables
     kvm_host_libvirt_dir: "/var/lib/libvirt"
     libvirt_host_storage_pools:
@@ -60,7 +56,6 @@
         type: "dir"
         path: "/var/lib/libvirt/images"
         autostart: true
-    
     # Sample kvmhost_cockpit variables
     enable_cockpit: true
     kvmhost_cockpit_port: 9090
@@ -71,7 +66,6 @@
     cockpit_modules:
       - machines
       - networkmanager
-    
     # Sample kvmhost_user_config variables
     admin_user: "qubinode"
     configure_shell: true
@@ -100,7 +94,6 @@
 
     - name: Run variable validation framework
       ansible.builtin.include_tasks: validation/schema_validation.yml
-      
     - name: Display validation results summary
       ansible.builtin.debug:
         msg: |
@@ -109,14 +102,12 @@
           Errors: {{ validation_errors | default([]) | length }}
           Warnings: {{ validation_warnings | default([]) | length }}
           Status: {{ 'PASSED' if validation_errors | default([]) | length == 0 else 'FAILED' }}
-          
           {% if validation_errors | default([]) | length > 0 %}
           Errors:
           {% for error in validation_errors %}
           - {{ error }}
           {% endfor %}
           {% endif %}
-          
           {% if validation_warnings | default([]) | length > 0 %}
           Warnings:
           {% for warning in validation_warnings %}

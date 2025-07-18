@@ -1,4 +1,3 @@
----
 - name: Test Container Detection Logic
   hosts: rocky-9,alma-9
   become: true

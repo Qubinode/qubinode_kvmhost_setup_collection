@@ -10,8 +10,8 @@
       - "Admin group: {{ kvmhost_libvirt_admin_group }}"
       - >-
         Admin users: {{
-          kvmhost_libvirt_admin_users | join(', ') 
-          if kvmhost_libvirt_admin_users 
+          kvmhost_libvirt_admin_users | join(', ')
+          if kvmhost_libvirt_admin_users
           else admin_user | default('None')
         }}
   when: kvmhost_libvirt_debug_enabled | default(false)
@@ -73,8 +73,8 @@
   ansible.builtin.debug:
     msg: >-
       Libvirt group members: {{
-        libvirt_group_check.stdout.split(':')[3] 
-        if libvirt_group_check.rc == 0 
+        libvirt_group_check.stdout.split(':')[3]
+        if libvirt_group_check.rc == 0
         else 'Group not found'
       }}
   when: kvmhost_libvirt_debug_enabled | default(false)
@@ -90,7 +90,7 @@
 - name: Display libvirt access test result
   ansible.builtin.debug:
     msg: >-
-      Libvirt access test for {{ ansible_user | default('current user') }}: 
+      Libvirt access test for {{ ansible_user | default('current user') }}:
       {{ 'Success' if user_libvirt_test.rc == 0 else 'Failed - may need to log out and back in' }}
   when:
     - kvmhost_libvirt_debug_enabled | default(false)

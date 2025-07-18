@@ -107,10 +107,10 @@
       ansible.builtin.systemd:
         name: libvirtd
       register: libvirtd_status
+      register: virsh_net_start
       failed_when: >
         "'Network not found' not in virsh_net_start.stderr and
          'already active' not in virsh_net_start.stderr"
-      register: virsh_net_start
 
     - name: Check if libvirtd is running
       ansible.builtin.command: systemctl is-active libvirtd

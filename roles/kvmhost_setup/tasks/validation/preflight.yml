@@ -27,7 +27,7 @@
         that:
           - item.size_available > 53687091200 # 50GB in bytes
         fail_msg: >-
-          Insufficient disk space in {{ item.mount }}: 
+          Insufficient disk space in {{ item.mount }}:
           {{ (item.size_available / 1024 / 1024 / 1024) | round(2) }}GB available,
           minimum 50GB required
         success_msg: >-

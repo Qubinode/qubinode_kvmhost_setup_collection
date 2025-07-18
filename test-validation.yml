@@ -1,4 +1,3 @@
----
 # Test playbook for demonstrating new validation features
 # Usage: ansible-playbook -i inventories/local/hosts test-validation.yml --tags preflight
 

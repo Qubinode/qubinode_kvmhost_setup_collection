@@ -1,4 +1,3 @@
----
 - name: Test kvmhost_libvirt role syntax
   hosts: localhost
   gather_facts: false

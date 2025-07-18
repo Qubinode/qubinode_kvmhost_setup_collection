@@ -12,8 +12,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [epel_drift_msg] }}"
   vars:
-    epel_drift_msg: "Configuration drift detected: EPEL installation method is '{{ epel_installation_method }}' but ADR-0001
-      requires 'dnf_module'"
+    epel_drift_msg: >-
+      Configuration drift detected: EPEL installation method is '{{ epel_installation_method }}'
+      but ADR-0001 requires 'dnf_module'
   when:
     - drift_detection_enabled
     - enable_epel | default(false)
@@ -24,8 +25,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [bridge_naming_drift_msg] }}"
   vars:
-    bridge_naming_drift_msg: "Configuration drift detected: Bridge device '{{ kvmhost_bridge_device }}' doesn't follow recommended
-      naming pattern (virbr*)"
+    bridge_naming_drift_msg: >-
+      Configuration drift detected: Bridge device '{{ kvmhost_bridge_device }}'
+      doesn't follow recommended naming pattern (virbr*)
   when:
     - drift_detection_enabled
     - kvmhost_bridge_device is defined
@@ -35,8 +37,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [libvirt_dir_drift_msg] }}"
   vars:
-    libvirt_dir_drift_msg: "Configuration drift detected: Libvirt directory '{{ kvm_host_libvirt_dir }}' is not the standard
-      '/var/lib/libvirt'"
+    libvirt_dir_drift_msg: >-
+      Configuration drift detected: Libvirt directory '{{ kvm_host_libvirt_dir }}'
+      is not the standard '/var/lib/libvirt'
   when:
     - drift_detection_enabled
     - kvm_host_libvirt_dir is defined
@@ -46,7 +49,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [cockpit_port_drift_msg] }}"
   vars:
-    cockpit_port_drift_msg: "Configuration drift detected: Cockpit port '{{ kvmhost_cockpit_port }}' is not the default 9090"
+    cockpit_port_drift_msg: >-
+      Configuration drift detected: Cockpit port '{{ kvmhost_cockpit_port }}'
+      is not the default 9090
   when:
     - drift_detection_enabled
     - enable_cockpit | default(false)
@@ -57,7 +62,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [ssh_port_drift_msg] }}"
   vars:
-    ssh_port_drift_msg: "Configuration drift detected: SSH port '{{ ssh_configuration.ssh_port }}' is not the default 22"
+    ssh_port_drift_msg: >-
+      Configuration drift detected: SSH port '{{ ssh_configuration.ssh_port }}'
+      is not the default 22
   when:
     - drift_detection_enabled
     - ssh_configuration is defined
@@ -68,7 +75,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [admin_user_drift_msg] }}"
   vars:
-    admin_user_drift_msg: "Configuration drift detected: Admin user '{{ admin_user }}' doesn't follow recommended naming (admin/qubinode)"
+    admin_user_drift_msg: >-
+      Configuration drift detected: Admin user '{{ admin_user }}'
+      doesn't follow recommended naming (admin/qubinode)
   when:
     - drift_detection_enabled
     - admin_user is defined
@@ -78,8 +87,9 @@
   ansible.builtin.set_fact:
     configuration_drifts: "{{ configuration_drifts + [storage_type_drift_msg] }}"
   vars:
-    storage_type_drift_msg: "Configuration drift detected: Storage pool '{{ item.name }}' uses type '{{ item.type }}' instead
-      of recommended 'dir'"
+    storage_type_drift_msg: >-
+      Configuration drift detected: Storage pool '{{ item.name }}'
+      uses type '{{ item.type }}' instead of recommended 'dir'
   when:
     - drift_detection_enabled
     - libvirt_host_storage_pools is defined

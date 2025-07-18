@@ -77,7 +77,7 @@
     validation_recommendations: "{{ validation_recommendations | default([]) + [recommendation] }}"
   vars:
     recommendation: "Review ADR-0001 for proper EPEL installation using DNF modules"
-  when: 
+  when:
     - validation_errors | select('search', 'epel_installation_method') | list | length > 0
 
 - name: Add bridge naming recommendation
@@ -85,7 +85,7 @@
     validation_recommendations: "{{ validation_recommendations | default([]) + [bridge_recommendation] }}"
   vars:
     bridge_recommendation: "Consider using standard bridge naming pattern (virbr*) per ADR-0007"
-  when: 
+  when:
     - validation_warnings | select('search', 'bridge device') | list | length > 0
 
 - name: Add schema compliance recommendation
@@ -93,7 +93,7 @@
     validation_recommendations: "{{ validation_recommendations | default([]) + [schema_recommendation] }}"
   vars:
     schema_recommendation: "Update variable definitions to match JSON schema requirements per ADR-0006"
-  when: 
+  when:
     - validation_errors | select('search', 'schema validation') | list | length > 0
 
 - name: Save validation report to file
