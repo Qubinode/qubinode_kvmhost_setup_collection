@@ -249,24 +249,20 @@ jobs:
             - name: rhel${{ matrix.rhel_version }}-test
               image: >-
                 {%- if matrix.rhel_version == '8' -%}
-                docker.io/rockylinux/rockylinux:8
+                docker.io/rockylinux/rockylinux:8-ubi-init
                 {%- elif matrix.rhel_version == '9' -%}
-                docker.io/rockylinux/rockylinux:9
+                registry.redhat.io/ubi9-init:latest
                 {%- elif matrix.rhel_version == '10' -%}
-                docker.io/rockylinux/rockylinux:9
+                registry.redhat.io/ubi10-init:latest
                 {%- else -%}
-                docker.io/rockylinux/rockylinux:9
+                registry.redhat.io/ubi9-init:latest
                 {%- endif -%}
-              pre_build_image: true
-              privileged: true
-              volumes:
-                - /sys/fs/cgroup:/sys/fs/cgroup:ro
-              command: /sbin/init
-              tmpfs:
-                - /run
-                - /tmp
+              systemd: always
+              command: /usr/sbin/init
               capabilities:
                 - SYS_ADMIN
+              volumes:
+                - /sys/fs/cgroup:/sys/fs/cgroup:ro
           provisioner:
             name: ansible
             config_options:
@@ -519,31 +515,33 @@ jobs:
 
       - name: Start test containers for validation
         run: |
-          # Start minimal test containers for compatibility validation
-          echo "🐳 Starting Rocky Linux 9 container..."
-          if ! podman run -d --name rocky-9 --privileged --tmpfs /tmp --tmpfs /run \
+          # Start ADR-compliant systemd-enabled containers for compatibility validation
+          echo "🐳 Starting UBI9 Init container..."
+          if ! podman run -d --name ubi9-init --systemd=always \
+            --cap-add SYS_ADMIN \
             -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-            docker.io/rockylinux/rockylinux:9 /usr/sbin/init; then
-            echo "❌ Failed to start Rocky Linux container"
+            registry.redhat.io/ubi9-init:latest /usr/sbin/init; then
+            echo "❌ Failed to start UBI9 Init container"
             exit 1
           fi
 
-          echo "🐳 Starting AlmaLinux 9 container..."
-          if ! podman run -d --name alma-9 --privileged --tmpfs /tmp --tmpfs /run \
+          echo "🐳 Starting Rocky Linux 8 Init container..."
+          if ! podman run -d --name rocky8-init --systemd=always \
+            --cap-add SYS_ADMIN \
             -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-            docker.io/almalinux/almalinux:9 /usr/sbin/init; then
-            echo "❌ Failed to start AlmaLinux container"
-            podman stop rocky-9 || true
-            podman rm rocky-9 || true
+            docker.io/rockylinux/rockylinux:8-ubi-init /usr/sbin/init; then
+            echo "❌ Failed to start Rocky Linux 8 Init container"
+            podman stop ubi9-init || true
+            podman rm ubi9-init || true
             exit 1
           fi
 
           # Wait for containers to be ready
-          echo "⏳ Waiting for containers to initialize..."
-          sleep 15
+          echo "⏳ Waiting for systemd to initialize..."
+          sleep 20
 
           # Install Ansible in containers
-          for container in rocky-9 alma-9; do
+          for container in ubi9-init rocky8-init; do
             echo "📦 Setting up $container..."
             if ! podman exec $container bash -c "
               dnf install -y python3 python3-pip &&
@@ -558,7 +556,7 @@ jobs:
       - name: Copy role to containers
         run: |
           # Copy the entire collection to test containers
-          for container in rocky-9 alma-9; do
+          for container in ubi9-init rocky8-init; do
             podman cp roles/ $container:/tmp/roles/ || echo "Warning: Copy failed for $container"
             podman cp test_container_detection.yml $container:/tmp/ || echo "Warning: Test copy failed for $container"
           done
@@ -587,5 +585,5 @@ jobs:
       - name: Clean up test containers
         if: always()
         run: |
-          podman stop rocky-9 alma-9 || true
-          podman rm rocky-9 alma-9 || true
+          podman stop ubi9-init rocky8-init || true
+          podman rm ubi9-init rocky8-init || true

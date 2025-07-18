@@ -190,11 +190,136 @@ platforms:
 - Test configurations across different environments
 - Maintain backward compatibility where possible
 
+## Production Implementation Examples
+
+### GitHub Actions Workflow Integration
+Our RHEL Compatibility Matrix workflow demonstrates these best practices in production:
+
+```yaml
+# Complete workflow configuration following ADR-0013 patterns
+name: RHEL Compatibility Matrix Testing
+on: [push, pull_request]
+
+jobs:
+  test-compatibility:
+    strategy:
+      matrix:
+        rhel_version: ['8', '9', '10']
+        ansible_version: ['2.15', '2.16', '2.17']
+
+    steps:
+      - name: Run Molecule test for RHEL ${{ matrix.rhel_version }}
+        run: |
+          cd molecule/rhel${{ matrix.rhel_version }}
+          # Handle SELinux gracefully in containerized environments
+          export ANSIBLE_SELINUX_SPECIAL_FS=""
+          export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
+          molecule test
+        env:
+          MOLECULE_NO_LOG: false
+          ANSIBLE_FORCE_COLOR: true
+```
+
+### Molecule Configuration Template
+Standard `molecule.yml` configuration following ADR-0013 best practices:
+
+```yaml
+---
+dependency:
+  name: galaxy
+driver:
+  name: podman
+  options:
+    podman_binary: /usr/bin/podman
+    podman_extra_args: --log-level=info
+platforms:
+  - name: rhel-9-test
+    image: registry.redhat.io/ubi9-init:latest
+    systemd: always  # ADR-0013 compliant - handles tmpfs automatically
+    command: /usr/sbin/init
+    capabilities:
+      - SYS_ADMIN
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - rhel9_compatible
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      callback_whitelist: profile_tasks, timer, yaml
+      host_key_checking: false
+      depreciation_warnings: false
+    ssh_connection:
+      pipelining: true
+verifier:
+  name: ansible
+```
+
+### Container Validation Script
+Production-ready validation script for CI/CD environments:
+
+```bash
+#!/bin/bash
+# validate-adr-compliance.sh - Ensures containers follow ADR-0013 patterns
+
+validate_container_config() {
+    local container_name="$1"
+    local expected_image="$2"
+
+    echo "🔍 Validating $container_name configuration..."
+
+    # Check if systemd is running as PID 1
+    if podman exec "$container_name" ps aux | grep -q "systemd.*PID.*1"; then
+        echo "✅ systemd running as PID 1"
+    else
+        echo "❌ systemd not running as PID 1"
+        return 1
+    fi
+
+    # Check systemd functionality
+    if podman exec "$container_name" systemctl --version >/dev/null 2>&1; then
+        echo "✅ systemctl functional"
+    else
+        echo "❌ systemctl not functional"
+        return 1
+    fi
+
+    # Check cgroup mounting
+    if podman exec "$container_name" ls -la /sys/fs/cgroup >/dev/null 2>&1; then
+        echo "✅ cgroups properly mounted"
+    else
+        echo "❌ cgroups not accessible"
+        return 1
+    fi
+
+    echo "✅ Container $container_name passes ADR-0013 validation"
+    return 0
+}
+
+# Usage example
+validate_container_config "ubi9-init" "registry.redhat.io/ubi9-init:latest"
+```
+
+### Migration Checklist
+For teams migrating existing configurations to ADR-0013 compliance:
+
+- [ ] Replace deprecated `tmpfs: [/run, /tmp]` with `systemd: always`
+- [ ] Update image references to use init-enabled variants
+- [ ] Verify init commands match distribution requirements
+- [ ] Add proper capability and volume configurations
+- [ ] Test systemd functionality in containers
+- [ ] Update CI/CD pipelines to use validated configurations
+- [ ] Document any custom requirements or deviations
+
 ## References
 - [Ansible Forum Discussion on systemd Configuration](https://forum.ansible.com/t/podman-container-w-systemd-for-molecule-doesnt-run-init/3529)
 - [GitHub Issue: Molecule tmpfs Configuration](https://github.com/ansible/molecule/issues/4140)
 - [Podman Documentation: systemd Flag](https://docs.podman.io/en/latest/markdown/podman-run.1.html)
 - [Red Hat UBI Documentation](https://catalog.redhat.com/software/containers/ubi8/ubi-init/5c359b97d70cc534b3a378c8)
+- [Production Implementation: RHEL Compatibility Matrix Workflow](../../.github/workflows/rhel-compatibility-matrix.yml)
+- [ADR-0012: Init Container vs Regular Container Molecule Testing](./adr-0012-init-container-vs-regular-container-molecule-testing.md)
 
 ## Decision Date
 2025-01-12

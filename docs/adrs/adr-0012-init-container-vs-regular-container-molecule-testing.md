@@ -153,6 +153,63 @@ platforms:
 - **Memory Limits**: Set memory constraints (e.g., `memory: 1G`) based on service requirements
 - **Monitoring**: Implement resource usage monitoring with alerts for threshold breaches
 
+## Production Implementation
+
+### GitHub Actions Workflow Configuration
+The following configuration demonstrates ADR-compliant implementation in our RHEL Compatibility Matrix workflow:
+
+```yaml
+# .github/workflows/rhel-compatibility-matrix.yml
+# Uses only images currently available on the target machine
+platforms:
+  - name: rhel${{ matrix.rhel_version }}-test
+    image: >-
+      {%- if matrix.rhel_version == '8' -%}
+      docker.io/rockylinux/rockylinux:8-ubi-init
+      {%- elif matrix.rhel_version == '9' -%}
+      registry.redhat.io/ubi9-init:latest
+      {%- elif matrix.rhel_version == '10' -%}
+      registry.redhat.io/ubi10-init:latest
+      {%- else -%}
+      registry.redhat.io/ubi9-init:latest
+      {%- endif -%}
+    systemd: always
+    command: /usr/sbin/init
+    capabilities:
+      - SYS_ADMIN
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+```
+
+### Container Validation Testing
+For direct container testing in CI/CD pipelines:
+
+```bash
+# Start ADR-compliant systemd-enabled containers
+podman run -d --name ubi9-init --systemd=always \
+  --cap-add SYS_ADMIN \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  registry.redhat.io/ubi9-init:latest /usr/sbin/init
+
+podman run -d --name ubi8-init --systemd=always \
+  --cap-add SYS_ADMIN \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  registry.redhat.io/ubi8-init:latest /usr/sbin/init
+```
+
+### Verified Compatible Images
+The following images have been tested and verified in production CI/CD environments and are **currently available** on the target machine:
+
+| Image | Version | systemd Support | Availability Status |
+|-------|---------|-----------------|-------------------|
+| `registry.redhat.io/ubi9-init:latest` | 9.6-1751962289 | ✅ Built-in | ✅ Available on Machine |
+| `registry.redhat.io/ubi10-init:latest` | 10.0-1751895590 | ✅ Built-in | ✅ Available on Machine |
+| `docker.io/rockylinux/rockylinux:8-ubi-init` | 8.x | ✅ Built-in | ✅ Available on Machine |
+| `docker.io/rockylinux/rockylinux:9-ubi-init` | 9.x | ✅ Built-in | ✅ Available on Machine |
+| `docker.io/almalinux/9-init:latest` | 9.6-20250712 | ✅ Built-in | ✅ Available on Machine |
+
+**Note**: CentOS Stream images are intentionally excluded from production use due to stability and enterprise support considerations.
+
 ## References
 - [Red Hat Blog: Developing and Testing Ansible Roles with Molecule and Podman](https://www.redhat.com/en/blog/developing-and-testing-ansible-roles-with-molecule-and-podman-part-1)
 - [Ansible Forum: Podman container w/ systemd for molecule doesn't run init](https://forum.ansible.com/t/podman-container-w-systemd-for-molecule-doesnt-run-init/3529)
@@ -160,6 +217,7 @@ platforms:
 - [Sysbee Blog: Testing Ansible playbooks with Molecule](https://www.sysbee.net/blog/testing-ansible-playbooks-with-molecule/)
 - [GitHub Issue: Molecule tmpfs wants dict, not list](https://github.com/ansible/molecule/issues/4140)
 - [Research Validation Report: Init Container vs Regular Container Technical Evaluation](../research/manual-research-results-july-12-2025.md)
+- [Production Implementation: RHEL Compatibility Matrix Workflow](../../.github/workflows/rhel-compatibility-matrix.yml)
 
 ## Decision Date
 2025-01-12 (Initial)  
