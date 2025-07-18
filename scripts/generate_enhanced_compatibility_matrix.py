@@ -18,26 +18,77 @@ from datetime import datetime
 class EnhancedCompatibilityMatrix:
     def __init__(self, project_root=None):
         if project_root is None:
-            # Auto-detect project root by looking for key files
-            current_dir = Path.cwd()
-            # Check if we're already in the project root
-            if (current_dir / "roles").exists() and (current_dir / "galaxy.yml").exists():
-                self.project_root = current_dir
-            else:
-                # Look for project root in parent directories
-                for parent in current_dir.parents:
-                    if (parent / "roles").exists() and (parent / "galaxy.yml").exists():
-                        self.project_root = parent
-                        break
-                else:
-                    # Fallback to current directory
-                    self.project_root = current_dir
+            self.project_root = self._detect_project_root()
         else:
             self.project_root = Path(project_root)
 
         self.roles_dir = self.project_root / "roles"
         self.molecule_dir = self.project_root / "molecule"
         self.compatibility_data = {}
+
+    def _detect_project_root(self):
+        """Detect project root by looking for key files in multiple locations"""
+        # Start with current working directory
+        current_dir = Path.cwd()
+
+        # Check current directory first
+        if self._is_project_root(current_dir):
+            return current_dir
+
+        # Check if we're in a subdirectory (like scripts/)
+        for parent in current_dir.parents:
+            if self._is_project_root(parent):
+                return parent
+
+        # Check common GitHub Actions paths
+        github_workspace = os.environ.get('GITHUB_WORKSPACE')
+        if github_workspace:
+            github_path = Path(github_workspace)
+            if self._is_project_root(github_path):
+                return github_path
+
+        # Check if we're in a nested GitHub Actions structure
+        if 'github' in str(current_dir).lower():
+            # Look for the actual project directory
+            for part in current_dir.parts:
+                if 'qubinode_kvmhost_setup_collection' in part:
+                    # Try to construct the path
+                    potential_root = Path('/'.join(current_dir.parts[:current_dir.parts.index(part)+1]))
+                    if self._is_project_root(potential_root):
+                        return potential_root
+
+        # Try to find the project based on the script location
+        script_path = Path(__file__).resolve()
+        script_parent = script_path.parent.parent  # Go up from scripts/ to project root
+        if self._is_project_root(script_parent):
+            return script_parent
+
+        # Look for common project locations
+        common_locations = [
+            Path.home() / "qubinode_kvmhost_setup_collection",
+            Path("/home/vpcuser/qubinode_kvmhost_setup_collection"),
+            Path("/home/runner/work/qubinode_kvmhost_setup_collection/qubinode_kvmhost_setup_collection"),
+        ]
+
+        for location in common_locations:
+            if self._is_project_root(location):
+                return location
+
+        # Fallback: return current directory and let the script handle missing roles
+        print(f"Warning: Could not detect project root, using current directory: {current_dir}")
+        return current_dir
+
+    def _is_project_root(self, path):
+        """Check if a path looks like the project root"""
+        path = Path(path)
+
+        # Must have roles directory
+        if not (path / "roles").exists():
+            return False
+
+        # Should have at least one of these files
+        indicators = ["galaxy.yml", "ansible.cfg", "pyproject.toml", "requirements.txt"]
+        return any((path / indicator).exists() for indicator in indicators)
         
     def detect_rhel_versions(self):
         """Detect supported RHEL versions from role tasks and Molecule scenarios"""
@@ -284,11 +335,17 @@ class EnhancedCompatibilityMatrix:
         }
         
         # Analyze each kvmhost role
+        if not self.roles_dir.exists():
+            print(f"❌ Error: Roles directory not found at {self.roles_dir}")
+            print(f"🔍 Current project root: {self.project_root}")
+            print("💡 Please run this script from the project root or specify the correct path")
+            raise FileNotFoundError(f"Roles directory not found: {self.roles_dir}")
+
         for role_dir in self.roles_dir.iterdir():
             if role_dir.is_dir() and role_dir.name.startswith("kvmhost_"):
                 role_name = role_dir.name
                 print(f"Analyzing role: {role_name}")
-                
+
                 role_features = self.analyze_role_features(role_name)
                 matrix['rhel_compatibility_matrix'][role_name] = {
                     'description': f"KVM Host setup role for {role_name.replace('kvmhost_', '')}",
@@ -459,11 +516,14 @@ def main():
     """Main execution function"""
     if len(sys.argv) > 1:
         project_root = sys.argv[1]
+        print(f"🔍 Using specified project root: {project_root}")
+        generator = EnhancedCompatibilityMatrix(project_root)
     else:
-        project_root = "/home/vpcuser/qubinode_kvmhost_setup_collection"
-    
+        print("🔍 Auto-detecting project root...")
+        generator = EnhancedCompatibilityMatrix()
+        print(f"🔍 Detected project root: {generator.project_root}")
+
     print("🔍 Generating Enhanced Compatibility Matrix...")
-    generator = EnhancedCompatibilityMatrix(project_root)
     
     matrix = generator.generate_enhanced_matrix()
     generator.save_matrix(matrix)

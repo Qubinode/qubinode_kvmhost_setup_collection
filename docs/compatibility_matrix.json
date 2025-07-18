@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_date": "2025-07-18 15:23:36",
+    "generated_date": "2025-07-18 21:40:40",
     "project": "Qubinode KVM Host Setup Collection",
     "version": "2.1.0",
     "rhel_versions_supported": [
@@ -10,7 +10,7 @@
     ],
     "generator_version": "2.0.0",
     "container_compatibility": "enhanced",
-    "last_updated_commit": "1030f9f3"
+    "last_updated_commit": "ae251937"
   },
   "container_compatibility": {
     "advanced_container_detection": {
