@@ -44,7 +44,7 @@
   when: configure_shell | bool
 
 - name: Add starship to shell configuration
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /home/{{ admin_user }}/.bashrc
     regexp: ^eval "\$(starship init bash)"
     line: eval "$(starship init bash)"

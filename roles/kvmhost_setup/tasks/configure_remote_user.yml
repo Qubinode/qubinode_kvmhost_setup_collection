@@ -17,7 +17,7 @@
     append: true
 
 - name: Add remote user to sudoers
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: "/etc/sudoers.d/{{ xrdp_remote_user }}"
     line: "{{ xrdp_remote_user }} ALL=(root) NOPASSWD:ALL"
     create: true

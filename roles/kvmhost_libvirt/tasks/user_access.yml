@@ -37,7 +37,7 @@
     - admin_user not in kvmhost_libvirt_admin_users | default([])
 
 - name: Configure libvirt unix socket group
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/libvirt/libvirtd.conf
     regexp: "^#?\\s*unix_sock_group\\s*=.*$"
     line: 'unix_sock_group = "{{ kvmhost_libvirt_unix_sock_group }}"'
@@ -46,7 +46,7 @@
   become: true
 
 - name: Configure libvirt unix socket read-write permissions
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/libvirt/libvirtd.conf
     regexp: "^#?\\s*unix_sock_rw_perms\\s*=.*$"
     line: 'unix_sock_rw_perms = "{{ kvmhost_libvirt_unix_sock_rw_perms }}"'
@@ -55,7 +55,7 @@
   become: true
 
 - name: Configure libvirt unix socket admin permissions
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/libvirt/libvirtd.conf
     regexp: "^#?\\s*unix_sock_admin_perms\\s*=.*$"
     line: 'unix_sock_admin_perms = "{{ kvmhost_libvirt_unix_sock_admin_perms }}"'

@@ -22,7 +22,7 @@
   notify: restart cockpit
 
 - name: Configure Cockpit port (if different from default)
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/system/cockpit.socket.d/listen.conf
     line: ListenStream={{ kvmhost_cockpit_port }}
     regexp: ^ListenStream=

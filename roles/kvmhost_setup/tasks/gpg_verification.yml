@@ -2,7 +2,7 @@
 # Enhanced security compliance with automatic key verification
 
 - name: Ensure DNF GPG key verification is enabled globally
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/dnf/dnf.conf
     regexp: ^gpgcheck=
     line: gpgcheck=1
@@ -14,7 +14,7 @@
     - adr_0001
 
 - name: Ensure DNF repo GPG key verification is enabled globally
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/dnf/dnf.conf
     regexp: ^repo_gpgcheck=
     line: repo_gpgcheck=1
@@ -26,7 +26,7 @@
     - adr_0001
 
 - name: Ensure DNF local package GPG verification is enabled
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/dnf/dnf.conf
     regexp: ^localpkg_gpgcheck=
     line: localpkg_gpgcheck=1

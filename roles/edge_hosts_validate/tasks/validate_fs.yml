@@ -10,7 +10,7 @@
     - validate_fs
 
 - name: Validate libirt install dir is mounted
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/fstab
     regexp: (^.*libvirt.*$)
     state: present

@@ -7,7 +7,7 @@
 - name: Include schema validation framework (ADR-0006)
   ansible.builtin.include_tasks: "{{ playbook_dir }}/validation/schema_validation.yml"
   vars:
-    validation_scope: "{{ validation_scope           | default('all_roles')   }}"
+    validation_scope: "{{ validation_scope | default('all_roles') }}"
   tags:
     - schema_validation
     - adr_compliance

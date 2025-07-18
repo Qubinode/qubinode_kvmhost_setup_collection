@@ -5,21 +5,21 @@
     append: true
 
 - name: Allow non-root users to libvirt unix_sock_group
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/libvirt/libvirtd.conf
     regexp: ^#\s*unix_sock_group.*$
     line: unix_sock_group = "libvirt"
   notify: Reload libvirtd service
 
 - name: Allow non-root users to libvirt unix_sock_rw_perms
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/libvirt/libvirtd.conf
     regexp: ^#\s*unix_sock_rw_perms.*$
     line: unix_sock_rw_perms = "0770"
   notify: Reload libvirtd service
 
 - name: Allow non-root users to libvirt unix_sock_admin_perms
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     dest: /etc/libvirt/libvirtd.conf
     regexp: ^#\s*unix_sock_admin_perms.*$
     line: unix_sock_admin_perms = "0700"

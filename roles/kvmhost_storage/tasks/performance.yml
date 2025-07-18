@@ -49,7 +49,7 @@
   become: true
 
 - name: Configure storage-related kernel parameters in grub
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: ^GRUB_CMDLINE_LINUX=
     line: GRUB_CMDLINE_LINUX="elevator={{ kvmhost_storage_io_scheduler }} transparent_hugepage=never"

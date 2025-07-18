@@ -215,7 +215,7 @@
     group: root
 
 - name: Register bridge configuration in system facts
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/qubinode/bridge.conf
     line: BRIDGE_NAME={{ qubinode_bridge_name | default('qubibr0') }}
     create: true
@@ -224,12 +224,12 @@
     group: root
 
 - name: Register bridge interface in system facts
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/qubinode/bridge.conf
     line: BRIDGE_INTERFACE={{ primary_interface }}
 
 - name: Register bridge configuration timestamp
-  ansible.builtin.lineinansible.builtin.file:
+  ansible.builtin.lineinfile:
     path: /etc/qubinode/bridge.conf
     line: BRIDGE_CONFIGURED={{ ansible_date_time.iso8601 }}
 
