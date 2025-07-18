@@ -161,7 +161,7 @@ jobs:
       - name: Run enhanced dependency scanner
         run: |
           chmod +x ./scripts/enhanced-dependency-scanner.sh
-          ./scripts/enhanced-dependency-scanner.sh --format json --output-dir security-reports/ --ci --severity medium
+          ./scripts/enhanced-dependency-scanner.sh --format json --report-dir security-reports/ --ci --severity medium
       
       - name: Upload security scan results
         uses: actions/upload-artifact@v4

@@ -16,8 +16,25 @@ from datetime import datetime
 
 
 class EnhancedCompatibilityMatrix:
-    def __init__(self, project_root="/home/vpcuser/qubinode_kvmhost_setup_collection"):
-        self.project_root = Path(project_root)
+    def __init__(self, project_root=None):
+        if project_root is None:
+            # Auto-detect project root by looking for key files
+            current_dir = Path.cwd()
+            # Check if we're already in the project root
+            if (current_dir / "roles").exists() and (current_dir / "galaxy.yml").exists():
+                self.project_root = current_dir
+            else:
+                # Look for project root in parent directories
+                for parent in current_dir.parents:
+                    if (parent / "roles").exists() and (parent / "galaxy.yml").exists():
+                        self.project_root = parent
+                        break
+                else:
+                    # Fallback to current directory
+                    self.project_root = current_dir
+        else:
+            self.project_root = Path(project_root)
+
         self.roles_dir = self.project_root / "roles"
         self.molecule_dir = self.project_root / "molecule"
         self.compatibility_data = {}
@@ -25,7 +42,12 @@ class EnhancedCompatibilityMatrix:
     def detect_rhel_versions(self):
         """Detect supported RHEL versions from role tasks and Molecule scenarios"""
         rhel_versions = set()
-        
+
+        # Check if roles directory exists
+        if not self.roles_dir.exists():
+            print(f"Warning: Roles directory not found at {self.roles_dir}")
+            return ["8", "9"]  # Default fallback versions
+
         # Check Molecule configurations for tested versions
         if self.molecule_dir.exists():
             for scenario_dir in self.molecule_dir.iterdir():
@@ -47,17 +69,18 @@ class EnhancedCompatibilityMatrix:
                                             rhel_versions.add("10")
                         except Exception as e:
                             print(f"Warning: Could not read {molecule_yml}: {e}")
-        
+
         # Fallback: check task files for version-specific logic
         version_patterns = ["rhel8", "rhel9", "rhel10", "el8", "el9", "el10"]
-        for role_dir in self.roles_dir.iterdir():
-            if role_dir.is_dir() and role_dir.name.startswith("kvmhost_"):
-                tasks_dir = role_dir / "tasks"
-                if tasks_dir.exists():
-                    for task_file in tasks_dir.glob("*.yml"):
-                        try:
-                            with open(task_file, 'r') as f:
-                                content = f.read()
+        try:
+            for role_dir in self.roles_dir.iterdir():
+                if role_dir.is_dir() and role_dir.name.startswith("kvmhost_"):
+                    tasks_dir = role_dir / "tasks"
+                    if tasks_dir.exists():
+                        for task_file in tasks_dir.glob("*.yml"):
+                            try:
+                                with open(task_file, 'r') as f:
+                                    content = f.read()
                                 for pattern in version_patterns:
                                     if pattern in content.lower():
                                         if "rhel8" in pattern or "el8" in pattern:
@@ -66,8 +89,10 @@ class EnhancedCompatibilityMatrix:
                                             rhel_versions.add("9")
                                         elif "rhel10" in pattern or "el10" in pattern:
                                             rhel_versions.add("10")
-                        except Exception as e:
-                            print(f"Warning: Could not read {task_file}: {e}")
+                            except Exception as e:
+                                print(f"Warning: Could not read {task_file}: {e}")
+        except Exception as e:
+            print(f"Warning: Could not scan roles directory: {e}")
         
         # Default to supporting 8, 9, 10 if no specific versions found
         if not rhel_versions:

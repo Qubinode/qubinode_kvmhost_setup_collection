@@ -257,7 +257,7 @@ validate_security() {
     if [[ -f "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" ]]; then
         log_info "Running enhanced dependency scanner"
         
-        if "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" --format json --output-dir "$TEMP_DIR" >/dev/null 2>&1; then
+        if "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" --format json --report-dir "$TEMP_DIR" >/dev/null 2>&1; then
             log_success "Enhanced dependency scanner completed successfully"
         else
             log_warning "Enhanced dependency scanner reported issues"
