@@ -102,8 +102,8 @@ provisioner:
       pipelining: true
   inventory:
     links:
-      hosts: ../../inventories/test/hosts
-      group_vars: ../../inventories/test/group_vars/
+      hosts: ../../inventories/github-actions/hosts
+      group_vars: ../../inventories/github-actions/group_vars/
   playbooks:
     converge: converge.yml
     verify: verify.yml

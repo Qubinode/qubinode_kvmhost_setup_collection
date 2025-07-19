@@ -1,11 +1,15 @@
+# Container-only inventory for GitHub Actions CI/CD
+# This inventory excludes test-host to avoid conflicts in containerized environments
+# Molecule will automatically add container hosts to the [all] group
+
 [all]
-github-runner ansible_host=127.0.0.1 ansible_connection=local
+# Container hosts will be automatically added here by molecule
 
 [kvm_hosts]
-github-runner
+# Container hosts will be added to this group by molecule
 
 [edge_hosts]
-github-runner
+# Container hosts will be added to this group by molecule
 
 [ci_hosts]
-github-runner
+# Special group for CI/CD testing
