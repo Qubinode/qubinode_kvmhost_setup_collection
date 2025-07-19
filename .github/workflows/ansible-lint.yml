@@ -12,6 +12,19 @@ jobs:
         with:
           fetch-depth: 0 # needed for progressive mode to work
 
+      - name: Display OS information
+        run: |
+          echo "🖥️  Operating System Information (Ansible Lint):"
+          echo "==============================================="
+          echo "📋 OS Information:"
+          echo "   $(lsb_release -d 2>/dev/null || echo "LSB not available")"
+          echo "   $(cat /etc/os-release 2>/dev/null | grep PRETTY_NAME | cut -d= -f2 | tr -d '"' || echo "OS release info not available")"
+          echo "🏗️  System Architecture: $(uname -m)"
+          echo "🐧 Kernel Version: $(uname -r)"
+          echo "💻 Hostname: $(hostname)"
+          echo "🐍 Default Python: $(python3 --version 2>&1)"
+          echo "==============================================="
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

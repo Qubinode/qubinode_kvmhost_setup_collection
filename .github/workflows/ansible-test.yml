@@ -36,6 +36,28 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+      - name: Display OS information
+        run: |
+          echo "🖥️  Operating System Information:"
+          echo "=================================="
+          if [ -f /etc/os-release ]; then
+            echo "📋 OS Release Information:"
+            cat /etc/os-release | grep -E '^(NAME|VERSION|ID|PRETTY_NAME)=' | sed 's/^/   /'
+          fi
+          if [ -f /etc/redhat-release ]; then
+            echo "🔴 Red Hat Release:"
+            echo "   $(cat /etc/redhat-release)"
+          fi
+          echo "🏗️  System Architecture: $(uname -m)"
+          echo "🐧 Kernel Version: $(uname -r)"
+          echo "💻 Hostname: $(hostname)"
+          echo "🔧 Available Python versions:"
+          for py in python3.11 python3.10 python3.9 python3 python; do
+            if command -v $py &> /dev/null; then
+              echo "   ✅ $py: $($py --version 2>&1)"
+            fi
+          done
+          echo "=================================="
       - name: Setup Python 3.11 environment
         run: |
           # Install Python 3.11 and SELinux development packages for RHEL 9 compatibility
@@ -81,6 +103,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Display OS information
+        run: |
+          echo "🖥️  Operating System Information (Test Job):"
+          echo "============================================="
+          if [ -f /etc/os-release ]; then
+            echo "📋 OS Release Information:"
+            cat /etc/os-release | grep -E '^(NAME|VERSION|ID|PRETTY_NAME)=' | sed 's/^/   /'
+          fi
+          if [ -f /etc/redhat-release ]; then
+            echo "🔴 Red Hat Release:"
+            echo "   $(cat /etc/redhat-release)"
+          fi
+          echo "🏗️  System Architecture: $(uname -m)"
+          echo "🐧 Kernel Version: $(uname -r)"
+          echo "💻 Hostname: $(hostname)"
+          echo "🔧 Target Python version: ${{ matrix.python-version }}"
+          echo "============================================="
       - name: Setup Python ${{ matrix.python-version }}
         run: |
           # Ensure Python 3.11 and SELinux packages are available (RHEL 9 compatibility)
@@ -458,6 +497,23 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+      - name: Display OS information
+        run: |
+          echo "🖥️  Operating System Information (Security Job):"
+          echo "==============================================="
+          if [ -f /etc/os-release ]; then
+            echo "📋 OS Release Information:"
+            cat /etc/os-release | grep -E '^(NAME|VERSION|ID|PRETTY_NAME)=' | sed 's/^/   /'
+          fi
+          if [ -f /etc/redhat-release ]; then
+            echo "🔴 Red Hat Release:"
+            echo "   $(cat /etc/redhat-release)"
+          fi
+          echo "🏗️  System Architecture: $(uname -m)"
+          echo "🐧 Kernel Version: $(uname -r)"
+          echo "💻 Hostname: $(hostname)"
+          echo "🔒 Security scanning with Python 3.11"
+          echo "==============================================="
       - name: Setup Python 3.11 environment
         run: |
           # Use Python 3.11 for security scanning consistency with SELinux support

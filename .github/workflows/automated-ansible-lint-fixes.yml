@@ -39,6 +39,29 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Display OS information
+        run: |
+          echo "🖥️  Operating System Information (Lint Analysis):"
+          echo "================================================"
+          if [ -f /etc/os-release ]; then
+            echo "📋 OS Release Information:"
+            cat /etc/os-release | grep -E '^(NAME|VERSION|ID|PRETTY_NAME)=' | sed 's/^/   /'
+          fi
+          if [ -f /etc/redhat-release ]; then
+            echo "🔴 Red Hat Release:"
+            echo "   $(cat /etc/redhat-release)"
+          fi
+          echo "🏗️  System Architecture: $(uname -m)"
+          echo "🐧 Kernel Version: $(uname -r)"
+          echo "💻 Hostname: $(hostname)"
+          echo "🔧 Available Python versions:"
+          for py in python3.12 python3.11 python3.10 python3 python; do
+            if command -v $py &> /dev/null; then
+              echo "   ✅ $py: $($py --version 2>&1)"
+            fi
+          done
+          echo "================================================"
+
       - name: Set up Python virtual environment
         run: |
           # Use Python 3.12 if available, fallback to python3
@@ -178,6 +201,29 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+
+      - name: Display OS information
+        run: |
+          echo "🖥️  Operating System Information (Lint Fixes):"
+          echo "=============================================="
+          if [ -f /etc/os-release ]; then
+            echo "📋 OS Release Information:"
+            cat /etc/os-release | grep -E '^(NAME|VERSION|ID|PRETTY_NAME)=' | sed 's/^/   /'
+          fi
+          if [ -f /etc/redhat-release ]; then
+            echo "🔴 Red Hat Release:"
+            echo "   $(cat /etc/redhat-release)"
+          fi
+          echo "🏗️  System Architecture: $(uname -m)"
+          echo "🐧 Kernel Version: $(uname -r)"
+          echo "💻 Hostname: $(hostname)"
+          echo "🔧 Available Python versions:"
+          for py in python3.12 python3.11 python3.10 python3 python; do
+            if command -v $py &> /dev/null; then
+              echo "   ✅ $py: $($py --version 2>&1)"
+            fi
+          done
+          echo "=============================================="
 
       - name: Set up Python virtual environment
         run: |
