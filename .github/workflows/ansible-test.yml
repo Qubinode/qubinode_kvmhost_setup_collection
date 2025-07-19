@@ -68,6 +68,7 @@ jobs:
   test:
     needs: lint
     runs-on: self-hosted
+    timeout-minutes: 50  # Total job timeout with buffer for cleanup
     env:
       REDHAT_REGISTRY_USERNAME: ${{ secrets.REDHAT_REGISTRY_USERNAME }}
       REDHAT_REGISTRY_TOKEN: ${{ secrets.REDHAT_REGISTRY_TOKEN }}
@@ -180,7 +181,7 @@ jobs:
           echo "🎯 Container registry setup complete!"
 
       - name: Run Molecule tests
-        timeout-minutes: 45
+        timeout-minutes: 35
         run: |
           echo "🧪 Starting Molecule tests..."
           
@@ -213,8 +214,11 @@ jobs:
           podman info | grep -E "(graphDriverName|runRoot|imageStore)"
           echo ""
           
-          # Run molecule test with enhanced debugging
+          # Run molecule test with enhanced debugging and cleanup trap
           echo "🚀 Running molecule test..."
+          
+          # Set up cleanup trap for any exit
+          trap 'echo "🚨 Test interrupted or failed - cleaning up containers..."; molecule destroy || true; podman container prune -f || true' EXIT TERM INT
           
           # First, let's try to run each step individually to see where it fails
           echo "🔧 Running molecule steps individually for better debugging..."
@@ -286,6 +290,27 @@ jobs:
         if: always()
         run: |
           echo "🧹 Cleaning up temporary changes..."
+          
+          # Force destroy any remaining molecule containers
+          echo "🧹 Force destroying any remaining molecule containers..."
+          molecule destroy || true
+          
+          # Clean up any lingering podman containers from molecule
+          echo "🧹 Cleaning up lingering podman containers..."
+          for container in $(podman ps -aq --filter "label=molecule" 2>/dev/null || true); do
+            echo "Removing container: $container"
+            podman rm -f "$container" 2>/dev/null || true
+          done
+          
+          # Clean up any molecule-related containers by name pattern
+          for container in $(podman ps -aq --filter "name=rocky-9" --filter "name=alma-9" --filter "name=rhel-9" --filter "name=rhel-10" 2>/dev/null || true); do
+            echo "Removing molecule container: $container"
+            podman rm -f "$container" 2>/dev/null || true
+          done
+          
+          # Clean up unused images to save space
+          echo "🧹 Cleaning up unused container images..."
+          podman image prune -f || true
           
           # Restore original molecule configurations if they were backed up
           for scenario in default idempotency validation ci; do
@@ -384,6 +409,19 @@ jobs:
           ansible --version
           molecule --version
           echo "✅ Core dependencies install and work correctly"
+
+  # Emergency cleanup job that runs if test job fails or times out
+  emergency-cleanup:
+    if: always() && (needs.test.result == 'failure' || needs.test.result == 'cancelled')
+    needs: test
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Emergency container cleanup
+        run: |
+          echo "🚨 Running emergency cleanup for stuck containers..."
+          chmod +x scripts/emergency-cleanup-containers.sh
+          ./scripts/emergency-cleanup-containers.sh
 
   release:
     needs: [test, version-monitoring, security]

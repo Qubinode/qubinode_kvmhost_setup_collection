@@ -1,6 +1,6 @@
 ---
 - name: Converge - KVM Host Setup Testing
-  hosts: all
+  hosts: all:!localhost
   become: true
   gather_facts: true
   vars:
@@ -41,6 +41,14 @@
             (ansible_mounts | selectattr('mount', 'equalto', '/') | first).fstype in ['overlay', 'tmpfs'] or
             ansible_facts.get('ansible_selinux', {}).get('type', '') == 'docker_t'
           }}
+
+    - name: Display host information
+      ansible.builtin.debug:
+        msg: |
+          Testing on: {{ inventory_hostname }}
+          Connection: {{ ansible_connection | default('ssh') }}
+          Container Environment: {{ is_container_environment }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
 
     - name: Update package cache
       ansible.builtin.dnf:

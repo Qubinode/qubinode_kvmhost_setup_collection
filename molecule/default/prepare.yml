@@ -5,7 +5,7 @@
 # ADR References: ADR-0012 (Container Security), ADR-0011 (Local Testing)
 
 - name: Prepare testing environment
-  hosts: all
+  hosts: all:!localhost
   become: true
   gather_facts: true
   vars:
@@ -19,6 +19,12 @@
         applicable_versions: ["9", "10"]
 
   tasks:
+    - name: Wait for container to be ready
+      wait_for_connection:
+        timeout: 60
+        delay: 5
+      when: ansible_connection == 'podman'
+
     - name: Display testing environment information
       debug:
         msg: |
@@ -26,6 +32,7 @@
           OS Family: {{ ansible_os_family }}
           Distribution: {{ ansible_distribution }}
           Version: {{ ansible_distribution_major_version }}
+          Connection: {{ ansible_connection | default('ssh') }}
 
     - name: Ensure basic packages are available (skip curl due to container conflicts)
       package:

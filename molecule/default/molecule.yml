@@ -9,6 +9,8 @@ driver:
   options:
     podman_binary: /usr/bin/podman
     podman_extra_args: --log-level=info
+    ansible_connection_options:
+      ansible_podman_executable: /usr/bin/podman
 
 platforms:
   # RHEL 9 compatible - Rocky Linux 9 (Init Container)
@@ -27,6 +29,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     ansible_user: root
+    ansible_connection: podman
 
   # AlmaLinux 9 Init Container (ADR-0012 compliant)
   - name: alma-9
@@ -44,6 +47,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     ansible_user: root
+    ansible_connection: podman
 
   # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
   - name: rhel-9
@@ -61,6 +65,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     ansible_user: root
+    ansible_connection: podman
 
   # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
   - name: rhel-10
@@ -78,6 +83,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     ansible_user: root
+    ansible_connection: podman
 
 provisioner:
   name: ansible
@@ -94,10 +100,6 @@ provisioner:
       roles_path: "../../roles"
     ssh_connection:
       pipelining: true
-  inventory:
-    links:
-      hosts: ../../inventories/test/hosts
-      group_vars: ../../inventories/test/group_vars/
   playbooks:
     converge: converge.yml
     verify: verify.yml
