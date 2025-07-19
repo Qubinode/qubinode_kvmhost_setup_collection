@@ -9,6 +9,23 @@ on:
     branches: [main]
   schedule:
     - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: 'Enable debug mode for troubleshooting'
+        required: false
+        default: false
+        type: boolean
+      test_scenario:
+        description: 'Test scenario to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - lint-only
+        - molecule-only
+        - security-only
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
