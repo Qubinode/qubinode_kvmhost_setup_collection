@@ -202,6 +202,10 @@ jobs:
           # Use the same command pattern as our working local script
           echo "🔧 Running molecule test with scenario-specific approach (matches local script)..."
           
+          # First, clean up any existing state like we do locally
+          echo "🧹 Cleaning up any existing molecule state first..."
+          molecule destroy -s default || echo "No existing containers to destroy"
+          
           # Run molecule test for default scenario like the local script does
           if molecule test -s default; then
             echo "✅ Molecule default scenario test passed!"
