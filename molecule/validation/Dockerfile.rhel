@@ -1,9 +1,8 @@
 # Molecule managed Dockerfile for RHEL-based containers
 # This template supports RHEL 9, RHEL 10, Rocky Linux, AlmaLinux, and compatible distributions
 
-# Use ARG to make the base image configurable (Molecule will pass this automatically)
-ARG BASE_IMAGE
-FROM ${BASE_IMAGE}
+# Molecule will replace this placeholder with the actual base image
+FROM %FROM%
 
 # Install essential packages using dnf (RHEL package manager)
 RUN if [ $(command -v dnf) ]; then \
