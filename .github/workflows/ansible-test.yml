@@ -198,7 +198,8 @@ jobs:
           
           # Run molecule test with enhanced debugging
           echo "🚀 Running molecule test..."
-          molecule test --debug || {
+          # Use --debug at the global level and -v for verbose Ansible output
+          molecule --debug -v test || {
             echo "❌ Molecule test failed!"
             echo ""
             echo "🔍 Debugging information:"
@@ -232,7 +233,7 @@ jobs:
         env:
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
-          MOLECULE_DEBUG: "true"
+          MOLECULE_NO_LOG: "false"
           ANSIBLE_VERBOSITY: "2"
           # Disable SELinux checks if bindings are problematic
           LIBSELINUX_DISABLE_SELINUX_CHECK: "1"
