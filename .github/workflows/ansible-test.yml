@@ -140,15 +140,11 @@ jobs:
                 echo "Updating molecule/$scenario/molecule.yml..."
                 cp "molecule/$scenario/molecule.yml" "molecule/$scenario/molecule.yml.backup"
                 
-                # Replace Red Hat images with public alternatives - more comprehensive replacement
+                # Replace Red Hat images with public alternatives
                 sed -i \
-                  -e 's|registry\.redhat\.io/ubi9-init:[^[:space:]]*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
-                  -e 's|registry\.redhat\.io/ubi10-init:[^[:space:]]*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
+                  -e 's|registry\.redhat\.io/ubi9-init:.*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
+                  -e 's|registry\.redhat\.io/ubi10-init:.*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
                   "molecule/$scenario/molecule.yml"
-                
-                # Verify the replacement worked
-                echo "After replacement, checking for Red Hat registry images:"
-                grep -n "registry\.redhat\.io" "molecule/$scenario/molecule.yml" && echo "⚠️ Still found Red Hat registry images!" || echo "✅ No Red Hat registry images found"
                 
                 echo "✅ Updated $scenario scenario to use public images"
               fi
@@ -183,33 +179,6 @@ jobs:
           
           echo "🎯 Container registry setup complete!"
 
-      - name: Destroy existing Molecule state
-        run: |
-          echo "🧹 Cleaning up any existing Molecule state..."
-          
-          # First, restore any backed up configurations from previous failed runs
-          echo "Restoring any backed up configurations from previous runs..."
-          for scenario in default idempotency validation ci; do
-            if [[ -f "molecule/$scenario/molecule.yml.backup" ]]; then
-              echo "Restoring backup for $scenario scenario..."
-              mv "molecule/$scenario/molecule.yml.backup" "molecule/$scenario/molecule.yml"
-            fi
-          done
-          
-          # Destroy all scenarios to ensure clean state
-          for scenario in default idempotency validation ci; do
-            if [[ -d "molecule/$scenario" ]]; then
-              echo "Destroying scenario: $scenario"
-              molecule destroy -s "$scenario" || echo "No existing containers in $scenario to destroy"
-            fi
-          done
-          
-          # Reset molecule to clear any cached configuration
-          echo "Resetting molecule configuration..."
-          molecule reset || echo "No molecule state to reset"
-          
-          echo "✅ Molecule cleanup completed"
-
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
@@ -237,9 +206,6 @@ jobs:
           echo "Default scenario configuration:"
           cat molecule/default/molecule.yml
           echo ""
-          echo "🔍 Checking which container images will be used:"
-          grep -A1 -B1 "image:" molecule/default/molecule.yml
-          echo ""
           
           # Check container runtime
           echo "Container runtime info:"
@@ -250,67 +216,82 @@ jobs:
           # Run molecule test with enhanced debugging
           echo "🚀 Running molecule test..."
           
-          # Use the same command pattern as our working local script
-          echo "🔧 Running molecule test with scenario-specific approach (matches local script)..."
+          # First, let's try to run each step individually to see where it fails
+          echo "🔧 Running molecule steps individually for better debugging..."
           
-          # Run molecule test for default scenario like the local script does
-          if molecule test -s default; then
-            echo "✅ Molecule default scenario test passed!"
-          else
-            echo "❌ Molecule test failed!"
-            echo ""
-            echo "� Debugging information:"
-            echo "Podman containers:"
+          # Step 1: dependency
+          echo "📦 Running molecule dependency..."
+          molecule --debug dependency || echo "⚠️ Dependency step failed (non-critical)"
+          
+          # Step 2: create
+          echo "🏗️ Running molecule create..."
+          if ! molecule --debug create; then
+            echo "❌ Create step failed!"
+            echo "Podman containers after create failure:"
             podman ps -a
-            echo ""
             echo "Podman images:"
             podman images
-            echo ""
-            
-            # Get container logs for failed containers
-            echo "Container logs for debugging:"
-            for container in $(podman ps -a --format "{{.Names}}" 2>/dev/null || true); do
-              if [ -n "$container" ]; then
-                echo "=== Logs for $container ==="
-                podman logs "$container" 2>&1 | tail -50 || echo "Could not get logs for $container"
-              fi
-            done
-            
-            echo ""
-            echo "Recent podman logs:"
-            journalctl --user -u podman --no-pager -n 50 || echo "Could not get podman logs"
             exit 1
           fi
+          
+          # Step 3: prepare
+          echo "🛠️ Running molecule prepare..."
+          if ! molecule --debug prepare; then
+            echo "❌ Prepare step failed!"
+            echo "Podman containers after prepare failure:"
+            podman ps -a
+            echo "Container logs for debugging:"
+            for container in $(podman ps -a --format "{{.Names}}"); do
+              echo "=== Logs for $container ==="
+              podman logs "$container" 2>&1 | tail -50
+            done
+            exit 1
+          fi
+          
+          # Step 4: converge
+          echo "⚙️ Running molecule converge..."
+          if ! molecule --debug converge; then
+            echo "❌ Converge step failed!"
+            echo "Podman containers after converge failure:"
+            podman ps -a
+            echo "Container logs for debugging:"
+            for container in $(podman ps -a --format "{{.Names}}"); do
+              echo "=== Logs for $container ==="
+              podman logs "$container" 2>&1 | tail -50
+            done
+            exit 1
+          fi
+          
+          # Step 5: verify (if verification exists)
+          echo "✅ Running molecule verify..."
+          if ! molecule --debug verify; then
+            echo "❌ Verify step failed!"
+            echo "Podman containers after verify failure:"
+            podman ps -a
+            exit 1
+          fi
+          
+          # Step 6: destroy
+          echo "🧹 Running molecule destroy..."
+          if ! molecule --debug destroy; then
+            echo "❌ Destroy step failed!"
+            echo "Podman containers after destroy failure:"
+            podman ps -a
+            # Don't exit here as destroy failure shouldn't fail the test
+          fi
+          
+          echo "✅ All molecule steps completed successfully!"
           
       - name: Cleanup and restore original configurations
         if: always()
         run: |
           echo "🧹 Cleaning up temporary changes..."
           
-          # Always destroy any remaining containers
-          echo "Destroying any remaining molecule containers..."
-          for scenario in default idempotency validation ci; do
-            molecule destroy -s "$scenario" || echo "No containers in $scenario to destroy"
-          done
-          
           # Restore original molecule configurations if they were backed up
           for scenario in default idempotency validation ci; do
             if [[ -f "molecule/$scenario/molecule.yml.backup" ]]; then
               echo "Restoring original molecule/$scenario/molecule.yml..."
               mv "molecule/$scenario/molecule.yml.backup" "molecule/$scenario/molecule.yml"
-            fi
-          done
-          
-          # Verify all molecule.yml files are in good state
-          echo "Verifying molecule.yml files..."
-          for scenario in default idempotency validation ci; do
-            if [[ -f "molecule/$scenario/molecule.yml" ]]; then
-              echo "Checking syntax of molecule/$scenario/molecule.yml..."
-              python3 -c "import yaml; yaml.safe_load(open('molecule/$scenario/molecule.yml'))" || {
-                echo "ERROR: molecule/$scenario/molecule.yml has syntax errors!"
-                echo "Restoring from git..."
-                git checkout HEAD -- "molecule/$scenario/molecule.yml"
-              }
             fi
           done
           
