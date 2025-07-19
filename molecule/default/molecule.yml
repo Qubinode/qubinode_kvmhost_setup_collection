@@ -14,6 +14,8 @@ platforms:
   # RHEL 9 compatible - Rocky Linux 9 (Init Container)
   - name: rocky-9
     image: docker.io/rockylinux/rockylinux:9-ubi-init
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
     capabilities:
@@ -24,6 +26,8 @@ platforms:
   # AlmaLinux 9 Init Container (ADR-0012 compliant)
   - name: alma-9
     image: docker.io/almalinux/9-init:9.6-20250712
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
     capabilities:
@@ -37,6 +41,8 @@ platforms:
   # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
   - name: rhel-9
     image: registry.redhat.io/ubi9-init:9.6-1751962289
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
     capabilities:
@@ -47,6 +53,8 @@ platforms:
   # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
   - name: rhel-10
     image: registry.redhat.io/ubi10-init:10.0-1751895590
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
     capabilities:

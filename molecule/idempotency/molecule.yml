@@ -41,7 +41,8 @@ platforms:
     
   - name: idempotency-rhel9
     image: registry.redhat.io/ubi9-init:9.6-1751962289
-    pre_build_image: true
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     override_command: false
     systemd: always
     command: "/usr/sbin/init"
@@ -53,7 +54,8 @@ platforms:
     
   - name: idempotency-rhel10
     image: registry.redhat.io/ubi10-init:10.0-1751895590
-    pre_build_image: true
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     override_command: false
     systemd: always
     command: "/usr/sbin/init"

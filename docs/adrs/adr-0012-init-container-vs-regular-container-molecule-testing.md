@@ -1,7 +1,8 @@
 # ADR-0012: Use Init Containers for Molecule Testing with systemd Services
 
 ## Status
-Accepted - Updated with Research Validation (2025-07-12)
+Accepted - Updated with Research Validation (2025-07-12)  
+Updated - Package Manager Compatibility Fix (2025-07-19)
 
 ## Context
 During our work with Molecule testing framework for Ansible roles, we discovered a critical issue where containers without systemd init support fail when testing roles that manage systemd services. Our research revealed fundamental differences between init containers and regular containers that impact testing reliability.
@@ -29,6 +30,20 @@ During our work with Molecule testing framework for Ansible roles, we discovered
    - **Podman's native systemd support**: `--systemd=true` flag automatically handles tmpfs and cgroup mounting
    - **UBI-init images**: Purpose-built for systemd as PID 1, officially supported by Red Hat
    - **Reduced complexity**: Eliminates need for manual systemd workarounds
+
+### Package Manager Compatibility Issue (2025-07-19)
+
+During CI/CD pipeline testing, we discovered a critical issue where Molecule's auto-generated Dockerfiles were using Debian/Ubuntu package management commands (`apt-get`) on RHEL-based container images. This caused container build failures with errors like:
+
+```
+RUN if [ $(command -v apt-get) ]; then export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y python3 sudo bash ca-certificates iproute2 python3-apt aptitude && apt-get clean && rm -rf /var/lib/apt/lists/*;
+```
+
+**Root Cause**: Molecule's default Dockerfile template assumes Debian-based systems and generates package installation commands using `apt-get`, which fails on RHEL/CentOS/Rocky Linux/AlmaLinux systems that use `dnf`/`yum`.
+
+**Impact**: All RHEL-based container platforms failed during the container build phase, preventing any Molecule tests from running.
+
+**Resolution**: Implemented custom `Dockerfile.rhel` templates for all RHEL-based platforms with proper package manager detection and configuration.
 
 ## Decision
 We will standardize on using systemd-enabled base images (init containers) for all Molecule testing scenarios in this collection.
@@ -86,7 +101,9 @@ We will standardize on using systemd-enabled base images (init containers) for a
 platforms:
   - name: rhel-9
     image: registry.redhat.io/ubi9-init:latest
-    systemd: always  # Podman native systemd support
+    dockerfile: Dockerfile.rhel  # Custom Dockerfile for RHEL-based systems
+    pre_build_image: false       # Force use of custom Dockerfile
+    systemd: always              # Podman native systemd support
     command: "/usr/sbin/init"
     capabilities:
       - SYS_ADMIN
@@ -102,6 +119,73 @@ driver:
   options:
     podman_extra_args: --systemd=true --log-level=info
 ```
+
+### Custom Dockerfile for RHEL-based Systems:
+To resolve package manager compatibility issues, all RHEL-based platforms now use a custom `Dockerfile.rhel`:
+
+```dockerfile
+# Molecule managed Dockerfile for RHEL-based containers
+# Supports RHEL 9, RHEL 10, Rocky Linux, AlmaLinux, and compatible distributions
+
+# Use ARG to make the base image configurable (Molecule passes this automatically)
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Install essential packages using dnf (RHEL package manager)
+RUN if [ $(command -v dnf) ]; then \
+        dnf update -y && \
+        dnf install -y \
+            python3 \
+            python3-pip \
+            sudo \
+            bash \
+            ca-certificates \
+            iproute \
+            openssh-clients \
+            systemd \
+            procps-ng \
+            which \
+            tar \
+            gzip \
+        && dnf clean all; \
+    elif [ $(command -v yum) ]; then \
+        yum update -y && \
+        yum install -y \
+            python3 \
+            python3-pip \
+            sudo \
+            bash \
+            ca-certificates \
+            iproute \
+            openssh-clients \
+            systemd \
+            procps-ng \
+            which \
+            tar \
+            gzip \
+        && yum clean all; \
+    fi
+
+# Create molecule user with sudo privileges
+RUN useradd -m -s /bin/bash molecule && \
+    echo "molecule ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/molecule && \
+    chmod 0440 /etc/sudoers.d/molecule
+
+# Set up Python symlinks if needed
+RUN if [ ! -e /usr/bin/python ]; then ln -sf /usr/bin/python3 /usr/bin/python; fi
+
+# Set working directory
+WORKDIR /tmp
+
+# Default command for systemd init
+CMD ["/usr/sbin/init"]
+```
+
+### Key Configuration Requirements:
+1. **Custom Dockerfile**: Use `dockerfile: Dockerfile.rhel` for all RHEL-based platforms
+2. **Disable Pre-built Images**: Set `pre_build_image: false` to force custom Dockerfile usage
+3. **Package Manager Detection**: Dockerfile automatically detects and uses appropriate package manager (`dnf` or `yum`)
+4. **Base Image Flexibility**: Uses ARG to accept any RHEL-compatible base image
 
 ### Security-Enhanced Configuration:
 ```yaml
@@ -198,15 +282,22 @@ podman run -d --name ubi8-init --systemd=always \
 ```
 
 ### Verified Compatible Images
-The following images have been tested and verified in production CI/CD environments and are **currently available** on the target machine:
+The following images have been tested and verified in production CI/CD environments with custom RHEL Dockerfile support:
 
-| Image | Version | systemd Support | Availability Status |
-|-------|---------|-----------------|-------------------|
-| `registry.redhat.io/ubi9-init:latest` | 9.6-1751962289 | ✅ Built-in | ✅ Available on Machine |
-| `registry.redhat.io/ubi10-init:latest` | 10.0-1751895590 | ✅ Built-in | ✅ Available on Machine |
-| `docker.io/rockylinux/rockylinux:8-ubi-init` | 8.x | ✅ Built-in | ✅ Available on Machine |
-| `docker.io/rockylinux/rockylinux:9-ubi-init` | 9.x | ✅ Built-in | ✅ Available on Machine |
-| `docker.io/almalinux/9-init:latest` | 9.6-20250712 | ✅ Built-in | ✅ Available on Machine |
+| Image | Version | systemd Support | Package Manager | Dockerfile Status |
+|-------|---------|-----------------|-----------------|------------------|
+| `registry.redhat.io/ubi9-init:latest` | 9.6-1751962289 | ✅ Built-in | `dnf` | ✅ Dockerfile.rhel |
+| `registry.redhat.io/ubi10-init:latest` | 10.0-1751895590 | ✅ Built-in | `dnf` | ✅ Dockerfile.rhel |
+| `docker.io/rockylinux/rockylinux:8-ubi-init` | 8.x | ✅ Built-in | `dnf`/`yum` | ✅ Dockerfile.rhel |
+| `docker.io/rockylinux/rockylinux:9-ubi-init` | 9.x | ✅ Built-in | `dnf` | ✅ Dockerfile.rhel |
+| `docker.io/almalinux/9-init:latest` | 9.6-20250712 | ✅ Built-in | `dnf` | ✅ Dockerfile.rhel |
+| `quay.io/centos/centos:stream9-init` | Stream 9 | ✅ Built-in | `dnf` | ✅ Dockerfile.rhel |
+
+**Package Manager Compatibility**: All RHEL-based images now use the custom `Dockerfile.rhel` which automatically detects and uses the appropriate package manager (`dnf` for modern systems, `yum` for legacy systems).
+
+**Migration Note**: Existing molecule configurations **must** be updated to include:
+- `dockerfile: Dockerfile.rhel` 
+- `pre_build_image: false`
 
 **Note**: CentOS Stream images are intentionally excluded from production use due to stability and enterprise support considerations.
 
@@ -221,7 +312,8 @@ The following images have been tested and verified in production CI/CD environme
 
 ## Decision Date
 2025-01-12 (Initial)  
-2025-07-12 (Updated with research validation)
+2025-07-12 (Updated with research validation)  
+2025-07-19 (Package manager compatibility fix)
 
 ## Decision Makers
 - Ansible Collection Development Team
