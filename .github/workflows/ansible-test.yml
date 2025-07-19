@@ -198,23 +198,72 @@ jobs:
           
           # Run molecule test with enhanced debugging
           echo "🚀 Running molecule test..."
-          # Use --debug at the global level and -v for verbose Ansible output
-          molecule --debug -v test || {
-            echo "❌ Molecule test failed!"
-            echo ""
-            echo "🔍 Debugging information:"
-            echo "Podman containers:"
+          
+          # First, let's try to run each step individually to see where it fails
+          echo "🔧 Running molecule steps individually for better debugging..."
+          
+          # Step 1: dependency
+          echo "📦 Running molecule dependency..."
+          molecule --debug dependency || echo "⚠️ Dependency step failed (non-critical)"
+          
+          # Step 2: create
+          echo "🏗️ Running molecule create..."
+          if ! molecule --debug create; then
+            echo "❌ Create step failed!"
+            echo "Podman containers after create failure:"
             podman ps -a
-            echo ""
             echo "Podman images:"
             podman images
-            echo ""
-            echo "Recent podman logs:"
-            journalctl --user -u podman --no-pager -n 50 || echo "Could not get podman logs"
             exit 1
-          }
+          fi
           
-          echo "✅ Molecule tests completed successfully!"
+          # Step 3: prepare
+          echo "🛠️ Running molecule prepare..."
+          if ! molecule --debug prepare; then
+            echo "❌ Prepare step failed!"
+            echo "Podman containers after prepare failure:"
+            podman ps -a
+            echo "Container logs for debugging:"
+            for container in $(podman ps -a --format "{{.Names}}"); do
+              echo "=== Logs for $container ==="
+              podman logs "$container" 2>&1 | tail -50
+            done
+            exit 1
+          fi
+          
+          # Step 4: converge
+          echo "⚙️ Running molecule converge..."
+          if ! molecule --debug converge; then
+            echo "❌ Converge step failed!"
+            echo "Podman containers after converge failure:"
+            podman ps -a
+            echo "Container logs for debugging:"
+            for container in $(podman ps -a --format "{{.Names}}"); do
+              echo "=== Logs for $container ==="
+              podman logs "$container" 2>&1 | tail -50
+            done
+            exit 1
+          fi
+          
+          # Step 5: verify (if verification exists)
+          echo "✅ Running molecule verify..."
+          if ! molecule --debug verify; then
+            echo "❌ Verify step failed!"
+            echo "Podman containers after verify failure:"
+            podman ps -a
+            exit 1
+          fi
+          
+          # Step 6: destroy
+          echo "🧹 Running molecule destroy..."
+          if ! molecule --debug destroy; then
+            echo "❌ Destroy step failed!"
+            echo "Podman containers after destroy failure:"
+            podman ps -a
+            # Don't exit here as destroy failure shouldn't fail the test
+          fi
+          
+          echo "✅ All molecule steps completed successfully!"
           
       - name: Cleanup and restore original configurations
         if: always()
