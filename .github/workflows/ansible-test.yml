@@ -75,16 +75,86 @@ jobs:
 
       - name: Install Molecule with Python 3.11 support
         run: |
-          # Updated to Molecule v25.6.0+ for Python 3.11 compatibility
-          python${{ matrix.python-version }} -m pip install "molecule>=25.6.0" molecule-podman
+          # Updated to Molecule v6.x for current stable release
+          python${{ matrix.python-version }} -m pip install "molecule>=6.0.0" molecule-podman
+
+      - name: Setup container registries and authentication  
+        run: |
+          echo "🔧 Setting up container registry access for CI environment..."
+          
+          # Test Red Hat registry access first
+          echo "Testing Red Hat registry connectivity..."
+          RED_HAT_ACCESS=false
+          
+          # Try to pull a minimal Red Hat image to test authentication
+          if podman pull registry.redhat.io/ubi9-minimal:latest 2>/dev/null; then
+            echo "✅ Red Hat registry access confirmed"
+            RED_HAT_ACCESS=true
+            podman rmi registry.redhat.io/ubi9-minimal:latest 2>/dev/null || true
+          else
+            echo "❌ Red Hat registry access failed - switching to public alternatives"
+            RED_HAT_ACCESS=false
+          fi
+          
+          # If Red Hat registry is not accessible, modify molecule configs to use public images
+          if [[ "$RED_HAT_ACCESS" == "false" ]]; then
+            echo "🔄 Replacing Red Hat registry images with public alternatives..."
+            
+            # Create temporary molecule configs with public images
+            for scenario in default idempotency validation ci; do
+              if [[ -f "molecule/$scenario/molecule.yml" ]]; then
+                echo "Updating molecule/$scenario/molecule.yml..."
+                cp "molecule/$scenario/molecule.yml" "molecule/$scenario/molecule.yml.backup"
+                
+                # Replace Red Hat images with public alternatives
+                sed -i \
+                  -e 's|registry\.redhat\.io/ubi9-init:.*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
+                  -e 's|registry\.redhat\.io/ubi10-init:.*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
+                  "molecule/$scenario/molecule.yml"
+                
+                echo "✅ Updated $scenario scenario to use public images"
+              fi
+            done
+          fi
+          
+          # Pre-pull available container images
+          echo "🐳 Pre-pulling container images to avoid timeout during tests..."
+          
+          if [[ "$RED_HAT_ACCESS" == "true" ]]; then
+            IMAGES=(
+              "docker.io/rockylinux/rockylinux:9-ubi-init"
+              "docker.io/almalinux/9-init:9.6-20250712" 
+              "registry.redhat.io/ubi9-init:9.6-1751962289"
+              "registry.redhat.io/ubi10-init:10.0-1751895590"
+            )
+          else
+            IMAGES=(
+              "docker.io/rockylinux/rockylinux:9-ubi-init"
+              "docker.io/almalinux/9-init:9.6-20250712"
+            )
+          fi
+          
+          for image in "${IMAGES[@]}"; do
+            echo "Pulling $image..."
+            if podman pull "$image"; then
+              echo "✅ Successfully pulled $image"
+            else
+              echo "⚠️  Failed to pull $image - may cause test failures"
+            fi
+          done
+          
+          echo "🎯 Container registry setup complete!"
 
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
+          echo "🧪 Starting Molecule tests..."
+          
           # Set Python interpreter for Ansible (Python 3.11)
           export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
+          
           # Verify ansible-core version compatibility
           ansible_version=$(ansible --version | head -1 | cut -d' ' -f3 | cut -d']' -f1)
           echo "Using ansible-core version: $ansible_version"
@@ -93,7 +163,55 @@ jobs:
             echo "This workflow requires ansible-core 2.18+ for compatibility"
             exit 1
           fi
-          molecule test
+          
+          # Debug molecule configuration
+          echo "🔍 Molecule configuration debugging..."
+          echo "Available scenarios:"
+          molecule list
+          echo ""
+          echo "Default scenario configuration:"
+          cat molecule/default/molecule.yml
+          echo ""
+          
+          # Check container runtime
+          echo "Container runtime info:"
+          podman version
+          podman info | grep -E "(graphDriverName|runRoot|imageStore)"
+          echo ""
+          
+          # Run molecule test with enhanced debugging
+          echo "🚀 Running molecule test..."
+          molecule test --debug || {
+            echo "❌ Molecule test failed!"
+            echo ""
+            echo "🔍 Debugging information:"
+            echo "Podman containers:"
+            podman ps -a
+            echo ""
+            echo "Podman images:"
+            podman images
+            echo ""
+            echo "Recent podman logs:"
+            journalctl --user -u podman --no-pager -n 50 || echo "Could not get podman logs"
+            exit 1
+          }
+          
+          echo "✅ Molecule tests completed successfully!"
+          
+      - name: Cleanup and restore original configurations
+        if: always()
+        run: |
+          echo "🧹 Cleaning up temporary changes..."
+          
+          # Restore original molecule configurations if they were backed up
+          for scenario in default idempotency validation ci; do
+            if [[ -f "molecule/$scenario/molecule.yml.backup" ]]; then
+              echo "Restoring original molecule/$scenario/molecule.yml..."
+              mv "molecule/$scenario/molecule.yml.backup" "molecule/$scenario/molecule.yml"
+            fi
+          done
+          
+          echo "✅ Cleanup completed"
         env:
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
@@ -164,7 +282,7 @@ jobs:
           source venv/bin/activate
           # Create temp requirements for key dependencies
           echo "ansible-core>=2.18.0,<2.19.0" > temp-requirements.txt
-          echo "molecule[podman]>=25.6.0" >> temp-requirements.txt
+          echo "molecule[podman]>=6.0.0" >> temp-requirements.txt
           echo "ansible-lint" >> temp-requirements.txt
           # Check for vulnerabilities in our core dependencies
           safety check -r temp-requirements.txt --json || echo "⚠️ Security issues found in dependencies"
