@@ -1,8 +1,12 @@
 # Molecule managed Dockerfile for RHEL-based containers
 # This template supports RHEL 9, RHEL 10, Rocky Linux, AlmaLinux, and compatible distributions
 
-# Molecule will replace this placeholder with the actual base image
-FROM %FROM%
+# Molecule Jinja2 template for base image
+{% if item.registry is defined %}
+FROM {{ item.registry.url }}/{{ item.image }}
+{% else %}
+FROM {{ item.image }}
+{% endif %}
 
 # Install essential packages using dnf (RHEL package manager)
 RUN if [ $(command -v dnf) ]; then \

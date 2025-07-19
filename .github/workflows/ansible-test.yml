@@ -227,8 +227,8 @@ jobs:
         run: |
           echo "🧪 Starting Molecule tests..."
           
-          # Set Python interpreter for Ansible (Python 3.11)
-          export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
+          # Set Python interpreter for Ansible (use auto detection for containers)
+          export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
           
@@ -296,6 +296,14 @@ jobs:
               echo "=== Container: $container ==="
               podman inspect "$container" --format "{{.State.Status}}: {{.Config.Cmd}}" 2>/dev/null || true
             done
+            echo "🐍 Checking Python availability in containers:"
+            for container in $(podman ps -q 2>/dev/null || true); do
+              container_name=$(podman inspect "$container" --format "{{.Name}}" 2>/dev/null || true)
+              echo "=== Python check for $container_name ==="
+              podman exec "$container" which python3 2>/dev/null || echo "python3 not found"
+              podman exec "$container" which python 2>/dev/null || echo "python not found"
+              podman exec "$container" python3 --version 2>/dev/null || echo "python3 version check failed"
+            done
           else
             echo "❌ Create step failed!"
             echo "📊 Podman containers after create failure:"
@@ -309,6 +317,8 @@ jobs:
           
           # Step 3: prepare
           echo "🛠️ Running molecule prepare..."
+          echo "🐍 Verifying Ansible Python interpreter detection..."
+          echo "ANSIBLE_PYTHON_INTERPRETER is set to: $ANSIBLE_PYTHON_INTERPRETER"
           if ! molecule --debug prepare; then
             echo "❌ Prepare step failed!"
             echo "Podman containers after prepare failure:"
@@ -410,8 +420,8 @@ jobs:
           LIBSELINUX_DISABLE_SELINUX_CHECK: "1"
       - name: Run Playbook tests
         run: |
-          # Use Python 3.11 interpreter for consistency
-          export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
+          # Use auto detection for Python interpreter in containers
+          export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
           export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
