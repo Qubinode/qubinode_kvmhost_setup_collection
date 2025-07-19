@@ -19,6 +19,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
       - SYS_ADMIN
     groups:
@@ -26,6 +27,7 @@ platforms:
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
 
   # AlmaLinux 9 Init Container (ADR-0012 compliant)
   - name: alma-9
@@ -34,6 +36,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
       - SYS_ADMIN
     groups:
@@ -41,6 +44,7 @@ platforms:
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
 
   # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
   - name: rhel-9
@@ -49,6 +53,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
       - SYS_ADMIN
     groups:
@@ -56,6 +61,7 @@ platforms:
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
 
   # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
   - name: rhel-10
@@ -64,13 +70,15 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
       - SYS_ADMIN
     groups:
-      - rhel9_compatible
+      - rhel10_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
 
 provisioner:
   name: ansible

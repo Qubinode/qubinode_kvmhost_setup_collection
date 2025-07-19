@@ -12,21 +12,27 @@ driver:
 
 platforms:
   # RHEL 9 compatible - Rocky Linux 9 (Init Container)
-    # Rocky Linux 9 Init Container (ADR-0012 compliant)
   - name: rocky-9
     image: docker.io/rockylinux/rockylinux:9-ubi-init
     dockerfile: Dockerfile.rhel
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
+    privileged: true
       - SYS_ADMIN
     groups:
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
       - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
+    ansible_user: root
+      
   # AlmaLinux 9 Init Container (ADR-0012 compliant)
   - name: alma-9
     image: docker.io/almalinux/9-init:9.6-20250712
@@ -34,14 +40,18 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
+    privileged: true
       - SYS_ADMIN
     groups:
       - rhel9_compatible
     cgroupns_mode: host
     volumes:
+    ansible_user: root
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
+    ansible_user: root
+      
   # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
   - name: rhel-9
     image: registry.redhat.io/ubi9-init:9.6-1751962289
@@ -49,14 +59,21 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
+    privileged: true
       - SYS_ADMIN
     groups:
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
       - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
+    ansible_user: root
+      
   # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
   - name: rhel-10
     image: registry.redhat.io/ubi10-init:10.0-1751895590
@@ -64,13 +81,20 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
+    privileged: true
     capabilities:
+    privileged: true
       - SYS_ADMIN
     groups:
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
       - rhel10_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    ansible_user: root
 
 provisioner:
   name: ansible
