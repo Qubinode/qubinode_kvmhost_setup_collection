@@ -38,7 +38,7 @@ jobs:
         run: |
           source venv/bin/activate
           # Use ansible-core 2.18+ for Python 3.11 compatibility (fixes SELinux binding issues)
-          pip install ansible-lint>=6.0.0 bandit>=1.7.0 ansible-core>=2.18.0,<2.19.0
+          pip install ansible-lint>=6.0.0 bandit>=1.7.0 "ansible-core>=2.18.0,<2.19.0"
       - name: Install required Ansible collections
         run: |
           source venv/bin/activate
@@ -163,7 +163,7 @@ jobs:
         run: |
           source venv/bin/activate
           # Create temp requirements for key dependencies
-          echo "ansible-core>=2.17,<2.19" > temp-requirements.txt
+          echo "ansible-core>=2.18.0,<2.19.0" > temp-requirements.txt
           echo "molecule[podman]>=25.6.0" >> temp-requirements.txt
           echo "ansible-lint" >> temp-requirements.txt
           # Check for vulnerabilities in our core dependencies
