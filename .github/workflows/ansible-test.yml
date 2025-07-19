@@ -162,6 +162,24 @@ jobs:
           
           echo "🎯 Container registry setup complete!"
 
+      - name: Destroy existing Molecule state
+        run: |
+          echo "🧹 Cleaning up any existing Molecule state..."
+          
+          # Destroy all scenarios to ensure clean state
+          for scenario in default idempotency validation ci; do
+            if [[ -d "molecule/$scenario" ]]; then
+              echo "Destroying scenario: $scenario"
+              molecule destroy -s "$scenario" || echo "No existing containers in $scenario to destroy"
+            fi
+          done
+          
+          # Reset molecule to clear any cached configuration
+          echo "Resetting molecule configuration..."
+          molecule reset || echo "No molecule state to reset"
+          
+          echo "✅ Molecule cleanup completed"
+
       - name: Run Molecule tests
         timeout-minutes: 45
         run: |
@@ -201,10 +219,6 @@ jobs:
           
           # Use the same command pattern as our working local script
           echo "🔧 Running molecule test with scenario-specific approach (matches local script)..."
-          
-          # First, clean up any existing state like we do locally
-          echo "🧹 Cleaning up any existing molecule state first..."
-          molecule destroy -s default || echo "No existing containers to destroy"
           
           # Run molecule test for default scenario like the local script does
           if molecule test -s default; then
