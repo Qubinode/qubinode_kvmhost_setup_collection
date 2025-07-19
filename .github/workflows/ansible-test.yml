@@ -208,19 +208,29 @@ jobs:
           
           # Step 2: create
           echo "🏗️ Running molecule create..."
-          if ! molecule --debug create; then
-            echo "❌ Create step failed!"
-            echo "Podman containers after create failure:"
-            podman ps -a
-            echo "Podman images:"
-            podman images
+          molecule --debug create
+          CREATE_EXIT_CODE=$?
+          echo "Create step exit code: $CREATE_EXIT_CODE"
+          echo "Podman containers after create:"
+          podman ps -a
+          echo "Podman images:"
+          podman images
+          
+          if [ $CREATE_EXIT_CODE -ne 0 ]; then
+            echo "❌ Create step failed with exit code $CREATE_EXIT_CODE"
             exit 1
+          else
+            echo "✅ Create step completed successfully"
           fi
           
           # Step 3: prepare
           echo "🛠️ Running molecule prepare..."
-          if ! molecule --debug prepare; then
-            echo "❌ Prepare step failed!"
+          molecule --debug prepare
+          PREPARE_EXIT_CODE=$?
+          echo "Prepare step exit code: $PREPARE_EXIT_CODE"
+          
+          if [ $PREPARE_EXIT_CODE -ne 0 ]; then
+            echo "❌ Prepare step failed with exit code $PREPARE_EXIT_CODE"
             echo "Podman containers after prepare failure:"
             podman ps -a
             echo "Container logs for debugging:"
@@ -229,12 +239,18 @@ jobs:
               podman logs "$container" 2>&1 | tail -50
             done
             exit 1
+          else
+            echo "✅ Prepare step completed successfully"
           fi
           
           # Step 4: converge
           echo "⚙️ Running molecule converge..."
-          if ! molecule --debug converge; then
-            echo "❌ Converge step failed!"
+          molecule --debug converge
+          CONVERGE_EXIT_CODE=$?
+          echo "Converge step exit code: $CONVERGE_EXIT_CODE"
+          
+          if [ $CONVERGE_EXIT_CODE -ne 0 ]; then
+            echo "❌ Converge step failed with exit code $CONVERGE_EXIT_CODE"
             echo "Podman containers after converge failure:"
             podman ps -a
             echo "Container logs for debugging:"
@@ -243,24 +259,39 @@ jobs:
               podman logs "$container" 2>&1 | tail -50
             done
             exit 1
+          else
+            echo "✅ Converge step completed successfully"
           fi
           
           # Step 5: verify (if verification exists)
           echo "✅ Running molecule verify..."
-          if ! molecule --debug verify; then
-            echo "❌ Verify step failed!"
+          molecule --debug verify
+          VERIFY_EXIT_CODE=$?
+          echo "Verify step exit code: $VERIFY_EXIT_CODE"
+          
+          if [ $VERIFY_EXIT_CODE -ne 0 ]; then
+            echo "❌ Verify step failed with exit code $VERIFY_EXIT_CODE"
             echo "Podman containers after verify failure:"
             podman ps -a
             exit 1
+          else
+            echo "✅ Verify step completed successfully"
           fi
           
           # Step 6: destroy
           echo "🧹 Running molecule destroy..."
-          if ! molecule --debug destroy; then
-            echo "❌ Destroy step failed!"
+          molecule --debug destroy
+          DESTROY_EXIT_CODE=$?
+          echo "Destroy step exit code: $DESTROY_EXIT_CODE"
+          
+          if [ $DESTROY_EXIT_CODE -ne 0 ]; then
+            echo "❌ Destroy step failed with exit code $DESTROY_EXIT_CODE"
             echo "Podman containers after destroy failure:"
             podman ps -a
             # Don't exit here as destroy failure shouldn't fail the test
+            echo "⚠️ Continuing despite destroy failure..."
+          else
+            echo "✅ Destroy step completed successfully"
           fi
           
           echo "✅ All molecule steps completed successfully!"
