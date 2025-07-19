@@ -1,15 +1,18 @@
-# Container-only inventory for GitHub Actions CI/CD
-# This inventory excludes test-host to avoid conflicts in containerized environments
-# Molecule will automatically add container hosts to the [all] group
+# GitHub Actions Rocky Linux Runner Inventory
+# This inventory represents the Rocky Linux shared runner instance
+# that the GitHub Actions pipelines execute against
 
 [all]
-# Container hosts will be automatically added here by molecule
+rocky-runner ansible_host=127.0.0.1 ansible_connection=local
 
 [kvm_hosts]
-# Container hosts will be added to this group by molecule
+rocky-runner
 
 [edge_hosts]
-# Container hosts will be added to this group by molecule
+rocky-runner
 
-[ci_hosts]
-# Special group for CI/CD testing
+[github_runners]
+rocky-runner
+
+[rocky_linux]
+rocky-runner

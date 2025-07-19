@@ -1,58 +1,63 @@
 ---
-# GitHub Actions CI/CD Inventory Variables
-# Optimized for containerized testing environments
-# Based on inventories/test/group_vars/all.yml with CI-specific modifications
+# GitHub Actions Rocky Linux Runner Inventory Variables
+# Configuration for the Rocky Linux shared runner instance
+# Based on inventories/test/group_vars/all.yml with runner-specific modifications
 
 # System Configuration
 project_dir: /opt/qubinode-installer
-admin_user: github-runner
-domain: ci.example.com
+admin_user: runner
+domain: github-runner.example.com
 rhel_version: "9.0"
+rocky_version: "9.0"
 
-# CI/CD Environment Settings
+# GitHub Actions Runner Environment Settings
 run_on_rhpds: false
 run_kni_lab_on_rhpds: false
 one_redhat: false
 ci_environment: true
+github_actions_runner: true
+runner_os: rocky_linux
 
 # Application Dependencies (minimal for CI)
 ansible_automation_platform: false
 enable_ceph_deployment: false
 
-# Networking Configuration (CI-optimized)
-kvm_host_ip: 10.0.2.15
-kvm_host_netmask: 255.255.255.0
-kvm_host_gateway: 10.0.2.2
+# Networking Configuration (Rocky Linux Runner optimized)
+# Using loopback address for local runner operations
+kvm_host_ip: 127.0.0.1
+kvm_host_netmask: 255.0.0.0
+kvm_host_gateway: 127.0.0.1
 kvm_host_gw: "{{ kvm_host_gateway }}"
-kvm_host_dns: 1.1.1.1
+kvm_host_dns: 127.0.0.1
 kvm_host_bridge: virbr0
-kvm_host_interface: eth0
-kvm_host_mac: "02:00:00:00:00:10"
-kvm_host_macaddr: "02:00:00:00:00:11"
-kvm_host_mask_prefix: 24
-qubinode_ptr: ci.in-addr.arpa
-dns_forwarder: 1.1.1.1
+kvm_host_interface: lo
+kvm_host_mac: "00:00:00:00:00:00"
+kvm_host_macaddr: "00:00:00:00:00:00"
+kvm_host_mask_prefix: 8
+qubinode_ptr: localhost.localdomain
+dns_forwarder: 127.0.0.1
 convert_dhcp_to_static: false
-kvm_host_bootproto: dhcp
+kvm_host_bootproto: static
 kvm_bridge_type: bridge
-qubinet: ci-qubinode-net
+qubinet: github-runner-net
 
 # Subscription Management (disabled for CI)
 rhsm_reg_method: ""
 rhsm_setup_insights_client: false
 
-# LVM Configuration (minimal for CI)
+# LVM Configuration (Rocky Linux Runner optimized)
 logical_volumes:
-  - name: ci_images
-    size: +5G
+  - name: runner_images
+    size: +10G
     mount_dir: /var/lib/libvirt/images
     fstype: xfs
 
 # User Configuration
 users:
   - "{{ admin_user }}"
+  - runner
 
-# Required Packages (essential only for CI)
+# Required Packages (Rocky Linux Runner optimized)
 required_rpm_packages:
   - virt-install
   - libvirt-daemon-config-network
@@ -71,22 +76,26 @@ required_rpm_packages:
   - python3-dns
   - python3-lxml
   - curl
+  - podman
+  - buildah
+  - skopeo
 
 # Libvirt Configuration
 kvm_host_libvirt_dir: /var/lib/libvirt/images
 kvm_vm_pool_dir: "{{ kvm_host_libvirt_dir }}"
 host_device: "{{ kvm_host_libvirt_extra_disk | default('vda') }}"
-vg_name: vg_ci
+vg_name: vg_runner
 vm_libvirt_net_check: false
 kvm_host_libvirt_extra_disk: vda
 
-# CI-specific settings
+# GitHub Actions Runner specific settings
 setup_nfs: false
 remove_nfs: false
 libvirt_pool_name: default
 qubinode_installer_host_completed: false
 
-# Performance optimizations for CI
+# Performance optimizations for GitHub Actions Runner
 enable_cockpit: false
 configure_shell: false
 lib_virt_setup: true
+github_actions_environment: true
