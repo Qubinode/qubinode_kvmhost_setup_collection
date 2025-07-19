@@ -5,10 +5,29 @@
   when: ansible_os_family == "RedHat"
   become: true
 
-- name: Update package cache
-  ansible.builtin.dnf:
+- name: Update package cache (OS-aware)
+  ansible.builtin.package:
     update_cache: true
   changed_when: false
+  when: ansible_os_family == "RedHat"
+
+- name: Update package cache for RHEL with GPG handling
+  ansible.builtin.dnf:
+    update_cache: true
+    disable_gpg_check: false
+  changed_when: false
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution == "RedHat"
+
+- name: Update package cache for Rocky/Alma Linux
+  ansible.builtin.dnf:
+    update_cache: true
+    disable_gpg_check: false
+  changed_when: false
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution in ["Rocky", "AlmaLinux"]
 
 - name: Check current package state
   ansible.builtin.package_facts:

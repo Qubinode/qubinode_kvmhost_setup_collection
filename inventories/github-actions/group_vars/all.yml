@@ -1,22 +1,27 @@
 ---
 # GitHub Actions Rocky Linux Runner Inventory Variables
-# Configuration for the Rocky Linux shared runner instance
-# Based on inventories/test/group_vars/all.yml with runner-specific modifications
+# Configuration for the Rocky Linux shared runner instance (NOT RHEL)
+# This inventory is specifically for Rocky Linux systems running GitHub Actions
+# Based on inventories/test/group_vars/all.yml with Rocky Linux specific modifications
 
-# System Configuration
+# System Configuration - Rocky Linux Specific
 project_dir: /opt/qubinode-installer
 admin_user: runner
 domain: github-runner.example.com
-rhel_version: "9.0"
+rhel_version: "9.0"  # Keep for compatibility
 rocky_version: "9.0"
+actual_os: "rocky"  # Explicitly mark this as Rocky Linux
 
-# GitHub Actions Runner Environment Settings
+# GitHub Actions Runner Environment Settings - Rocky Linux
 run_on_rhpds: false
 run_kni_lab_on_rhpds: false
 one_redhat: false
 ci_environment: true
 github_actions_runner: true
 runner_os: rocky_linux
+target_os_family: "RedHat"  # Rocky is RedHat family
+target_distribution: "Rocky"  # But specifically Rocky Linux
+use_rocky_repos: true  # Use Rocky Linux repositories, not RHEL
 
 # Application Dependencies (minimal for CI)
 ansible_automation_platform: false
@@ -58,6 +63,7 @@ users:
   - runner
 
 # Required Packages (Rocky Linux Runner optimized)
+# These packages are available in Rocky Linux repositories
 required_rpm_packages:
   - virt-install
   - libvirt-daemon-config-network
@@ -79,6 +85,7 @@ required_rpm_packages:
   - podman
   - buildah
   - skopeo
+  - epel-release  # Rocky Linux has EPEL available
 
 # Libvirt Configuration
 kvm_host_libvirt_dir: /var/lib/libvirt/images

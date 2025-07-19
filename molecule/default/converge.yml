@@ -50,11 +50,38 @@
           Container Environment: {{ is_container_environment }}
           OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
 
-    - name: Update package cache
+    - name: Detect target OS for GitHub Actions
+      ansible.builtin.set_fact:
+        target_is_rocky: "{{ target_distribution | default(ansible_distribution) == 'Rocky' }}"
+        target_is_rhel: "{{ target_distribution | default(ansible_distribution) == 'RedHat' }}"
+
+    - name: Update package cache (Generic RedHat family)
+      ansible.builtin.package:
+        update_cache: true
+      changed_when: false
+      when:
+        - ansible_os_family == "RedHat"
+        - not target_is_rocky
+        - not target_is_rhel
+
+    - name: Update package cache for RHEL systems
       ansible.builtin.dnf:
         update_cache: true
-        disable_gpg_check: "{{ is_container_environment }}"  # Container workaround
+        disable_gpg_check: "{{ is_container_environment }}"
       changed_when: false
+      when:
+        - ansible_os_family == "RedHat"
+        - target_is_rhel or ansible_distribution == "RedHat"
+      ignore_errors: true  # RHEL may have subscription issues
+
+    - name: Update package cache for Rocky Linux systems
+      ansible.builtin.dnf:
+        update_cache: true
+        disable_gpg_check: false
+      changed_when: false
+      when:
+        - ansible_os_family == "RedHat"
+        - target_is_rocky or ansible_distribution in ["Rocky", "AlmaLinux"]
 
     # EPEL repository setup with GPG workarounds per research findings
     - name: Setup EPEL repository with container-compatible configuration

@@ -27,10 +27,11 @@
     dns_forwarder: "1.1.1.1"
 
   pre_tasks:
-    - name: "Update package cache"
-      ansible.builtin.dnf:
+    - name: "Update package cache (OS-aware)"
+      ansible.builtin.package:
         update_cache: true
       changed_when: false
+      when: ansible_os_family == "RedHat"
 
     - name: "Install test dependencies"
       ansible.builtin.dnf:
