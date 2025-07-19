@@ -1,20 +1,19 @@
 ---
-# CI-specific molecule configuration
-# Uses only publicly available images (no Red Hat registry authentication required)
 dependency:
   name: galaxy
   options:
     requirements-file: requirements.yml
-
 driver:
+  # Podman driver for local development
   name: podman
   options:
     podman_binary: /usr/bin/podman
     podman_extra_args: --log-level=info
 
 platforms:
-  # Rocky Linux 9 (RHEL 9 compatible) - Public registry
-  - name: rocky-9-ci
+  # RHEL 9 compatible - Rocky Linux 9 (Init Container)
+    # Rocky Linux 9 Init Container (ADR-0012 compliant)
+  - name: rocky-9
     image: docker.io/rockylinux/rockylinux:9-ubi-init
     dockerfile: Dockerfile.rhel
     pre_build_image: false
@@ -28,8 +27,8 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       
-  # AlmaLinux 9 (RHEL 9 compatible) - Public registry
-  - name: alma-9-ci
+  # AlmaLinux 9 Init Container (ADR-0012 compliant)
+  - name: alma-9
     image: docker.io/almalinux/9-init:9.6-20250712
     dockerfile: Dockerfile.rhel
     pre_build_image: false
@@ -43,17 +42,50 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       
-  # Rocky Linux 8 (RHEL 8 compatible) - Public registry
-  - name: rocky-8-ci
-    image: docker.io/rockylinux/rockylinux:8-ubi-init
+  # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
+  - name: rhel-9
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    image: registry.redhat.io/ubi9-init:9.6-1751962289
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     dockerfile: Dockerfile.rhel
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     pre_build_image: false
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     systemd: always
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: "/usr/sbin/init"
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     capabilities:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - SYS_ADMIN
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     groups:
-      - rhel8_compatible
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - rhel9_compatible
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      
+  # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
+  - name: rhel-10
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    image: registry.redhat.io/ubi10-init:10.0-1751895590
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    dockerfile: Dockerfile.rhel
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    pre_build_image: false
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    systemd: always
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    command: "/usr/sbin/init"
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    capabilities:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - SYS_ADMIN
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - rhel10_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -78,8 +110,8 @@ provisioner:
       hosts: ../../inventories/test/hosts
       group_vars: ../../inventories/test/group_vars/
   playbooks:
-    converge: ../default/converge.yml
-    verify: ../default/verify.yml
+    converge: converge.yml
+    verify: verify.yml
 
 lint: |
   set -e

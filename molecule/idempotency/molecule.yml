@@ -1,107 +1,127 @@
 ---
-# Idempotency testing scenario for Molecule
-# Tests all roles for idempotency compliance using only init containers
-# Updated per ADR-0012: Uses systemd-enabled base images only
-# Available images documented in: molecule/AVAILABLE_INIT_IMAGES.md
-
 dependency:
   name: galaxy
   options:
-    requirements-file: ../../roles/kvmhost_setup/collection/requirements.yml
-
+    requirements-file: requirements.yml
 driver:
+  # Podman driver for local development
   name: podman
   options:
-    podman_extra_args: --systemd=true --log-level=info
-  
+    podman_binary: /usr/bin/podman
+    podman_extra_args: --log-level=info
+
 platforms:
-  - name: idempotency-rocky9
+  # RHEL 9 compatible - Rocky Linux 9 (Init Container)
+    # Rocky Linux 9 Init Container (ADR-0012 compliant)
+  - name: rocky-9
     image: docker.io/rockylinux/rockylinux:9-ubi-init
-    pre_build_image: true
-    override_command: false
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
     capabilities:
       - SYS_ADMIN
+    groups:
+      - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    
-  - name: idempotency-alma9
+      
+  # AlmaLinux 9 Init Container (ADR-0012 compliant)
+  - name: alma-9
     image: docker.io/almalinux/9-init:9.6-20250712
-    pre_build_image: true
-    override_command: false
+    dockerfile: Dockerfile.rhel
+    pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
     capabilities:
       - SYS_ADMIN
+    groups:
+      - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    
-  - name: idempotency-rhel9
+      
+  # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
+  - name: rhel-9
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     image: registry.redhat.io/ubi9-init:9.6-1751962289
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     dockerfile: Dockerfile.rhel
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     pre_build_image: false
-    override_command: false
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     systemd: always
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: "/usr/sbin/init"
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     capabilities:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - SYS_ADMIN
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    
-  - name: idempotency-rhel10
+      
+  # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
+  - name: rhel-10
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     image: registry.redhat.io/ubi10-init:10.0-1751895590
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     dockerfile: Dockerfile.rhel
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     pre_build_image: false
-    override_command: false
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     systemd: always
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: "/usr/sbin/init"
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     capabilities:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - SYS_ADMIN
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - rhel10_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 provisioner:
   name: ansible
-  playbooks:
-    prepare: ../default/prepare.yml
-    converge: converge.yml
-    verify: verify.yml
-  inventory:
-    host_vars:
-      idempotency-rocky9:
-        ansible_python_interpreter: /usr/bin/python3
-        testing_mode: true
-        idempotency_test: true
-      idempotency-alma9:
-        ansible_python_interpreter: /usr/bin/python3
-        testing_mode: true
-        idempotency_test: true
-      idempotency-rhel9:
-        ansible_python_interpreter: /usr/bin/python3
-        testing_mode: true
-        idempotency_test: true
-      idempotency-rhel10:
-        ansible_python_interpreter: /usr/bin/python3
-        testing_mode: true
-        idempotency_test: true
-  ansible_args:
-    - --timeout=30
-    - -v
+  env:
+    ANSIBLE_FORCE_COLOR: "true"
+    ANSIBLE_VERBOSITY: "1"
+    ANSIBLE_ROLES_PATH: "../../roles"
   config_options:
     defaults:
-      callbacks_enabled: timer,profile_tasks
+      interpreter_python: auto_silent
+      callback_whitelist: profile_tasks, timer, yaml
       host_key_checking: false
-      retry_files_enabled: false
+      deprecation_warnings: false
+      roles_path: "../../roles"
     ssh_connection:
       pipelining: true
+  inventory:
+    links:
+      hosts: ../../inventories/test/hosts
+      group_vars: ../../inventories/test/group_vars/
+  playbooks:
+    converge: converge.yml
+    verify: verify.yml
+
+lint: |
+  set -e
+  yamllint .
+  ansible-lint roles/kvmhost_setup/ --exclude .github/
 
 verifier:
-  name: ansible
+  name: testinfra
+  options:
+    verbose: true
 
 scenario:
   test_sequence:
@@ -112,6 +132,7 @@ scenario:
     - create
     - prepare
     - converge
+    - idempotence
     - verify
     - cleanup
     - destroy

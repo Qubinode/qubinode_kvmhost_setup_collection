@@ -12,6 +12,7 @@ driver:
 
 platforms:
   # RHEL 9 compatible - Rocky Linux 9 (Init Container)
+    # Rocky Linux 9 Init Container (ADR-0012 compliant)
   - name: rocky-9
     image: docker.io/rockylinux/rockylinux:9-ubi-init
     dockerfile: Dockerfile.rhel
@@ -22,6 +23,9 @@ platforms:
       - SYS_ADMIN
     groups:
       - rhel9_compatible
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       
   # AlmaLinux 9 Init Container (ADR-0012 compliant)
   - name: alma-9
@@ -49,6 +53,9 @@ platforms:
       - SYS_ADMIN
     groups:
       - rhel9_compatible
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       
   # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
   - name: rhel-10
@@ -61,6 +68,9 @@ platforms:
       - SYS_ADMIN
     groups:
       - rhel10_compatible
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
 provisioner:
   name: ansible
