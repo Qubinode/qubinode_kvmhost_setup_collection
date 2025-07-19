@@ -199,6 +199,34 @@ jobs:
           echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
           echo "$(pwd)/venv/bin" >> $GITHUB_PATH
 
+      - name: Install GitHub CLI
+        run: |
+          # Check if gh is already installed
+          if command -v gh &> /dev/null; then
+            echo "GitHub CLI already installed: $(gh version)"
+          else
+            echo "Installing GitHub CLI..."
+            if [ -f /etc/redhat-release ]; then
+              # RHEL/CentOS/Fedora
+              sudo dnf install -y gh || {
+                # Fallback: manual installation
+                curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | sudo tee /etc/yum.repos.d/github-cli.repo
+                sudo dnf install -y gh
+              }
+            elif [ -f /etc/debian_version ]; then
+              # Debian/Ubuntu
+              curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+              sudo apt update
+              sudo apt install gh
+            else
+              # Generic installation
+              curl -L https://github.com/cli/cli/releases/latest/download/gh_*_linux_amd64.tar.gz | tar -xz
+              sudo mv gh_*/bin/gh /usr/local/bin/
+            fi
+            echo "GitHub CLI installed: $(gh version)"
+          fi
+
       - name: Install required Ansible collections
         run: |
           source venv/bin/activate
