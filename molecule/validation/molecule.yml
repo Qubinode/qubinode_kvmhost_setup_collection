@@ -44,48 +44,31 @@ platforms:
 
   # RHEL 9 - Official Red Hat UBI 9 init image (Recommended)
   - name: rhel-9
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     image: registry.redhat.io/ubi9-init:9.6-1751962289
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     dockerfile: Dockerfile.rhel
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     pre_build_image: false
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     systemd: always
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: "/usr/sbin/init"
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     capabilities:
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - SYS_ADMIN
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     groups:
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
+
   # RHEL 10 - Official Red Hat UBI 10 init image (Latest)
   - name: rhel-10
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     image: registry.redhat.io/ubi10-init:10.0-1751895590
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     dockerfile: Dockerfile.rhel
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     pre_build_image: false
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     systemd: always
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: "/usr/sbin/init"
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     capabilities:
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - SYS_ADMIN
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     groups:
-    cgroupns_mode: host    volumes:      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - rhel10_compatible
+      - rhel9_compatible
     cgroupns_mode: host
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
