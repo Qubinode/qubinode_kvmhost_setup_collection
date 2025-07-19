@@ -59,10 +59,16 @@ if command -v ansible &> /dev/null; then
     ansible_version=$(ansible --version | head -1 | cut -d" " -f3 | cut -d"]" -f1)
     echo "📋 Ansible version: $ansible_version"
     
-    if [[ "${ansible_version%%.*}" -ge "2" ]] && [[ "${ansible_version#*.}" -ge "17" ]] 2>/dev/null; then
-        echo "✅ Ansible version supports current best practices"
+    # Check for 2.18+ compatibility with Python 3.11
+    major=$(echo "$ansible_version" | cut -d. -f1)
+    minor=$(echo "$ansible_version" | cut -d. -f2)
+    if [[ "$major" -eq "2" ]] && [[ "$minor" -ge "18" ]]; then
+        echo "✅ Ansible version supports Python 3.11 + SELinux (2.18+ recommended)"
+    elif [[ "$major" -eq "2" ]] && [[ "$minor" -eq "17" ]]; then
+        echo "⚠️  Ansible 2.17 has SELinux binding issues with Python 3.11 - upgrade to 2.18+"
+        echo "   Run: pip install 'ansible-core>=2.18.0,<2.19.0'"
     else
-        echo "⚠️  Consider upgrading Ansible: pip install 'ansible-core>=2.17'"
+        echo "⚠️  Consider using Ansible-core 2.18+: pip install 'ansible-core>=2.18.0'"
     fi
 else
     echo "❌ Ansible not found"

@@ -1,9 +1,9 @@
 # Python dependencies for Qubinode KVM Host Setup Collection
 # Core Ansible and testing tools
 
-# Ansible Core - updated to fix security vulnerabilities
-# Note: 2.17+ requires Python 3.11+, 2.15+ requires Python 3.9+
-ansible-core>=2.15.0,<2.19.0
+# Ansible Core - updated to fix SELinux binding issues with Python 3.11
+# Note: 2.18+ required for Python 3.11 + SELinux compatibility, 2.17 has binding issues
+ansible-core>=2.18.0,<2.19.0
 
 # Ansible Lint - for code quality
 ansible-lint>=6.0.0

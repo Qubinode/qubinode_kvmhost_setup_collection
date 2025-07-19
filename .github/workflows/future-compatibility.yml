@@ -1,0 +1,284 @@
+name: Future Compatibility Testing
+
+on:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC to test latest versions
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+    # Allow manual triggering
+    inputs:
+      test_versions:
+        description: 'Comma-separated Ansible versions to test (e.g., "2.18,2.19,devel")'
+        required: false
+        default: "2.18,2.19,devel"
+      python_versions:
+        description: 'Comma-separated Python versions to test (e.g., "3.11,3.12")'
+        required: false
+        default: "3.11,3.12"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-versions:
+    runs-on: self-hosted
+    outputs:
+      ansible-versions: ${{ steps.versions.outputs.ansible-versions }}
+      python-versions: ${{ steps.versions.outputs.python-versions }}
+    steps:
+      - name: Detect latest Ansible versions
+        id: versions
+        run: |
+          # Get input versions or use defaults
+          if [ -n "${{ github.event.inputs.test_versions }}" ]; then
+            ANSIBLE_VERSIONS="${{ github.event.inputs.test_versions }}"
+          else
+            # Auto-detect latest versions
+            ANSIBLE_VERSIONS="2.18,2.19"
+            # Try to get the latest devel version
+            if curl -s https://pypi.org/pypi/ansible-core/json | grep -q "devel"; then
+              ANSIBLE_VERSIONS="$ANSIBLE_VERSIONS,devel"
+            fi
+          fi
+          
+          if [ -n "${{ github.event.inputs.python_versions }}" ]; then
+            PYTHON_VERSIONS="${{ github.event.inputs.python_versions }}"
+          else
+            PYTHON_VERSIONS="3.11,3.12"
+          fi
+          
+          echo "ansible-versions=[$(echo $ANSIBLE_VERSIONS | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/'))]" >> $GITHUB_OUTPUT
+          echo "python-versions=[$(echo $PYTHON_VERSIONS | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/'))]" >> $GITHUB_OUTPUT
+          
+          echo "Will test Ansible versions: $ANSIBLE_VERSIONS"
+          echo "Will test Python versions: $PYTHON_VERSIONS"
+
+  future-compatibility-test:
+    needs: detect-versions
+    runs-on: self-hosted
+    continue-on-error: true  # Don't fail the workflow if future versions fail
+    strategy:
+      fail-fast: false  # Test all combinations even if some fail
+      matrix:
+        ansible-version: ${{ fromJson(needs.detect-versions.outputs.ansible-versions) }}
+        python-version: ${{ fromJson(needs.detect-versions.outputs.python-versions) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python ${{ matrix.python-version }}
+        run: |
+          # Install the specified Python version
+          if [ "${{ matrix.python-version }}" == "3.12" ]; then
+            # Python 3.12 might need special handling on RHEL 9
+            sudo dnf install -y python3.12 python3.12-devel python3.12-pip || {
+              echo "⚠️  Python 3.12 not available on this system"
+              exit 0
+            }
+          else
+            sudo dnf install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+          fi
+          
+          python${{ matrix.python-version }} -m pip install --upgrade pip
+          python${{ matrix.python-version }} -m pip install virtualenv
+
+      - name: Create test environment
+        run: |
+          python${{ matrix.python-version }} -m virtualenv test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate
+          pip install --upgrade pip
+
+      - name: Install Ansible ${{ matrix.ansible-version }}
+        id: install-ansible
+        continue-on-error: true
+        run: |
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate
+          
+          if [ "${{ matrix.ansible-version }}" == "devel" ]; then
+            echo "Installing Ansible development version..."
+            pip install git+https://github.com/ansible/ansible.git@devel || {
+              echo "Failed to install Ansible devel - this is expected for unstable versions"
+              exit 1
+            }
+          else
+            echo "Installing Ansible ${{ matrix.ansible-version }}..."
+            pip install "ansible-core>=${{ matrix.ansible-version }},<$(echo ${{ matrix.ansible-version }} | cut -d. -f1).$(expr $(echo ${{ matrix.ansible-version }} | cut -d. -f2) + 1).0" || {
+              echo "Failed to install Ansible ${{ matrix.ansible-version }}"
+              exit 1
+            }
+          fi
+
+      - name: Install test dependencies
+        if: steps.install-ansible.outcome == 'success'
+        continue-on-error: true
+        run: |
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate
+          
+          # Install molecule and other test dependencies
+          pip install molecule molecule-podman pytest-testinfra yamllint
+          
+          # Try to install ansible-lint (might not be compatible with devel)
+          pip install ansible-lint || echo "⚠️  ansible-lint not compatible with this Ansible version"
+
+      - name: Setup SELinux for testing
+        if: steps.install-ansible.outcome == 'success'
+        continue-on-error: true
+        run: |
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate
+          ./scripts/setup-selinux-for-ci.sh python${{ matrix.python-version }} || {
+            echo "⚠️  SELinux setup failed - continuing with fallback configuration"
+            export ANSIBLE_SELINUX_SPECIAL_FS=""
+            export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
+          }
+
+      - name: Test basic Ansible functionality
+        if: steps.install-ansible.outcome == 'success'
+        id: basic-test
+        continue-on-error: true
+        run: |
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate
+          
+          echo "🔍 Testing Ansible ${{ matrix.ansible-version }} with Python ${{ matrix.python-version }}"
+          
+          # Test basic ansible commands
+          ansible --version
+          ansible-playbook --version
+          
+          # Test basic playbook syntax
+          ansible-playbook --syntax-check test.yml || {
+            echo "⚠️  Syntax check failed - may indicate compatibility issues"
+            exit 1
+          }
+
+      - name: Run limited Molecule tests
+        if: steps.basic-test.outcome == 'success'
+        id: molecule-test
+        continue-on-error: true
+        timeout-minutes: 30
+        run: |
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate
+          
+          # Set environment variables for testing
+          export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
+          export ANSIBLE_SELINUX_SPECIAL_FS=""
+          export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
+          
+          # Run a minimal molecule test (just create and destroy)
+          molecule create -s default || {
+            echo "⚠️  Molecule create failed"
+            exit 1
+          }
+          
+          molecule destroy -s default || {
+            echo "⚠️  Molecule destroy failed"
+            exit 1
+          }
+          
+          echo "✅ Basic Molecule functionality works"
+
+      - name: Generate compatibility report
+        if: always()
+        run: |
+          source test-env-${{ matrix.python-version }}-${{ matrix.ansible-version }}/bin/activate || true
+          
+          echo "## Compatibility Report: Python ${{ matrix.python-version }} + Ansible ${{ matrix.ansible-version }}" >> compatibility-report.md
+          echo "" >> compatibility-report.md
+          
+          if [ "${{ steps.install-ansible.outcome }}" == "success" ]; then
+            echo "✅ **Installation**: Success" >> compatibility-report.md
+            ansible --version >> compatibility-report.md 2>/dev/null || echo "❌ Version check failed" >> compatibility-report.md
+          else
+            echo "❌ **Installation**: Failed" >> compatibility-report.md
+          fi
+          
+          if [ "${{ steps.basic-test.outcome }}" == "success" ]; then
+            echo "✅ **Basic Functionality**: Success" >> compatibility-report.md
+          else
+            echo "❌ **Basic Functionality**: Failed" >> compatibility-report.md
+          fi
+          
+          if [ "${{ steps.molecule-test.outcome }}" == "success" ]; then
+            echo "✅ **Molecule Testing**: Success" >> compatibility-report.md
+          else
+            echo "❌ **Molecule Testing**: Failed" >> compatibility-report.md
+          fi
+          
+          echo "" >> compatibility-report.md
+          
+          # Add notes about compatibility
+          if [ "${{ matrix.ansible-version }}" == "devel" ]; then
+            echo "📝 **Note**: Development version - instability expected" >> compatibility-report.md
+          fi
+          
+          echo "---" >> compatibility-report.md
+          echo "" >> compatibility-report.md
+
+      - name: Upload compatibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compatibility-report-python${{ matrix.python-version }}-ansible${{ matrix.ansible-version }}
+          path: compatibility-report.md
+
+  generate-summary:
+    needs: future-compatibility-test
+    runs-on: self-hosted
+    if: always()
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: compatibility-report-*
+          merge-multiple: true
+
+      - name: Generate summary report
+        run: |
+          echo "# Future Compatibility Testing Summary" > summary.md
+          echo "Generated on: $(date)" >> summary.md
+          echo "" >> summary.md
+          echo "This report shows compatibility testing results for future Ansible versions." >> summary.md
+          echo "❌ Failures are expected for development versions and don't block the main pipeline." >> summary.md
+          echo "" >> summary.md
+          
+          # Combine all individual reports
+          cat compatibility-report.md >> summary.md 2>/dev/null || echo "No compatibility reports found" >> summary.md
+          
+          echo "" >> summary.md
+          echo "## Red Hat Enterprise Linux Compatibility" >> summary.md
+          echo "" >> summary.md
+          echo "This testing helps identify when newer Ansible versions become:" >> summary.md
+          echo "- ✅ **Fully Compatible**: Ready for production use" >> summary.md
+          echo "- ⚠️  **Partially Compatible**: Requires workarounds" >> summary.md
+          echo "- ❌ **Incompatible**: Not yet ready for this collection" >> summary.md
+          echo "" >> summary.md
+          echo "## Recommendations" >> summary.md
+          echo "" >> summary.md
+          echo "- **Current Stable**: Use ansible-core 2.18.x for production" >> summary.md
+          echo "- **Testing**: Monitor this report for future version readiness" >> summary.md
+          echo "- **Migration**: Plan upgrades when newer versions show full compatibility" >> summary.md
+
+      - name: Upload summary report
+        uses: actions/upload-artifact@v4
+        with:
+          name: future-compatibility-summary
+          path: summary.md
+
+      - name: Comment on latest commit (if scheduled)
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          # Create a simple status comment
+          echo "🔮 **Future Compatibility Testing completed**" > comment.md
+          echo "" >> comment.md
+          echo "Weekly testing of latest Ansible versions completed." >> comment.md
+          echo "Check the [Action Summary](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed results." >> comment.md
+          echo "" >> comment.md
+          echo "This testing helps ensure forward compatibility and doesn't affect the main CI/CD pipeline." >> comment.md
+          
+          # Note: In a real environment, you might want to create an issue or send a notification
+          # For now, just log the results
+          echo "Future compatibility testing summary:"
+          cat comment.md

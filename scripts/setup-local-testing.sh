@@ -85,10 +85,10 @@ setup_venv() {
 install_python_deps() {
     echo ""
     echo "📦 Installing Python dependencies..."
-    echo "   Based on research recommendations: Molecule 25.6.0+, Ansible-core 2.17+"
+    echo "   Based on research recommendations: Molecule 25.6.0+, Ansible-core 2.18+ (fixes SELinux issues)"
     
-    # Install dependencies based on research findings
-    pip install "ansible-core>=2.17,<2.19"
+    # Install dependencies based on research findings - use 2.18+ for Python 3.11 + SELinux compatibility
+    pip install "ansible-core>=2.18.0,<2.19.0"
     pip install "molecule>=25.6.0"
     pip install "molecule-plugins[docker]"
     pip install "pytest-testinfra"

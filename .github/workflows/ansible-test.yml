@@ -37,8 +37,8 @@ jobs:
       - name: Install lint tools
         run: |
           source venv/bin/activate
-          # Updated to latest versions based on research findings
-          pip install ansible-lint>=6.0.0 bandit>=1.7.0 ansible-core>=2.17.0
+          # Use ansible-core 2.18+ for Python 3.11 compatibility (fixes SELinux binding issues)
+          pip install ansible-lint>=6.0.0 bandit>=1.7.0 ansible-core>=2.18.0,<2.19.0
       - name: Install required Ansible collections
         run: |
           source venv/bin/activate
@@ -53,8 +53,8 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        # Updated to support latest Ansible-core versions (based on research)
-        ansible-version: ["2.17", "2.18"]
+        # Use ansible-core 2.18+ for Python 3.11 compatibility (2.17 has SELinux binding issues)
+        ansible-version: ["2.18"]
         python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
@@ -85,6 +85,14 @@ jobs:
           export ANSIBLE_PYTHON_INTERPRETER=python${{ matrix.python-version }}
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
+          # Verify ansible-core version compatibility
+          ansible_version=$(ansible --version | head -1 | cut -d' ' -f3 | cut -d']' -f1)
+          echo "Using ansible-core version: $ansible_version"
+          if [[ "$ansible_version" == "2.17"* ]]; then
+            echo "ERROR: ansible-core 2.17 has SELinux binding issues with Python 3.11"
+            echo "This workflow requires ansible-core 2.18+ for compatibility"
+            exit 1
+          fi
           molecule test
         env:
           PY_COLORS: "1"
