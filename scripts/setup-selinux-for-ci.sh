@@ -43,37 +43,89 @@ detect_environment() {
     fi
 }
 
+# Function to detect OS and package manager
+detect_os_and_package_manager() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        echo "OS_ID=$ID" >&2
+        echo "OS_NAME=$NAME" >&2
+    fi
+
+    if command -v dnf >/dev/null 2>&1; then
+        echo "dnf"
+    elif command -v yum >/dev/null 2>&1; then
+        echo "yum"
+    elif command -v apt-get >/dev/null 2>&1; then
+        echo "apt-get"
+    else
+        echo "unknown"
+    fi
+}
+
 # Function to install system SELinux packages
 install_system_selinux_packages() {
     local env_type="$1"
-    
+
     log_info "Installing system SELinux packages for environment: $env_type"
-    
+
+    # Detect OS and package manager
+    local pkg_mgr
+    pkg_mgr=$(detect_os_and_package_manager)
+
     case "$env_type" in
         "docker"|"github-actions"|"ci")
             # In containerized environments, try to install if possible
-            if command -v yum >/dev/null 2>&1; then
-                log_info "Using yum package manager"
-                yum install -y libselinux-python3 python3-libselinux libselinux-devel 2>/dev/null || {
-                    log_warning "Failed to install SELinux packages via yum, continuing..."
+            case "$pkg_mgr" in
+                "dnf"|"yum")
+                    log_info "Using $pkg_mgr package manager"
+                    # Detect OS for appropriate package names
+                    if [ -f /etc/os-release ]; then
+                        . /etc/os-release
+                        if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+                            log_info "Installing SELinux packages for Rocky/Alma Linux"
+                            $pkg_mgr install -y python3-libselinux libselinux-devel 2>/dev/null || {
+                                log_warning "Failed to install SELinux packages via $pkg_mgr, continuing..."
+                                return 1
+                            }
+                        elif [[ "$ID" == "rhel" ]]; then
+                            log_info "Installing SELinux packages for RHEL"
+                            $pkg_mgr install -y libselinux-python3 python3-libselinux libselinux-devel 2>/dev/null || {
+                                log_warning "Failed to install SELinux packages via $pkg_mgr, continuing..."
+                                return 1
+                            }
+                        else
+                            log_info "Installing SELinux packages for generic RedHat family"
+                            $pkg_mgr install -y python3-libselinux libselinux-devel 2>/dev/null || {
+                                log_warning "Failed to install SELinux packages via $pkg_mgr, continuing..."
+                                return 1
+                            }
+                        fi
+                    else
+                        # Fallback for unknown RedHat family
+                        $pkg_mgr install -y python3-libselinux libselinux-devel 2>/dev/null || {
+                            log_warning "Failed to install SELinux packages via $pkg_mgr, continuing..."
+                            return 1
+                        }
+                    fi
+                    ;;
+                "apt-get")
+                    log_info "Using apt package manager"
+                    apt-get update && apt-get install -y python3-selinux libselinux1-dev 2>/dev/null || {
+                        log_warning "Failed to install SELinux packages via apt, continuing..."
+                        return 1
+                    }
+                    ;;
+                *)
+                    log_warning "No supported package manager found for SELinux installation"
                     return 1
-                }
-            elif command -v apt-get >/dev/null 2>&1; then
-                log_info "Using apt package manager"
-                apt-get update && apt-get install -y python3-selinux libselinux1-dev 2>/dev/null || {
-                    log_warning "Failed to install SELinux packages via apt, continuing..."
-                    return 1
-                }
-            else
-                log_warning "No supported package manager found for SELinux installation"
-                return 1
-            fi
+                    ;;
+            esac
             ;;
         "local")
             log_info "Local environment detected, assuming SELinux packages are available"
             ;;
     esac
-    
+
     log_success "System SELinux packages installation completed"
     return 0
 }
