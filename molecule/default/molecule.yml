@@ -100,6 +100,10 @@ provisioner:
       roles_path: "../../roles"
     ssh_connection:
       pipelining: true
+  inventory:
+    links:
+      hosts: ../../inventories/test/hosts
+      group_vars: ../../inventories/test/group_vars/
   playbooks:
     converge: converge.yml
     verify: verify.yml

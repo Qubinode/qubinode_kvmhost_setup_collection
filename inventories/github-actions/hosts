@@ -1,0 +1,11 @@
+[all]
+github-runner ansible_host=127.0.0.1 ansible_connection=local
+
+[kvm_hosts]
+github-runner
+
+[edge_hosts]
+github-runner
+
+[ci_hosts]
+github-runner
