@@ -68,6 +68,9 @@ jobs:
   test:
     needs: lint
     runs-on: self-hosted
+    env:
+      REDHAT_REGISTRY_USERNAME: ${{ secrets.REDHAT_REGISTRY_USERNAME }}
+      REDHAT_REGISTRY_TOKEN: ${{ secrets.REDHAT_REGISTRY_TOKEN }}
     strategy:
       matrix:
         # Use ansible-core 2.18+ for Python 3.11 compatibility (2.17 has SELinux binding issues)
@@ -99,17 +102,31 @@ jobs:
         run: |
           echo "🔧 Setting up container registry access for CI environment..."
           
-          # Test Red Hat registry access first
-          echo "Testing Red Hat registry connectivity..."
+          # Setup Red Hat Registry Service Account authentication
+          echo "Setting up Red Hat Registry authentication..."
           RED_HAT_ACCESS=false
           
-          # Try to pull a minimal Red Hat image to test authentication
-          if podman pull registry.redhat.io/ubi9-minimal:latest 2>/dev/null; then
-            echo "✅ Red Hat registry access confirmed"
-            RED_HAT_ACCESS=true
-            podman rmi registry.redhat.io/ubi9-minimal:latest 2>/dev/null || true
+          if [[ -n "$REDHAT_REGISTRY_USERNAME" && -n "$REDHAT_REGISTRY_TOKEN" ]]; then
+            echo "🔐 Logging into Red Hat registry with Service Account..."
+            if echo "$REDHAT_REGISTRY_TOKEN" | podman login registry.redhat.io --username "$REDHAT_REGISTRY_USERNAME" --password-stdin; then
+              echo "✅ Red Hat registry authentication successful"
+              
+              # Test access with a minimal pull
+              if podman pull registry.redhat.io/ubi9-minimal:latest 2>/dev/null; then
+                echo "✅ Red Hat registry access confirmed"
+                RED_HAT_ACCESS=true
+                podman rmi registry.redhat.io/ubi9-minimal:latest 2>/dev/null || true
+              else
+                echo "⚠️ Red Hat registry authenticated but image pull failed"
+                RED_HAT_ACCESS=false
+              fi
+            else
+              echo "❌ Red Hat registry authentication failed"
+              RED_HAT_ACCESS=false
+            fi
           else
-            echo "❌ Red Hat registry access failed - switching to public alternatives"
+            echo "⚠️ Red Hat registry credentials not configured - using public alternatives"
+            echo "To use official Red Hat images, add REDHAT_REGISTRY_USERNAME and REDHAT_REGISTRY_TOKEN secrets"
             RED_HAT_ACCESS=false
           fi
           
@@ -123,11 +140,15 @@ jobs:
                 echo "Updating molecule/$scenario/molecule.yml..."
                 cp "molecule/$scenario/molecule.yml" "molecule/$scenario/molecule.yml.backup"
                 
-                # Replace Red Hat images with public alternatives
+                # Replace Red Hat images with public alternatives - more comprehensive replacement
                 sed -i \
-                  -e 's|registry\.redhat\.io/ubi9-init:.*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
-                  -e 's|registry\.redhat\.io/ubi10-init:.*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
+                  -e 's|registry\.redhat\.io/ubi9-init:[^[:space:]]*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
+                  -e 's|registry\.redhat\.io/ubi10-init:[^[:space:]]*|docker.io/rockylinux/rockylinux:9-ubi-init|g' \
                   "molecule/$scenario/molecule.yml"
+                
+                # Verify the replacement worked
+                echo "After replacement, checking for Red Hat registry images:"
+                grep -n "registry\.redhat\.io" "molecule/$scenario/molecule.yml" && echo "⚠️ Still found Red Hat registry images!" || echo "✅ No Red Hat registry images found"
                 
                 echo "✅ Updated $scenario scenario to use public images"
               fi
@@ -215,6 +236,9 @@ jobs:
           echo ""
           echo "Default scenario configuration:"
           cat molecule/default/molecule.yml
+          echo ""
+          echo "🔍 Checking which container images will be used:"
+          grep -A1 -B1 "image:" molecule/default/molecule.yml
           echo ""
           
           # Check container runtime
@@ -306,6 +330,14 @@ jobs:
           export ANSIBLE_SELINUX_SPECIAL_FS=""
           export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
           ansible-playbook -i inventories/test/hosts test.yml -vv
+
+      - name: Cleanup container registry authentication
+        if: always()
+        run: |
+          echo "🧹 Cleaning up container registry authentication..."
+          # Logout from all registries to avoid credential leakage
+          podman logout --all 2>/dev/null || true
+          echo "✅ Registry cleanup completed"
 
   version-monitoring:
     runs-on: ubuntu-latest
