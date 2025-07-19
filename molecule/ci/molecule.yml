@@ -19,7 +19,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
-    privileged: true
+    # Security-enhanced configuration per ADR-0012 (no privileged containers)
     capabilities:
       - SYS_ADMIN
     groups:
@@ -36,7 +36,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
-    privileged: true
+    # Security-enhanced configuration per ADR-0012 (no privileged containers)
     capabilities:
       - SYS_ADMIN
     groups:
@@ -53,7 +53,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
-    privileged: true
+    # Security-enhanced configuration per ADR-0012 (no privileged containers)
     capabilities:
       - SYS_ADMIN
     groups:
@@ -70,7 +70,7 @@ platforms:
     pre_build_image: false
     systemd: always
     command: "/usr/sbin/init"
-    privileged: true
+    # Security-enhanced configuration per ADR-0012 (no privileged containers)
     capabilities:
       - SYS_ADMIN
     groups:

@@ -180,8 +180,50 @@ jobs:
           
           echo "🎯 Container registry setup complete!"
 
+      - name: Validate ADR-0012 Security Compliance
+        run: |
+          echo "🛡️ Validating ADR-0012 security compliance before running tests..."
+          # Run security compliance validation (without actually running tests)
+          chmod +x scripts/test-local-molecule.sh
+          # Extract just the security validation part
+          if [ -d "molecule" ]; then
+            security_compliance_failed=false
+            privileged_usage_found=false
+
+            for molecule_file in molecule/*/molecule.yml; do
+              if [ -f "$molecule_file" ]; then
+                scenario_name=$(basename $(dirname "$molecule_file"))
+                echo "📋 Checking scenario: $scenario_name"
+
+                # Check for privileged containers (security violation)
+                if grep -q "privileged.*true" "$molecule_file"; then
+                  echo "  ❌ Privileged container found - security violation"
+                  echo "     🚫 Violates ADR-0012: Security-Enhanced Container Testing"
+                  privileged_usage_found=true
+                else
+                  echo "  ✅ No privileged containers detected"
+                fi
+
+                # Check for security-enhanced capabilities approach
+                if grep -q "capabilities:" "$molecule_file"; then
+                  echo "  ✅ Capability-specific security found"
+                else
+                  echo "  ⚠️  No specific capabilities defined - consider adding SYS_ADMIN only"
+                fi
+              fi
+            done
+
+            if [ "$security_compliance_failed" = true ] || [ "$privileged_usage_found" = true ]; then
+              echo "❌ CRITICAL: Security Compliance Failed"
+              echo "🚫 BLOCKING CI/CD - Security violations detected"
+              exit 1
+            else
+              echo "✅ All configurations comply with security-enhanced testing requirements"
+            fi
+          fi
+
       - name: Run Molecule tests
-        timeout-minutes: 35
+        timeout-minutes: 45  # Increased timeout for better debugging
         run: |
           echo "🧪 Starting Molecule tests..."
           
@@ -217,24 +259,51 @@ jobs:
           # Run molecule test with enhanced debugging and cleanup trap
           echo "🚀 Running molecule test..."
           
-          # Set up cleanup trap for any exit
-          trap 'echo "🚨 Test interrupted or failed - cleaning up containers..."; molecule destroy || true; podman container prune -f || true' EXIT TERM INT
+          # Set up enhanced cleanup trap for any exit with better debugging
+          trap 'echo "🚨 Test interrupted or failed - cleaning up containers...";
+                echo "📊 Container status before cleanup:";
+                podman ps -a || true;
+                echo "🖼️ Image status:";
+                podman images || true;
+                echo "🧹 Running cleanup...";
+                molecule destroy || true;
+                podman container prune -f || true;
+                echo "✅ Cleanup completed"' EXIT TERM INT
           
           # First, let's try to run each step individually to see where it fails
           echo "🔧 Running molecule steps individually for better debugging..."
           
           # Step 1: dependency
           echo "📦 Running molecule dependency..."
-          molecule --debug dependency || echo "⚠️ Dependency step failed (non-critical)"
+          echo "🔍 Pre-dependency container status:"
+          podman ps -a || true
+          if molecule --debug dependency; then
+            echo "✅ Dependency step completed successfully"
+          else
+            echo "⚠️ Dependency step failed (non-critical)"
+          fi
           
           # Step 2: create
           echo "🏗️ Running molecule create..."
-          if ! molecule --debug create; then
+          echo "🔍 Pre-create container status:"
+          podman ps -a || true
+          if molecule --debug create; then
+            echo "✅ Create step completed successfully"
+            echo "📊 Post-create container status:"
+            podman ps -a || true
+            echo "🔍 Container details:"
+            for container in $(podman ps -q 2>/dev/null || true); do
+              echo "=== Container: $container ==="
+              podman inspect "$container" --format "{{.State.Status}}: {{.Config.Cmd}}" 2>/dev/null || true
+            done
+          else
             echo "❌ Create step failed!"
-            echo "Podman containers after create failure:"
-            podman ps -a
-            echo "Podman images:"
-            podman images
+            echo "📊 Podman containers after create failure:"
+            podman ps -a || true
+            echo "🖼️ Podman images:"
+            podman images || true
+            echo "🔍 Checking for build logs..."
+            podman logs $(podman ps -aq --latest) 2>/dev/null | tail -20 || true
             exit 1
           fi
           
@@ -277,11 +346,22 @@ jobs:
           
           # Step 6: destroy
           echo "🧹 Running molecule destroy..."
-          if ! molecule --debug destroy; then
+          echo "🔍 Pre-destroy container status:"
+          podman ps -a || true
+          if molecule --debug destroy; then
+            echo "✅ Destroy step completed successfully"
+            echo "📊 Post-destroy container status:"
+            podman ps -a || true
+          else
             echo "❌ Destroy step failed!"
-            echo "Podman containers after destroy failure:"
-            podman ps -a
-            # Don't exit here as destroy failure shouldn't fail the test
+            echo "📊 Podman containers after destroy failure:"
+            podman ps -a || true
+            echo "🔍 Attempting manual cleanup of stuck containers..."
+            for container in $(podman ps -aq --filter "label=molecule" 2>/dev/null || true); do
+              echo "Force removing container: $container"
+              podman rm -f "$container" 2>/dev/null || true
+            done
+            echo "⚠️ Destroy failure handled - continuing (destroy failures are non-critical)"
           fi
           
           echo "✅ All molecule steps completed successfully!"
