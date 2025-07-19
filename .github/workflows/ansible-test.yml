@@ -166,6 +166,15 @@ jobs:
         run: |
           echo "🧹 Cleaning up any existing Molecule state..."
           
+          # First, restore any backed up configurations from previous failed runs
+          echo "Restoring any backed up configurations from previous runs..."
+          for scenario in default idempotency validation ci; do
+            if [[ -f "molecule/$scenario/molecule.yml.backup" ]]; then
+              echo "Restoring backup for $scenario scenario..."
+              mv "molecule/$scenario/molecule.yml.backup" "molecule/$scenario/molecule.yml"
+            fi
+          done
+          
           # Destroy all scenarios to ensure clean state
           for scenario in default idempotency validation ci; do
             if [[ -d "molecule/$scenario" ]]; then
@@ -254,11 +263,30 @@ jobs:
         run: |
           echo "🧹 Cleaning up temporary changes..."
           
+          # Always destroy any remaining containers
+          echo "Destroying any remaining molecule containers..."
+          for scenario in default idempotency validation ci; do
+            molecule destroy -s "$scenario" || echo "No containers in $scenario to destroy"
+          done
+          
           # Restore original molecule configurations if they were backed up
           for scenario in default idempotency validation ci; do
             if [[ -f "molecule/$scenario/molecule.yml.backup" ]]; then
               echo "Restoring original molecule/$scenario/molecule.yml..."
               mv "molecule/$scenario/molecule.yml.backup" "molecule/$scenario/molecule.yml"
+            fi
+          done
+          
+          # Verify all molecule.yml files are in good state
+          echo "Verifying molecule.yml files..."
+          for scenario in default idempotency validation ci; do
+            if [[ -f "molecule/$scenario/molecule.yml" ]]; then
+              echo "Checking syntax of molecule/$scenario/molecule.yml..."
+              python3 -c "import yaml; yaml.safe_load(open('molecule/$scenario/molecule.yml'))" || {
+                echo "ERROR: molecule/$scenario/molecule.yml has syntax errors!"
+                echo "Restoring from git..."
+                git checkout HEAD -- "molecule/$scenario/molecule.yml"
+              }
             fi
           done
           
