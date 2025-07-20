@@ -1,0 +1,31 @@
+---
+# Ansible Collections and Roles Requirements
+# This file defines the collections and roles needed for the kvmhost_setup role
+
+collections:
+  # Core Ansible collections
+  - name: ansible.posix
+    version: ">=1.5.0"
+  
+  - name: community.general
+    version: ">=7.0.0"
+  
+  - name: community.libvirt
+    version: ">=1.3.0"
+  
+  - name: fedora.linux_system_roles
+    version: ">=1.0.0"
+  
+  - name: ansible.netcommon
+    version: ">=5.0.0"
+
+roles:
+  # Linux System Roles for network configuration
+  - name: linux-system-roles.network
+    src: https://github.com/linux-system-roles/network
+    version: main
+
+  # Additional system roles if needed
+  - name: linux-system-roles.storage
+    src: https://github.com/linux-system-roles/storage
+    version: main
