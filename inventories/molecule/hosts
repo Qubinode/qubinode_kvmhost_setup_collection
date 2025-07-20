@@ -1,0 +1,29 @@
+# Molecule Test Inventory
+# This inventory is specifically for Molecule testing
+# It only includes the containerized test platforms, not the GitHub Actions runner
+
+[all]
+# Molecule platforms are defined in molecule.yml
+# This file provides group definitions for the test containers
+
+[kvm_hosts]
+# Test containers that will be configured as KVM hosts
+# These are defined as platforms in molecule/default/molecule.yml
+
+[edge_hosts]
+# Test containers for edge host validation
+
+[rhel9_compatible]
+# RHEL 9 compatible distributions (Rocky 9, Alma 9, RHEL 9)
+
+[rhel10_compatible]
+# RHEL 10 compatible distributions
+
+[rocky_linux]
+# Rocky Linux specific hosts
+
+[alma_linux]
+# AlmaLinux specific hosts
+
+[redhat_linux]
+# Red Hat Enterprise Linux specific hosts

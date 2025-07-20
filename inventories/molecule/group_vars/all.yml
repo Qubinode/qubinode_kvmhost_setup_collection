@@ -1,0 +1,79 @@
+---
+# Molecule Test Environment Variables
+# Configuration for containerized test environments
+# Based on inventories/github-actions/group_vars/all.yml but optimized for testing
+
+# System Configuration - Test Environment
+project_dir: /opt/qubinode-installer
+admin_user: root  # Containers run as root
+domain: molecule-test.example.com
+rhel_version: "9.0"
+rocky_version: "9.0"
+actual_os: "test"  # Mark as test environment
+
+# Test Environment Settings
+run_on_rhpds: false
+run_kni_lab_on_rhpds: false
+one_redhat: false
+ci_environment: true
+github_actions_runner: false  # This is NOT the runner, these are test targets
+runner_os: container
+target_os_family: "RedHat"
+target_distribution: "Rocky"  # Default for testing
+use_rocky_repos: true
+
+# EPEL Repository Configuration - Test Environment
+enable_epel: true  # Enable EPEL for testing
+epel_gpg_check: false  # Disable GPG verification for test containers
+epel_gpg_import_keys: true  # Import GPG keys for testing
+
+# Application Dependencies (minimal for testing)
+ansible_automation_platform: false
+enable_ceph_deployment: false
+
+# Networking Configuration (Test Environment)
+# Using minimal configuration for containers
+kvm_host_ip: 127.0.0.1
+kvm_host_netmask: 255.0.0.0
+kvm_host_gateway: 127.0.0.1
+kvm_host_gw: "{{ kvm_host_gateway }}"
+kvm_host_dns: 127.0.0.1
+kvm_host_bridge: virbr0
+kvm_host_interface: lo
+kvm_host_mac: "00:00:00:00:00:00"
+kvm_host_macaddr: "00:00:00:00:00:00"
+
+# Storage Configuration (Test Environment)
+# Minimal storage for container testing
+storage_pool_name: default
+storage_pool_path: /var/lib/libvirt/images
+storage_pool_type: dir
+
+# Required Packages (Container Testing optimized)
+# Minimal package set for testing in containers
+required_rpm_packages:
+  - python3
+  - python3-pip
+  - curl
+  - wget
+  - git
+  - net-tools
+  - bind-utils
+  - bash-completion
+  - vim
+
+# Service Configuration (Test Environment)
+# Minimal services for container testing
+base_services_enabled:
+  - NetworkManager
+
+# Testing Configuration
+cicd_test: true
+testing_mode: true
+container_environment: true
+
+# Skip hardware-dependent tasks in containers
+skip_hardware_tasks: true
+skip_virtualization_tasks: true
+skip_storage_tasks: true
+skip_networking_tasks: true
