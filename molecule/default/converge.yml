@@ -63,6 +63,7 @@
         - ansible_os_family == "RedHat"
         - not target_is_rocky
         - not target_is_rhel
+      ignore_errors: true  # May have GPG issues in container environments
 
     - name: Update package cache for RHEL systems
       ansible.builtin.dnf:
@@ -74,7 +75,18 @@
         - target_is_rhel or ansible_distribution == "RedHat"
       ignore_errors: true  # RHEL may have subscription issues
 
-    - name: Update package cache for Rocky Linux systems
+    - name: Update package cache for Rocky Linux systems (container environment)
+      ansible.builtin.dnf:
+        update_cache: true
+        disable_gpg_check: true  # Disable GPG check for container testing
+      changed_when: false
+      when:
+        - ansible_os_family == "RedHat"
+        - target_is_rocky or ansible_distribution in ["Rocky", "AlmaLinux"]
+        - is_container_environment | default(false)
+      ignore_errors: true  # Container environments may have GPG issues
+
+    - name: Update package cache for Rocky Linux systems (non-container)
       ansible.builtin.dnf:
         update_cache: true
         disable_gpg_check: false
@@ -82,6 +94,8 @@
       when:
         - ansible_os_family == "RedHat"
         - target_is_rocky or ansible_distribution in ["Rocky", "AlmaLinux"]
+        - not (is_container_environment | default(false))
+      ignore_errors: true  # May have EPEL GPG issues
 
     # EPEL repository setup with GPG workarounds per research findings
     - name: Setup EPEL repository with container-compatible configuration

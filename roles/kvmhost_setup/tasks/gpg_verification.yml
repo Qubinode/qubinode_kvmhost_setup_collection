@@ -126,9 +126,12 @@
 - name: Create GPG verification status report
   ansible.builtin.template:
     src: gpg_verification_report.j2
-    dest: /var/log/ansible-gpg-verification-{{ ansible_date_time.epoch }}.log
+    dest: /var/log/ansible-gpg-verification-status.log
     mode: "0644"
   become: true
+  when:
+    - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
+    - not (cicd_test | default(false))
   tags:
     - security
     - gpg_verification

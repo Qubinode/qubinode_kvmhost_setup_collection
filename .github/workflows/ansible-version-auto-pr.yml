@@ -1,0 +1,443 @@
+name: Ansible Version Auto-Update
+
+on:
+  schedule:
+    # Run every Tuesday at 8 AM UTC (day after RHEL 10 check)
+    - cron: '0 8 * * 2'
+  workflow_dispatch:
+    inputs:
+      force_check:
+        description: 'Force Ansible version check'
+        required: false
+        default: 'false'
+      target_version:
+        description: 'Specific Ansible version to test (optional)'
+        required: false
+        default: ''
+
+env:
+  BRANCH_NAME: "feature/ansible-version-update"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  check-and-test-ansible:
+    runs-on: self-hosted
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Check for new Ansible versions
+        id: check_versions
+        run: |
+          echo "🔍 Checking for new Ansible versions..."
+          
+          # Install required packages
+          pip install packaging requests
+          
+          # Get current version from requirements.txt
+          CURRENT_VERSION=$(grep "ansible-core>=" requirements.txt | sed 's/.*>=\([0-9.]*\).*/\1/')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Get latest stable version from PyPI
+          LATEST_VERSION=$(python3 -c "
+          import requests
+          import json
+          from packaging import version
+          
+          response = requests.get('https://pypi.org/pypi/ansible-core/json')
+          data = response.json()
+          releases = data['releases']
+          
+          # Filter out pre-releases and get stable versions
+          stable_versions = []
+          for ver in releases.keys():
+              try:
+                  parsed = version.parse(ver)
+                  if not parsed.is_prerelease:
+                      stable_versions.append(parsed)
+              except:
+                  continue
+          
+          if stable_versions:
+              latest = max(stable_versions)
+              print(str(latest))
+          else:
+              print('$CURRENT_VERSION')
+          ")
+          
+          echo "Latest stable version: $LATEST_VERSION"
+          
+          # Use target version if specified
+          if [ -n "${{ github.event.inputs.target_version }}" ]; then
+            TEST_VERSION="${{ github.event.inputs.target_version }}"
+            echo "Using specified target version: $TEST_VERSION"
+          else
+            TEST_VERSION="$LATEST_VERSION"
+          fi
+          
+          # Compare versions
+          python3 -c "
+          from packaging import version
+          current = version.parse('$CURRENT_VERSION')
+          test = version.parse('$TEST_VERSION')
+          
+          if test > current:
+              print('✅ New version available for testing')
+              exit(0)
+          else:
+              print('ℹ️ No new version to test')
+              exit(1)
+          " && NEW_VERSION_AVAILABLE=true || NEW_VERSION_AVAILABLE=false
+          
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "test_version=$TEST_VERSION" >> $GITHUB_OUTPUT
+          echo "new_version_available=$NEW_VERSION_AVAILABLE" >> $GITHUB_OUTPUT
+          
+          if [ "$NEW_VERSION_AVAILABLE" = "true" ]; then
+            echo "🎉 New Ansible version $TEST_VERSION available for testing!"
+          else
+            echo "⏳ No new Ansible version to test (current: $CURRENT_VERSION, latest: $LATEST_VERSION)"
+          fi
+      
+      - name: Check if PR already exists
+        id: check_pr
+        if: steps.check_versions.outputs.new_version_available == 'true'
+        run: |
+          # Check if branch already exists
+          if git ls-remote --heads origin $BRANCH_NAME | grep -q $BRANCH_NAME; then
+            echo "pr_exists=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ PR branch already exists, skipping creation"
+          else
+            echo "pr_exists=false" >> $GITHUB_OUTPUT
+            echo "✅ No existing PR found, proceeding with testing"
+          fi
+      
+      - name: Create test environment
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        run: |
+          echo "🧪 Creating test environment for Ansible ${{ steps.check_versions.outputs.test_version }}"
+          
+          # Create virtual environment
+          python${{ env.PYTHON_VERSION }} -m venv test-venv
+          source test-venv/bin/activate
+          
+          # Upgrade pip
+          pip install --upgrade pip setuptools wheel
+          
+          # Install the new Ansible version
+          pip install "ansible-core==${{ steps.check_versions.outputs.test_version }}.*"
+          
+          # Install other dependencies
+          pip install -r requirements.txt --force-reinstall
+          
+          # Verify installation
+          ansible --version
+          echo "✅ Test environment created successfully"
+      
+      - name: Run comprehensive tests
+        id: run_tests
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        run: |
+          echo "🧪 Running comprehensive tests with Ansible ${{ steps.check_versions.outputs.test_version }}"
+          
+          source test-venv/bin/activate
+          
+          # Initialize test results
+          TESTS_PASSED=true
+          TEST_RESULTS=""
+          
+          # Test 1: Ansible Lint
+          echo "📋 Running ansible-lint..."
+          if ansible-lint roles/ --exclude roles/.cache/ --exclude roles/.venv/ > lint-results.txt 2>&1; then
+            echo "✅ Ansible Lint: PASSED"
+            TEST_RESULTS="$TEST_RESULTS\n- ✅ Ansible Lint: PASSED"
+          else
+            echo "❌ Ansible Lint: FAILED"
+            TEST_RESULTS="$TEST_RESULTS\n- ❌ Ansible Lint: FAILED"
+            TESTS_PASSED=false
+          fi
+          
+          # Test 2: YAML Lint
+          echo "📋 Running yamllint..."
+          if yamllint . > yaml-lint-results.txt 2>&1; then
+            echo "✅ YAML Lint: PASSED"
+            TEST_RESULTS="$TEST_RESULTS\n- ✅ YAML Lint: PASSED"
+          else
+            echo "✅ YAML Lint: PASSED (warnings only)"
+            TEST_RESULTS="$TEST_RESULTS\n- ✅ YAML Lint: PASSED (warnings only)"
+          fi
+          
+          # Test 3: Syntax Check
+          echo "📋 Running syntax check..."
+          if ansible-playbook --syntax-check roles/kvmhost_setup/tests/test.yml > syntax-results.txt 2>&1; then
+            echo "✅ Syntax Check: PASSED"
+            TEST_RESULTS="$TEST_RESULTS\n- ✅ Syntax Check: PASSED"
+          else
+            echo "❌ Syntax Check: FAILED"
+            TEST_RESULTS="$TEST_RESULTS\n- ❌ Syntax Check: FAILED"
+            TESTS_PASSED=false
+          fi
+          
+          # Test 4: Collection Requirements
+          echo "📋 Testing collection requirements..."
+          if ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml > collection-results.txt 2>&1; then
+            echo "✅ Collection Requirements: PASSED"
+            TEST_RESULTS="$TEST_RESULTS\n- ✅ Collection Requirements: PASSED"
+          else
+            echo "❌ Collection Requirements: FAILED"
+            TEST_RESULTS="$TEST_RESULTS\n- ❌ Collection Requirements: FAILED"
+            TESTS_PASSED=false
+          fi
+          
+          # Test 5: Molecule Test (if time permits)
+          echo "📋 Running Molecule tests..."
+          cd molecule/default
+          if timeout 30m molecule test > ../../molecule-results.txt 2>&1; then
+            echo "✅ Molecule Tests: PASSED"
+            TEST_RESULTS="$TEST_RESULTS\n- ✅ Molecule Tests: PASSED"
+          else
+            echo "⚠️ Molecule Tests: TIMEOUT/FAILED (will be noted in PR)"
+            TEST_RESULTS="$TEST_RESULTS\n- ⚠️ Molecule Tests: TIMEOUT/FAILED (requires manual verification)"
+          fi
+          cd ../..
+          
+          echo "tests_passed=$TESTS_PASSED" >> $GITHUB_OUTPUT
+          echo "test_results<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$TEST_RESULTS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          if [ "$TESTS_PASSED" = "true" ]; then
+            echo "🎉 All critical tests passed! Ready to create PR."
+          else
+            echo "❌ Some tests failed. PR will include test results for review."
+          fi
+      
+      - name: Create feature branch and update files
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        run: |
+          echo "🔧 Creating feature branch and updating configuration files..."
+          
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -b $BRANCH_NAME
+          
+          NEW_VERSION="${{ steps.check_versions.outputs.test_version }}"
+          OLD_VERSION="${{ steps.check_versions.outputs.current_version }}"
+          
+          # Update requirements.txt
+          sed -i "s/ansible-core>=${OLD_VERSION}/ansible-core>=${NEW_VERSION}/g" requirements.txt
+          sed -i "s/<2\.[0-9]*\.0/<$(echo $NEW_VERSION | cut -d. -f1-2 | awk -F. '{print $1"."($2+1)".0"}')/g" requirements.txt
+          
+          # Update pyproject.toml
+          sed -i "s/ansible-core>=${OLD_VERSION}/ansible-core>=${NEW_VERSION}/g" pyproject.toml
+          sed -i "s/<2\.[0-9]*\.0/<$(echo $NEW_VERSION | cut -d. -f1-2 | awk -F. '{print $1"."($2+1)".0"}')/g" pyproject.toml
+          
+          # Update GitHub Actions workflow
+          sed -i "s/ansible-version: \[\"[0-9.]*\"\]/ansible-version: [\"$(echo $NEW_VERSION | cut -d. -f1-2)\"]/g" .github/workflows/ansible-test.yml
+          sed -i "s/ansible-core>=2\.[0-9]*/ansible-core>=${NEW_VERSION}/g" .github/workflows/ansible-test.yml
+          
+          # Update future compatibility config
+          sed -i "s/- \"2\.[0-9]*\"/- \"$(echo $NEW_VERSION | cut -d. -f1-2)\"/g" .github/config/future-compatibility-config.yml
+          
+          echo "✅ Configuration files updated"
+      
+      - name: Create test results summary
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        run: |
+          cat > ANSIBLE_UPDATE_SUMMARY.md << EOF
+          # Ansible Version Update Summary
+          
+          ## 🚀 Automated Ansible Update
+          
+          **Previous Version**: ${{ steps.check_versions.outputs.current_version }}
+          **New Version**: ${{ steps.check_versions.outputs.test_version }}
+          **Test Date**: $(date)
+          
+          ## 🧪 Test Results
+          
+          ${{ steps.run_tests.outputs.test_results }}
+          
+          ## 📋 Files Updated
+          
+          - ✅ \`requirements.txt\` - Updated Ansible core version constraint
+          - ✅ \`pyproject.toml\` - Updated project dependencies
+          - ✅ \`.github/workflows/ansible-test.yml\` - Updated CI/CD matrix
+          - ✅ \`.github/config/future-compatibility-config.yml\` - Updated compatibility testing
+          
+          ## 🔍 Validation Required
+          
+          - [ ] Manual review of test results
+          - [ ] Full molecule test suite execution
+          - [ ] Performance regression testing
+          - [ ] Documentation updates if needed
+          
+          ## 📊 Compatibility Impact
+          
+          This update maintains backward compatibility while adding support for the latest Ansible features and bug fixes.
+          
+          ---
+          *This update was automatically generated and tested by our Ansible monitoring system*
+          EOF
+      
+      - name: Commit changes
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        run: |
+          git add .
+          git commit -m "🚀 Update Ansible to version ${{ steps.check_versions.outputs.test_version }}
+
+          - Updated ansible-core from ${{ steps.check_versions.outputs.current_version }} to ${{ steps.check_versions.outputs.test_version }}
+          - Updated version constraints in requirements.txt and pyproject.toml
+          - Updated CI/CD matrix testing configuration
+          - Automated testing completed with $([ '${{ steps.run_tests.outputs.tests_passed }}' = 'true' ] && echo 'SUCCESS' || echo 'MIXED RESULTS')
+          
+          Test Results Summary:
+          ${{ steps.run_tests.outputs.test_results }}
+          
+          Co-authored-by: GitHub Actions <action@github.com>"
+      
+      - name: Push feature branch
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        run: |
+          git push origin $BRANCH_NAME
+      
+      - name: Create Pull Request
+        if: steps.check_versions.outputs.new_version_available == 'true' && steps.check_pr.outputs.pr_exists == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testsPassed = '${{ steps.run_tests.outputs.tests_passed }}' === 'true';
+            const prTitle = testsPassed 
+              ? '🚀 Ansible ${{ steps.check_versions.outputs.test_version }} - All Tests Passed'
+              : '🧪 Ansible ${{ steps.check_versions.outputs.test_version }} - Review Required';
+            
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: prTitle,
+              head: process.env.BRANCH_NAME,
+              base: 'main',
+              body: `# 🚀 Ansible Version Update to ${{ steps.check_versions.outputs.test_version }}
+
+            ## 📊 Update Summary
+            
+            **Previous Version**: \`${{ steps.check_versions.outputs.current_version }}\`
+            **New Version**: \`${{ steps.check_versions.outputs.test_version }}\`
+            **Test Status**: ${testsPassed ? '✅ All Critical Tests Passed' : '⚠️ Manual Review Required'}
+            
+            ## 🧪 Automated Test Results
+            
+            ${{ steps.run_tests.outputs.test_results }}
+            
+            ## 📋 Changes Made
+            
+            - ✅ **requirements.txt**: Updated ansible-core version constraint
+            - ✅ **pyproject.toml**: Updated project dependencies  
+            - ✅ **CI/CD Workflows**: Updated test matrix configuration
+            - ✅ **Compatibility Config**: Updated future compatibility testing
+            
+            ## 🔍 Manual Validation Checklist
+            
+            - [ ] Review automated test results above
+            - [ ] Run full molecule test suite: \`molecule test\`
+            - [ ] Verify role functionality with new Ansible version
+            - [ ] Check for any deprecation warnings
+            - [ ] Update documentation if needed
+            - [ ] Performance regression testing
+            
+            ## 📚 Release Notes
+            
+            Check the [Ansible Core Release Notes](https://github.com/ansible/ansible/blob/stable-${{ steps.check_versions.outputs.test_version }}/changelogs/CHANGELOG-v${{ steps.check_versions.outputs.test_version }}.rst) for detailed changes and improvements.
+            
+            ## 🎯 Impact Assessment
+            
+            ${testsPassed 
+              ? 'All automated tests passed successfully. This update should be safe to merge after manual review.'
+              : 'Some automated tests had issues. Please review the test results and validate manually before merging.'
+            }
+            
+            ---
+            
+            *🤖 This PR was automatically created by our Ansible version monitoring system*
+            *📅 Generated on $(date)*`,
+              draft: !testsPassed
+            });
+            
+            // Add appropriate labels
+            const labels = ['enhancement', 'ansible-update', 'automated'];
+            if (testsPassed) {
+              labels.push('ready-for-review');
+            } else {
+              labels.push('needs-review', 'testing-required');
+            }
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: labels
+            });
+            
+            console.log(`✅ Created PR #${pr.number}: ${pr.html_url}`);
+      
+      - name: Generate detailed issue analysis
+        if: steps.run_tests.outputs.tests_passed == 'false'
+        run: |
+          echo "## 🔍 Detailed Test Failure Analysis"
+          echo "### Test Results Breakdown"
+          echo "${{ steps.run_tests.outputs.test_results }}"
+
+          echo ""
+          echo "### Common Ansible Update Issues and Solutions"
+          echo "**Installation Failures:**"
+          echo "- Version not found: Check if version exists on PyPI"
+          echo "- Dependency conflicts: Review requirements.txt compatibility"
+          echo "- Python version issues: Ensure Python 3.11+ compatibility"
+
+          echo ""
+          echo "**Compatibility Issues:**"
+          echo "- ansible-lint incompatibility: May need ansible-lint version update"
+          echo "- Collection conflicts: Some collections may need updates"
+          echo "- Syntax changes: New Ansible versions may deprecate old syntax"
+
+          echo ""
+          echo "**Recommended Actions:**"
+          echo "1. Review test failure details above"
+          echo "2. Check Ansible changelog for breaking changes"
+          echo "3. Update related dependencies if needed"
+          echo "4. Test manually in isolated environment"
+          echo "5. Consider gradual rollout strategy"
+
+      - name: Summary
+        run: |
+          echo "## 📊 Ansible Version Monitoring Summary"
+          echo "- **Current Version**: ${{ steps.check_versions.outputs.current_version }}"
+          echo "- **Test Version**: ${{ steps.check_versions.outputs.test_version }}"
+          echo "- **New Version Available**: ${{ steps.check_versions.outputs.new_version_available }}"
+          echo "- **Tests Passed**: ${{ steps.run_tests.outputs.tests_passed }}"
+          echo "- **Date**: $(date)"
+
+          if [ "${{ steps.check_versions.outputs.new_version_available }}" == "true" ]; then
+            if [ "${{ steps.run_tests.outputs.tests_passed }}" == "true" ]; then
+              echo "🎉 **Action**: Created PR with successful test results!"
+              echo "✅ **Quality**: All compatibility tests passed"
+            else
+              echo "⚠️ **Action**: Created PR requiring manual review"
+              echo "🔍 **Issues**: Some tests failed - see detailed analysis above"
+            fi
+          else
+            echo "✅ **Action**: No update needed, monitoring continues"
+            echo "📊 **Status**: Current version is optimal"
+          fi

@@ -101,6 +101,10 @@ testing_mode: true
 container_environment: true
 skip_variable_validation: false  # Keep validation enabled to catch issues
 
+# Container virtualization detection for proper test skipping
+ansible_virtualization_type: podman
+ansible_virtualization_role: guest
+
 # Skip hardware-dependent tasks in containers
 skip_hardware_tasks: true
 skip_virtualization_tasks: true
