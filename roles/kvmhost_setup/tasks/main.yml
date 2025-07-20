@@ -31,7 +31,8 @@
     - package_install_result.failed
     - "'No package' not in (package_install_result.msg | default(''))"
     - "'GPG' not in (package_install_result.msg | default(''))" # Allow GPG-related failures
-    - not (kvmhost_is_rhel10 | default(false) and is_container_environment | default(false)) # RHEL 10 container exception
+    # RHEL 10 container exception - allow failures in container environments
+    - not (kvmhost_is_rhel10 | default(false) and is_container_environment | default(false))
   ignore_errors: true
   tags:
     - security
