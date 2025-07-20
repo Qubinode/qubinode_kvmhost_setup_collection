@@ -114,6 +114,64 @@
         - ansible_service_mgr == "systemd"
         - ansible_virtualization_type == "container"
 
+    # Install required Ansible collections and roles into containers
+    - name: Install Ansible collections and roles for testing
+      block:
+        - name: Install pip packages for Ansible collection management
+          pip:
+            name:
+              - ansible-core
+              - requests
+            state: present
+          ignore_errors: true
+
+        - name: Install required Ansible collections
+          ansible.builtin.command:
+            cmd: ansible-galaxy collection install {{ item }}
+          loop:
+            - ansible.posix
+            - community.general
+            - community.libvirt
+            - fedora.linux_system_roles
+            - ansible.netcommon
+          ignore_errors: true
+          changed_when: false
+
+        - name: Install linux-system-roles.network role
+          ansible.builtin.command:
+            cmd: ansible-galaxy role install linux-system-roles.network
+          ignore_errors: true
+          changed_when: false
+
+        - name: Verify collections installation
+          ansible.builtin.command:
+            cmd: ansible-galaxy collection list
+          register: installed_collections
+          ignore_errors: true
+          changed_when: false
+
+        - name: Display installed collections
+          debug:
+            msg: "Installed collections: {{ installed_collections.stdout_lines | default(['None']) }}"
+
+        - name: Verify roles installation
+          ansible.builtin.command:
+            cmd: ansible-galaxy role list
+          register: installed_roles
+          ignore_errors: true
+          changed_when: false
+
+        - name: Display installed roles
+          debug:
+            msg: "Installed roles: {{ installed_roles.stdout_lines | default(['None']) }}"
+
+      rescue:
+        - name: Log collection installation failure
+          debug:
+            msg: |
+              Collection/role installation failed - this may cause some tests to fail.
+              Consider pre-building containers with collections installed.
+
     - name: Create testing marker file
       file:
         path: /tmp/molecule-prepare-complete

@@ -51,6 +51,12 @@ RUN useradd -m -s /bin/bash molecule && \
 # Set up Python symlinks if needed
 RUN if [ ! -e /usr/bin/python ]; then ln -sf /usr/bin/python3 /usr/bin/python; fi
 
+# Install Ansible and required collections for testing
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install ansible-core requests && \
+    ansible-galaxy collection install ansible.posix community.general community.libvirt fedora.linux_system_roles ansible.netcommon && \
+    ansible-galaxy role install linux-system-roles.network || true
+
 # Set working directory
 WORKDIR /tmp
 

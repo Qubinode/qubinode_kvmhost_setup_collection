@@ -11,4 +11,6 @@ RUN useradd -m -s /bin/bash molecule && \
 
 # Install Ansible and dependencies
 RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install "ansible>=2.13,<2.16" molecule podman
+    python3 -m pip install "ansible-core>=2.18.0" molecule podman requests && \
+    ansible-galaxy collection install ansible.posix community.general community.libvirt fedora.linux_system_roles ansible.netcommon && \
+    ansible-galaxy role install linux-system-roles.network || true

@@ -163,11 +163,11 @@ jobs:
             fi
           fi
 
-          # Setup Python virtual environment
+          # Setup Python virtual environment with Python 3.11
           python3.11 -m pip install --upgrade pip
           python3.11 -m pip install virtualenv
-          python3.11 -m virtualenv venv
-          source venv/bin/activate
+          python3.11 -m virtualenv venv-py311
+          source venv-py311/bin/activate
       - name: Setup SELinux for CI environment
         run: |
           source venv/bin/activate
@@ -179,10 +179,18 @@ jobs:
           source venv/bin/activate
           # Use ansible-core 2.18+ for Python 3.11 compatibility (fixes SELinux binding issues)
           pip install ansible-lint>=6.0.0 bandit>=1.7.0 "ansible-core>=2.18.0,<2.19.0"
-      - name: Install required Ansible collections
+      - name: Install required Ansible collections and roles
         run: |
           source venv/bin/activate
+          # Install collections and roles from main requirements file
+          ansible-galaxy install -r requirements.yml
+          # Also install from collection-specific requirements
           ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
+          # Verify installations
+          echo "📋 Installed collections:"
+          ansible-galaxy collection list
+          echo "📋 Installed roles:"
+          ansible-galaxy role list
       - name: Run ansible-lint
         run: |
           source venv/bin/activate
@@ -638,8 +646,19 @@ jobs:
           ANSIBLE_VERBOSITY: "2"
           # Disable SELinux checks if bindings are problematic
           LIBSELINUX_DISABLE_SELINUX_CHECK: "1"
+      - name: Install collections for playbook testing
+        run: |
+          source venv/bin/activate
+          # Ensure collections are available for playbook testing
+          ansible-galaxy install -r requirements.yml
+          echo "📋 Collections available for playbook testing:"
+          ansible-galaxy collection list
+          echo "📋 Roles available for playbook testing:"
+          ansible-galaxy role list
+
       - name: Run Playbook tests
         run: |
+          source venv/bin/activate
           # Use auto detection for Python interpreter in containers
           export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           # Handle SELinux gracefully in containerized environments
