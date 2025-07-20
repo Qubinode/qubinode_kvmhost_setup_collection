@@ -61,10 +61,12 @@
         - enable_epel | default(true)
         - epel_gpg_import_keys | default(true)
         - ansible_os_family == "RedHat"
-      ignore_errors: true
+      failed_when: false  # Allow failure if GPG key file doesn't exist
 
     - name: Verify EPEL repository status
-      ansible.builtin.shell: "{{ ansible_pkg_mgr }} repolist enabled | grep -i epel"
+      ansible.builtin.shell: |
+        set -o pipefail
+        {{ ansible_pkg_mgr }} repolist enabled | grep -i epel
       register: epel_status
       changed_when: false
       failed_when: false
