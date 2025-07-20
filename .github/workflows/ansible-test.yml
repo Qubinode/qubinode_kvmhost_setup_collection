@@ -94,9 +94,14 @@ jobs:
             echo "Importing EPEL GPG key..."
             sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
 
-            # Remove and reinstall EPEL cleanly
+            # Remove and reinstall EPEL cleanly with --nogpgcheck for Rocky Linux
             sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
-            sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed, continuing without EPEL"
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux EPEL installation"
+              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed, continuing without EPEL"
+            else
+              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed, continuing without EPEL"
+            fi
 
             # Configure GPG verification based on input flag
             if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
@@ -125,8 +130,14 @@ jobs:
           if [[ "$PYTHON_INSTALLED" == "false" ]]; then
             if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
               echo "Installing Python packages for Rocky/Alma Linux..."
-              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              if [[ "$ID" == "rocky" ]]; then
+                echo "Using --nogpgcheck for Rocky Linux package installation"
+                sudo $PKG_MGR install -y --nogpgcheck python3.11 python3.11-devel python3.11-pip
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
             elif [[ "$ID" == "rhel" ]]; then
               echo "Installing Python packages for RHEL..."
               sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
@@ -140,7 +151,11 @@ jobs:
             echo "Skipping Python 3.11 installation (already installed)"
             # Still install SELinux packages if needed
             if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              if [[ "$ID" == "rocky" ]]; then
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
             elif [[ "$ID" == "rhel" ]]; then
               sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
             else
@@ -258,8 +273,14 @@ jobs:
           if [[ "$PYTHON_INSTALLED" == "false" ]]; then
             if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
               echo "Installing Python packages for Rocky/Alma Linux..."
-              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              if [[ "$ID" == "rocky" ]]; then
+                echo "Using --nogpgcheck for Rocky Linux package installation"
+                sudo $PKG_MGR install -y --nogpgcheck python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
             elif [[ "$ID" == "rhel" ]]; then
               echo "Installing Python packages for RHEL..."
               sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
@@ -273,7 +294,11 @@ jobs:
             echo "Skipping Python ${{ matrix.python-version }} installation (already installed)"
             # Still install SELinux packages if needed
             if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              if [[ "$ID" == "rocky" ]]; then
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
             elif [[ "$ID" == "rhel" ]]; then
               sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
             else
@@ -722,8 +747,14 @@ jobs:
           if [[ "$PYTHON_INSTALLED" == "false" ]]; then
             if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
               echo "Installing Python packages for Rocky/Alma Linux..."
-              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              if [[ "$ID" == "rocky" ]]; then
+                echo "Using --nogpgcheck for Rocky Linux package installation"
+                sudo $PKG_MGR install -y --nogpgcheck python3.11 python3.11-devel python3.11-pip
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
             elif [[ "$ID" == "rhel" ]]; then
               echo "Installing Python packages for RHEL..."
               sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
@@ -737,7 +768,11 @@ jobs:
             echo "Skipping Python 3.11 installation (already installed)"
             # Still install SELinux packages if needed
             if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              if [[ "$ID" == "rocky" ]]; then
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
             elif [[ "$ID" == "rhel" ]]; then
               sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
             else

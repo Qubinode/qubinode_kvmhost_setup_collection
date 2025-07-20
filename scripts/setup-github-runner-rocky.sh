@@ -128,7 +128,12 @@ install_system_deps() {
             rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || warn "Failed to import EPEL GPG key"
 
             # Install EPEL repository
-            $PKG_MGR install -y epel-release || warn "EPEL repository not available"
+            if [[ $OS == "rocky" ]]; then
+                info "Using --nogpgcheck for Rocky Linux EPEL installation"
+                $PKG_MGR install -y --nogpgcheck epel-release || warn "EPEL repository not available"
+            else
+                $PKG_MGR install -y epel-release || warn "EPEL repository not available"
+            fi
         fi
 
         # Enable CRB/PowerTools repository for development packages
