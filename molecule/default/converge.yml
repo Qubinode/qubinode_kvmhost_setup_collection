@@ -1,6 +1,6 @@
 ---
 - name: Converge - KVM Host Setup Testing
-  hosts: all:!localhost
+  hosts: all:!localhost:!rocky-runner
   become: true
   gather_facts: true
   vars:
