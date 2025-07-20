@@ -95,7 +95,53 @@ If you encounter EPEL GPG verification errors, you can:
    epel_gpg_check: false
    ```
 
-3. **Check the ADR documentation**: See `docs/adr/ADR-0012-EPEL-REPOSITORY-MANAGEMENT.md` for detailed information.
+3. **Check the ADR documentation**:
+   - EPEL Repository Management: `docs/adr/ADR-0012-EPEL-REPOSITORY-MANAGEMENT.md`
+   - GitHub Actions Runner Setup: `docs/adr/ADR-0013-GITHUB-ACTIONS-RUNNER-SETUP.md`
+
+## GitHub Actions Self-Hosted Runner Setup
+
+This collection is designed to work with GitHub Actions self-hosted runners on RHEL-based systems.
+
+### Recommended Runner Configuration
+
+**🥇 Primary Recommendation: Rocky Linux 9.x**
+- Free and open-source
+- RHEL-compatible without subscription requirements
+- Reliable EPEL repository access
+- Excellent for CI/CD environments
+
+**🥈 Alternative Options:**
+- AlmaLinux 9.x (identical setup to Rocky Linux)
+- RHEL 9.x (requires active subscription)
+- CentOS Stream 9 (rolling release, more maintenance)
+
+### Quick Setup
+
+```bash
+# For Rocky Linux, AlmaLinux, RHEL, or CentOS Stream
+sudo ./scripts/setup-github-runner-rocky.sh
+
+# The script automatically:
+# ✅ Detects your distribution
+# ✅ Installs Python 3.11 and dependencies
+# ✅ Configures EPEL repository
+# ✅ Sets up Podman for testing
+# ✅ Installs Ansible and Molecule
+```
+
+### System Requirements
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **CPU** | 2 cores | 4+ cores |
+| **RAM** | 4 GB | 8+ GB |
+| **Storage** | 20 GB | 50+ GB |
+| **OS** | RHEL-based 8+ | Rocky Linux 9.x |
+
+For detailed setup instructions and troubleshooting, see:
+- **Setup Guide**: `scripts/README.md`
+- **Architecture Decision**: `docs/adr/ADR-0013-GITHUB-ACTIONS-RUNNER-SETUP.md`
 
 # Collection directories and files Reference
 https://docs.ansible.com/ansible/latest/dev_guide/developing_collections_structure.html#collection-directories-and-files

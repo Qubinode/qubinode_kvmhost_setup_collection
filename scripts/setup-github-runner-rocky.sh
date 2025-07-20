@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# GitHub Self-Hosted Runner Setup Script for Rocky Linux / CentOS Stream
-# Optimized for Rocky Linux 9, CentOS Stream 9/10, and RHEL derivatives
+# GitHub Self-Hosted Runner Setup Script for RHEL-Based Systems
+# Supports Rocky Linux, AlmaLinux, RHEL, and CentOS Stream
+# See docs/adr/ADR-0013-GITHUB-ACTIONS-RUNNER-SETUP.md for detailed guidance
 
 set -euo pipefail
 
@@ -48,6 +49,10 @@ detect_os() {
         OS="rocky"
         VERSION=$(grep -oE '[0-9]+' /etc/rocky-release | head -1)
         VARIANT="Rocky Linux"
+    elif [[ -f /etc/almalinux-release ]]; then
+        OS="almalinux"
+        VERSION=$(grep -oE '[0-9]+' /etc/almalinux-release | head -1)
+        VARIANT="AlmaLinux"
     elif [[ -f /etc/centos-release ]]; then
         if grep -q "Stream" /etc/centos-release; then
             OS="centos-stream"
@@ -80,7 +85,7 @@ detect_os() {
     info "Detected OS: ${VARIANT} ${VERSION}"
     
     # Set package manager
-    if [[ $OS =~ ^(rocky|centos|centos-stream|rhel|rhel-derivative)$ ]]; then
+    if [[ $OS =~ ^(rocky|almalinux|centos|centos-stream|rhel|rhel-derivative)$ ]]; then
         PKG_MGR="dnf"
         if ! command -v dnf &> /dev/null; then
             PKG_MGR="yum"
@@ -96,17 +101,38 @@ detect_os() {
 install_system_deps() {
     info "Installing system dependencies for ${VARIANT}..."
     
-    if [[ $OS =~ ^(rocky|centos|centos-stream|rhel|rhel-derivative)$ ]]; then
+    if [[ $OS =~ ^(rocky|almalinux|centos|centos-stream|rhel|rhel-derivative)$ ]]; then
+        # Display distribution-specific guidance
+        case $OS in
+            "rocky")
+                info "✅ Rocky Linux detected - Recommended distribution for GitHub Actions runners"
+                ;;
+            "almalinux")
+                info "✅ AlmaLinux detected - Excellent alternative to Rocky Linux"
+                ;;
+            "rhel")
+                info "⚠️  RHEL detected - Ensure active subscription for repository access"
+                ;;
+            "centos-stream")
+                info "⚠️  CentOS Stream detected - Rolling release, more frequent updates needed"
+                ;;
+        esac
+
         # Update system
         $PKG_MGR update -y
-        
+
         # Install EPEL repository (if available)
         if [[ $VERSION -ge 8 ]]; then
+            # Import EPEL GPG key first
+            info "Importing EPEL GPG key..."
+            rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || warn "Failed to import EPEL GPG key"
+
+            # Install EPEL repository
             $PKG_MGR install -y epel-release || warn "EPEL repository not available"
         fi
-        
+
         # Enable CRB/PowerTools repository for development packages
-        if [[ $OS == "rocky" ]] || [[ $OS == "centos-stream" ]]; then
+        if [[ $OS == "rocky" ]] || [[ $OS == "almalinux" ]] || [[ $OS == "centos-stream" ]]; then
             if [[ $VERSION -ge 9 ]]; then
                 $PKG_MGR config-manager --set-enabled crb || warn "CRB repository not available"
             elif [[ $VERSION -eq 8 ]]; then
@@ -144,8 +170,14 @@ install_system_deps() {
             skopeo \
             containers-common
             
-        # Python 3.11 installation
-        install_python_rocky_centos
+        # Python 3.11 installation (check if already installed first)
+        if command -v python3.11 &> /dev/null; then
+            info "Python 3.11 is already installed: $(python3.11 --version)"
+            PYTHON_VERSION="3.11"
+        else
+            info "Python 3.11 not found, installing..."
+            install_python_rocky_centos
+        fi
         
     elif [[ $OS == "debian" ]]; then
         # Debian/Ubuntu installation
