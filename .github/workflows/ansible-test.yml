@@ -26,6 +26,11 @@ on:
         - lint-only
         - molecule-only
         - security-only
+      enable_epel_gpg:
+        description: 'Enable GPG verification for EPEL repositories'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -77,17 +82,29 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Handle EPEL repository GPG issues for Rocky/Alma Linux
+          # Configure EPEL repository for Rocky/Alma Linux
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Fixing EPEL repository GPG issues for Rocky/Alma Linux..."
-            # Clean metadata and disable GPG check for EPEL
-            sudo $PKG_MGR clean metadata || true
-            # Disable GPG checking for EPEL repository in CI environment
-            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            # Alternative: use dnf config-manager if available
-            sudo $PKG_MGR config-manager --save --setopt=epel.gpgcheck=0 2>/dev/null || true
-            sudo $PKG_MGR config-manager --save --setopt=epel-next.gpgcheck=0 2>/dev/null || true
-            echo "EPEL GPG verification disabled for CI environment"
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            # Clean all metadata and cache
+            sudo $PKG_MGR clean all || true
+            # Remove corrupted EPEL metadata
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Reinstall EPEL cleanly
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed, continuing without EPEL"
+
+            # Configure GPG verification based on input flag
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+              sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+
+            # Refresh metadata
+            sudo $PKG_MGR makecache || true
+            echo "EPEL repository configuration completed"
           fi
 
           # Install Python 3.11 and development packages
@@ -182,12 +199,19 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Handle EPEL repository GPG issues for Rocky/Alma Linux
+          # Configure EPEL repository for Rocky/Alma Linux
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Fixing EPEL repository GPG issues for Rocky/Alma Linux..."
-            sudo $PKG_MGR clean metadata || true
-            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            sudo $PKG_MGR config-manager --save --setopt=epel.gpgcheck=0 2>/dev/null || true
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Configure GPG verification based on input flag
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+            sudo $PKG_MGR makecache || true
           fi
 
           # Install Python and development packages based on OS
@@ -613,12 +637,19 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Handle EPEL repository GPG issues for Rocky/Alma Linux
+          # Configure EPEL repository for Rocky/Alma Linux
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Fixing EPEL repository GPG issues for Rocky/Alma Linux..."
-            sudo $PKG_MGR clean metadata || true
-            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            sudo $PKG_MGR config-manager --save --setopt=epel.gpgcheck=0 2>/dev/null || true
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Configure GPG verification based on input flag
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+            sudo $PKG_MGR makecache || true
           fi
 
           # Install Python 3.11 and development packages for security scanning

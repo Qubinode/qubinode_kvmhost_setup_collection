@@ -13,6 +13,13 @@
     - always
     - validation
 
+- name: Base Configuration - EPEL Repository Management
+  ansible.builtin.include_tasks: epel_management.yml
+  tags:
+    - epel
+    - repositories
+    - package-management
+
 - name: Base Configuration - Package Management
   ansible.builtin.include_tasks: packages.yml
   tags:

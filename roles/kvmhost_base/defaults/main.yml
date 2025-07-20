@@ -17,6 +17,9 @@ supported_major_versions:
   - "9"
   - "10"
 
+# EPEL Repository Configuration (enhanced)
+# Controls EPEL repository installation and GPG verification
+
 # Base package management
 base_packages_common:
   - curl
@@ -38,9 +41,11 @@ base_packages_rhel_family:
   - NetworkManager
   - firewalld
 
-# Repository configuration
-enable_epel: true
-epel_installation_method: dnf_module # ADR-0001 compliant
+# Repository configuration (enhanced with GPG control)
+enable_epel: true  # Enable EPEL repository installation
+epel_installation_method: dnf_module  # ADR-0001 compliant
+epel_gpg_check: false  # Disable GPG verification by default (CI-friendly)
+epel_gpg_import_keys: true  # Import GPG keys for optional future use
 
 # Service management
 base_services_enabled:

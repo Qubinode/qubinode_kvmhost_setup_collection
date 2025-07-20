@@ -23,6 +23,11 @@ target_os_family: "RedHat"  # Rocky is RedHat family
 target_distribution: "Rocky"  # But specifically Rocky Linux
 use_rocky_repos: true  # Use Rocky Linux repositories, not RHEL
 
+# EPEL Repository Configuration
+enable_epel: true  # Enable EPEL repository
+epel_gpg_check: false  # Disable GPG verification for EPEL (default for CI)
+epel_gpg_import_keys: true  # Import GPG keys (for optional future use)
+
 # Application Dependencies (minimal for CI)
 ansible_automation_platform: false
 enable_ceph_deployment: false

@@ -40,7 +40,64 @@ Role Variables
 | cockpit_packages | default packages for cockpit |
 | cicd_test | set to true to test in container |
 
-# Collection directories and files Reference 
+## EPEL Repository Configuration
+
+This collection supports configurable EPEL (Extra Packages for Enterprise Linux) repository management with optional GPG verification control.
+
+### EPEL Configuration Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `enable_epel` | `true` | Enable EPEL repository installation |
+| `epel_gpg_check` | `false` | Enable/disable GPG verification for EPEL packages |
+| `epel_gpg_import_keys` | `true` | Import EPEL GPG keys for optional future use |
+
+### Configuration Examples
+
+#### CI/CD Environment (Default - GPG Disabled)
+```yaml
+enable_epel: true
+epel_gpg_check: false
+epel_gpg_import_keys: true
+```
+
+#### Production Environment (GPG Enabled)
+```yaml
+enable_epel: true
+epel_gpg_check: true
+epel_gpg_import_keys: true
+```
+
+#### Minimal Environment (No EPEL)
+```yaml
+enable_epel: false
+```
+
+### GitHub Actions Configuration
+
+The GitHub Actions workflow supports an optional input parameter to control EPEL GPG verification:
+
+- **Parameter**: `enable_epel_gpg`
+- **Default**: `false`
+- **Description**: Enable GPG verification for EPEL repositories
+
+### Troubleshooting EPEL Issues
+
+If you encounter EPEL GPG verification errors, you can:
+
+1. **Use the manual cleanup script**:
+   ```bash
+   sudo ./scripts/fix-epel-on-runner.sh
+   ```
+
+2. **Disable GPG verification** (for CI/CD environments):
+   ```yaml
+   epel_gpg_check: false
+   ```
+
+3. **Check the ADR documentation**: See `docs/adr/ADR-0012-EPEL-REPOSITORY-MANAGEMENT.md` for detailed information.
+
+# Collection directories and files Reference
 https://docs.ansible.com/ansible/latest/dev_guide/developing_collections_structure.html#collection-directories-and-files
 ```
 collection/
