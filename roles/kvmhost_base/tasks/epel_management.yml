@@ -1,0 +1,98 @@
+# EPEL Repository Management Tasks
+# Handles EPEL repository installation and GPG configuration
+# Supports optional GPG verification control
+
+- name: EPEL Repository Management
+  tags:
+    - epel
+    - repositories
+    - package-management
+  block:
+    - name: Display EPEL configuration
+      ansible.builtin.debug:
+        msg: |
+          EPEL Configuration:
+          - Enable EPEL: {{ enable_epel | default(true) }}
+          - GPG Check: {{ epel_gpg_check | default(false) }}
+          - Import GPG Keys: {{ epel_gpg_import_keys | default(true) }}
+          - OS Family: {{ ansible_os_family }}
+          - Distribution: {{ ansible_distribution }}
+
+    - name: Install EPEL repository
+      ansible.builtin.package:
+        name: epel-release
+        state: present
+      become: true
+      when:
+        - enable_epel | default(true)
+        - ansible_os_family == "RedHat"
+        - ansible_distribution in ["Rocky", "AlmaLinux", "CentOS", "RedHat"]
+
+    - name: Clean EPEL metadata cache
+      ansible.builtin.shell: |
+        {{ ansible_pkg_mgr }} clean metadata
+        rm -rf /var/cache/{{ ansible_pkg_mgr }}/epel* 2>/dev/null || true
+      become: true
+      when:
+        - enable_epel | default(true)
+        - ansible_os_family == "RedHat"
+      changed_when: false
+
+    - name: Configure EPEL GPG verification
+      ansible.builtin.replace:
+        path: "{{ item }}"
+        regexp: 'gpgcheck=1'
+        replace: "gpgcheck={{ '1' if epel_gpg_check | default(false) else '0' }}"
+        backup: true
+      become: true
+      with_fileglob:
+        - "/etc/yum.repos.d/epel*.repo"
+      when:
+        - enable_epel | default(true)
+        - ansible_os_family == "RedHat"
+      notify: refresh package cache
+
+    - name: Import EPEL GPG keys
+      ansible.builtin.rpm_key:
+        key: /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
+        state: present
+      become: true
+      when:
+        - enable_epel | default(true)
+        - epel_gpg_import_keys | default(true)
+        - ansible_os_family == "RedHat"
+      ignore_errors: true
+
+    - name: Verify EPEL repository status
+      ansible.builtin.shell: "{{ ansible_pkg_mgr }} repolist enabled | grep -i epel"
+      register: epel_status
+      changed_when: false
+      failed_when: false
+      when:
+        - enable_epel | default(true)
+        - ansible_os_family == "RedHat"
+
+    - name: Display EPEL repository status
+      ansible.builtin.debug:
+        msg: |
+          EPEL Repository Status:
+          {% if epel_status.rc == 0 %}
+          ✅ EPEL repository is enabled and accessible
+          {% else %}
+          ❌ EPEL repository is not accessible
+          {% endif %}
+          GPG Verification: {{ 'Enabled' if epel_gpg_check | default(false) else 'Disabled' }}
+      when:
+        - enable_epel | default(true)
+        - ansible_os_family == "RedHat"
+
+  rescue:
+    - name: Handle EPEL installation failure
+      ansible.builtin.debug:
+        msg: |
+          ⚠️  EPEL repository installation or configuration failed.
+          This may be due to:
+          - Network connectivity issues
+          - Repository mirror problems
+          - GPG verification issues
+          Continuing without EPEL repository.
