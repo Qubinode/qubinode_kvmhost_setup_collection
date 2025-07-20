@@ -645,7 +645,7 @@ jobs:
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
           export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
-          ansible-playbook -i inventories/test/hosts test.yml -vv
+          ansible-playbook -i inventories/github-actions/hosts test.yml -vv
 
       - name: Cleanup container registry authentication
         if: always()

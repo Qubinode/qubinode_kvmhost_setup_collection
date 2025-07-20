@@ -37,8 +37,8 @@ provisioner:
       pipelining: true
   inventory:
     links:
-      hosts: ../../inventories/test/hosts
-      group_vars: ../../inventories/test/group_vars/
+      hosts: ../../inventories/molecule/hosts
+      group_vars: ../../inventories/molecule/group_vars/
   playbooks:
     converge: ../default/converge.yml
     verify: ../default/verify.yml
