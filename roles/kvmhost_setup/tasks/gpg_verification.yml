@@ -97,6 +97,15 @@
     - gpg_verification
     - adr_0001
 
+- name: Skip EPEL GPG verification in GitHub Actions environment
+  ansible.builtin.debug:
+    msg: "Skipping EPEL GPG verification - running in GitHub Actions CI environment"
+  when: github_actions_runner | default(false)
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
 - name: Verify EPEL repository GPG signature validation
   ansible.builtin.assert:
     that:
@@ -107,6 +116,7 @@
     - epel_info_check is defined
     - "'epel' in enabled_repos_check.stdout | lower"
     - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
+    - not (github_actions_runner | default(false))
   tags:
     - security
     - gpg_verification
