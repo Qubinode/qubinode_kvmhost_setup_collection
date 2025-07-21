@@ -94,6 +94,20 @@
         backup: false
       ignore_errors: true
 
+    # Additional workaround for EPEL GPG signature issues in containers
+    - name: Disable GPG verification for EPEL repositories in containers
+      ini_file:
+        path: "{{ item }}"
+        section: epel
+        option: gpgcheck
+        value: "0"
+        backup: false
+      loop:
+        - /etc/yum.repos.d/epel.repo
+        - /etc/yum.repos.d/epel-next.repo
+      ignore_errors: true
+      when: ansible_virtualization_type == "container"
+
     - name: Verify GPG key import status
       shell: rpm -q gpg-pubkey --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n'
       register: gpg_keys_status

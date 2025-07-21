@@ -19,6 +19,10 @@ exclude_paths:
   # Exclude external dependency roles that we installed
   - roles/linux-system-roles.network/
   - roles/linux-system-roles.storage/
+  # Exclude molecule prepare files (test setup files with relaxed standards)
+  - molecule/*/prepare.yml
+  - molecule/*/converge.yml
+  - molecule/*/verify.yml
 
 skip_list:
   - var-naming

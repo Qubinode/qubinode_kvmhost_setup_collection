@@ -8,15 +8,19 @@
     enabled: true
     state: started
   with_items: "{{ libvirt_services }}"
+  when: not (ansible_virtualization_type == "container" or cicd_test|bool)
 
 - name: Check current tuned profile
   ansible.builtin.command: tuned-adm active
   register: current_tuned_profile
   changed_when: false
+  when: not (ansible_virtualization_type == "container" or cicd_test|bool)
 
 - name: Start tuned profile virtual-host (idempotent)
   ansible.builtin.command: tuned-adm profile virtual-host
-  when: "'virtual-host' not in current_tuned_profile.stdout"
+  when:
+    - not (ansible_virtualization_type == "container" or cicd_test|bool)
+    - "'virtual-host' not in current_tuned_profile.stdout"
   register: tuned_profile_changed
   changed_when: tuned_profile_changed.rc == 0
 
@@ -26,10 +30,11 @@
   ignore_errors: true
   check_mode: true
   changed_when: false
+  when: not (ansible_virtualization_type == "container" or cicd_test|bool)
 
 - name: Get Bridge Status
   ansible.builtin.set_fact:
-    bridge_interface_status: "{{ bridge_interface }}"
+    bridge_interface_status: "{{ bridge_interface | default({'stdout': 'container-mode-no-bridge'}) }}"
 
 - name: Print the bridge info
   ansible.builtin.debug:

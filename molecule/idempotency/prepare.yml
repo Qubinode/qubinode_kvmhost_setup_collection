@@ -144,6 +144,20 @@
               Collection/role installation failed - this may cause some tests to fail.
               Consider pre-building containers with collections installed.
 
+    # Additional workaround for EPEL GPG signature issues in containers
+    - name: Disable GPG verification for EPEL repositories in containers
+      ini_file:
+        path: "{{ item }}"
+        section: epel
+        option: gpgcheck
+        value: "0"
+        backup: false
+      loop:
+        - /etc/yum.repos.d/epel.repo
+        - /etc/yum.repos.d/epel-next.repo
+      ignore_errors: true
+      when: ansible_virtualization_type == "container"
+
     - name: Create testing marker file
       ansible.builtin.file:
         path: /tmp/molecule-prepare-complete
