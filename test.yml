@@ -1,5 +1,5 @@
 - name: Test qubinode_kvmhost_setup_collection
-  hosts: all
+  hosts: all:!github_runners
   become: yes
   pre_tasks:
     - name: Ensure test-user exists with proper home directory
