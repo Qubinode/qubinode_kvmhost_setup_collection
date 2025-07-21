@@ -318,15 +318,25 @@ jobs:
           python${{ matrix.python-version }} -m pip install --upgrade pip
       - name: Install ansible-core
         run: python${{ matrix.python-version }} -m pip install ansible-core==${{ matrix.ansible-version }}
+      - name: Setup Python virtual environment for test job
+        run: |
+          # Create virtual environment for test job
+          python${{ matrix.python-version }} -m pip install virtualenv
+          python${{ matrix.python-version }} -m virtualenv venv-py311
+          source venv-py311/bin/activate
+          # Install ansible-core in the virtual environment
+          pip install ansible-core==${{ matrix.ansible-version }}
       - name: Setup SELinux for CI environment
         run: |
+          source venv-py311/bin/activate
           # Use our comprehensive SELinux setup script
           ./scripts/setup-selinux-for-ci.sh python${{ matrix.python-version }}
 
       - name: Install Molecule with Python 3.11 support
         run: |
+          source venv-py311/bin/activate
           # Updated to Molecule v6.x for current stable release
-          python${{ matrix.python-version }} -m pip install "molecule>=6.0.0" molecule-podman
+          pip install "molecule>=6.0.0" molecule-podman
 
       - name: Setup container registries and authentication  
         run: |
@@ -803,7 +813,7 @@ jobs:
           # Setup Python virtual environment
           python3.11 -m pip install --upgrade pip
           python3.11 -m pip install virtualenv
-          python3.11 -m virtualenv venv
+          python3.11 -m virtualenv venv-py311
           source venv-py311/bin/activate
       - name: Setup SELinux for CI environment
         run: |
