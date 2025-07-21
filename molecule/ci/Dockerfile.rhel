@@ -53,7 +53,7 @@ RUN if [ ! -e /usr/bin/python ]; then ln -sf /usr/bin/python3 /usr/bin/python; f
 
 # Install Ansible and required collections for testing
 RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install ansible-core requests && \
+    python3 -m pip install 'ansible-core>=2.18.0,<2.19.0' requests && \
     ansible-galaxy collection install ansible.posix community.general community.libvirt fedora.linux_system_roles ansible.netcommon && \
     ansible-galaxy role install linux-system-roles.network || true
 
