@@ -4,8 +4,8 @@
 dependency-security:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python 3.11
+        - uses: actions/checkout@v4
+        - name: Setup Python 3.11
         run: |
           sudo yum install -y python3.11 python3.11-pip
           python3.11 -m pip install --upgrade pip

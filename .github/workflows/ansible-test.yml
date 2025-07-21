@@ -194,7 +194,8 @@ jobs:
       - name: Run ansible-lint
         run: |
           source venv-py311/bin/activate
-          ansible-lint roles/ --exclude roles/.cache/ --exclude roles/.venv/
+          # Use .ansible-lint config file which excludes external dependency roles
+          ansible-lint roles/ --profile=production
 
   test:
     needs: lint

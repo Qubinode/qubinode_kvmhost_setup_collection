@@ -16,6 +16,9 @@ exclude_paths:
   - __pycache__/
   - changelogs/
   - docs/
+  # Exclude external dependency roles that we installed
+  - roles/linux-system-roles.network/
+  - roles/linux-system-roles.storage/
 
 skip_list:
   - var-naming
