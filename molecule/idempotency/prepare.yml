@@ -117,32 +117,149 @@
               - ansible-core
               - requests
             state: present
-          ignore_errors: true
+          register: pip_install_result
+          failed_when: false  # Don't fail immediately, but track result
+
+        - name: Ensure ansible-galaxy is available in PATH
+          ansible.builtin.shell: |
+            if command -v ansible-galaxy >/dev/null 2>&1; then
+              echo "SUCCESS: ansible-galaxy found in PATH"
+              exit 0
+            elif [ -f /usr/local/bin/ansible-galaxy ]; then
+              ln -sf /usr/local/bin/ansible-galaxy /usr/bin/ansible-galaxy
+              echo "SUCCESS: ansible-galaxy linked from /usr/local/bin"
+              exit 0
+            elif [ -f ~/.local/bin/ansible-galaxy ]; then
+              export PATH="$HOME/.local/bin:$PATH"
+              echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+              echo "SUCCESS: ansible-galaxy found in ~/.local/bin, PATH updated"
+              exit 0
+            else
+              echo "WARNING: ansible-galaxy not found in common locations"
+              exit 1
+            fi
+          register: galaxy_path_result
+          failed_when: false
+          changed_when: false
 
         - name: Install required Ansible collections
-          ansible.builtin.command:
-            cmd: ansible-galaxy collection install {{ item }}
+          ansible.builtin.shell: |
+            if command -v ansible-galaxy >/dev/null 2>&1; then
+              echo "Installing collection: {{ item }}"
+              ansible-galaxy collection install {{ item }} --force
+              echo "SUCCESS: {{ item }} installed"
+            else
+              echo "ERROR: ansible-galaxy not available for {{ item }}"
+              exit 1
+            fi
           loop:
             - ansible.posix
             - community.general
             - community.libvirt
             - fedora.linux_system_roles
             - ansible.netcommon
-          ignore_errors: true
+          register: collection_install_results
+          failed_when: false
           changed_when: false
 
         - name: Install linux-system-roles.network role
-          ansible.builtin.command:
-            cmd: ansible-galaxy role install linux-system-roles.network
-          ignore_errors: true
+          ansible.builtin.shell: |
+            if command -v ansible-galaxy >/dev/null 2>&1; then
+              echo "Installing role: linux-system-roles.network"
+              ansible-galaxy role install linux-system-roles.network --force
+              echo "SUCCESS: linux-system-roles.network installed"
+            else
+              echo "ERROR: ansible-galaxy not available for role installation"
+              exit 1
+            fi
+          register: role_install_result
+          failed_when: false
           changed_when: false
 
-      rescue:
-        - name: Log collection installation failure
+        - name: Check critical collections availability
+          ansible.builtin.shell: |
+            echo "Verifying required Ansible collections for testing..."
+
+            # Check critical collections using ansible-galaxy list
+            missing_critical=""
+
+            if command -v ansible-galaxy >/dev/null 2>&1; then
+              # Get list of installed collections
+              installed_collections=$(ansible-galaxy collection list 2>/dev/null | grep -E "^(ansible\.posix|community\.general|ansible\.netcommon)" || echo "")
+
+              for collection in ansible.posix community.general ansible.netcommon; do
+                if echo "${installed_collections}" | grep -q "${collection}"; then
+                  echo "✅ CRITICAL: ${collection} - Available"
+                else
+                  echo "❌ CRITICAL: ${collection} - Missing"
+                  missing_critical="${missing_critical} ${collection}"
+                fi
+              done
+
+              # Check optional collections
+              for collection in community.libvirt fedora.linux_system_roles; do
+                if ansible-galaxy collection list 2>/dev/null | grep -q "${collection}"; then
+                  echo "✅ OPTIONAL: ${collection} - Available"
+                else
+                  echo "⚠️  OPTIONAL: ${collection} - Missing (tests may be limited)"
+                fi
+              done
+            else
+              echo "⚠️  ansible-galaxy not available - assuming collections are pre-installed"
+              # If ansible-galaxy is not available, assume collections are available
+              for collection in ansible.posix community.general ansible.netcommon; do
+                echo "✅ CRITICAL: ${collection} - Assumed available (ansible-galaxy unavailable)"
+              done
+            fi
+
+            # Fail if critical collections are missing
+            if [ -n "${missing_critical}" ]; then
+              echo ""
+              echo "🚨 PIPELINE FAILURE: Missing critical collections:${missing_critical}"
+              echo ""
+              echo "These collections are REQUIRED for tests to function properly."
+              echo "Without them, the tests are meaningless and will fail."
+              exit 1
+            else
+              echo ""
+              echo "✅ SUCCESS: All critical collections are available for testing"
+              exit 0
+            fi
+          register: collection_verification
+          failed_when: collection_verification.rc != 0
+          changed_when: false
+
+        - name: Display installation summary
           debug:
             msg: |
-              Collection/role installation failed - this may cause some tests to fail.
-              Consider pre-building containers with collections installed.
+              📋 Installation Summary:
+              • Pip packages: {{ 'SUCCESS' if not pip_install_result.failed else 'FAILED' }}
+              • ansible-galaxy PATH: {{ 'SUCCESS' if galaxy_path_result.rc == 0 else 'WARNING' }}
+              • Collections: {{ 'SUCCESS' if collection_verification.rc == 0 else 'FAILED' }}
+              • Critical collections verified and available for testing
+
+      rescue:
+        - name: Critical failure - Collections not available
+          fail:
+            msg: |
+              🚨 PIPELINE FAILURE: Required Ansible collections are not available!
+
+              📊 Diagnostic Information:
+              • Pip packages (ansible-core): {{ 'FAILED' if pip_install_result.failed else 'OK' }}
+              • ansible-galaxy command: {{ 'FAILED' if galaxy_path_result.rc != 0 else 'OK' }}
+              • Collection verification: FAILED
+
+              🎯 Why This Matters:
+              Without the required Ansible collections, the tests cannot function properly.
+              Running tests without proper collections would produce meaningless results.
+
+              🔧 Required Actions:
+              1. Check container build process includes collection installation
+              2. Verify ansible-galaxy is available in container PATH
+              3. Ensure collections are properly installed during container creation
+              4. Review Dockerfile collection installation steps
+
+              The pipeline MUST fail to prevent false test results.
 
     # Additional workaround for EPEL GPG signature issues in containers
     - name: Disable GPG verification for EPEL repositories in containers

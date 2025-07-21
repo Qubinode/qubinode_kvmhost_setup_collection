@@ -132,6 +132,17 @@
           - wget
         state: present
         disable_gpg_check: true  # Container testing workaround
+      when: not (target_is_rhel | default(false)) or not (is_container_environment | default(false))
+      failed_when: false  # Don't fail pipeline on package installation issues
+
+    - name: Install basic packages for RHEL containers (EPEL-free)
+      ansible.builtin.dnf:
+        name:
+          - python3
+          - python3-pip
+        state: present
+        disable_gpg_check: true
+      when: (target_is_rhel | default(false)) and (is_container_environment | default(false))
       failed_when: false  # Don't fail pipeline on package installation issues
 
     - name: Handle curl installation (avoid curl-minimal conflict)
