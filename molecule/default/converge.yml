@@ -132,7 +132,7 @@
           - wget
         state: present
         disable_gpg_check: true  # Container testing workaround
-        failed_when: false  # Don't fail pipeline on package installation issues
+      failed_when: false  # Don't fail pipeline on package installation issues
 
     - name: Handle curl installation (avoid curl-minimal conflict)
       block:
