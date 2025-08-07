@@ -122,19 +122,37 @@ jobs:
         run: |
           echo "📦 Installing Python dependencies with $PYTHON_CMD..."
 
-          # Upgrade pip first
-          $PYTHON_CMD -m pip install --upgrade pip --user
+          # Check if we're in a virtual environment
+          if [[ -n "$VIRTUAL_ENV" ]]; then
+            echo "🔍 Detected virtual environment: $VIRTUAL_ENV"
+            echo "Installing packages in virtual environment..."
 
-          # Install required packages for the analyzer
-          $PYTHON_CMD -m pip install --user \
-            requests \
-            urllib3 \
-            pyyaml \
-            packaging
+            # Upgrade pip first
+            $PYTHON_CMD -m pip install --upgrade pip
+
+            # Install required packages for the analyzer
+            $PYTHON_CMD -m pip install \
+              requests \
+              urllib3 \
+              pyyaml \
+              packaging
+          else
+            echo "🔍 No virtual environment detected, using --user install..."
+
+            # Upgrade pip first
+            $PYTHON_CMD -m pip install --upgrade pip --user
+
+            # Install required packages for the analyzer
+            $PYTHON_CMD -m pip install --user \
+              requests \
+              urllib3 \
+              pyyaml \
+              packaging
+          fi
 
           # Verify installations
           echo "✅ Installed packages:"
-          $PYTHON_CMD -m pip list --user | grep -E "(requests|urllib3|PyYAML|packaging)"
+          $PYTHON_CMD -m pip list | grep -E "(requests|urllib3|PyYAML|packaging)" || echo "⚠️ Some packages may not be visible"
       
       - name: Load environment variables
         run: |
@@ -148,11 +166,26 @@ jobs:
       
       - name: Validate environment
         run: |
-          echo "Validating required environment variables..."
-          
-          # Check Python installation
+          echo "🔍 Validating environment and dependencies..."
+
+          # Check Python installation and environment
           echo "Python command: $PYTHON_CMD"
-          $PYTHON_CMD --version
+          echo "Python version: $($PYTHON_CMD --version)"
+          echo "Python executable path: $(which $PYTHON_CMD)"
+
+          # Check virtual environment status
+          if [[ -n "$VIRTUAL_ENV" ]]; then
+            echo "Virtual environment: $VIRTUAL_ENV"
+          else
+            echo "No virtual environment detected"
+          fi
+
+          # Test Python imports
+          echo "🧪 Testing Python package imports..."
+          $PYTHON_CMD -c "import requests; print(f'✅ requests: {requests.__version__}')" || echo "❌ requests import failed"
+          $PYTHON_CMD -c "import urllib3; print(f'✅ urllib3: {urllib3.__version__}')" || echo "❌ urllib3 import failed"
+          $PYTHON_CMD -c "import yaml; print('✅ PyYAML imported successfully')" || echo "❌ PyYAML import failed"
+          $PYTHON_CMD -c "import json; print('✅ json (built-in) available')" || echo "❌ json import failed"
 
           # Check GitHub token
           if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
@@ -165,7 +198,7 @@ jobs:
             echo "❌ RED_HAT_MAAS_API_KEY is not available"
             exit 1
           fi
-          
+
           echo "✅ All required environment variables are available"
           echo "✅ Repository: ${{ github.repository }}"
           echo "✅ Triggering workflow: ${{ github.event.workflow_run.name || 'Manual trigger' }}"
