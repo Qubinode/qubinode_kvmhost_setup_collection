@@ -1,0 +1,118 @@
+{
+  "analyzer_config": {
+    "version": "1.0.0",
+    "description": "Configuration for GitHub Workflow Failure Analyzer",
+    "confidence_threshold": 0.75,
+    "max_workflows_per_run": 20,
+    "max_errors_per_job": 10,
+    "log_retention_days": 30
+  },
+  
+  "github_api": {
+    "base_url": "https://api.github.com",
+    "timeout_seconds": 30,
+    "retry_attempts": 3,
+    "rate_limit_buffer": 100
+  },
+  
+  "red_hat_maas": {
+    "api_url": "https://granite-3-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443",
+    "model": "granite-3-3-8b-instruct",
+    "max_tokens": 800,
+    "temperature": 0.1,
+    "timeout_seconds": 60
+  },
+  
+  "error_patterns": {
+    "critical": [
+      "FATAL:",
+      "CRITICAL:",
+      "Exception:",
+      "Traceback \\(most recent call last\\):",
+      "Error: Process completed with exit code [1-9]",
+      "The command .* failed with exit code [1-9]"
+    ],
+    "ansible_specific": [
+      "ansible-lint.*\\[E\\d+\\]",
+      "TASK \\[.*\\] \\*+\\nfatal:",
+      "FAILED! =>",
+      "fatal: \\[.*\\]:",
+      "ERROR! .*",
+      "UNREACHABLE! =>"
+    ],
+    "build_failures": [
+      "Build failed",
+      "Compilation error",
+      "Test failed",
+      "npm ERR!",
+      "pip install.*failed",
+      "docker build.*failed"
+    ],
+    "dependency_issues": [
+      "ModuleNotFoundError:",
+      "ImportError:",
+      "No module named",
+      "Package .* not found",
+      "Unable to locate package",
+      "dependency.*not found"
+    ]
+  },
+  
+  "issue_templates": {
+    "default": {
+      "labels": [
+        "workflow-failure",
+        "automated-analysis", 
+        "needs-investigation"
+      ],
+      "assignees": [],
+      "milestone": null
+    },
+    "critical": {
+      "labels": [
+        "workflow-failure",
+        "automated-analysis",
+        "critical",
+        "high-priority"
+      ],
+      "assignees": [],
+      "milestone": null
+    },
+    "ansible": {
+      "labels": [
+        "workflow-failure",
+        "automated-analysis",
+        "ansible",
+        "lint-issue"
+      ],
+      "assignees": [],
+      "milestone": null
+    }
+  },
+  
+  "llm_prompts": {
+    "root_cause_analysis": "You are an expert DevOps engineer analyzing a GitHub Actions workflow failure.\n\nWORKFLOW: {workflow_name}\nJOB: {job_name}\nERROR CONTEXT:\n{error_context}\n\nPlease provide a structured analysis:\n\n1. ROOT CAUSE: Identify the specific technical reason for this failure\n2. IMPACT: Describe what this error prevents or breaks\n3. SOLUTION: Provide step-by-step fix instructions\n4. PREVENTION: Suggest how to prevent this error in the future\n\nFormat your response as a clear, actionable analysis for a developer to resolve this issue.",
+    
+    "ansible_analysis": "You are an expert Ansible developer analyzing a workflow failure in an Ansible collection.\n\nWORKFLOW: {workflow_name}\nJOB: {job_name}\nANSIBLE ERROR:\n{error_context}\n\nProvide a detailed Ansible-specific analysis:\n\n1. ANSIBLE ROOT CAUSE: Identify the specific Ansible issue (syntax, module, playbook, etc.)\n2. AFFECTED COMPONENTS: List roles, tasks, or modules impacted\n3. FIX INSTRUCTIONS: Provide exact Ansible code changes needed\n4. BEST PRACTICES: Suggest Ansible best practices to prevent this issue\n5. TESTING: Recommend how to test the fix\n\nFocus on Ansible-specific solutions and best practices.",
+    
+    "dependency_analysis": "You are an expert in dependency management analyzing a workflow failure.\n\nWORKFLOW: {workflow_name}\nJOB: {job_name}\nDEPENDENCY ERROR:\n{error_context}\n\nProvide dependency-focused analysis:\n\n1. DEPENDENCY ISSUE: Identify the specific dependency problem\n2. VERSION CONFLICTS: Highlight any version compatibility issues\n3. RESOLUTION STEPS: Provide exact commands to fix dependencies\n4. DEPENDENCY STRATEGY: Suggest long-term dependency management improvements\n\nFocus on practical dependency resolution and management strategies."
+  },
+  
+  "monitoring": {
+    "enable_metrics": true,
+    "metrics_retention_days": 90,
+    "alert_thresholds": {
+      "failure_rate_percent": 25,
+      "consecutive_failures": 3,
+      "analysis_errors_percent": 10
+    }
+  },
+  
+  "verification_framework": {
+    "enable_systematic_checks": true,
+    "confidence_scoring": true,
+    "error_categorization": true,
+    "fallback_analysis": true,
+    "human_review_threshold": 0.6
+  }
+}

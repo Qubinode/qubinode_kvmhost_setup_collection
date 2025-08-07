@@ -1,0 +1,187 @@
+name: Workflow Failure Analyzer
+
+# Trigger this workflow when other workflows complete
+on:
+  workflow_run:
+    workflows: [
+      "Automated Ansible Lint Fixes with Aider",
+      "Dependency Testing Pipeline", 
+      "ADR Compliance and File Structure Validation",
+      "Ansible Version Auto-Update",
+      "Release and Deploy collection"
+    ]
+    types: [completed]
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+    inputs:
+      analyze_all_recent:
+        description: 'Analyze all recent workflows (not just current run)'
+        required: false
+        default: 'false'
+        type: boolean
+      max_workflows:
+        description: 'Maximum number of workflows to analyze'
+        required: false
+        default: '10'
+        type: string
+
+# Ensure only one analysis runs at a time
+concurrency:
+  group: workflow-failure-analyzer
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+  pull-requests: read
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  analyze-workflow-failures:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    
+    # Only run if there were failures or manual trigger
+    if: >
+      github.event_name == 'workflow_dispatch' || 
+      github.event.workflow_run.conclusion == 'failure' ||
+      github.event.workflow_run.conclusion == 'cancelled'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests urllib3
+      
+      - name: Load environment variables
+        run: |
+          if [ -f .env ]; then
+            echo "Loading environment variables from .env"
+            export $(cat .env | grep -v '^#' | xargs)
+            echo "RED_HAT_MAAS_API_KEY=${RED_HAT_MAAS_API_KEY}" >> $GITHUB_ENV
+          else
+            echo "Warning: .env file not found"
+          fi
+      
+      - name: Validate environment
+        run: |
+          echo "Validating required environment variables..."
+          
+          # Check GitHub token
+          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "❌ GITHUB_TOKEN is not available"
+            exit 1
+          fi
+          
+          # Check Red Hat MaaS API key
+          if [ -z "$RED_HAT_MAAS_API_KEY" ]; then
+            echo "❌ RED_HAT_MAAS_API_KEY is not available"
+            exit 1
+          fi
+          
+          echo "✅ All required environment variables are available"
+          echo "✅ Repository: ${{ github.repository }}"
+          echo "✅ Triggering workflow: ${{ github.event.workflow_run.name || 'Manual trigger' }}"
+      
+      - name: Run workflow failure analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_WORKFLOW_RUN_URL: ${{ github.event.workflow_run.html_url || github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RED_HAT_MAAS_API_KEY: ${{ env.RED_HAT_MAAS_API_KEY }}
+          TRIGGERING_WORKFLOW_ID: ${{ github.event.workflow_run.id || 'manual' }}
+          TRIGGERING_WORKFLOW_NAME: ${{ github.event.workflow_run.name || 'Manual Analysis' }}
+          ANALYZE_ALL_RECENT: ${{ github.event.inputs.analyze_all_recent || 'false' }}
+          MAX_WORKFLOWS: ${{ github.event.inputs.max_workflows || '10' }}
+        run: |
+          echo "🔍 Starting workflow failure analysis..."
+          echo "Triggering workflow: $TRIGGERING_WORKFLOW_NAME"
+          echo "Analysis mode: $([ "$ANALYZE_ALL_RECENT" = "true" ] && echo "All recent workflows" || echo "Triggered workflow only")"
+          
+          # Make the script executable
+          chmod +x scripts/workflow-failure-analyzer.py
+          
+          # Run the analysis
+          python scripts/workflow-failure-analyzer.py
+      
+      - name: Upload analysis artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workflow-failure-analysis-${{ github.run_id }}
+          path: |
+            workflow-failure-analysis-report.md
+            *.log
+          retention-days: 30
+      
+      - name: Comment on triggering workflow (if applicable)
+        if: github.event.workflow_run.id && success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create a comment on the original workflow run if it failed
+          if [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
+            echo "Creating analysis comment for failed workflow..."
+            
+            # This would require additional API calls to comment on the original run
+            # For now, we'll just log the information
+            echo "✅ Analysis completed for workflow: ${{ github.event.workflow_run.name }}"
+            echo "📋 Check the Issues tab for detailed failure analysis"
+            echo "🔗 Analysis run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Workflow Failure Analysis Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f workflow-failure-analysis-report.md ]; then
+            echo "### Analysis Report" >> $GITHUB_STEP_SUMMARY
+            cat workflow-failure-analysis-report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Analysis report not generated" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Links" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔗 [View Issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+is%3Aopen+label%3Aworkflow-failure)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 [Workflow Runs](https://github.com/${{ github.repository }}/actions)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📋 [Analysis Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Create a summary issue if multiple workflows are failing
+  create-summary-issue:
+    runs-on: self-hosted
+    needs: analyze-workflow-failures
+    if: always() && needs.analyze-workflow-failures.result == 'success'
+    
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+      - name: Check for multiple recent failures
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking for patterns in recent workflow failures..."
+          
+          # This could be enhanced to detect patterns and create summary issues
+          # For now, we'll just log the check
+          echo "✅ Summary analysis completed"
+          echo "Individual issues have been created for specific failures"

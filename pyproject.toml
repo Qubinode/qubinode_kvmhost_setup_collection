@@ -120,13 +120,13 @@ include = '\.pyi?$'
 extend-exclude = """
 /(
   # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
+  \\.eggs
+  | \\.git
+  | \\.hg
+  | \\.mypy_cache
+  | \\.tox
+  | \\.venv
   | build
   | dist
 )/
-'''
+"""
