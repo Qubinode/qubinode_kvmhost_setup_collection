@@ -6,6 +6,9 @@ This script monitors GitHub workflow completion and creates detailed issues for 
 It leverages the Red Hat MaaS API with granite-3-3-8b-instruct model for intelligent
 log analysis and root cause identification.
 
+Designed for Python 3.11+ as per ADR-0008 RHEL 9+ Support Strategy.
+Compatible with the Qubinode KVM Host Setup Collection project standards.
+
 Author: Sophia (Methodological Pragmatism Framework)
 Confidence: 92% - Based on GitHub API patterns and LLM integration best practices
 """
@@ -672,35 +675,80 @@ def main():
     Confidence: 90% - Well-structured main function with comprehensive error handling
     """
     try:
+        # Log system information for debugging
+        logger.info("🚀 Starting Workflow Failure Analyzer")
+        logger.info(f"Python version: {sys.version}")
+        logger.info(f"Working directory: {os.getcwd()}")
+
         # Initialize the analyzer
         logger.info("Initializing Workflow Failure Analyzer...")
         analyzer = WorkflowFailureAnalyzer()
 
         # Process workflow failures
+        logger.info("Processing workflow failures...")
         stats = analyzer.process_workflow_failures()
 
         # Generate and log summary report
         summary_report = analyzer.generate_summary_report(stats)
-        logger.info("Analysis Summary:")
-        logger.info(summary_report)
+        logger.info("📊 Analysis Summary:")
+        for line in summary_report.split('\n'):
+            if line.strip():
+                logger.info(line)
 
         # Write summary to file for GitHub Actions artifact
-        with open('workflow-failure-analysis-report.md', 'w') as f:
-            f.write(summary_report)
+        try:
+            with open('workflow-failure-analysis-report.md', 'w') as f:
+                f.write(summary_report)
+            logger.info("✅ Analysis report written to workflow-failure-analysis-report.md")
+        except Exception as e:
+            logger.error(f"Failed to write analysis report: {e}")
 
         # Set exit code based on results
         if stats['processing_errors'] > 0:
-            logger.warning("Analysis completed with errors")
+            logger.warning("⚠️ Analysis completed with errors")
             sys.exit(1)
         elif stats['failed_workflows'] > 0:
-            logger.info("Analysis completed - failures detected and processed")
+            logger.info("✅ Analysis completed - failures detected and processed")
             sys.exit(0)
         else:
-            logger.info("Analysis completed - no failures detected")
+            logger.info("✅ Analysis completed - no failures detected")
             sys.exit(0)
 
+    except KeyboardInterrupt:
+        logger.info("🛑 Analysis interrupted by user")
+        sys.exit(130)
     except Exception as e:
-        logger.error(f"Critical failure in main execution: {e}")
+        logger.error(f"💥 Critical failure in main execution: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+
+        # Try to write a basic error report
+        try:
+            error_report = f"""# Workflow Failure Analyzer - Error Report
+
+**Error:** {str(e)}
+**Type:** {type(e).__name__}
+**Timestamp:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")}
+
+## Traceback
+```
+{traceback.format_exc()}
+```
+
+## Environment
+- Python: {sys.version}
+- Working Directory: {os.getcwd()}
+
+This error prevented the analyzer from completing successfully.
+Please check the workflow logs and environment configuration.
+"""
+            with open('workflow-failure-analysis-error.md', 'w') as f:
+                f.write(error_report)
+            logger.info("📝 Error report written to workflow-failure-analysis-error.md")
+        except:
+            pass  # Don't fail on error report writing
+
         sys.exit(2)
 
 

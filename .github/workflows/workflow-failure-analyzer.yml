@@ -57,15 +57,84 @@ jobs:
         with:
           fetch-depth: 1
       
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      
+      - name: Set up Python 3.11 for self-hosted runner
+        run: |
+          echo "🐍 Setting up Python 3.11 for self-hosted runner..."
+
+          # Check if Python 3.11 is already available
+          if command -v python3.11 >/dev/null 2>&1; then
+            echo "✅ Python 3.11 already available: $(python3.11 --version)"
+            PYTHON_CMD="python3.11"
+          elif command -v python3 >/dev/null 2>&1; then
+            PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
+            echo "✅ Found python3: $PYTHON_VERSION"
+
+            # Check if it's 3.11+
+            if python3 -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)" 2>/dev/null; then
+              echo "✅ Python3 version is 3.11+, using python3"
+              PYTHON_CMD="python3"
+            else
+              echo "⚠️ Python3 version is < 3.11, attempting to install Python 3.11..."
+
+              # Install Python 3.11 on RHEL/Rocky systems
+              if command -v yum >/dev/null 2>&1; then
+                sudo yum install -y python3.11 python3.11-pip python3.11-devel || {
+                  echo "❌ Failed to install Python 3.11 via yum"
+                  echo "Using available Python3: $PYTHON_VERSION"
+                  PYTHON_CMD="python3"
+                }
+
+                # Check if installation succeeded
+                if command -v python3.11 >/dev/null 2>&1; then
+                  echo "✅ Python 3.11 installed successfully"
+                  PYTHON_CMD="python3.11"
+                else
+                  echo "⚠️ Python 3.11 installation failed, using python3"
+                  PYTHON_CMD="python3"
+                fi
+              else
+                echo "⚠️ Non-RHEL system, using available python3"
+                PYTHON_CMD="python3"
+              fi
+            fi
+          else
+            echo "❌ No Python installation found, attempting basic installation..."
+            if command -v yum >/dev/null 2>&1; then
+              sudo yum install -y python3.11 python3.11-pip || sudo yum install -y python3 python3-pip
+            fi
+
+            # Final check
+            if command -v python3.11 >/dev/null 2>&1; then
+              PYTHON_CMD="python3.11"
+            elif command -v python3 >/dev/null 2>&1; then
+              PYTHON_CMD="python3"
+            else
+              echo "❌ Failed to install Python"
+              exit 1
+            fi
+          fi
+
+          echo "PYTHON_CMD=$PYTHON_CMD" >> $GITHUB_ENV
+          echo "🎯 Using Python command: $PYTHON_CMD"
+          $PYTHON_CMD --version
+
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install requests urllib3
+          echo "📦 Installing Python dependencies with $PYTHON_CMD..."
+
+          # Upgrade pip first
+          $PYTHON_CMD -m pip install --upgrade pip --user
+
+          # Install required packages for the analyzer
+          $PYTHON_CMD -m pip install --user \
+            requests \
+            urllib3 \
+            pyyaml \
+            packaging
+
+          # Verify installations
+          echo "✅ Installed packages:"
+          $PYTHON_CMD -m pip list --user | grep -E "(requests|urllib3|PyYAML|packaging)"
       
       - name: Load environment variables
         run: |
@@ -81,12 +150,16 @@ jobs:
         run: |
           echo "Validating required environment variables..."
           
+          # Check Python installation
+          echo "Python command: $PYTHON_CMD"
+          $PYTHON_CMD --version
+
           # Check GitHub token
           if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
             echo "❌ GITHUB_TOKEN is not available"
             exit 1
           fi
-          
+
           # Check Red Hat MaaS API key
           if [ -z "$RED_HAT_MAAS_API_KEY" ]; then
             echo "❌ RED_HAT_MAAS_API_KEY is not available"
@@ -115,9 +188,9 @@ jobs:
           
           # Make the script executable
           chmod +x scripts/workflow-failure-analyzer.py
-          
+
           # Run the analysis
-          python scripts/workflow-failure-analyzer.py
+          $PYTHON_CMD scripts/workflow-failure-analyzer.py
       
       - name: Upload analysis artifacts
         uses: actions/upload-artifact@v4
