@@ -13,7 +13,7 @@ on:
       rhel_versions:
         description: RHEL versions to test (comma-separated)
         required: false
-        default: 8,9,10
+        default: 9,10
 
 env:
   COLLECTION_NAMESPACE: qubinode
@@ -163,7 +163,7 @@ jobs:
           if [ "${{ github.event.inputs.rhel_versions }}" != "" ]; then
             RHEL_VERSIONS="${{ github.event.inputs.rhel_versions }}"
           else
-            RHEL_VERSIONS="8,9,10"
+            RHEL_VERSIONS="9,10"
           fi
 
           # Create matrix for parallel testing
@@ -289,33 +289,9 @@ jobs:
 
       - name: Run Molecule test for RHEL ${{ matrix.rhel_version }}
         run: |
-          # Check if RHEL-specific molecule directory exists, otherwise use default
-          if [ -d "molecule/rhel${{ matrix.rhel_version }}" ]; then
-            cd molecule/rhel${{ matrix.rhel_version }}
-            echo "🧪 Using RHEL ${{ matrix.rhel_version }} specific molecule configuration"
-          elif [ -d "molecule/default" ]; then
-            cd molecule/default
-            echo "🧪 Using default molecule configuration for RHEL ${{ matrix.rhel_version }} testing"
-          else
-            echo "❌ No molecule configuration found. Expected molecule/rhel${{ matrix.rhel_version }}/ or molecule/default/"
-            echo "Available molecule directories:"
-            find molecule/ -type d -name "*" 2>/dev/null || echo "No molecule directory found"
-            exit 1
-          fi
-
-          # Handle SELinux gracefully in containerized environments
-          export ANSIBLE_SELINUX_SPECIAL_FS=""
-          export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
-
-          # Verify ansible-core version compatibility (avoid 2.17 SELinux issues)
-          ansible_version=$(ansible --version | head -1 | cut -d' ' -f3 | cut -d']' -f1)
-          echo "Using ansible-core version: $ansible_version"
-          if [[ "$ansible_version" == "2.17"* ]]; then
-            echo "⚠️ WARNING: ansible-core 2.17 has SELinux binding issues with Python 3.11"
-            echo "Consider upgrading to ansible-core 2.18+ for better compatibility"
-          fi
-
-          molecule test
+          # Use the dedicated RHEL compatibility testing script
+          # This follows the same pattern as scripts/test-dependencies.sh
+          ./scripts/test-rhel-compatibility.sh ${{ matrix.rhel_version }} --full-test --no-install
         env:
           MOLECULE_NO_LOG: false
           ANSIBLE_FORCE_COLOR: true

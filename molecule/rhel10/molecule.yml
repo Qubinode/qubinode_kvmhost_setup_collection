@@ -40,8 +40,8 @@ provisioner:
       hosts: ../../inventories/molecule/hosts
       group_vars: ../../inventories/molecule/group_vars/
   playbooks:
-    converge: ../default/converge.yml
-    verify: ../default/verify.yml
+    converge: converge.yml
+    verify: verify.yml
 
 lint: |
   set -e
