@@ -609,6 +609,17 @@ jobs:
             echo "✅ Podman installed: $(podman --version)"
           fi
 
+      - name: Login to Red Hat Registry
+        run: |
+          echo "🔐 Logging into Red Hat Registry..."
+          if [ -n "${{ secrets.REDHAT_REGISTRY_USERNAME }}" ] && [ -n "${{ secrets.REDHAT_REGISTRY_TOKEN }}" ]; then
+            echo "${{ secrets.REDHAT_REGISTRY_TOKEN }}" | podman login registry.redhat.io -u "${{ secrets.REDHAT_REGISTRY_USERNAME }}" --password-stdin
+            echo "✅ Successfully logged into Red Hat Registry"
+          else
+            echo "⚠️ Red Hat Registry credentials not available, skipping authentication"
+            echo "Note: This may cause pulls from registry.redhat.io to fail"
+          fi
+
       - name: Start test containers for validation
         run: |
           # Start ADR-compliant systemd-enabled containers for compatibility validation
@@ -683,3 +694,9 @@ jobs:
         run: |
           podman stop ubi9-init rocky8-init || true
           podman rm ubi9-init rocky8-init || true
+
+      - name: Logout from Red Hat Registry
+        if: always()
+        run: |
+          echo "🔐 Logging out from Red Hat Registry..."
+          podman logout registry.redhat.io || echo "Registry logout failed or not logged in"
