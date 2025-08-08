@@ -170,7 +170,7 @@ jobs:
           # Note: Using 2.18+ to avoid SELinux binding issues with Python 3.11 (see ADR-0005)
           MATRIX=$(cat << EOF
           {
-            "rhel_version": [$(echo $RHEL_VERSIONS | sed 's/,/, /g' | sed 's/[^,]*/"&"/g')],
+            "rhel_version": [$(echo $RHEL_VERSIONS | sed 's/,/","/g' | sed 's/^/"/' | sed 's/$/"/')],
             "ansible_version": ["2.18"]
           }
           EOF
@@ -270,92 +270,22 @@ jobs:
           # Ensure Docker is available for Molecule
           docker --version || echo "Warning: Docker not available in container"
 
-      - name: Create RHEL ${{ matrix.rhel_version }} test scenario
+      - name: Verify RHEL ${{ matrix.rhel_version }} molecule configuration exists
         run: |
-          mkdir -p molecule/rhel${{ matrix.rhel_version }}
-          cat > molecule/rhel${{ matrix.rhel_version }}/molecule.yml << EOF
-          ---
-          dependency:
-            name: galaxy
-          driver:
-            name: docker
-          platforms:
-            - name: rhel${{ matrix.rhel_version }}-test
-              image: >-
-                {%- if matrix.rhel_version == '8' -%}
-                docker.io/rockylinux/rockylinux:8-ubi-init
-                {%- elif matrix.rhel_version == '9' -%}
-                registry.redhat.io/ubi9-init:latest
-                {%- elif matrix.rhel_version == '10' -%}
-                registry.redhat.io/ubi10-init:latest
-                {%- else -%}
-                registry.redhat.io/ubi9-init:latest
-                {%- endif -%}
-              systemd: always
-              command: /usr/sbin/init
-              capabilities:
-                - SYS_ADMIN
-              volumes:
-                - /sys/fs/cgroup:/sys/fs/cgroup:ro
-          provisioner:
-            name: ansible
-            config_options:
-              defaults:
-                callbacks_enabled: timer,profile_tasks,profile_roles
-            inventory:
-              host_vars:
-                rhel${{ matrix.rhel_version }}-test:
-                  ansible_python_interpreter: /usr/bin/python3
-          verifier:
-            name: ansible
-          EOF
+          echo "🔍 Checking for RHEL ${{ matrix.rhel_version }} molecule configuration..."
 
-          # Create converge playbook
-          cat > molecule/rhel${{ matrix.rhel_version }}/converge.yml << EOF
-          ---
-          - name: Converge
-            hosts: all
-            become: true
-            vars:
-              # RHEL ${{ matrix.rhel_version }} specific variables
-              rhel_version: "${{ matrix.rhel_version }}"
-              ansible_python_interpreter: /usr/bin/python3
-            tasks:
-              - name: Include kvmhost_base role
-                include_role:
-                  name: kvmhost_base
-                tags: ['base']
-
-              - name: Include kvmhost_networking role  
-                include_role:
-                  name: kvmhost_networking
-                tags: ['networking']
-                when: inventory_hostname != 'rhel${{ matrix.rhel_version }}-test' or true
-          EOF
-
-          # Create verify playbook
-          cat > molecule/rhel${{ matrix.rhel_version }}/verify.yml << EOF
-          ---
-          - name: Verify
-            hosts: all
-            gather_facts: false
-            tasks:
-              - name: Verify RHEL version detection
-                debug:
-                  msg: "Successfully tested on RHEL ${{ matrix.rhel_version }} with Ansible ${{ matrix.ansible_version }}"
-
-              - name: Check if required packages are installed
-                package_facts:
-                  manager: auto
-
-              - name: Validate role functionality
-                assert:
-                  that:
-                    - ansible_facts.packages is defined
-                    - ansible_facts.os_family == "RedHat"
-                  success_msg: "RHEL ${{ matrix.rhel_version }} compatibility verified"
-                  fail_msg: "RHEL ${{ matrix.rhel_version }} compatibility check failed"
-          EOF
+          if [ -d "molecule/rhel${{ matrix.rhel_version }}" ]; then
+            echo "✅ Found existing molecule/rhel${{ matrix.rhel_version }}/ configuration"
+            ls -la molecule/rhel${{ matrix.rhel_version }}/
+          elif [ -d "molecule/default" ]; then
+            echo "⚠️ RHEL ${{ matrix.rhel_version }} specific configuration not found, will use molecule/default/"
+            ls -la molecule/default/
+          else
+            echo "❌ No suitable molecule configuration found"
+            echo "Available molecule directories:"
+            find molecule/ -type d -maxdepth 1 2>/dev/null || echo "No molecule directory found"
+            exit 1
+          fi
 
       - name: Run Molecule test for RHEL ${{ matrix.rhel_version }}
         run: |
