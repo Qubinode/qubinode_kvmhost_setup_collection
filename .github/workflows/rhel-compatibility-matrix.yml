@@ -404,27 +404,37 @@ jobs:
 
           # Update with test results
           test_results = {}
-          for artifact_dir in Path('test-artifacts').iterdir():
-              if artifact_dir.is_dir() and artifact_dir.name.startswith('test-results-'):
-                  for result_file in artifact_dir.glob('*.txt'):
-                      with open(result_file, 'r') as f:
-                          content = f.read().strip()
-                          # Parse result: "RHEL X + Ansible Y: STATUS"
-                          if ':' in content:
-                              test_info, status = content.split(':', 1)
-                              test_results[test_info.strip()] = status.strip()
+          test_artifacts_path = Path('test-artifacts')
+
+          # Check if test-artifacts directory exists
+          if test_artifacts_path.exists() and test_artifacts_path.is_dir():
+              print(f"Found test-artifacts directory with {len(list(test_artifacts_path.iterdir()))} items")
+              for artifact_dir in test_artifacts_path.iterdir():
+                  if artifact_dir.is_dir() and artifact_dir.name.startswith('test-results-'):
+                      print(f"Processing artifact directory: {artifact_dir.name}")
+                      for result_file in artifact_dir.glob('*.txt'):
+                          with open(result_file, 'r') as f:
+                              content = f.read().strip()
+                              # Parse result: "RHEL X + Ansible Y: STATUS"
+                              if ':' in content:
+                                  test_info, status = content.split(':', 1)
+                                  test_results[test_info.strip()] = status.strip()
+          else:
+              print("Warning: test-artifacts directory not found, skipping test result integration")
+              print("This may be expected if no test artifacts were generated in this run")
 
           # Add test results to matrix
           matrix['ci_test_results'] = {
               'last_updated': '${{ github.run_id }}',
-              'results': test_results
+              'results': test_results,
+              'artifacts_found': len(test_results) > 0
           }
 
           # Save updated matrix
           with open('docs/compatibility_matrix.json', 'w') as f:
               json.dump(matrix, f, indent=2)
 
-          print("Updated compatibility matrix with CI test results")
+          print(f"Updated compatibility matrix with {len(test_results)} test results")
           EOF
 
       - name: Regenerate compatibility report
