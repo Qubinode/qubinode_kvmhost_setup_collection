@@ -178,10 +178,12 @@ jobs:
           fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
-      - name: Run enhanced dependency scanner
+      - name: Run Ansible collection security check
         run: |
-          chmod +x ./scripts/enhanced-dependency-scanner.sh
-          ./scripts/enhanced-dependency-scanner.sh --format json --report-dir security-reports/ --ci --severity medium
+          # Use focused security check for Ansible collections
+          # Only scans project requirements, not system packages
+          # Appropriate for collections that don't control the entire environment
+          ./scripts/ansible-collection-security-check.sh
       
       - name: Upload security scan results
         uses: actions/upload-artifact@v4
