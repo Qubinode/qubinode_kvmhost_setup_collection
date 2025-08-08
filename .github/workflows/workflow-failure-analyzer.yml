@@ -147,9 +147,19 @@ jobs:
           if [ -f .env ]; then
             echo "Loading environment variables from .env"
             export $(cat .env | grep -v '^#' | xargs)
-            echo "RED_HAT_MAAS_API_KEY=${RED_HAT_MAAS_API_KEY}" >> $GITHUB_ENV
+            # Export to GitHub env so subsequent steps see it
+            if [ -n "$RED_HAT_MAAS_API_KEY" ]; then
+              echo "RED_HAT_MAAS_API_KEY=[masked] (from .env)"
+              echo "RED_HAT_MAAS_API_KEY=$RED_HAT_MAAS_API_KEY" >> $GITHUB_ENV
+            fi
           else
             echo "Warning: .env file not found"
+          fi
+
+          # Fallback to GitHub Secret if env var not set by .env
+          if [ -z "$RED_HAT_MAAS_API_KEY" ] && [ -n "${{ secrets.RED_HAT_MAAS_API_KEY }}" ]; then
+            echo "Using RED_HAT_MAAS_API_KEY from GitHub Secrets"
+            echo "RED_HAT_MAAS_API_KEY=${{ secrets.RED_HAT_MAAS_API_KEY }}" >> $GITHUB_ENV
           fi
       
       - name: Validate environment
