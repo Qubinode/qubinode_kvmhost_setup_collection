@@ -223,6 +223,66 @@ setup_environment() {
     fi
 }
 
+# Install actionlint binary directly
+install_actionlint_binary() {
+    log_debug "Installing actionlint via binary download..."
+    local actionlint_version="1.6.26"
+    local download_url="https://github.com/rhysd/actionlint/releases/download/v${actionlint_version}/actionlint_${actionlint_version}_linux_amd64.tar.gz"
+
+    # Create local bin directory if it doesn't exist
+    mkdir -p ~/.local/bin
+
+    # Download to temporary file first to check if it's valid
+    local temp_file="/tmp/actionlint.tar.gz"
+    log_debug "Downloading actionlint from: $download_url"
+
+    if curl -L -o "$temp_file" "$download_url"; then
+        # Check if the downloaded file is a valid gzip file
+        if file "$temp_file" | grep -q "gzip compressed"; then
+            # Extract actionlint binary
+            if tar xzf "$temp_file" -C ~/.local/bin actionlint; then
+                log_debug "Successfully installed actionlint binary"
+                # Make sure it's executable
+                chmod +x ~/.local/bin/actionlint
+                # Add to PATH if not already there
+                if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+                    export PATH="$HOME/.local/bin:$PATH"
+                fi
+                rm -f "$temp_file"
+                return 0
+            else
+                log_error "Failed to extract actionlint from downloaded archive"
+            fi
+        else
+            log_error "Downloaded file is not a valid gzip archive"
+            log_debug "File type: $(file "$temp_file")"
+            log_debug "First few bytes: $(head -c 100 "$temp_file" | xxd)"
+        fi
+        rm -f "$temp_file"
+    else
+        log_error "Failed to download actionlint binary"
+    fi
+
+    # If binary download fails, try alternative approach
+    log_warning "Binary download failed, trying alternative installation method..."
+
+    # Try downloading the raw binary directly
+    local binary_url="https://github.com/rhysd/actionlint/releases/download/v${actionlint_version}/actionlint_${actionlint_version}_linux_amd64"
+    if curl -L -o ~/.local/bin/actionlint "$binary_url"; then
+        chmod +x ~/.local/bin/actionlint
+        if ~/.local/bin/actionlint --version &>/dev/null; then
+            log_debug "Successfully installed actionlint via direct binary download"
+            return 0
+        else
+            log_error "Downloaded binary is not functional"
+            rm -f ~/.local/bin/actionlint
+        fi
+    fi
+
+    log_error "All actionlint installation methods failed"
+    return 1
+}
+
 # Install security scanning tools
 install_security_tools() {
     local tools=("$@")
@@ -255,13 +315,17 @@ install_security_tools() {
                 ;;
             actionlint)
                 log_debug "Installing actionlint..."
-                go install github.com/rhymond/actionlint/cmd/actionlint@latest || {
-                    log_warning "Failed to install actionlint via go, trying binary download..."
-                    curl -L https://github.com/rhymond/actionlint/releases/latest/download/actionlint_1.6.26_linux_amd64.tar.gz | tar xz -C ~/.local/bin actionlint || {
-                        log_error "Failed to install actionlint"
-                        return 1
+                # Check if Go is available first
+                if command -v go &> /dev/null; then
+                    log_debug "Go found, attempting installation via go install..."
+                    go install github.com/rhysd/actionlint/cmd/actionlint@latest || {
+                        log_warning "Failed to install actionlint via go, trying binary download..."
+                        install_actionlint_binary
                     }
-                }
+                else
+                    log_warning "Go not found, using binary download method..."
+                    install_actionlint_binary
+                fi
                 ;;
         esac
     done
