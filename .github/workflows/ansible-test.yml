@@ -695,12 +695,15 @@ jobs:
           python -c "from packaging import version
           import requests
           latest = version.parse(requests.get('https://pypi.org/pypi/ansible-core/json').json()['info']['version'])
-          current = version.parse('2.17')  # Updated baseline based on research
+          current = version.parse('2.18')  # Current version we're using in workflows
           if latest > current:
-              print(f'New Ansible-core version available: {latest}')
-              exit(1)
+              print(f'📢 INFO: New Ansible-core version available: {latest}')
+              print(f'📋 Current version in use: {current}')
+              print(f'💡 Consider updating workflows to use ansible-core {latest}')
+              # Don't fail - just inform about available updates
+              exit(0)
           else:
-              print('Using current stable version')"
+              print('✅ Using current stable version')"
         continue-on-error: true
 
   security:
