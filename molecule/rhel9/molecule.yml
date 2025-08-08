@@ -1,0 +1,68 @@
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+driver:
+  name: podman
+  options:
+    podman_binary: /usr/bin/podman
+    podman_extra_args: --log-level=info
+
+platforms:
+  - name: rhel9-test
+    image: registry.redhat.io/ubi9-init:latest
+    systemd: always
+    command: /usr/sbin/init
+    capabilities:
+      - SYS_ADMIN
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - rhel9_compatible
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_FORCE_COLOR: "true"
+    ANSIBLE_VERBOSITY: "1"
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      callback_whitelist: profile_tasks, timer, yaml
+      host_key_checking: false
+      deprecation_warnings: false
+    ssh_connection:
+      pipelining: true
+  inventory:
+    links:
+      hosts: ../../inventories/molecule/hosts
+      group_vars: ../../inventories/molecule/group_vars/
+  playbooks:
+    converge: ../default/converge.yml
+    verify: ../default/verify.yml
+
+lint: |
+  set -e
+  yamllint .
+  ansible-lint roles/kvmhost_setup/ --exclude .github/
+
+verifier:
+  name: testinfra
+  options:
+    verbose: true
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
