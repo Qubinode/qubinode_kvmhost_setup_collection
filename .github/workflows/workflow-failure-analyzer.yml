@@ -118,41 +118,29 @@ jobs:
           echo "🎯 Using Python command: $PYTHON_CMD"
           $PYTHON_CMD --version
 
-      - name: Install Python dependencies
+      - name: Create virtual environment and install dependencies
         run: |
-          echo "📦 Installing Python dependencies with $PYTHON_CMD..."
+          echo "🧰 Creating dedicated virtual environment with $PYTHON_CMD..."
 
-          # Check if we're in a virtual environment
-          if [[ -n "$VIRTUAL_ENV" ]]; then
-            echo "🔍 Detected virtual environment: $VIRTUAL_ENV"
-            echo "Installing packages in virtual environment..."
+          # Create venv in workspace
+          $PYTHON_CMD -m venv .venv
 
-            # Upgrade pip first
-            $PYTHON_CMD -m pip install --upgrade pip
+          # Use absolute path for Python inside venv across steps
+          VENV_PY="$PWD/.venv/bin/python"
+          VENV_PIP="$PWD/.venv/bin/pip"
+          echo "PYTHON_CMD=$VENV_PY" >> $GITHUB_ENV
 
-            # Install required packages for the analyzer
-            $PYTHON_CMD -m pip install \
-              requests \
-              urllib3 \
-              pyyaml \
-              packaging
-          else
-            echo "🔍 No virtual environment detected, using --user install..."
-
-            # Upgrade pip first
-            $PYTHON_CMD -m pip install --upgrade pip --user
-
-            # Install required packages for the analyzer
-            $PYTHON_CMD -m pip install --user \
-              requests \
-              urllib3 \
-              pyyaml \
-              packaging
-          fi
+          # Upgrade pip and install required packages into venv
+          $VENV_PY -m pip install --upgrade pip
+          $VENV_PIP install \
+            requests \
+            urllib3 \
+            pyyaml \
+            packaging
 
           # Verify installations
-          echo "✅ Installed packages:"
-          $PYTHON_CMD -m pip list | grep -E "(requests|urllib3|PyYAML|packaging)" || echo "⚠️ Some packages may not be visible"
+          echo "✅ Installed packages in venv:"
+          $VENV_PIP list | grep -E "(requests|urllib3|PyYAML|packaging)" || true
       
       - name: Load environment variables
         run: |
@@ -173,12 +161,10 @@ jobs:
           echo "Python version: $($PYTHON_CMD --version)"
           echo "Python executable path: $(which $PYTHON_CMD)"
 
-          # Check virtual environment status
-          if [[ -n "$VIRTUAL_ENV" ]]; then
-            echo "Virtual environment: $VIRTUAL_ENV"
-          else
-            echo "No virtual environment detected"
-          fi
+          # Display venv being used
+          echo "Using Python: $PYTHON_CMD"
+          ls -l "$PYTHON_CMD" || true
+          "$PYTHON_CMD" -c "import sys; print('sys.prefix:', sys.prefix); print('sys.executable:', sys.executable)"
 
           # Test Python imports
           echo "🧪 Testing Python package imports..."
@@ -222,7 +208,7 @@ jobs:
           # Make the script executable
           chmod +x scripts/workflow-failure-analyzer.py
 
-          # Run the analysis
+          # Run the analysis using venv python
           $PYTHON_CMD scripts/workflow-failure-analyzer.py
       
       - name: Upload analysis artifacts
