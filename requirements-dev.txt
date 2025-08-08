@@ -25,7 +25,6 @@ sphinx-rtd-theme
 black
 isort
 flake8
-aider-lint-fixer
 
 # Version management
 bump2version
