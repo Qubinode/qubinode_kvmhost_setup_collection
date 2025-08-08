@@ -102,25 +102,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-          cache-dependency-path: |
-            requirements.txt
-            pyproject.toml
+      - name: Set up Python 3.11 for self-hosted runner
+        run: |
+          echo "🐍 Setting up Python 3.11 for self-hosted runner..."
+
+          # Check if Python 3.11 is already available
+          if command -v python3.11 >/dev/null 2>&1; then
+            echo "✅ Python 3.11 already available: $(python3.11 --version)"
+          else
+            echo "📦 Installing Python 3.11..."
+            # Detect OS and use appropriate package installation method
+            . /etc/os-release
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo yum install -y --nogpgcheck python3.11 python3.11-pip python3.11-devel
+            else
+              sudo yum install -y python3.11 python3.11-pip python3.11-devel
+            fi
+            echo "✅ Python 3.11 installed: $(python3.11 --version)"
+          fi
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python3.11 -m pip install --upgrade pip
           # Use pip's new dependency resolver with optimized settings
-          pip install --use-pep517 --no-deps --upgrade setuptools wheel
-          pip install -r requirements.txt --use-pep517
+          python3.11 -m pip install --use-pep517 --no-deps --upgrade setuptools wheel
+          python3.11 -m pip install -r requirements.txt --use-pep517
 
       - name: Generate enhanced compatibility matrix
         run: |
-          python scripts/generate_enhanced_compatibility_matrix.py
+          python3.11 scripts/generate_enhanced_compatibility_matrix.py
 
       - name: Set matrix output
         id: set-matrix
@@ -365,21 +376,32 @@ jobs:
           pattern: test-results-*
           merge-multiple: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-          cache-dependency-path: |
-            requirements.txt
-            pyproject.toml
+      - name: Set up Python 3.11 for self-hosted runner
+        run: |
+          echo "🐍 Setting up Python 3.11 for self-hosted runner..."
+
+          # Check if Python 3.11 is already available
+          if command -v python3.11 >/dev/null 2>&1; then
+            echo "✅ Python 3.11 already available: $(python3.11 --version)"
+          else
+            echo "📦 Installing Python 3.11..."
+            # Detect OS and use appropriate package installation method
+            . /etc/os-release
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo yum install -y --nogpgcheck python3.11 python3.11-pip python3.11-devel
+            else
+              sudo yum install -y python3.11 python3.11-pip python3.11-devel
+            fi
+            echo "✅ Python 3.11 installed: $(python3.11 --version)"
+          fi
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python3.11 -m pip install --upgrade pip
           # Use pip's optimized dependency resolution
-          pip install --use-pep517 --no-deps --upgrade setuptools wheel
-          pip install -r requirements.txt --use-pep517
+          python3.11 -m pip install --use-pep517 --no-deps --upgrade setuptools wheel
+          python3.11 -m pip install -r requirements.txt --use-pep517
 
       - name: Download compatibility reports
         uses: actions/download-artifact@v4
@@ -435,7 +457,7 @@ jobs:
 
       - name: Regenerate compatibility report
         run: |
-          python scripts/generate_enhanced_compatibility_matrix.py
+          python3.11 scripts/generate_enhanced_compatibility_matrix.py
 
       - name: Create GitHub issue for compatibility matrix updates
         run: |
@@ -540,27 +562,52 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-          cache-dependency-path: |
-            requirements.txt
-            pyproject.toml
+      - name: Set up Python 3.11 for self-hosted runner
+        run: |
+          echo "🐍 Setting up Python 3.11 for self-hosted runner..."
+
+          # Check if Python 3.11 is already available
+          if command -v python3.11 >/dev/null 2>&1; then
+            echo "✅ Python 3.11 already available: $(python3.11 --version)"
+          else
+            echo "📦 Installing Python 3.11..."
+            # Detect OS and use appropriate package installation method
+            . /etc/os-release
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo yum install -y --nogpgcheck python3.11 python3.11-pip python3.11-devel
+            else
+              sudo yum install -y python3.11 python3.11-pip python3.11-devel
+            fi
+            echo "✅ Python 3.11 installed: $(python3.11 --version)"
+          fi
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python3.11 -m pip install --upgrade pip
           # Use pip's optimized dependency resolution
-          pip install --use-pep517 --no-deps --upgrade setuptools wheel
-          pip install -r requirements.txt --use-pep517
+          python3.11 -m pip install --use-pep517 --no-deps --upgrade setuptools wheel
+          python3.11 -m pip install -r requirements.txt --use-pep517
 
       - name: Set up Podman
         run: |
-          sudo apt-get update
-          sudo apt-get install -y podman
-          podman --version
+          echo "🐳 Setting up Podman for self-hosted runner..."
+
+          # Check if Podman is already available
+          if command -v podman >/dev/null 2>&1; then
+            echo "✅ Podman already available: $(podman --version)"
+          else
+            echo "📦 Installing Podman..."
+            # Detect OS and use appropriate package installation method
+            . /etc/os-release
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo yum install -y --nogpgcheck podman
+            else
+              sudo yum install -y podman
+            fi
+            echo "✅ Podman installed: $(podman --version)"
+          fi
 
       - name: Start test containers for validation
         run: |
@@ -613,7 +660,7 @@ jobs:
       - name: Run container compatibility validation
         run: |
           echo "🔍 Running container compatibility validation..."
-          if python scripts/validate_container_compatibility.py; then
+          if python3.11 scripts/validate_container_compatibility.py; then
             echo "✅ Container compatibility validation completed successfully"
           else
             echo "⚠️ Container compatibility validation had issues - check logs"
