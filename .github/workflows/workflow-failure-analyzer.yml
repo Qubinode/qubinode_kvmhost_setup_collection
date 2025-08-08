@@ -78,11 +78,22 @@ jobs:
 
               # Install Python 3.11 on RHEL/Rocky systems
               if command -v yum >/dev/null 2>&1; then
-                sudo yum install -y python3.11 python3.11-pip python3.11-devel || {
-                  echo "❌ Failed to install Python 3.11 via yum"
-                  echo "Using available Python3: $PYTHON_VERSION"
-                  PYTHON_CMD="python3"
-                }
+                # Detect OS and use appropriate package installation method
+                . /etc/os-release
+                if [[ "$ID" == "rocky" ]]; then
+                  echo "Using --nogpgcheck for Rocky Linux package installation"
+                  sudo yum install -y --nogpgcheck python3.11 python3.11-pip python3.11-devel || {
+                    echo "❌ Failed to install Python 3.11 via yum"
+                    echo "Using available Python3: $PYTHON_VERSION"
+                    PYTHON_CMD="python3"
+                  }
+                else
+                  sudo yum install -y python3.11 python3.11-pip python3.11-devel || {
+                    echo "❌ Failed to install Python 3.11 via yum"
+                    echo "Using available Python3: $PYTHON_VERSION"
+                    PYTHON_CMD="python3"
+                  }
+                fi
 
                 # Check if installation succeeded
                 if command -v python3.11 >/dev/null 2>&1; then
