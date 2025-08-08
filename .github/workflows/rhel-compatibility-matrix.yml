@@ -291,10 +291,10 @@ jobs:
         run: |
           # Check if RHEL-specific molecule directory exists, otherwise use default
           if [ -d "molecule/rhel${{ matrix.rhel_version }}" ]; then
-            cd molecule/rhel${{ matrix.rhel_version }}
+            SCENARIO="rhel${{ matrix.rhel_version }}"
             echo "🧪 Using RHEL ${{ matrix.rhel_version }} specific molecule configuration"
           elif [ -d "molecule/default" ]; then
-            cd molecule/default
+            SCENARIO="default"
             echo "🧪 Using default molecule configuration for RHEL ${{ matrix.rhel_version }} testing"
           else
             echo "❌ No molecule configuration found. Expected molecule/rhel${{ matrix.rhel_version }}/ or molecule/default/"
@@ -315,7 +315,8 @@ jobs:
             echo "Consider upgrading to ansible-core 2.18+ for better compatibility"
           fi
 
-          molecule test
+          # Run molecule test from root directory with scenario flag
+          molecule test -s "$SCENARIO"
         env:
           MOLECULE_NO_LOG: false
           ANSIBLE_FORCE_COLOR: true
