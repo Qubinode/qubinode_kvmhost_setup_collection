@@ -1,0 +1,121 @@
+---
+- name: Set test variables
+  set_fact:
+    _storage_test_pool_pvs_lvm: "{{ ansible_lvm.pvs | dict2items |
+      selectattr('value.vg', 'match', '^' ~ storage_test_pool.name ~ '$') |
+      map(attribute='key') | list }}"
+    _storage_test_expected_pv_count: "{{ 0
+      if storage_test_pool.state == 'absent'
+      else (storage_test_pool.raid_level |
+      ternary(1, storage_test_pool.disks | length)) }}"
+  when: storage_test_pool.type == 'lvm'
+
+- name: Get the canonical device path for each member device
+  resolve_blockdev:
+    spec: "{{ pv }}"
+  loop: "{{ _storage_test_pool_pvs_lvm }}"
+  loop_control:
+    loop_var: pv
+  register: pv_paths
+  when: storage_test_pool.type == 'lvm'
+
+- name: Set pvs lvm length
+  set_fact:
+    __pvs_lvm_len: "{{ _storage_test_pool_pvs_lvm | length }}"
+  when: storage_test_pool.type == 'lvm'
+
+- name: Set pool pvs
+  set_fact:
+    _storage_test_pool_pvs: "{{ pv_paths.results[0 : (__pvs_lvm_len | int)] |
+      map(attribute='device') | list }}"
+  when: storage_test_pool.type == 'lvm'
+
+- name: Verify PV count
+  assert:
+    that: __pvs_lvm_len | int == _storage_test_expected_pv_count | int
+    msg: >-
+      Unexpected PV count for pool {{ storage_test_pool.name }}
+      (has: {{ __pvs_lvm_len | int }}
+       expected: {{ _storage_test_expected_pv_count | int }})
+  when: storage_test_pool.type == 'lvm'
+
+- name: Set expected pv type
+  set_fact:
+    _storage_test_expected_pv_type: "{{ 'crypt'
+      if storage_test_pool.encryption else 'disk' }}"
+  when: storage_test_pool.type == 'lvm'
+
+- name: Set expected pv type - 2
+  set_fact:
+    _storage_test_expected_pv_type: "{{ 'partition'
+      if storage_use_partitions | d(false) else 'disk' }}"
+  when: storage_test_pool.type == 'lvm' and not storage_test_pool.encryption
+
+- name: Set expected pv type - 3
+  set_fact:
+    _storage_test_expected_pv_type: "{{ storage_test_pool.raid_level }}"
+  when:
+    - storage_test_pool.type == 'lvm'
+    - not storage_test_pool.raid_level is none
+    - storage_test_pool.raid_level | length > 0
+    - not storage_test_pool.encryption
+
+- name: Check the type of each PV
+  assert:
+    that: storage_test_blkinfo.info[pv]['type'] ==
+      _storage_test_expected_pv_type
+    msg: >-
+      Incorrect type for PV {{ pv }}
+      (has: '{{ storage_test_blkinfo.info[pv]['type'] }}'
+      expected: '{{ _storage_test_expected_pv_type }})'
+      in pool '{{ storage_test_pool.name }}'
+  loop: "{{ _storage_test_pool_pvs }}"
+  loop_control:
+    loop_var: pv
+  when: storage_test_pool.type == 'lvm'
+
+- name: Check that blivet supports PV grow to fill
+  ansible.builtin.script: >-
+    scripts/does_library_support.py
+    blivet.formats.lvmpv.LVMPhysicalVolume.grow_to_fill
+  args:
+    executable: "{{ ansible_python.executable }}"
+  register: grow_supported
+  changed_when: false
+  failed_when: grow_supported.rc not in [0, 1]
+
+- name: Verify that PVs fill the whole devices when they should
+  include_tasks: verify-pool-member-pvsize.yml
+  loop: "{{ _storage_test_pool_pvs | default([]) }}"
+  loop_control:
+    loop_var: st_pool_pv
+  when:
+    - grow_supported.rc == 0
+    - storage_test_pool.type == "lvm"
+    - storage_test_pool.grow_to_fill | bool
+
+- name: Check MD RAID
+  include_tasks: verify-pool-md.yml
+
+- name: Check LVM RAID
+  include_tasks: verify-pool-members-lvmraid.yml
+
+- name: Check Thin Pools
+  include_tasks: verify-pool-members-thin.yml
+
+- name: Check member encryption
+  include_tasks: verify-pool-members-encryption.yml
+
+- name: Check VDO
+  include_tasks: verify-pool-members-vdo.yml
+
+- name: Check Stratis
+  include_tasks: verify-pool-stratis.yml
+
+- name: Clean up test variables
+  set_fact:
+    _storage_test_expected_pv_type: null
+    _storage_test_expected_pv_count: null
+    _storage_test_pool_pvs_lvm: []
+    _storage_test_pool_pvs: []
+    __pvs_lvm_len: null

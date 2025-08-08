@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: Play for testing vlan mtu setting
+  hosts: all
+  vars:
+    type: veth
+    interface: lsr101
+    vlan_interface: lsr101.90
+  tasks:
+    - name: Include the task 'show_interfaces.yml'
+      include_tasks: tasks/show_interfaces.yml
+    - name: Include the task 'manage_test_interface.yml'
+      include_tasks: tasks/manage_test_interface.yml
+      vars:
+        state: present
+    - name: Include the task 'assert_device_present.yml'
+      include_tasks: tasks/assert_device_present.yml
+    - name: >-
+        TEST: I can configure the MTU for a vlan interface without autoconnect.
+      debug:
+        msg: "##################################################"
+    - name: Import network role
+      import_role:
+        name: linux-system-roles.network
+      vars:
+        network_connections:
+          - name: "{{ interface }}"
+            type: ethernet
+            state: up
+            mtu: 1492
+            autoconnect: false
+            ip:
+              dhcp4: false
+              auto6: false
+
+          - name: "{{ vlan_interface }}"
+            parent: "{{ interface }}"
+            type: vlan
+            vlan_id: 90
+            mtu: 1280
+            state: up
+            autoconnect: false
+            ip:
+              dhcp4: false
+              auto6: false
+    - name: Include the task 'assert_device_present.yml' after running role
+      include_tasks: tasks/assert_device_present.yml
+      vars:
+        interface: "{{ vlan_interface }}"
+    - name: Include the task 'assert_profile_present.yml'
+      include_tasks: tasks/assert_profile_present.yml
+      vars:
+        profile: "{{ item }}"
+      loop:
+        - "{{ interface }}"
+        - "{{ vlan_interface }}"
+
+    - name: "TEARDOWN: remove profiles."
+      debug:
+        msg: "##################################################"
+    - name: Import network role to remove interfaces
+      import_role:
+        name: linux-system-roles.network
+      vars:
+        network_connections:
+          - name: "{{ interface }}"
+            persistent_state: absent
+            state: down
+          - name: "{{ vlan_interface }}"
+            persistent_state: absent
+            state: down
+      ignore_errors: true  # noqa ignore-errors
+    - name: Include the task 'manage_test_interface.yml' to remove interfaces
+      include_tasks: tasks/manage_test_interface.yml
+      vars:
+        state: absent
+    - name: Verify network state restored to default
+      include_tasks: tasks/check_network_dns.yml

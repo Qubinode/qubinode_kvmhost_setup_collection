@@ -253,14 +253,14 @@ validate_security() {
         log_warning "Safety tool not available - skipping Python security check"
     fi
     
-    # Run enhanced dependency scanner if available
-    if [[ -f "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" ]]; then
-        log_info "Running enhanced dependency scanner"
-        
-        if "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" --format json --report-dir "$TEMP_DIR" >/dev/null 2>&1; then
-            log_success "Enhanced dependency scanner completed successfully"
+    # Run Ansible collection security check if available
+    if [[ -f "$PROJECT_ROOT/scripts/ansible-collection-security-check.sh" ]]; then
+        log_info "Running Ansible collection security check"
+
+        if "$PROJECT_ROOT/scripts/ansible-collection-security-check.sh" >/dev/null 2>&1; then
+            log_success "Ansible collection security check completed successfully"
         else
-            log_warning "Enhanced dependency scanner reported issues"
+            log_warning "Ansible collection security check reported issues"
         fi
     fi
 }

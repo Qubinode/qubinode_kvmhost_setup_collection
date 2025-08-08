@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: Include the task 'get_profile_stat.yml'
+  include_tasks: get_profile_stat.yml
+- name: "Assert that the profile is absent - '{{ profile }}'"
+  assert:
+    that: not lsr_net_profile_exists
+    msg: "profile {{ profile }} does exist"

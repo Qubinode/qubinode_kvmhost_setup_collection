@@ -1,0 +1,89 @@
+---
+# Only when volume is raid
+- name: Check RAID options
+  when:
+    - storage_test_volume.type == 'raid'
+    - storage_test_volume._device | length > 0
+  block:
+    - name: Get information about RAID
+      command: mdadm --detail {{ storage_test_volume._raw_device | quote }}
+      register: storage_test_mdadm
+      changed_when: false
+
+    # pre-chew regex search patterns
+    - name: Set active devices regex
+      set_fact:
+        storage_test_md_active_devices_re: "{{
+          ('Active Devices : ' ~ storage_test_volume.raid_device_count ~ '\n') |
+          regex_escape() }}"
+      when: storage_test_volume.raid_device_count is defined
+
+    - name: Set spare devices regex
+      set_fact:
+        storage_test_md_spare_devices_re: "{{
+          ('Spare Devices : ' ~ storage_test_volume.raid_spare_count ~ '\n') |
+          regex_escape() }}"
+      when: storage_test_volume.raid_spare_count is defined
+
+    - name: Set md version regex
+      set_fact:
+        storage_test_md_metadata_version_re: "{{
+          ('Version : ' ~ storage_test_volume.raid_metadata_version ~ '\n') |
+          regex_escape() }}"
+      when: storage_test_volume.raid_metadata_version is defined
+
+    - name: Set chunk size regex
+      set_fact:
+        storage_test_md_chunk_size_re: "{{
+          storage_test_mdadm.stdout | regex_search('Chunk Size : ([0-9]+[KMG])',
+          '\\1') }}"
+      when:
+        - storage_test_volume.raid_chunk_size is defined
+        - storage_test_volume.raid_chunk_size is not none
+        - storage_test_volume.raid_chunk_size | string != "0 B"
+
+    - name: Parse the chunk size
+      bsize:
+        size: "{{ storage_test_md_chunk_size_re[0] }}"
+      register: storage_test_parsed_md_chunk_size
+      when:
+        - storage_test_volume.raid_chunk_size is defined
+        - storage_test_volume.raid_chunk_size is not none
+        - storage_test_volume.raid_chunk_size | string != "0 B"
+
+    - name: Check RAID active devices count
+      assert:
+        that: storage_test_mdadm.stdout is
+          regex(storage_test_md_active_devices_re)
+        msg: >-
+          Expected {{ storage_test_volume.raid_device_count }} active RAID
+          devices.
+      when: storage_test_volume.raid_device_count is not none
+
+    - name: Check RAID spare devices count
+      assert:
+        that: storage_test_mdadm.stdout is
+          regex(storage_test_md_spare_devices_re)
+        msg: >-
+          Expected {{ storage_test_volume.raid_spare_count }} spare RAID
+          devices.
+      when: storage_test_volume.raid_spare_count is not none
+
+    - name: Check RAID metadata version
+      assert:
+        that: storage_test_mdadm.stdout is
+          regex(storage_test_md_metadata_version_re)
+        msg: >-
+          Expected {{ storage_test_volume.raid_metadata_version }} RAID metadata
+          version.
+      when: storage_test_volume.raid_metadata_version is not none
+
+    - name: Check RAID chunk size
+      assert:
+        that: storage_test_parsed_md_chunk_size | int ==
+          storage_test_volume.raid_chunk_size | int
+        msg: Expected {{ storage_test_volume.raid_chunk_size }} RAID chunk size.
+      when:
+        - storage_test_volume.raid_chunk_size is defined
+        - storage_test_volume.raid_chunk_size is not none
+        - storage_test_volume.raid_chunk_size | string != "0 B"

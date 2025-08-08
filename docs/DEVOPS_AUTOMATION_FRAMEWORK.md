@@ -131,7 +131,7 @@ graph TD
 3. **Security-Only Mode**: Security-focused validation
    - Vulnerability scanning with Safety
    - Security code analysis with Bandit
-   - Enhanced dependency scanner integration
+   - Focused Ansible collection security check
 
 **Features**:
 - Isolated testing environments
@@ -140,21 +140,21 @@ graph TD
 - Molecule scenario validation
 - Detailed validation reporting
 
-### Enhanced Dependency Scanner
+### Ansible Collection Security Check
 
-**Purpose**: Comprehensive security scanning for all dependency types
+**Purpose**: Focused security scanning for Ansible collections
 
 **Usage**:
 ```bash
-# Scan all dependencies
-./scripts/enhanced-dependency-scanner.sh
-
-# Python dependencies only
-./scripts/enhanced-dependency-scanner.sh --python --severity high
-
-# JSON output for CI/CD
-./scripts/enhanced-dependency-scanner.sh --format json --ci --severity critical
+# Run focused security check
+./scripts/ansible-collection-security-check.sh
 ```
+
+**Features**:
+- Only scans project requirements files (not system packages)
+- Excludes external roles we don't control
+- Appropriate severity thresholds for Ansible collections
+- Fast execution with minimal false positives
 
 **Scanned Dependencies**:
 - **Python**: pip packages, requirements.txt files

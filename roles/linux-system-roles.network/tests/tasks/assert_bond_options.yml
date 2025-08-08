@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: "** TEST check bond settings"
+  command: cat
+    /sys/class/net/{{ controller_device }}/bonding/{{ bond_opt.key | quote }}
+  register: result
+  until: bond_opt.value in result.stdout
+  loop: "{{ bond_options_to_assert }}"
+  loop_control:
+    loop_var: bond_opt
+  changed_when: false
+- name: Include the task 'assert_IPv4_present.yml'
+  include_tasks: assert_IPv4_present.yml
+  vars:
+    interface: "{{ controller_device }}"
+    address: '192.0.2'
+- name: Include the task 'assert_IPv6_present.yml'
+  include_tasks: assert_IPv6_present.yml
+  vars:
+    interface: "{{ controller_device }}"
+    address: '2001'

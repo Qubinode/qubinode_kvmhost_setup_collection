@@ -249,7 +249,7 @@ validate_scripts_structure() {
     # Check for validation scripts
     validate_file "scripts/validate-adr-files.sh" "ADR file validation script"
     validate_file "scripts/validate-molecule-systemd.sh" "Molecule systemd validation script"
-    validate_file "scripts/enhanced-dependency-scanner.sh" "Enhanced dependency scanner"
+    validate_file "scripts/ansible-collection-security-check.sh" "Ansible collection security check"
     
     # Check script executability
     if [[ -d "$PROJECT_ROOT/scripts" ]]; then

@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: Include the task 'manage_test_interface.yml'
+  include_tasks: tasks/manage_test_interface.yml
+  vars:
+    state: present
+    type: veth
+...

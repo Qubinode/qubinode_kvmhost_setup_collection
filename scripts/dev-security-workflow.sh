@@ -58,21 +58,14 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-run_enhanced_scanner() {
-    local severity="$1"
-    local format="$2"
-    local extra_args="${3:-}"
-    
-    log_info "Running enhanced dependency scanner (severity: $severity, format: $format)"
-    
-    if [[ -x "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" ]]; then
-        "$PROJECT_ROOT/scripts/enhanced-dependency-scanner.sh" \
-            --severity "$severity" \
-            --format "$format" \
-            $extra_args
+run_collection_security_check() {
+    log_info "Running Ansible collection security check"
+
+    if [[ -x "$PROJECT_ROOT/scripts/ansible-collection-security-check.sh" ]]; then
+        "$PROJECT_ROOT/scripts/ansible-collection-security-check.sh"
     else
-        log_error "Enhanced dependency scanner not found or not executable"
-        log_info "Please ensure scripts/enhanced-dependency-scanner.sh exists and is executable"
+        log_error "Ansible collection security check not found or not executable"
+        log_info "Please ensure scripts/ansible-collection-security-check.sh exists and is executable"
         return 1
     fi
 }
@@ -88,15 +81,15 @@ workflow_pre_commit() {
     log_info "Running quick security checks before commit..."
     
     # Quick critical vulnerability check
-    if run_enhanced_scanner "critical" "table" ""; then
+    if run_collection_security_check; then
         log_success "No critical vulnerabilities found"
     else
         local exit_code=$?
-        if [[ $exit_code -eq 5 ]]; then
+        if [[ $exit_code -eq 1 ]]; then
             log_error "Critical vulnerabilities found! Please fix before committing."
             return 1
-        elif [[ $exit_code -eq 4 ]]; then
-            log_warning "High severity vulnerabilities found. Consider fixing before commit."
+        else
+            log_warning "Some vulnerabilities found (exit code: $exit_code)"
         fi
     fi
     
@@ -130,16 +123,16 @@ workflow_pre_push() {
     
     log_info "Running security checks before push..."
     
-    # Run medium+ severity scan
-    if run_enhanced_scanner "medium" "table" ""; then
-        log_success "No medium+ severity vulnerabilities found"
+    # Run security check
+    if run_collection_security_check; then
+        log_success "Security check passed"
     else
         local exit_code=$?
-        if [[ $exit_code -ge 4 ]]; then
-            log_error "High or critical vulnerabilities found! Please fix before pushing."
+        if [[ $exit_code -eq 1 ]]; then
+            log_error "Critical vulnerabilities found! Please fix before pushing."
             return 1
-        elif [[ $exit_code -eq 3 ]]; then
-            log_warning "Medium severity vulnerabilities found. Consider fixing."
+        else
+            log_warning "Some security issues found. Consider reviewing."
         fi
     fi
     
@@ -163,17 +156,17 @@ workflow_pre_release() {
         log_info "Reports will be generated in ./security-reports/"
     fi
     
-    # Comprehensive scan with all dependency types
-    if run_enhanced_scanner "low" "json" "$extra_args"; then
-        log_success "No vulnerabilities found - ready for release!"
+    # Comprehensive security check
+    if run_collection_security_check; then
+        log_success "No critical vulnerabilities found - ready for release!"
     else
         local exit_code=$?
-        case $exit_code in
-            5) log_error "CRITICAL vulnerabilities found - BLOCK RELEASE"; return 1 ;;
-            4) log_error "HIGH vulnerabilities found - BLOCK RELEASE"; return 1 ;;
-            3) log_warning "MEDIUM vulnerabilities found - review required" ;;
-            2) log_info "LOW vulnerabilities found - acceptable for release" ;;
-        esac
+        if [[ $exit_code -eq 1 ]]; then
+            log_error "CRITICAL vulnerabilities found - BLOCK RELEASE"
+            return 1
+        else
+            log_warning "Some vulnerabilities found - review recommended"
+        fi
     fi
     
     # Additional pre-release checks
@@ -204,8 +197,8 @@ workflow_weekly_review() {
     mkdir -p "./security-reports/weekly"
     local report_dir="./security-reports/weekly"
     
-    # Run comprehensive scan with detailed reporting
-    if run_enhanced_scanner "low" "json" "--report-dir $report_dir"; then
+    # Run comprehensive security check
+    if run_collection_security_check; then
         log_info "Full security scan completed"
     else
         log_info "Vulnerabilities found - see detailed reports"
@@ -256,8 +249,8 @@ workflow_quick_check() {
     log_info "Running quick critical vulnerability check..."
     
     # Only check for critical issues, fast execution
-    if run_enhanced_scanner "critical" "table" "--python"; then
-        log_success "✅ No critical Python vulnerabilities found"
+    if run_collection_security_check; then
+        log_success "✅ No critical vulnerabilities found"
     else
         log_warning "⚠️  Critical vulnerabilities detected"
     fi

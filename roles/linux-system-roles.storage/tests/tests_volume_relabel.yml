@@ -1,0 +1,146 @@
+---
+- name: Test volume relabel
+  hosts: all
+  become: true
+  vars:
+    storage_safe_mode: false
+    mount_location: '/opt/test1'
+    volume_size: '5g'
+
+  tasks:
+    - name: Run the role
+      include_role:
+        name: linux-system-roles.storage
+
+    - name: Mark tasks to be skipped
+      set_fact:
+        storage_skip_checks:
+          - blivet_available
+          - "{{ (lookup('env',
+                        'SYSTEM_ROLES_REMOVE_CLOUD_INIT') in ['', 'false']) |
+                ternary('packages_installed', '') }}"
+          - service_facts
+
+    - name: Get unused disks
+      include_tasks: get_unused_disk.yml
+      vars:
+        min_size: "{{ volume_size }}"
+        max_return: 1
+
+    - name: Set label
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            mount_point: "{{ mount_location }}"
+            fs_type: ext4
+            disks: "{{ unused_disks }}"
+            fs_label: label
+
+    - name: Verify role results
+      include_tasks: verify-role-results.yml
+
+    - name: Relabel
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            mount_point: "{{ mount_location }}"
+            fs_type: ext4
+            disks: "{{ unused_disks }}"
+            fs_label: relabel
+
+    - name: Verify role results - 2
+      include_tasks: verify-role-results.yml
+
+    - name: Run relabel again to verify idempotence
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            mount_point: "{{ mount_location }}"
+            fs_type: ext4
+            disks: "{{ unused_disks }}"
+            fs_label: relabel
+
+    - name: Check for idempotency
+      assert:
+        that: not blivet_output.changed
+        msg: "Volume relabeling is not idempotent."
+
+    - name: Verify role results - 3
+      include_tasks: verify-role-results.yml
+
+    - name: Relabel without explicitly setting the label
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            mount_point: "{{ mount_location }}"
+            fs_type: ext4
+            disks: "{{ unused_disks }}"
+
+    - name: Check for default value
+      assert:
+        that: not blivet_output.changed
+        msg: "Volume relabeling doesn't preserve existing label."
+
+    - name: Verify role results - 4
+      include_tasks: verify-role-results.yml
+
+    - name: Remove label
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            mount_point: "{{ mount_location }}"
+            fs_type: ext4
+            disks: "{{ unused_disks }}"
+            fs_label: ""
+
+    - name: Verify role results - 5
+      include_tasks: verify-role-results.yml
+
+    - name: Format the device to LVMPV which doesn't support labels
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            fs_type: lvmpv
+            disks: "{{ unused_disks }}"
+
+    - name: Rerun to check we don't try to relabel preexisitng LVMPV (regression test for RHEL-29874)
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            fs_type: lvmpv
+            disks: "{{ unused_disks }}"
+
+    - name: Clean up
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_volumes:
+          - name: test1
+            type: disk
+            mount_point: "{{ mount_location }}"
+            disks: "{{ unused_disks }}"
+            state: absent
+
+    - name: Verify role results - 6
+      include_tasks: verify-role-results.yml

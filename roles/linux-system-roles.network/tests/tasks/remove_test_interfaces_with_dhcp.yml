@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: Remove test interfaces
+  shell: |
+    set -euxo pipefail
+    exec 1>&2
+    rc=0
+    ip link delete {{ dhcp_interface1 }} || rc="$?"
+    if [ "$rc" != 0 ]; then
+      echo ERROR - could not delete link {{ dhcp_interface1 }} - error "$rc"
+    fi
+    ip link delete {{ dhcp_interface2 }} || rc="$?"
+    if [ "$rc" != 0 ]; then
+      echo ERROR - could not delete link {{ dhcp_interface2 }} - error "$rc"
+    fi
+    ip link delete testbr || rc="$?"
+    if [ "$rc" != 0 ]; then
+      echo ERROR - could not delete link testbr - error "$rc"
+    fi
+  changed_when: false
+
+
+- name: Stop dnsmasq/radvd services
+  shell: |
+    set -uxo pipefail
+    exec 1>&2
+    pkill -F /run/dhcp_testbr.pid
+    rm -rf /run/dhcp_testbr.pid
+    rm -rf /run/dhcp_testbr.lease
+    if grep 'release 6' /etc/redhat-release; then
+        # Stop radvd server
+        service radvd stop
+        iptables -D INPUT -i testbr -p udp --dport 67:68 --sport 67:68 -j ACCEPT
+    fi
+    if systemctl is-active firewalld; then
+        for service in dhcp dhcpv6 dhcpv6-client; do
+            if firewall-cmd --query-service="$service"; then
+                firewall-cmd --remove-service "$service"
+            fi
+        done
+    fi
+  changed_when: false

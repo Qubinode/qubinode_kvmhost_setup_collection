@@ -1,0 +1,8 @@
+dbus-tools
+ethtool
+hostapd
+NetworkManager
+network-scripts
+openssl
+procps-ng
+python3-pytest

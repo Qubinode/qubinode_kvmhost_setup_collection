@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: BSD-3-Clause
+---
+- name: Play for testing dummy connection
+  hosts: all
+  vars:
+    autocon_retries: 2
+    interface: dummy0
+    wait_ip: ipv4+ipv6
+    profile: "{{ interface }}"
+    lsr_fail_debug:
+      - __network_connections_result
+  tasks:
+    - name: Show playbook name
+      debug:
+        msg: "this is: playbooks/tests_dummy.yml"
+      tags:
+        - always
+
+    - name: Test the dummy connection
+      tags:
+        - tests::dummy:create
+      block:
+        - name: Include the task 'run_test.yml'
+          include_tasks: tasks/run_test.yml
+          vars:
+            lsr_description: Create a dummy interface
+            lsr_setup:
+              - tasks/delete_interface.yml
+              - tasks/assert_device_absent.yml
+            lsr_test:
+              - tasks/create_dummy_profile.yml
+            lsr_assert:
+              - tasks/assert_profile_present.yml
+              - tasks/assert_device_present.yml
+              - tasks/assert_autoconnect_retries.yml
+              - tasks/assert_may_fail.yml
+            lsr_cleanup:
+              - tasks/cleanup_profile+device.yml
+              - tasks/check_network_dns.yml

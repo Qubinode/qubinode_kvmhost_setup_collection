@@ -1,0 +1,10 @@
+dbus-tools
+ethtool
+hostapd
+NetworkManager
+network-scripts
+openssl
+procps-ng
+python3-pytest
+systemd-resolved
+wpa_supplicant

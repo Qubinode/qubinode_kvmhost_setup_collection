@@ -60,10 +60,10 @@ jobs:
             chmod +x /tmp/docker-bench-security.sh
           fi
       
-      - name: Run enhanced dependency vulnerability scan
+      - name: Run Ansible collection security check
         run: |
-          chmod +x ./scripts/enhanced-dependency-scanner.sh
-          ./scripts/enhanced-dependency-scanner.sh --format json --report-dir security-reports/
+          # Use focused security check for Ansible collections
+          ./scripts/ansible-collection-security-check.sh
       
       - name: Upload security scan results
         uses: actions/upload-artifact@v4

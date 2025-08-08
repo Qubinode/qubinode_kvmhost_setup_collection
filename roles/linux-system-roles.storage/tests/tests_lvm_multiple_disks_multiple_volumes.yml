@@ -1,0 +1,83 @@
+---
+- name: Test lvm multiple disks multiple volumes
+  hosts: all
+  become: true
+  vars:
+    mount_location1: '/opt/test1'
+    mount_location2: '/opt/test2'
+    volume_group_size: '5g'
+    volume_size: '4g'
+  tags:
+    - tests::lvm
+  tasks:
+    - name: Run the role
+      include_role:
+        name: linux-system-roles.storage
+
+    - name: Mark tasks to be skipped
+      set_fact:
+        storage_skip_checks:
+          - blivet_available
+          - "{{ (lookup('env',
+                        'SYSTEM_ROLES_REMOVE_CLOUD_INIT') in ['', 'false']) |
+                ternary('packages_installed', '') }}"
+          - service_facts
+
+    - name: Get unused disks
+      include_tasks: get_unused_disk.yml
+      vars:
+        min_size: "{{ volume_group_size }}"
+        max_return: 2
+        disks_needed: 2
+        match_sector_size: true
+
+    - name: >-
+        Create a logical volume spanning two physical volumes that changes its
+        mount location
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_pools:
+          - name: phi
+            disks: "{{ unused_disks }}"
+            volumes:
+              - name: test1
+                size: "{{ volume_size }}"
+                mount_point: "{{ mount_location1 }}"
+              - name: test2
+                size: "{{ volume_size }}"
+                mount_point: "{{ mount_location2 }}"
+
+    - name: Verify role results
+      include_tasks: verify-role-results.yml
+
+    - name: Repeat the previous invocation to verify idempotence
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_pools:
+          - name: phi
+            disks: "{{ unused_disks }}"
+            volumes:
+              - name: test1
+                size: "{{ volume_size }}"
+                mount_point: "{{ mount_location1 }}"
+              - name: test2
+                size: "{{ volume_size }}"
+                mount_point: "{{ mount_location2 }}"
+
+    - name: Verify role results - 2
+      include_tasks: verify-role-results.yml
+
+    - name: Clean up
+      include_role:
+        name: linux-system-roles.storage
+      vars:
+        storage_pools:
+          - name: phi
+            disks: "{{ unused_disks }}"
+            volumes: []
+            state: absent
+
+    - name: Verify role results - 3
+      include_tasks: verify-role-results.yml
