@@ -1,4 +1,0 @@
-NetworkManager
-NetworkManager-team
-NetworkManager-wifi
-wpa_supplicant

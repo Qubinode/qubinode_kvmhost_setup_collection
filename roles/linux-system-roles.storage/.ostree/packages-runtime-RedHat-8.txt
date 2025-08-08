@@ -1,5 +1,0 @@
-kmod-kvdo
-python3-blivet
-vdo
-stratisd
-stratis-cli

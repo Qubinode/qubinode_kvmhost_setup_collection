@@ -1,7 +1,0 @@
-ethtool
-hostapd
-NetworkManager
-openssl
-procps-ng
-wpa_supplicant
-yum-utils

@@ -230,6 +230,10 @@ pip-audit-report.json
 safety-report.json
 .ansible
 
+# External roles (installed as dependencies, not part of our source)
+roles/linux-system-roles.network/
+roles/linux-system-roles.storage/
+
 # Experimental files and drafts not ready for production
 *.experimental
 *.draft

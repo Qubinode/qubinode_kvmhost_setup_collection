@@ -1,3 +1,0 @@
-dbus-tools
-network-scripts
-python3-pytest

@@ -1,4 +1,0 @@
-bridge-utils
-dhclient
-initscripts
-python-gobject-base

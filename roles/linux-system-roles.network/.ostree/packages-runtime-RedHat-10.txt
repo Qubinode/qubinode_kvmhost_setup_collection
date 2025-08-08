@@ -1,3 +1,0 @@
-nmstate
-python3-gobject-base
-python3-libnmstate

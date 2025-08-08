@@ -1,5 +1,0 @@
-clevis
-clevis-luks
-tpm2-tools
-jq
-util-linux-core
