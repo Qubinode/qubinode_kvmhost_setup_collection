@@ -73,7 +73,14 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          # Detect OS and use appropriate package installation method
+          . /etc/os-release
+          if [[ "$ID" == "rocky" ]]; then
+            echo "Using --nogpgcheck for Rocky Linux package installation"
+            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          else
+            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run ADR compliance checker
@@ -127,7 +134,14 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          # Detect OS and use appropriate package installation method
+          . /etc/os-release
+          if [[ "$ID" == "rocky" ]]; then
+            echo "Using --nogpgcheck for Rocky Linux package installation"
+            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          else
+            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run dependency validation pipeline
@@ -154,8 +168,14 @@ jobs:
       
       - name: Setup scanning tools
         run: |
-          # Ensure Python and pip are available
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+          # Detect OS and use appropriate package installation method
+          . /etc/os-release
+          if [[ "$ID" == "rocky" ]]; then
+            echo "Using --nogpgcheck for Rocky Linux package installation"
+            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+          else
+            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+          fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run enhanced dependency scanner
