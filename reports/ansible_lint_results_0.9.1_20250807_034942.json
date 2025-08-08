@@ -1,0 +1,96 @@
+{
+  "tool_name": "ansible_lint",
+  "status": "failed",
+  "execution_time": 18.984293222427368,
+  "findings": [
+    {
+      "tool_name": "ansible_lint",
+      "category": "infrastructure",
+      "severity": "major",
+      "title": "Ansible issue",
+      "message": "",
+      "file_path": "",
+      "line_number": null,
+      "column_number": null,
+      "rule_id": "unknown",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "tags": [],
+        "ansible_rule": ""
+      }
+    },
+    {
+      "tool_name": "ansible_lint",
+      "category": "infrastructure",
+      "severity": "major",
+      "title": "Ansible issue",
+      "message": "",
+      "file_path": "",
+      "line_number": null,
+      "column_number": null,
+      "rule_id": "unknown",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "tags": [],
+        "ansible_rule": ""
+      }
+    },
+    {
+      "tool_name": "ansible_lint",
+      "category": "infrastructure",
+      "severity": "major",
+      "title": "Ansible issue",
+      "message": "",
+      "file_path": "",
+      "line_number": null,
+      "column_number": null,
+      "rule_id": "unknown",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "tags": [],
+        "ansible_rule": ""
+      }
+    },
+    {
+      "tool_name": "ansible_lint",
+      "category": "infrastructure",
+      "severity": "minor",
+      "title": "Ansible issue",
+      "message": "",
+      "file_path": "",
+      "line_number": null,
+      "column_number": null,
+      "rule_id": "unknown",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "tags": [],
+        "ansible_rule": ""
+      }
+    },
+    {
+      "tool_name": "ansible_lint",
+      "category": "infrastructure",
+      "severity": "major",
+      "title": "Ansible issue",
+      "message": "",
+      "file_path": "",
+      "line_number": null,
+      "column_number": null,
+      "rule_id": "unknown",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "tags": [],
+        "ansible_rule": ""
+      }
+    }
+  ],
+  "metadata": {
+    "return_code": 2,
+    "command": "/home/vpcuser/releasepilot/venv/bin/ansible-lint --format json --nocolor -c /home/vpcuser/qubinode_kvmhost_setup_collection/.ansible-lint /home/vpcuser/qubinode_kvmhost_setup_collection/requirements.yml /home/vpcuser/qubinode_kvmhost_setup_collection/simple-dependency-check.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test-modular-roles-2.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test-modular.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test-validation.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test_container_detection.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test_libvirt_syntax.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test_storage_syntax.yml /home/vpcuser/qubinode_kvmhost_setup_collection/test_validation_framework.yml /home/vpcuser/qubinode_kvmhost_setup_collection/.releasepilot.yaml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/edge_hosts_validate/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/edge_hosts_validate/tasks/validate_fs.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/edge_hosts_validate/tasks/validate_pkgs.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/edge_hosts_validate/tasks/validate_rhsm.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/epel_management.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/os_detection.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/packages.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/services.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/system_prep.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/tasks/validate_os.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_cockpit/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/create_network.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/networks.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/services.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/storage.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/user_access.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/tasks/validation.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_networking/tasks/bridge_config.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_networking/tasks/interface_detection.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_networking/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_networking/tasks/network_validation.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_networking/tasks/preflight.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/bridge_interface.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/build_user_home_dir.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/cockpit_setup.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/configure_remote_user.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/configure_shell.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/gpg_verification.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/kvm_feature_detection.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/kvm_host_validation.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/libvirt_setup.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/networks.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/performance_optimization.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/rhel_version_detection.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/rhpds_instance.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/rocky_linux.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/storage_pool.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/user_libvirt.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/user_shell_configs.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/validate.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/tasks/verify_variables.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/advanced_pools.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/backup.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/lvm_setup.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/monitoring.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/performance.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/tasks/validation.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_user_config/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/swygue_lvm/tasks/deploy.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/swygue_lvm/tasks/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/swygue_lvm/tasks/precheck.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_cockpit/handlers/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/handlers/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_setup/handlers/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/handlers/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_user_config/handlers/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_base/meta/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_cockpit/meta/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_libvirt/meta/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_networking/meta/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_storage/meta/main.yml /home/vpcuser/qubinode_kvmhost_setup_collection/roles/kvmhost_user_config/meta/main.yml"
+  }
+}

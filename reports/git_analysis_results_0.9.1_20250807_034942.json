@@ -1,0 +1,39 @@
+{
+  "tool_name": "git_analysis",
+  "status": "clean",
+  "execution_time": 0.019384145736694336,
+  "findings": [
+    {
+      "tool_name": "git_analysis",
+      "category": "version_control",
+      "severity": "major",
+      "title": "Uncommitted changes block release",
+      "message": "Found 1 modified files and 4 untracked files. All changes must be committed before creating release 0.9.1.",
+      "file_path": null,
+      "line_number": null,
+      "column_number": null,
+      "rule_id": null,
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "dirty_files": [
+          "pyproject.toml"
+        ],
+        "untracked_files": [
+          ".releasepilot.yaml",
+          ".releasepilot/workspace/latest",
+          ".releasepilot/workspace/run_20250807_034813_0.9.1/metadata.json",
+          "_version.py"
+        ],
+        "total_dirty": 1,
+        "total_untracked": 4,
+        "release_action": "Run 'git add -A && git commit -m \"Prepare for release\"' to commit all changes"
+      }
+    }
+  ],
+  "metadata": {
+    "current_branch": "main",
+    "total_commits": 418,
+    "is_dirty": true
+  }
+}

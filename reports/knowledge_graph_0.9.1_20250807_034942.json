@@ -1,0 +1,24 @@
+{
+  "nodes_count": 156,
+  "edges_count": 312,
+  "node_types": [
+    "files",
+    "functions",
+    "dependencies"
+  ],
+  "edge_types": [
+    "relationships",
+    "imports",
+    "calls"
+  ],
+  "high_impact_areas": [
+    {
+      "file": "src/index.ts",
+      "description": "Entry point affecting 12 dependent files",
+      "dependents_count": 12,
+      "risk_level": "HIGH"
+    }
+  ],
+  "circular_dependencies": 0,
+  "dead_code_count": 3
+}

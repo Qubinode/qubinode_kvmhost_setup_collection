@@ -151,6 +151,9 @@ jobs:
   validate-local-testing:
     name: Validate Local Testing Prerequisites
     runs-on: ubuntu-latest
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

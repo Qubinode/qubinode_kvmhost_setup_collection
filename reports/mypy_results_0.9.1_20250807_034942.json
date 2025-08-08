@@ -1,0 +1,78 @@
+{
+  "tool_name": "mypy",
+  "status": "critical",
+  "execution_time": 0.5142850875854492,
+  "findings": [
+    {
+      "tool_name": "mypy",
+      "category": "type_checking",
+      "severity": "critical",
+      "title": "Type checking error",
+      "message": "Need type annotation for \"fixes_applied\" (hint: \"fixes_applied: list[<type>] = ...\")  [var-annotated]",
+      "file_path": "scripts/fix_ansible_lint.py",
+      "line_number": 18,
+      "column_number": null,
+      "rule_id": "mypy_error",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "issue_type": "error"
+      }
+    },
+    {
+      "tool_name": "mypy",
+      "category": "type_checking",
+      "severity": "critical",
+      "title": "Type checking error",
+      "message": "Need type annotation for \"results\" (hint: \"results: list[<type>] = ...\")  [var-annotated]",
+      "file_path": "tests/idempotency/run_tests.py",
+      "line_number": 28,
+      "column_number": null,
+      "rule_id": "mypy_error",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "issue_type": "error"
+      }
+    },
+    {
+      "tool_name": "mypy",
+      "category": "type_checking",
+      "severity": "critical",
+      "title": "Type checking error",
+      "message": "Need type annotation for \"fixes_applied\" (hint: \"fixes_applied: list[<type>] = ...\")  [var-annotated]",
+      "file_path": "scripts/fix_yaml_parsing.py",
+      "line_number": 17,
+      "column_number": null,
+      "rule_id": "mypy_error",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "issue_type": "error"
+      }
+    },
+    {
+      "tool_name": "mypy",
+      "category": "type_checking",
+      "severity": "critical",
+      "title": "Type checking error",
+      "message": "Need type annotation for \"fixes_applied\" (hint: \"fixes_applied: list[<type>] = ...\")  [var-annotated]",
+      "file_path": "scripts/fix_ansible_lint_advanced.py",
+      "line_number": 18,
+      "column_number": null,
+      "rule_id": "mypy_error",
+      "code_snippet": null,
+      "raw_output": null,
+      "metadata": {
+        "issue_type": "error"
+      }
+    }
+  ],
+  "metadata": {
+    "command": "/home/vpcuser/releasepilot/venv/bin/mypy --ignore-missing-imports /home/vpcuser/qubinode_kvmhost_setup_collection",
+    "total_issues": 4,
+    "errors": 4,
+    "warnings": 0,
+    "notes": 0
+  }
+}
