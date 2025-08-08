@@ -45,8 +45,8 @@ USAGE:
     $0 [OPTIONS] [RHEL_VERSIONS]
 
 RHEL_VERSIONS:
-    Comma-separated list of RHEL versions to test (default: 8,9,10)
-    Examples: 8,9,10 or 9 or 8,10
+    Comma-separated list of RHEL versions to test (default: 9,10)
+    Examples: 9,10 or 9 or 10
 
 OPTIONS:
     -h, --help          Show this help message
@@ -57,10 +57,10 @@ OPTIONS:
     --clean             Clean molecule cache before testing
 
 EXAMPLES:
-    $0                  # Test all RHEL versions (8,9,10) with syntax checks
+    $0                  # Test current RHEL versions (9,10) with syntax checks
     $0 9                # Test only RHEL 9
-    $0 8,10 --full-test # Full test for RHEL 8 and 10
-    $0 --syntax-only    # Quick syntax validation for all versions
+    $0 9,10 --full-test # Full test for RHEL 9 and 10
+    $0 --syntax-only    # Quick syntax validation for current versions
 
 ENVIRONMENT VARIABLES:
     PYTHON_VERSION      Python version to use (default: 3.11)
@@ -118,8 +118,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Set default RHEL versions if not provided
-RHEL_VERSIONS=${RHEL_VERSIONS:-"8,9,10"}
+# Set default RHEL versions if not provided (focus on current and future versions)
+RHEL_VERSIONS=${RHEL_VERSIONS:-"9,10"}
 
 # Change to project root
 cd "$PROJECT_ROOT"
