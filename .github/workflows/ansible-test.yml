@@ -687,24 +687,100 @@ jobs:
 
   version-monitoring:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Check for new Ansible versions
+      - name: Check for new Ansible versions and create issue if needed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pip install packaging requests
-          python -c "from packaging import version
+
+          # Check for new versions
+          python3 << 'EOF'
+          from packaging import version
           import requests
-          latest = version.parse(requests.get('https://pypi.org/pypi/ansible-core/json').json()['info']['version'])
-          current = version.parse('2.18')  # Current version we're using in workflows
-          if latest > current:
-              print(f'📢 INFO: New Ansible-core version available: {latest}')
-              print(f'📋 Current version in use: {current}')
-              print(f'💡 Consider updating workflows to use ansible-core {latest}')
-              # Don't fail - just inform about available updates
-              exit(0)
+          import subprocess
+          import json
+          import os
+
+          def run_gh_command(cmd):
+              """Run gh command and return output"""
+              result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+              return result.returncode, result.stdout.strip(), result.stderr.strip()
+
+          # Get latest version from PyPI
+          response = requests.get('https://pypi.org/pypi/ansible-core/json')
+          latest_version = version.parse(response.json()['info']['version'])
+          current_version = version.parse('2.18')  # Current version we're using
+
+          print(f'📋 Current version in workflows: {current_version}')
+          print(f'📋 Latest available version: {latest_version}')
+
+          if latest_version > current_version:
+              print(f'📢 New Ansible-core version available: {latest_version}')
+
+              # Check if issue already exists
+              issue_title = f"Update Ansible-core to version {latest_version}"
+              returncode, stdout, stderr = run_gh_command(f'gh issue list --state open --search "Update Ansible-core to version {latest_version}" --json title,number')
+
+              if returncode == 0 and stdout.strip() != "[]":
+                  print(f'📋 Issue already exists for version {latest_version}')
+              else:
+                  print(f'� Creating GitHub issue for Ansible-core {latest_version} update...')
+
+                  issue_body = f"""## 🚀 New Ansible-core Version Available
+
+          **Current Version**: `{current_version}`
+          **Available Version**: `{latest_version}`
+
+          ### 📋 Action Required
+
+          A new version of ansible-core is available. Please review and update:
+
+          ### 🔧 Files to Update
+
+          - [ ] `requirements.txt` - Update ansible-core version constraint
+          - [ ] `pyproject.toml` - Update ansible-core version constraint
+          - [ ] `.github/workflows/ansible-test.yml` - Update matrix version
+          - [ ] Test compatibility with new version
+
+          ### 🧪 Testing Steps
+
+          1. **Automated Testing**: The `ansible-version-auto-pr.yml` workflow can test this automatically
+          2. **Manual Testing**: Run `./scripts/trigger-ansible-update.sh` for manual testing
+          3. **Compatibility Check**: Ensure molecule tests pass with new version
+
+          ### 🔗 Useful Commands
+
+          ```bash
+          # Trigger automated testing workflow
+          gh workflow run ansible-version-auto-pr.yml --field force_check=true --field target_version="{latest_version}"
+
+          # Manual local testing
+          ./scripts/trigger-ansible-update.sh
+          ```
+
+          ### 📚 Release Notes
+
+          Check the [Ansible-core changelog](https://github.com/ansible/ansible/blob/stable-{latest_version.major}.{latest_version.minor}/changelogs/CHANGELOG-v{latest_version.major}.{latest_version.minor}.rst) for breaking changes.
+
+          ---
+          *This issue was automatically created by the version monitoring workflow.*
+          """
+
+                  # Create the issue
+                  returncode, stdout, stderr = run_gh_command(f'gh issue create --title "{issue_title}" --body "{issue_body}" --label "enhancement,automation,ansible-version"')
+
+                  if returncode == 0:
+                      print(f'✅ Successfully created issue for Ansible-core {latest_version} update')
+                  else:
+                      print(f'❌ Failed to create issue: {stderr}')
           else:
-              print('✅ Using current stable version')"
-        continue-on-error: true
+              print('✅ Using current stable version - no updates needed')
+          EOF
 
   security:
     needs: lint
