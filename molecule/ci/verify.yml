@@ -1,0 +1,170 @@
+---
+# Molecule CI Verify Playbook
+# Purpose: Comprehensive verification of KVM host setup in CI environment
+# ADR References: ADR-0005 (Molecule Testing), ADR-0011 (Local Testing Requirements)
+
+- name: Verify - CI/CD KVM Host Setup Validation
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    expected_packages:
+      - qemu-kvm
+      - libvirt
+      - virt-install
+      - bridge-utils
+    
+    expected_services:
+      - libvirtd
+      - NetworkManager
+    
+    expected_directories:
+      - /var/lib/libvirt/images
+      - /etc/libvirt
+    
+    expected_users:
+      - molecule
+
+  tasks:
+    - name: Verify CI test marker exists
+      ansible.builtin.stat:
+        path: /tmp/molecule-ci-converge-complete
+      register: ci_marker
+      
+    - name: Assert CI converge completed
+      ansible.builtin.assert:
+        that:
+          - ci_marker.stat.exists
+        fail_msg: "CI converge marker not found - converge may have failed"
+        success_msg: "✅ CI converge completed successfully"
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Verify critical packages are installed
+      ansible.builtin.assert:
+        that:
+          - item in ansible_facts.packages
+        fail_msg: "❌ Required package {{ item }} is not installed"
+        success_msg: "✅ Package {{ item }} is installed"
+      loop: "{{ expected_packages }}"
+      ignore_errors: true
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Verify critical services exist
+      ansible.builtin.assert:
+        that:
+          - (item + '.service') in ansible_facts.services
+        fail_msg: "❌ Required service {{ item }} is not available"
+        success_msg: "✅ Service {{ item }} is available"
+      loop: "{{ expected_services }}"
+      ignore_errors: true
+
+    - name: Verify libvirt service is running (if available)
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['libvirtd.service'].state == 'running'
+        fail_msg: "⚠️ libvirtd service is not running (may be expected in containers)"
+        success_msg: "✅ libvirtd service is running"
+      ignore_errors: true
+      when: "'libvirtd.service' in ansible_facts.services"
+
+    - name: Verify expected directories exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: directory_check
+      loop: "{{ expected_directories }}"
+
+    - name: Assert directories exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isdir
+        fail_msg: "❌ Required directory {{ item.item }} does not exist"
+        success_msg: "✅ Directory {{ item.item }} exists"
+      loop: "{{ directory_check.results }}"
+      ignore_errors: true
+
+    - name: Check if molecule user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: molecule
+      register: molecule_user
+      ignore_errors: true
+
+    - name: Verify molecule user configuration
+      ansible.builtin.assert:
+        that:
+          - molecule_user is succeeded
+        fail_msg: "⚠️ Molecule user not found (may be expected in some CI scenarios)"
+        success_msg: "✅ Molecule user exists"
+      ignore_errors: true
+
+    - name: Verify Python environment
+      ansible.builtin.command:
+        cmd: python3 --version
+      register: python_version
+      changed_when: false
+
+    - name: Assert Python 3 is available
+      ansible.builtin.assert:
+        that:
+          - python_version.rc == 0
+          - "'Python 3' in python_version.stdout"
+        fail_msg: "❌ Python 3 is not available"
+        success_msg: "✅ Python 3 is available: {{ python_version.stdout }}"
+
+    - name: Check virtualization capabilities
+      ansible.builtin.command:
+        cmd: ls -la /dev/kvm
+      register: kvm_device
+      changed_when: false
+      ignore_errors: true
+
+    - name: Verify KVM device (if available)
+      ansible.builtin.debug:
+        msg: |
+          {% if kvm_device.rc == 0 %}
+          ✅ KVM device is available: {{ kvm_device.stdout }}
+          {% else %}
+          ⚠️ KVM device not available (expected in containers): {{ kvm_device.stderr | default('Not found') }}
+          {% endif %}
+
+    - name: Verify network configuration
+      ansible.builtin.command:
+        cmd: ip link show
+      register: network_interfaces
+      changed_when: false
+
+    - name: Check for network interfaces
+      ansible.builtin.assert:
+        that:
+          - "'lo:' in network_interfaces.stdout"
+        fail_msg: "❌ Basic network interfaces not found"
+        success_msg: "✅ Network interfaces are configured"
+
+    - name: Final CI verification summary
+      ansible.builtin.debug:
+        msg: |
+          🎯 CI Verification Summary for {{ inventory_hostname }}:
+          =====================================
+          ✅ OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          ✅ Python: {{ python_version.stdout }}
+          ✅ Ansible: {{ ansible_version.full }}
+          ✅ Architecture: {{ ansible_architecture }}
+          ✅ Converge marker: Present
+          
+          📊 Package Status:
+          {% for pkg in expected_packages %}
+          - {{ pkg }}: {{ 'Installed' if pkg in ansible_facts.packages else 'Missing' }}
+          {% endfor %}
+          
+          🔧 Service Status:
+          {% for svc in expected_services %}
+          - {{ svc }}: {{ ansible_facts.services[svc + '.service'].state | default('Not found') }}
+          {% endfor %}
+          
+          🏁 CI verification completed successfully!

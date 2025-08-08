@@ -1,0 +1,121 @@
+---
+# Molecule CI Converge Playbook
+# Purpose: CI/CD testing with comprehensive role validation
+# ADR References: ADR-0005 (Molecule Testing), ADR-0012 (Container Security), ADR-0013 (Best Practices)
+
+- name: Converge - CI/CD KVM Host Setup Testing
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    # CI-specific configuration
+    admin_user: molecule
+    domain: ci.test.local
+    dns_forwarder: "1.1.1.1"
+    
+    # KVM host configuration for CI testing
+    lib_virt_setup: true
+    enable_cockpit: false  # Disabled for CI to reduce complexity
+    configure_shell: true
+    kvm_host_libvirt_dir: /var/lib/libvirt/images
+    kvmhost_bridge_device: vmbr0
+    kvm_host_domain: ci.test.local
+    
+    # CI-optimized settings
+    skip_reboot: true
+    minimal_install: true
+    
+    # Security settings for CI
+    firewall_enabled: false  # Simplified for CI testing
+    selinux_state: permissive  # Relaxed for CI containers
+    
+    # Performance settings for CI
+    cpu_governor: performance
+    disable_swap: false
+    
+  pre_tasks:
+    - name: Display CI testing environment information
+      ansible.builtin.debug:
+        msg: |
+          CI Testing Environment: {{ inventory_hostname }}
+          OS Family: {{ ansible_os_family }}
+          Distribution: {{ ansible_distribution }}
+          Version: {{ ansible_distribution_major_version }}
+          Python Version: {{ ansible_python_version }}
+          Ansible Version: {{ ansible_version.full }}
+
+    - name: Ensure basic CI requirements are met
+      ansible.builtin.package:
+        name:
+          - python3
+          - python3-pip
+          - curl
+          - wget
+        state: present
+      ignore_errors: true
+
+  tasks:
+    # Base system configuration
+    - name: Include kvmhost_base role
+      include_role:
+        name: kvmhost_base
+      tags: ['base', 'ci']
+
+    # User configuration
+    - name: Include kvmhost_user_config role
+      include_role:
+        name: kvmhost_user_config
+      tags: ['user', 'ci']
+
+    # Networking configuration (simplified for CI)
+    - name: Include kvmhost_networking role
+      include_role:
+        name: kvmhost_networking
+      tags: ['networking', 'ci']
+      when: inventory_hostname != 'localhost'
+
+    # Storage configuration (minimal for CI)
+    - name: Include kvmhost_storage role
+      include_role:
+        name: kvmhost_storage
+      tags: ['storage', 'ci']
+      vars:
+        storage_minimal_setup: true
+
+    # Libvirt configuration
+    - name: Include kvmhost_libvirt role
+      include_role:
+        name: kvmhost_libvirt
+      tags: ['libvirt', 'ci']
+      when: lib_virt_setup | default(true)
+
+    # Skip Cockpit in CI for simplicity
+    # - name: Include kvmhost_cockpit role
+    #   include_role:
+    #     name: kvmhost_cockpit
+    #   tags: ['cockpit', 'ci']
+    #   when: enable_cockpit | default(false)
+
+  post_tasks:
+    - name: Verify CI test completion
+      ansible.builtin.debug:
+        msg: |
+          ✅ CI converge playbook completed successfully
+          Host: {{ inventory_hostname }}
+          Roles tested: base, user_config, networking, storage, libvirt
+          
+    - name: Create CI test marker
+      ansible.builtin.file:
+        path: /tmp/molecule-ci-converge-complete
+        state: touch
+        mode: "0644"
+      
+    - name: Gather service facts for verification
+      ansible.builtin.service_facts:
+      
+    - name: Display critical services status
+      ansible.builtin.debug:
+        msg: |
+          Critical Services Status:
+          - libvirtd: {{ ansible_facts.services['libvirtd.service'].state | default('not found') }}
+          - NetworkManager: {{ ansible_facts.services['NetworkManager.service'].state | default('not found') }}
