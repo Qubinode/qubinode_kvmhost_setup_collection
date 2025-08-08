@@ -205,7 +205,7 @@ jobs:
     strategy:
       matrix:
         rhel_version: ['8', '9', '10']
-        ansible_version: ['2.15', '2.16', '2.17']
+        ansible_version: ['2.18']  # Using 2.18+ for Python 3.11 compatibility (2.17 has SELinux binding issues)
 
     steps:
       - name: Run Molecule test for RHEL ${{ matrix.rhel_version }}

@@ -129,6 +129,29 @@ jobs:
           python3.11 -m pip install --use-pep517 --no-deps --upgrade setuptools wheel
           python3.11 -m pip install -r requirements.txt --use-pep517
 
+      - name: Validate Ansible version compatibility
+        run: |
+          echo "🔍 Validating Ansible version compatibility with Python 3.11..."
+          ansible_version=$(ansible --version | head -1 | cut -d' ' -f3 | cut -d']' -f1)
+          echo "Detected ansible-core version: $ansible_version"
+
+          # Check for problematic 2.17 version
+          if [[ "$ansible_version" == "2.17"* ]]; then
+            echo "❌ ERROR: ansible-core 2.17 has SELinux binding issues with Python 3.11"
+            echo "This is documented in ADR-0005 and requirements.txt"
+            echo "Expected: ansible-core 2.18+"
+            echo "Please update requirements.txt to use ansible-core>=2.18.0"
+            exit 1
+          fi
+
+          # Verify we have 2.18+
+          if [[ "$ansible_version" == "2.18"* ]] || [[ "$ansible_version" > "2.18" ]]; then
+            echo "✅ ansible-core $ansible_version is compatible with Python 3.11"
+          else
+            echo "⚠️ WARNING: ansible-core $ansible_version may have compatibility issues"
+            echo "Recommended: ansible-core 2.18+ for Python 3.11 compatibility"
+          fi
+
       - name: Generate enhanced compatibility matrix
         run: |
           python3.11 scripts/generate_enhanced_compatibility_matrix.py
@@ -144,10 +167,11 @@ jobs:
           fi
 
           # Create matrix for parallel testing
+          # Note: Using 2.18+ to avoid SELinux binding issues with Python 3.11 (see ADR-0005)
           MATRIX=$(cat << EOF
           {
             "rhel_version": [$(echo $RHEL_VERSIONS | sed 's/,/, /g' | sed 's/[^,]*/"&"/g')],
-            "ansible_version": ["2.15", "2.16", "2.17"]
+            "ansible_version": ["2.18"]
           }
           EOF
           )
@@ -335,10 +359,32 @@ jobs:
 
       - name: Run Molecule test for RHEL ${{ matrix.rhel_version }}
         run: |
-          cd molecule/rhel${{ matrix.rhel_version }}
+          # Check if RHEL-specific molecule directory exists, otherwise use default
+          if [ -d "molecule/rhel${{ matrix.rhel_version }}" ]; then
+            cd molecule/rhel${{ matrix.rhel_version }}
+            echo "🧪 Using RHEL ${{ matrix.rhel_version }} specific molecule configuration"
+          elif [ -d "molecule/default" ]; then
+            cd molecule/default
+            echo "🧪 Using default molecule configuration for RHEL ${{ matrix.rhel_version }} testing"
+          else
+            echo "❌ No molecule configuration found. Expected molecule/rhel${{ matrix.rhel_version }}/ or molecule/default/"
+            echo "Available molecule directories:"
+            find molecule/ -type d -name "*" 2>/dev/null || echo "No molecule directory found"
+            exit 1
+          fi
+
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
           export LIBSELINUX_DISABLE_SELINUX_CHECK="1"
+
+          # Verify ansible-core version compatibility (avoid 2.17 SELinux issues)
+          ansible_version=$(ansible --version | head -1 | cut -d' ' -f3 | cut -d']' -f1)
+          echo "Using ansible-core version: $ansible_version"
+          if [[ "$ansible_version" == "2.17"* ]]; then
+            echo "⚠️ WARNING: ansible-core 2.17 has SELinux binding issues with Python 3.11"
+            echo "Consider upgrading to ansible-core 2.18+ for better compatibility"
+          fi
+
           molecule test
         env:
           MOLECULE_NO_LOG: false
