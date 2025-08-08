@@ -90,7 +90,7 @@ jobs:
 
   generate-matrix:
     name: Generate Compatibility Matrix
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       rhel-versions: ${{ steps.set-matrix.outputs.rhel-versions }}
@@ -150,7 +150,7 @@ jobs:
 
   validate-local-testing:
     name: Validate Local Testing Prerequisites
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
@@ -211,23 +211,15 @@ jobs:
 
   test-compatibility:
     name: Test RHEL ${{ matrix.rhel_version }} + Ansible ${{ matrix.ansible_version }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [validate-dependencies, generate-matrix, validate-local-testing]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
-    container:
-      image: quay.io/ansible/molecule:latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup SELinux for containerized environment
-        run: |
-          # Use our comprehensive SELinux setup script
-          ./scripts/setup-selinux-for-ci.sh python
 
       - name: Set up Python and Ansible
         run: |
@@ -352,7 +344,7 @@ jobs:
 
   update-compatibility-report:
     name: Update Compatibility Documentation
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [validate-dependencies, generate-matrix, validate-local-testing, test-compatibility]
     if: always() && github.ref == 'refs/heads/main'
 
@@ -498,7 +490,7 @@ jobs:
 
   container-compatibility-validation:
     name: Container Compatibility Validation
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [validate-dependencies, generate-matrix]
     steps:
       - name: Checkout code
