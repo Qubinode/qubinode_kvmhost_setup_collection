@@ -17,6 +17,7 @@ This directory contains the architectural decision records for the Qubinode KVM 
 | [ADR-0009](adr-0009-github-actions-dependabot-auto-updates-strategy.md) | GitHub Actions Dependabot Auto-Updates Strategy | Accepted | 2024-07-11 | DevOps |
 | [ADR-0010](adr-0010-end-user-repeatability-and-solution-reproducibility-strategy.md) | End-User Repeatability and Solution Reproducibility Strategy | Accepted | 2024-07-11 | Quality |
 | [ADR-0011](adr-0011-local-molecule-testing-validation-before-cicd.md) | Local Molecule Testing Validation Before CI/CD | Proposed | 2025-01-12 | Testing |
+| [ADR-0014](ADR-0014-ANSIBLE-GALAXY-AUTOMATED-RELEASE-STRATEGY.md) | Ansible Galaxy Automated Release Strategy | Proposed | 2025-01-09 | DevOps |
 
 ## ADR Categories
 
@@ -43,13 +44,14 @@ This directory contains the architectural decision records for the Qubinode KVM 
 
 ### DevOps
 - **ADR-0009**: Implements automated dependency management with GitHub Dependabot
+- **ADR-0014**: Establishes automated release strategy for Ansible Galaxy deployment
 
 ### Quality
 - **ADR-0010**: Establishes comprehensive end-user repeatability and solution reproducibility standards
 
 ## Status Summary
 - **Accepted**: 10 ADRs
-- **Proposed**: 1 ADR  
+- **Proposed**: 2 ADRs
 - **Deprecated**: 0 ADRs
 
 ## Usage

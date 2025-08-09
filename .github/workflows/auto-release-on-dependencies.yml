@@ -1,0 +1,252 @@
+name: Auto-Release on Dependency Updates
+
+# =============================================================================
+# Automated Release Trigger - The "Release Automation Orchestrator"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This workflow automatically creates releases when dependency updates are merged,
+# implementing intelligent release automation based on dependency change patterns.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Dependency Change Detection - Identifies merged dependency updates
+# 2. [PHASE 2]: Release Impact Assessment - Analyzes impact and determines release type
+# 3. [PHASE 3]: Version Calculation - Calculates appropriate version bump (patch/minor/major)
+# 4. [PHASE 4]: Pre-Release Validation - Runs comprehensive validation before release
+# 5. [PHASE 5]: Automated Release Creation - Creates and publishes release automatically
+# 6. [PHASE 6]: Galaxy Deployment - Deploys to Ansible Galaxy with proper versioning
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Triggers: On merge of Dependabot PRs with dependency labels
+# - Validates: All tests pass before creating release
+# - Coordinates: With existing release.yml workflow for Galaxy deployment
+# - Implements: ADR-0009 GitHub Actions Dependabot Strategy automation
+# - Ensures: Timely releases when dependencies are updated
+# - Maintains: Semantic versioning based on dependency change impact
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release to create'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      force_release:
+        description: 'Force release even without dependency changes'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  detect-dependency-changes:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+      release_type: ${{ steps.check.outputs.release_type }}
+      dependency_changes: ${{ steps.check.outputs.dependency_changes }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for dependency changes
+        id: check
+        run: |
+          echo "🔍 Analyzing dependency changes..."
+          
+          # Check if this is a manual trigger
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "release_type=${{ github.event.inputs.release_type }}" >> $GITHUB_OUTPUT
+            echo "dependency_changes=manual-trigger" >> $GITHUB_OUTPUT
+            echo "✅ Manual release trigger detected"
+            exit 0
+          fi
+          
+          # Check PR labels for dependency updates
+          PR_LABELS="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
+          echo "PR Labels: $PR_LABELS"
+          
+          SHOULD_RELEASE="false"
+          RELEASE_TYPE="patch"
+          DEPENDENCY_CHANGES=""
+          
+          # Check for dependency-related labels
+          if echo "$PR_LABELS" | grep -q "dependencies"; then
+            echo "📦 Dependency update detected"
+            SHOULD_RELEASE="true"
+            DEPENDENCY_CHANGES="dependencies"
+            
+            # Determine release type based on dependency type
+            if echo "$PR_LABELS" | grep -q "python"; then
+              echo "🐍 Python dependency update - patch release"
+              RELEASE_TYPE="patch"
+            elif echo "$PR_LABELS" | grep -q "github-actions"; then
+              echo "⚙️ GitHub Actions update - patch release"
+              RELEASE_TYPE="patch"
+            elif echo "$PR_LABELS" | grep -q "docker"; then
+              echo "🐳 Docker dependency update - patch release"
+              RELEASE_TYPE="patch"
+            elif echo "$PR_LABELS" | grep -q "ansible"; then
+              echo "📚 Ansible dependency update - minor release"
+              RELEASE_TYPE="minor"
+            fi
+          fi
+          
+          # Check for major changes in commit messages
+          if git log --oneline -10 | grep -E "(BREAKING|breaking|major)"; then
+            echo "💥 Breaking changes detected - major release"
+            RELEASE_TYPE="major"
+          fi
+          
+          echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "dependency_changes=$DEPENDENCY_CHANGES" >> $GITHUB_OUTPUT
+          
+          echo "🎯 Release Decision: should_release=$SHOULD_RELEASE, type=$RELEASE_TYPE"
+
+  pre-release-validation:
+    needs: detect-dependency-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-dependency-changes.outputs.should_release == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core>=2.17
+          pip install molecule[podman]
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run compliance checks
+        run: |
+          echo "🔍 Running pre-release validation..."
+          
+          # Run compliance checks
+          if [ -f scripts/check-compliance.sh ]; then
+            bash scripts/check-compliance.sh
+          fi
+          
+          # Run security scan
+          if [ -f scripts/enhanced-security-scan.sh ]; then
+            bash scripts/enhanced-security-scan.sh
+          fi
+          
+          # Validate collection structure
+          ansible-galaxy collection build . --force
+          
+          echo "✅ Pre-release validation completed"
+
+  create-release:
+    needs: [detect-dependency-changes, pre-release-validation]
+    runs-on: ubuntu-latest
+    if: needs.detect-dependency-changes.outputs.should_release == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calculate new version
+        id: version
+        run: |
+          echo "📊 Calculating new version..."
+          
+          # Get current version from galaxy.yml
+          CURRENT_VERSION=$(grep "version:" galaxy.yml | sed 's/version: *"\([^"]*\)".*/\1/')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          
+          # Determine new version based on release type
+          RELEASE_TYPE="${{ needs.detect-dependency-changes.outputs.release_type }}"
+          
+          case $RELEASE_TYPE in
+            "major")
+              NEW_MAJOR=$((MAJOR + 1))
+              NEW_MINOR=0
+              NEW_PATCH=0
+              ;;
+            "minor")
+              NEW_MAJOR=$MAJOR
+              NEW_MINOR=$((MINOR + 1))
+              NEW_PATCH=0
+              ;;
+            "patch"|*)
+              NEW_MAJOR=$MAJOR
+              NEW_MINOR=$MINOR
+              NEW_PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="${NEW_MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+          echo "New version: $NEW_VERSION"
+          
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Update version files
+        run: |
+          echo "📝 Updating version files..."
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          # Update galaxy.yml
+          sed -i "s/version: \"[^\"]*\"/version: \"$NEW_VERSION\"/" galaxy.yml
+          
+          # Update Makefile
+          sed -i "s/TAG=[0-9.]*/TAG=$NEW_VERSION/" Makefile
+          
+          # Commit version updates
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add galaxy.yml Makefile
+          git commit -m "chore: bump version to $NEW_VERSION for dependency updates"
+          git push
+
+      - name: Create release tag
+        run: |
+          echo "🏷️ Creating release tag..."
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          DEPENDENCY_CHANGES="${{ needs.detect-dependency-changes.outputs.dependency_changes }}"
+          
+          # Create comprehensive tag message
+          TAG_MESSAGE="v$NEW_VERSION: Automated release for dependency updates
+
+🤖 Automated release triggered by: $DEPENDENCY_CHANGES
+📦 Release type: ${{ steps.version.outputs.release_type }}
+🔄 Dependency updates included in this release
+✅ All validation checks passed
+
+This release includes the latest dependency updates and maintains
+compatibility with the current feature set."
+          
+          git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
+          git push origin "v$NEW_VERSION"
+          
+          echo "✅ Release tag v$NEW_VERSION created and pushed"

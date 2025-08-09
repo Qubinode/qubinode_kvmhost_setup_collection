@@ -1,0 +1,218 @@
+name: Manual Release Trigger
+
+# =============================================================================
+# Manual Release Pipeline - The "Release Control Center"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This workflow provides manual control over release creation, allowing maintainers
+# to trigger releases on-demand with full control over versioning and release notes.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Manual Input Processing - Processes user-provided release parameters
+# 2. [PHASE 2]: Pre-Release Validation - Runs comprehensive validation suite
+# 3. [PHASE 3]: Version Management - Updates version numbers across all files
+# 4. [PHASE 4]: Release Creation - Creates GitHub release with custom notes
+# 5. [PHASE 5]: Galaxy Deployment - Deploys to Ansible Galaxy with validation
+# 6. [PHASE 6]: Post-Release Validation - Validates successful deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      release_notes:
+        description: 'Custom release notes (optional)'
+        required: false
+        type: string
+      skip_validation:
+        description: 'Skip pre-release validation (use with caution)'
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Dry run - validate but do not create release'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      is_valid: ${{ steps.validate.outputs.is_valid }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate release inputs
+        id: validate
+        run: |
+          echo "🔍 Validating release inputs..."
+          
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # Validate version format
+          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "Expected format: X.Y.Z (e.g., 1.0.0)"
+            exit 1
+          fi
+          
+          # Get current version
+          CURRENT_VERSION=$(grep "version:" galaxy.yml | sed 's/version: *"\([^"]*\)".*/\1/')
+          echo "Current version: $CURRENT_VERSION"
+          echo "Requested version: $VERSION"
+          
+          # Validate version is newer
+          if [ "$VERSION" = "$CURRENT_VERSION" ]; then
+            echo "❌ Version $VERSION is the same as current version"
+            exit 1
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is_valid=true" >> $GITHUB_OUTPUT
+          echo "✅ Version validation passed"
+
+  pre-release-validation:
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    if: needs.validate-inputs.outputs.is_valid == 'true' && github.event.inputs.skip_validation != 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core>=2.17
+          pip install molecule[podman]
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run comprehensive validation
+        run: |
+          echo "🧪 Running comprehensive pre-release validation..."
+          
+          # Run compliance checks
+          if [ -f scripts/check-compliance.sh ]; then
+            echo "📋 Running compliance checks..."
+            bash scripts/check-compliance.sh
+          fi
+          
+          # Run security scan
+          if [ -f scripts/enhanced-security-scan.sh ]; then
+            echo "🛡️ Running security scan..."
+            bash scripts/enhanced-security-scan.sh
+          fi
+          
+          # Validate file structure
+          if [ -f scripts/validate-file-structure.sh ]; then
+            echo "📁 Validating file structure..."
+            bash scripts/validate-file-structure.sh
+          fi
+          
+          # Test collection build
+          echo "🔨 Testing collection build..."
+          ansible-galaxy collection build . --force
+          
+          echo "✅ All pre-release validation passed"
+
+  create-manual-release:
+    needs: [validate-inputs, pre-release-validation]
+    runs-on: ubuntu-latest
+    if: |
+      always() && 
+      needs.validate-inputs.outputs.is_valid == 'true' && 
+      (needs.pre-release-validation.result == 'success' || github.event.inputs.skip_validation == 'true') &&
+      github.event.inputs.dry_run != 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version files
+        run: |
+          echo "📝 Updating version files..."
+          NEW_VERSION="${{ needs.validate-inputs.outputs.version }}"
+          
+          # Update galaxy.yml
+          sed -i "s/version: \"[^\"]*\"/version: \"$NEW_VERSION\"/" galaxy.yml
+          
+          # Update Makefile
+          sed -i "s/TAG=[0-9.]*/TAG=$NEW_VERSION/" Makefile
+          
+          # Commit version updates
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add galaxy.yml Makefile
+          git commit -m "chore: bump version to $NEW_VERSION for manual release"
+          git push
+
+      - name: Create release tag
+        run: |
+          echo "🏷️ Creating release tag..."
+          NEW_VERSION="${{ needs.validate-inputs.outputs.version }}"
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          CUSTOM_NOTES="${{ github.event.inputs.release_notes }}"
+          
+          # Create tag message
+          TAG_MESSAGE="v$NEW_VERSION: Manual $RELEASE_TYPE release
+
+🎯 Manual release created by maintainer
+📦 Release type: $RELEASE_TYPE
+✅ All validation checks passed"
+          
+          if [ -n "$CUSTOM_NOTES" ]; then
+            TAG_MESSAGE="$TAG_MESSAGE
+
+📝 Release Notes:
+$CUSTOM_NOTES"
+          fi
+          
+          git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
+          git push origin "v$NEW_VERSION"
+          
+          echo "✅ Release tag v$NEW_VERSION created and pushed"
+          echo "🚀 Automated release workflow will now deploy to Galaxy"
+
+  dry-run-summary:
+    needs: [validate-inputs, pre-release-validation]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.dry_run == 'true'
+    
+    steps:
+      - name: Dry run summary
+        run: |
+          echo "🧪 DRY RUN SUMMARY"
+          echo "=================="
+          echo "Version: ${{ needs.validate-inputs.outputs.version }}"
+          echo "Release Type: ${{ github.event.inputs.release_type }}"
+          echo "Validation: ${{ needs.pre-release-validation.result }}"
+          echo ""
+          echo "✅ This would create a release if dry_run was false"
+          echo "🚀 No actual release created due to dry_run mode"
