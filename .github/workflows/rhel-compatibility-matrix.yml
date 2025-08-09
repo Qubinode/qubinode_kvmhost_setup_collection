@@ -287,6 +287,66 @@ jobs:
             exit 1
           fi
 
+      - name: Setup container registries and authentication
+        env:
+          REDHAT_REGISTRY_USERNAME: ${{ secrets.REDHAT_REGISTRY_USERNAME }}
+          REDHAT_REGISTRY_TOKEN: ${{ secrets.REDHAT_REGISTRY_TOKEN }}
+        run: |
+          echo "🔧 Setting up container registry access for RHEL compatibility testing..."
+
+          # Setup Red Hat Registry Service Account authentication
+          echo "Setting up Red Hat Registry authentication..."
+          RED_HAT_ACCESS=false
+
+          if [[ -n "$REDHAT_REGISTRY_USERNAME" && -n "$REDHAT_REGISTRY_TOKEN" ]]; then
+            echo "🔐 Logging into Red Hat registry with Service Account..."
+            if echo "$REDHAT_REGISTRY_TOKEN" | podman login registry.redhat.io --username "$REDHAT_REGISTRY_USERNAME" --password-stdin; then
+              echo "✅ Red Hat registry authentication successful"
+
+              # Test access with a minimal pull
+              if podman pull registry.redhat.io/ubi9-minimal:latest 2>/dev/null; then
+                echo "✅ Red Hat registry access confirmed"
+                RED_HAT_ACCESS=true
+                podman rmi registry.redhat.io/ubi9-minimal:latest 2>/dev/null || true
+              else
+                echo "⚠️ Red Hat registry authenticated but image pull failed"
+                RED_HAT_ACCESS=false
+              fi
+            else
+              echo "❌ Red Hat registry authentication failed"
+              RED_HAT_ACCESS=false
+            fi
+          else
+            echo "⚠️ Red Hat registry credentials not configured - using public alternatives"
+            echo "To use official Red Hat images, add REDHAT_REGISTRY_USERNAME and REDHAT_REGISTRY_TOKEN secrets"
+            RED_HAT_ACCESS=false
+          fi
+
+          # Pre-pull container images for molecule testing
+          echo "🐳 Pre-pulling container images for RHEL ${{ matrix.rhel_version }} testing..."
+
+          if [[ "$RED_HAT_ACCESS" == "true" ]]; then
+            IMAGES=(
+              "registry.redhat.io/ubi${{ matrix.rhel_version }}-init:latest"
+              "docker.io/rockylinux/rockylinux:${{ matrix.rhel_version }}-ubi-init"
+            )
+          else
+            IMAGES=(
+              "docker.io/rockylinux/rockylinux:${{ matrix.rhel_version }}-ubi-init"
+            )
+          fi
+
+          for image in "${IMAGES[@]}"; do
+            echo "Pulling $image..."
+            if podman pull "$image"; then
+              echo "✅ Successfully pulled $image"
+            else
+              echo "⚠️ Failed to pull $image - may cause test failures"
+            fi
+          done
+
+          echo "🎯 Container registry setup complete!"
+
       - name: Run Molecule test for RHEL ${{ matrix.rhel_version }}
         run: |
           # Use the dedicated RHEL compatibility testing script
@@ -308,6 +368,14 @@ jobs:
         with:
           name: test-results-rhel${{ matrix.rhel_version }}-ansible${{ matrix.ansible_version }}
           path: test-results/
+
+      - name: Cleanup container registry authentication
+        if: always()
+        run: |
+          echo "🧹 Cleaning up container registry authentication..."
+          # Logout from all registries to avoid credential leakage
+          podman logout --all 2>/dev/null || true
+          echo "✅ Registry cleanup completed"
 
   update-compatibility-report:
     name: Update Compatibility Documentation
