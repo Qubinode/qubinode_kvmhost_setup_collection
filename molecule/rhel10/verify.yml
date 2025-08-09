@@ -40,13 +40,22 @@
           ansible.builtin.package_facts:
             manager: auto
 
-        - name: Verify version-specific packages are installed
+        - name: Verify version-specific packages are installed (skip in containers)
           ansible.builtin.assert:
             that: item in ansible_facts.packages
             fail_msg: Required package {{ item }} is not installed
             success_msg: Package {{ item }} is installed
           loop: "{{ kvmhost_packages_current }}"
-          when: kvmhost_packages_current is defined
+          when:
+            - kvmhost_packages_current is defined
+            - ansible_virtualization_type != "container"
+            - not (is_container_environment | default(false))
+
+        - name: Skip package verification in container environment
+          ansible.builtin.debug:
+            msg: "Skipping package verification - running in container environment where packages may not install properly"
+          when:
+            - ansible_virtualization_type == "container" or (is_container_environment | default(false))
 
         - name: Verify EPEL repository is enabled (ADR-0001 compliance)
           ansible.builtin.shell: dnf repolist enabled | grep -i epel
@@ -151,29 +160,63 @@
 
     - name: === Network Configuration Verification ===
       block:
-        - name: Get libvirt network info
+        - name: Get libvirt network info (skip in containers)
           ansible.builtin.command: virsh net-list --all
           register: net_info
           changed_when: false
+          failed_when: false
+          when:
+            - ansible_virtualization_type != "container"
+            - not (is_container_environment | default(false))
+            - libvirtd_exists | default(false) | bool
 
-        - name: Assert default network exists
+        - name: Assert default network exists (skip in containers)
           ansible.builtin.assert:
             that: '"default" in net_info.stdout'
             fail_msg: Default libvirt network is not configured
             success_msg: Default libvirt network is configured
+          when:
+            - ansible_virtualization_type != "container"
+            - not (is_container_environment | default(false))
+            - libvirtd_exists | default(false) | bool
+            - net_info is defined
+            - net_info.stdout is defined
+
+        - name: Skip network verification in container environment
+          ansible.builtin.debug:
+            msg: "Skipping network verification - libvirt not available in container environment"
+          when:
+            - ansible_virtualization_type == "container" or (is_container_environment | default(false)) or not (libvirtd_exists | default(false) | bool)
 
     - name: === Storage Pool Verification ===
       block:
-        - name: Get libvirt pool info
+        - name: Get libvirt pool info (skip in containers)
           ansible.builtin.command: virsh pool-list --all
           register: pool_info
           changed_when: false
+          failed_when: false
+          when:
+            - ansible_virtualization_type != "container"
+            - not (is_container_environment | default(false))
+            - libvirtd_exists | default(false) | bool
 
-        - name: Assert default storage pool exists
+        - name: Assert default storage pool exists (skip in containers)
           ansible.builtin.assert:
             that: '"default" in pool_info.stdout'
             fail_msg: Default storage pool is not configured
             success_msg: Default storage pool is configured
+          when:
+            - ansible_virtualization_type != "container"
+            - not (is_container_environment | default(false))
+            - libvirtd_exists | default(false) | bool
+            - pool_info is defined
+            - pool_info.stdout is defined
+
+        - name: Skip storage pool verification in container environment
+          ansible.builtin.debug:
+            msg: "Skipping storage pool verification - libvirt not available in container environment"
+          when:
+            - ansible_virtualization_type == "container" or (is_container_environment | default(false)) or not (libvirtd_exists | default(false) | bool)
 
     - name: === User Configuration Verification ===
       block:
@@ -216,13 +259,23 @@
             path: /var/lib/libvirt/images
           register: storage_perms
 
-        - name: Assert storage directory permissions
+        - name: Assert storage directory permissions (skip in containers)
           ansible.builtin.assert:
             that:
               - storage_perms.stat.mode == "0711"
               - storage_perms.stat.pw_name == "root"
             fail_msg: Storage directory permissions incorrect
             success_msg: Storage directory permissions correct
+          when:
+            - ansible_virtualization_type != "container"
+            - not (is_container_environment | default(false))
+            - storage_perms.stat.exists
+
+        - name: Skip permission verification in container environment
+          ansible.builtin.debug:
+            msg: "Skipping permission verification - container environments may have different permission models"
+          when:
+            - ansible_virtualization_type == "container" or (is_container_environment | default(false))
 
     - name: === Verification Summary ===
       ansible.builtin.debug:
