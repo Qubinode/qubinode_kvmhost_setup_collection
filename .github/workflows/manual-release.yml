@@ -183,15 +183,15 @@ jobs:
           # Create tag message
           TAG_MESSAGE="v$NEW_VERSION: Manual $RELEASE_TYPE release
 
-🎯 Manual release created by maintainer
-📦 Release type: $RELEASE_TYPE
-✅ All validation checks passed"
+          Manual release created by maintainer
+          Release type: $RELEASE_TYPE
+          All validation checks passed"
           
           if [ -n "$CUSTOM_NOTES" ]; then
             TAG_MESSAGE="$TAG_MESSAGE
 
-📝 Release Notes:
-$CUSTOM_NOTES"
+            Release Notes:
+            $CUSTOM_NOTES"
           fi
           
           git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
