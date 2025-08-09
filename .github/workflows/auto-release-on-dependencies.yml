@@ -238,13 +238,13 @@ jobs:
           # Create comprehensive tag message
           TAG_MESSAGE="v$NEW_VERSION: Automated release for dependency updates
 
-🤖 Automated release triggered by: $DEPENDENCY_CHANGES
-📦 Release type: ${{ steps.version.outputs.release_type }}
-🔄 Dependency updates included in this release
-✅ All validation checks passed
+          Automated release triggered by: $DEPENDENCY_CHANGES
+          Release type: ${{ steps.version.outputs.release_type }}
+          Dependency updates included in this release
+          All validation checks passed
 
-This release includes the latest dependency updates and maintains
-compatibility with the current feature set."
+          This release includes the latest dependency updates and maintains
+          compatibility with the current feature set."
           
           git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
           git push origin "v$NEW_VERSION"
