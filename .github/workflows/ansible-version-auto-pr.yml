@@ -34,10 +34,76 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        run: |
+          # Detect OS and use appropriate package manager (same approach as ansible-test.yml)
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          else
+            echo "Cannot detect OS - assuming RHEL-compatible"
+            ID="rhel"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "❌ No compatible package manager found"
+            exit 1
+          fi
+
+          echo "Using package manager: $PKG_MGR"
+
+          # Check if Python ${{ env.PYTHON_VERSION }} is already installed
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python and development packages based on OS if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+              echo "Installing Python packages for Rocky/Alma Linux..."
+              if [[ "$ID" == "rocky" ]]; then
+                echo "Using --nogpgcheck for Rocky Linux package installation"
+                sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
+            elif [[ "$ID" == "rhel" ]]; then
+              echo "Installing Python packages for RHEL..."
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            else
+              echo "Installing Python packages for generic RedHat family..."
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          else
+            echo "Skipping Python ${{ env.PYTHON_VERSION }} installation (already installed)"
+            # Still install SELinux packages if needed
+            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+              if [[ "$ID" == "rocky" ]]; then
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
+            elif [[ "$ID" == "rhel" ]]; then
+              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          fi
+
+          python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Check for new Ansible versions
         id: check_versions
