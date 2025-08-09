@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# SystemD Integration Validator - The "Service Management Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates systemd functionality and configuration compliance in
+# Molecule container environments, ensuring proper service management testing.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: SystemD Detection - Identifies systemd availability in containers
+# 2. [PHASE 2]: Configuration Validation - Validates systemd configuration compliance
+# 3. [PHASE 3]: Service Testing - Tests systemd service management functionality
+# 4. [PHASE 4]: Container Integration - Validates systemd-container integration
+# 5. [PHASE 5]: Best Practice Compliance - Ensures ADR-0013 compliance
+# 6. [PHASE 6]: Report Generation - Creates detailed systemd validation reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: SystemD functionality in Molecule testing containers
+# - Implements: ADR-0013 Molecule Container Configuration Best Practices
+# - Tests: Service management capabilities in containerized environments
+# - Ensures: Proper systemd integration for roles that manage services
+# - Supports: Testing of systemd-dependent Ansible roles and tasks
+# - Validates: Container configurations support systemd operations
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SYSTEMD-FOCUSED: Specifically validates systemd functionality and integration
+# - CONTAINER-AWARE: Understands systemd limitations and requirements in containers
+# - COMPLIANCE: Ensures adherence to established container configuration practices
+# - TESTING: Validates that systemd works properly for Ansible role testing
+# - INTEGRATION: Tests systemd-container integration thoroughly
+# - REPORTING: Provides detailed validation results and recommendations
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - SystemD Updates: Update for new systemd versions or features
+# - Container Platforms: Add support for new container runtimes
+# - Validation Tests: Add new systemd functionality tests
+# - ADR Updates: Incorporate new ADR requirements for systemd configuration
+# - Integration: Add integration with new service management tools
+# - Performance: Optimize validation for faster execution
+#
+# 🚨 IMPORTANT FOR LLMs: SystemD in containers requires specific configuration.
+# This script validates critical systemd functionality needed for Ansible roles
+# that manage services. Failures may indicate container configuration issues.
+
 # Molecule systemd Container Configuration Validation Script
 # Based on ADR-0013: Molecule Container Configuration Best Practices
 # Validates systemd functionality and configuration compliance

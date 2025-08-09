@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# Advanced Lint Repair System - The "Expert Code Surgeon"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This advanced Python script handles complex ansible-lint issues requiring
+# sophisticated analysis, including Jinja templating, conditional logic, and advanced patterns.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Complex Issue Detection - Identifies advanced ansible-lint violations
+# 2. [PHASE 2]: Jinja Template Analysis - Analyzes and fixes Jinja templating issues
+# 3. [PHASE 3]: Conditional Logic Repair - Fixes complex conditional and loop structures
+# 4. [PHASE 4]: Advanced Pattern Matching - Uses sophisticated regex for complex fixes
+# 5. [PHASE 5]: Semantic Validation - Validates fixes preserve semantic meaning
+# 6. [PHASE 6]: Advanced Reporting - Generates detailed reports of complex fixes
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Handles: Complex ansible-lint issues beyond basic fix_ansible_lint.py capabilities
+# - Fixes: Advanced Jinja templating, conditional logic, and complex patterns
+# - Complements: Basic lint fixing with sophisticated analysis and repair
+# - Maintains: Semantic correctness while fixing complex syntax issues
+# - Integrates: With comprehensive lint fixing pipeline for complete coverage
+# - Supports: Advanced Ansible patterns and complex role structures
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ADVANCED: Handles complex issues requiring sophisticated analysis
+# - SEMANTIC-AWARE: Preserves semantic meaning while fixing syntax
+# - PATTERN-BASED: Uses advanced pattern matching for complex fixes
+# - VALIDATION: Includes semantic validation beyond syntax checking
+# - COMPLEMENTARY: Works with basic fix tools for comprehensive coverage
+# - EXPERTISE: Applies expert-level knowledge of Ansible best practices
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Patterns: Add advanced fix patterns for new ansible-lint rules
+# - Jinja Updates: Update Jinja templating fixes for new template patterns
+# - Semantic Analysis: Enhance semantic validation capabilities
+# - Pattern Complexity: Add more sophisticated pattern matching algorithms
+# - Integration: Add integration with advanced static analysis tools
+# - Machine Learning: Add ML-based pattern recognition for complex fixes
+#
+# 🚨 IMPORTANT FOR LLMs: This script handles complex code transformations.
+# Advanced fixes can subtly change behavior. Always validate fixes thoroughly
+# in test environments and review changes for semantic correctness.
+
 """
 Advanced Ansible-lint Fix Script - Phase 2
 Handles more complex issues like Jinja spacing, no-changed-when, etc.

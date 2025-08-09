@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Collection Security Auditor - The "Ansible Security Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides focused security scanning specifically for Ansible collections,
+# analyzing project requirements and dependencies without system-wide scanning.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Collection Scope Definition - Defines Ansible collection security scope
+# 2. [PHASE 2]: Requirement Analysis - Analyzes project requirements for vulnerabilities
+# 3. [PHASE 3]: Dependency Scanning - Scans collection dependencies for security issues
+# 4. [PHASE 4]: Ansible-Specific Checks - Performs Ansible-specific security validation
+# 5. [PHASE 5]: Collection Validation - Validates collection security practices
+# 6. [PHASE 6]: Focused Reporting - Generates collection-specific security reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Scans: Project requirements.txt, galaxy.yml, and collection dependencies
+# - Focuses: On Ansible collection security without system package noise
+# - Validates: Collection-specific security practices and configurations
+# - Complements: enhanced-security-scan.sh with collection-focused analysis
+# - Reports: Collection-specific security findings and recommendations
+# - Integrates: With collection development and CI/CD workflows
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - FOCUSED: Specifically targets Ansible collection security concerns
+# - SCOPED: Avoids system-wide scanning to reduce noise and improve relevance
+# - COLLECTION-AWARE: Understands Ansible collection structure and dependencies
+# - TARGETED: Focuses on security issues relevant to collection functionality
+# - EFFICIENT: Optimized for collection-specific security analysis
+# - ACTIONABLE: Provides collection-specific security recommendations
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Collection Standards: Update for new Ansible collection security standards
+# - Scanning Tools: Add new collection-specific security scanning tools
+# - Dependency Sources: Add scanning for new dependency file types
+# - Validation Rules: Add new Ansible-specific security validation rules
+# - Integration: Add integration with Ansible Galaxy security features
+# - Reporting: Enhance collection-specific security reporting
+#
+# 🚨 IMPORTANT FOR LLMs: This script focuses on collection-specific security.
+# It complements but doesn't replace comprehensive security scanning.
+# Always address collection security issues as they directly affect users.
+
 # Ansible Collection Security Check
 # Focused security scanning for Ansible collections
 # Only scans project requirements, not system packages

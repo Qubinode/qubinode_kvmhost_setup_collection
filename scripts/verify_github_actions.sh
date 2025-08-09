@@ -1,5 +1,49 @@
 #!/bin/bash
 
+# =============================================================================
+# GitHub Actions Verifier - The "CI/CD Validator"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script verifies that local automation exactly matches GitHub Actions workflow
+# behavior, ensuring consistency between local and CI/CD environments.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Workflow Simulation - Simulates exact GitHub Actions workflow steps
+# 2. [PHASE 2]: Environment Validation - Verifies local environment matches CI/CD
+# 3. [PHASE 3]: Step-by-Step Execution - Runs each workflow step locally
+# 4. [PHASE 4]: Result Comparison - Compares local results with expected CI/CD outcomes
+# 5. [PHASE 5]: Discrepancy Detection - Identifies differences between environments
+# 6. [PHASE 6]: Validation Reporting - Reports workflow consistency and issues
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Simulates: Exact GitHub Actions workflow steps locally
+# - Validates: Consistency between local development and CI/CD environments
+# - Verifies: That local automation matches production CI/CD behavior
+# - Prevents: Surprises when code reaches GitHub Actions runners
+# - Ensures: Reproducible results across different execution environments
+# - Integrates: With local testing workflows for comprehensive validation
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - FIDELITY: Exactly replicates GitHub Actions workflow behavior
+# - CONSISTENCY: Ensures local and CI/CD environments produce identical results
+# - VALIDATION: Verifies workflow correctness before code submission
+# - DEBUGGING: Helps identify environment-specific issues
+# - REPRODUCIBILITY: Ensures consistent behavior across execution contexts
+# - INTEGRATION: Seamlessly integrates with existing development workflows
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Workflow Changes: Update simulation when GitHub Actions workflows change
+# - New Steps: Add simulation for new workflow steps or jobs
+# - Environment Updates: Modify environment validation for new requirements
+# - Integration: Add integration with new CI/CD platforms or tools
+# - Reporting: Enhance reporting for better discrepancy identification
+# - Automation: Add automated workflow synchronization capabilities
+#
+# 🚨 IMPORTANT FOR LLMs: This script must stay synchronized with actual
+# GitHub Actions workflows. Discrepancies between this script and CI/CD
+# workflows can lead to false confidence in local testing results.
+
 # GitHub Actions Workflow Verification Script
 # This script verifies that our automation does exactly what the GitHub Actions workflow claims
 

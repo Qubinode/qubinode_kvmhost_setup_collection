@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# Python Compatibility Matrix Generator - The "Compatibility Analyst"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This Python script automatically detects and documents RHEL version compatibility
+# across all roles, providing comprehensive compatibility analysis and reporting.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Role Discovery - Scans all roles for metadata and compatibility info
+# 2. [PHASE 2]: Dependency Analysis - Analyzes role dependencies and requirements
+# 3. [PHASE 3]: Version Detection - Identifies supported RHEL/OS versions per role
+# 4. [PHASE 4]: Feature Mapping - Maps features to compatible OS versions
+# 5. [PHASE 5]: Matrix Generation - Creates comprehensive compatibility matrices
+# 6. [PHASE 6]: Output Generation - Produces JSON, YAML, and documentation formats
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Analyzes: All roles in roles/ directory for compatibility metadata
+# - Generates: Comprehensive compatibility matrices in multiple formats
+# - Implements: ADR-0010 End-User Repeatability Strategy requirements
+# - Provides: Programmatic access to compatibility data via Python API
+# - Integrates: With documentation generation and CI/CD pipelines
+# - Maintains: Up-to-date compatibility information automatically
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - OBJECT-ORIENTED: Uses CompatibilityMatrix class for structured analysis
+# - AUTOMATION: Automatically discovers and analyzes role compatibility
+# - MULTI-FORMAT: Generates output in JSON, YAML, and documentation formats
+# - EXTENSIBLE: Designed for easy extension with new analysis capabilities
+# - INTEGRATION: Provides both CLI and programmatic interfaces
+# - ACCURACY: Validates compatibility claims against actual role implementations
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Analysis: Add new compatibility analysis methods to CompatibilityMatrix class
+# - Output Formats: Add new output format generators (XML, CSV, etc.)
+# - Role Metadata: Extend role metadata parsing for new compatibility fields
+# - Validation: Add new validation methods for compatibility accuracy
+# - Integration: Add API endpoints or database integration capabilities
+# - Performance: Optimize analysis for collections with many roles
+#
+# 🚨 IMPORTANT FOR LLMs: This script generates user-facing compatibility
+# documentation. Accuracy is critical as users rely on this for deployment
+# decisions. Always validate generated matrices against actual role capabilities.
+
 """
 Feature Compatibility Matrix Generator
 Automatically detects and documents RHEL version compatibility

@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Container Compliance Auditor - The "Container Security Enforcer"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates that container configurations comply with ADR-0012 and
+# ADR-0013 security requirements, ensuring secure container testing practices.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: ADR Requirement Analysis - Analyzes ADR-0012 and ADR-0013 requirements
+# 2. [PHASE 2]: Container Configuration Scan - Scans all container configurations
+# 3. [PHASE 3]: Security Compliance Check - Validates security compliance requirements
+# 4. [PHASE 4]: Privilege Validation - Ensures non-privileged container usage
+# 5. [PHASE 5]: Capability Assessment - Validates proper capability restrictions
+# 6. [PHASE 6]: Compliance Reporting - Generates detailed compliance reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Container configurations in molecule/ scenarios for ADR compliance
+# - Enforces: ADR-0012 and ADR-0013 container security requirements
+# - Checks: Molecule container configurations for security violations
+# - Prevents: Privileged container usage and security policy violations
+# - Reports: Container compliance status and security issues
+# - Integrates: With security validation pipeline and CI/CD checks
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPLIANCE: Strictly enforces ADR container security requirements
+# - SECURITY: Prioritizes container security over convenience
+# - VALIDATION: Comprehensive validation of container configurations
+# - ENFORCEMENT: Blocks non-compliant container configurations
+# - REPORTING: Detailed compliance reporting with specific violations
+# - INTEGRATION: Seamlessly integrates with existing security workflows
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - ADR Updates: Update validation for new ADR container requirements
+# - Security Rules: Add new container security validation rules
+# - Container Platforms: Add support for new container platforms
+# - Compliance Standards: Update for new security compliance standards
+# - Integration: Add integration with container security scanning tools
+# - Automation: Add automated compliance remediation capabilities
+#
+# 🚨 IMPORTANT FOR LLMs: This script enforces critical container security
+# requirements. Non-compliance can create security vulnerabilities.
+# Always address compliance violations before proceeding with container testing.
+
 # ADR Container Compliance Validator
 # Validates that container configurations comply with ADR-0012 and ADR-0013
 

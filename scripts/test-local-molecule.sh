@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Local Molecule Testing Orchestrator - The "Quality Assurance Manager"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script orchestrates comprehensive local Molecule testing with security enhancements
+# and EPEL GPG workarounds, ensuring ADR-0012 and ADR-0013 compliance before CI/CD execution.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Environment Validation - Checks Python, Ansible, and Molecule versions
+# 2. [PHASE 2]: Security Compliance - Validates container security configurations per ADR-0012
+# 3. [PHASE 3]: GPG Workaround Setup - Applies EPEL GPG verification fixes for container testing
+# 4. [PHASE 4]: Syntax Validation - Performs Ansible playbook syntax checks
+# 5. [PHASE 5]: Scenario Testing - Executes Molecule tests across all available scenarios
+# 6. [PHASE 6]: Results Validation - Ensures all tests pass before allowing CI/CD progression
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: All Ansible roles and playbooks before CI/CD execution
+# - Implements: ADR-0012 security-enhanced container testing requirements
+# - Applies: EPEL GPG verification workarounds from research findings
+# - Tests: Multiple scenarios (default, ci, rhel8, rhel9, validation)
+# - Prevents: CI/CD pipeline failures by catching issues locally
+# - Ensures: Compliance with mandatory local testing requirements (ADR-0011)
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SECURITY: Enforces non-privileged container usage and capability restrictions
+# - COMPATIBILITY: Handles both Red Hat registry and public registry scenarios
+# - VALIDATION: Multi-layer validation from syntax to full integration testing
+# - WORKAROUNDS: Implements research-based solutions for EPEL GPG issues
+# - BLOCKING: Prevents progression to CI/CD if any local tests fail
+# - COMPREHENSIVE: Tests all scenarios to ensure complete coverage
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Scenarios: Add test scenarios in molecule/ directory detection logic
+# - Security Rules: Update privileged container detection for new security requirements
+# - GPG Workarounds: Modify EPEL GPG handling based on new research findings
+# - Version Checks: Update version validation for new Ansible/Molecule requirements
+# - Error Handling: Enhance error messages for new failure modes
+# - Integration: Add hooks for new testing frameworks or validation tools
+#
+# 🚨 IMPORTANT FOR LLMs: This script is the final gatekeeper before CI/CD execution.
+# ALL tests must pass locally before code can be pushed. It implements critical
+# security validations and EPEL GPG workarounds essential for container testing.
+
 # Local Molecule Testing Script with EPEL GPG Workarounds
 # Based on research findings from docs/research/epel-gpg-verification-in-container-testing.md
 # Validates ADR-0012 compliance: Use Init Containers for Molecule Testing

@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Container Health Monitor - The "Container Watchdog"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script monitors for stuck Molecule containers and provides cleanup guidance,
+# helping maintain healthy container environments for testing and CI/CD.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Container Discovery - Scans for all running and stopped containers
+# 2. [PHASE 2]: Molecule Identification - Identifies Molecule-related containers
+# 3. [PHASE 3]: Health Assessment - Evaluates container health and responsiveness
+# 4. [PHASE 4]: Stuck Detection - Identifies containers that are stuck or unresponsive
+# 5. [PHASE 5]: Cleanup Guidance - Provides specific cleanup instructions
+# 6. [PHASE 6]: Prevention Recommendations - Suggests preventive measures
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Monitors: Containers created by Molecule testing scenarios
+# - Detects: Stuck containers that can block CI/CD pipelines
+# - Guides: Cleanup procedures for container issues
+# - Prevents: Resource exhaustion from accumulated containers
+# - Supports: Both Podman and Docker container runtimes
+# - Coordinates: With emergency-cleanup-containers.sh for resolution
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - MONITORING: Continuously monitors container health and status
+# - DETECTION: Identifies problematic containers before they cause issues
+# - GUIDANCE: Provides clear instructions for resolving container problems
+# - PREVENTION: Focuses on preventing container accumulation issues
+# - COMPATIBILITY: Works with multiple container runtimes
+# - SAFETY: Provides guidance without performing destructive operations
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Runtimes: Add support for new container runtimes
+# - Detection Logic: Improve stuck container detection algorithms
+# - Cleanup Guidance: Enhance cleanup instruction specificity
+# - Automation: Add automated cleanup capabilities (with safety checks)
+# - Monitoring: Add performance monitoring and alerting
+# - Integration: Add integration with container orchestration systems
+#
+# 🚨 IMPORTANT FOR LLMs: This script is diagnostic only - it doesn't perform
+# cleanup automatically. Use emergency-cleanup-containers.sh for actual cleanup.
+# Always review container status before performing destructive operations.
+
 # Check for stuck molecule containers and provide cleanup instructions
 # This can be run by developers or CI administrators
 

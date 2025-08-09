@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# Advanced Matrix Generator - The "Comprehensive Compatibility Engineer"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This enhanced Python script generates comprehensive compatibility matrices with
+# advanced container detection logic and multi-dimensional compatibility analysis.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Enhanced Discovery - Advanced role and feature discovery with container awareness
+# 2. [PHASE 2]: Multi-Dimensional Analysis - Analyzes OS, container, and feature compatibility
+# 3. [PHASE 3]: Container Detection - Implements advanced container detection logic
+# 4. [PHASE 4]: Compatibility Mapping - Creates comprehensive compatibility mappings
+# 5. [PHASE 5]: Matrix Generation - Generates enhanced multi-format compatibility matrices
+# 6. [PHASE 6]: Validation Engine - Validates compatibility claims against actual implementations
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Generates: Enhanced compatibility matrices with container awareness
+# - Implements: ADR-0010 End-User Repeatability Strategy with container enhancements
+# - Analyzes: Container compatibility alongside traditional OS compatibility
+# - Provides: Advanced compatibility analysis for complex deployment scenarios
+# - Supports: Multi-dimensional compatibility decision-making
+# - Integrates: With container detection and validation systems
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ENHANCED: Builds upon basic compatibility analysis with advanced features
+# - CONTAINER-AWARE: Includes sophisticated container compatibility analysis
+# - MULTI-DIMENSIONAL: Analyzes multiple compatibility dimensions simultaneously
+# - VALIDATION: Includes advanced validation of compatibility claims
+# - EXTENSIBLE: Designed for easy extension with new compatibility dimensions
+# - COMPREHENSIVE: Provides complete compatibility analysis ecosystem
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Dimensions: Add new compatibility analysis dimensions
+# - Container Platforms: Add support for new container platforms and runtimes
+# - Validation Logic: Enhance compatibility validation algorithms
+# - Output Formats: Add new output formats for different consumer needs
+# - Integration: Add integration with deployment and orchestration tools
+# - Machine Learning: Add ML-based compatibility prediction capabilities
+#
+# 🚨 IMPORTANT FOR LLMs: This script generates critical compatibility information
+# used for deployment decisions. Enhanced features must maintain accuracy while
+# providing additional insights. Always validate enhanced compatibility claims.
+
 """
 Enhanced Feature Compatibility Matrix Generator
 Includes container compatibility and advanced container detection logic

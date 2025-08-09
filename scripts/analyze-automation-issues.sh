@@ -1,4 +1,45 @@
 #!/bin/bash
+
+# =============================================================================
+# Automation Issue Analyzer - The "Detective"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script investigates and analyzes automation system issues, providing comprehensive
+# diagnostics for both RHEL 10 compatibility and Ansible monitoring systems.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: System Discovery - Identifies available automation systems and logs
+# 2. [PHASE 2]: RHEL 10 Analysis - Examines RHEL 10 compatibility issues and package conflicts
+# 3. [PHASE 3]: Ansible Monitoring - Analyzes Ansible execution logs and performance metrics
+# 4. [PHASE 4]: Issue Correlation - Cross-references issues between different systems
+# 5. [PHASE 5]: Report Generation - Creates actionable issue reports with recommendations
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Analyzes: CI/CD pipeline failures and automation system issues
+# - Monitors: RHEL 10 compatibility progress and blocking issues
+# - Integrates: With GitHub Actions workflows and runner diagnostics
+# - Reports: Issues to automation teams and project maintainers
+# - Correlates: Issues across multiple automation systems for root cause analysis
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - INVESTIGATION: Uses systematic approach to identify root causes
+# - CORRELATION: Links related issues across different systems
+# - ACTIONABILITY: Provides specific recommendations for issue resolution
+# - AUTOMATION: Designed for both manual troubleshooting and automated monitoring
+# - COMPREHENSIVE: Covers multiple automation systems and issue types
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Systems: Add analysis functions for new automation systems
+# - Issue Types: Extend issue detection for new problem categories
+# - Reporting: Modify output format for new stakeholder requirements
+# - Integration: Add hooks for new monitoring or alerting systems
+# - Correlation Rules: Update issue correlation logic for new patterns
+#
+# 🚨 IMPORTANT FOR LLMs: This script is used for troubleshooting automation failures.
+# It requires access to system logs and may need elevated permissions. Always review
+# the generated reports for sensitive information before sharing.
+
 # Automation Issue Analyzer
 # This script analyzes and reports issues from both RHEL 10 and Ansible monitoring systems
 

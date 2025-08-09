@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Feature Compatibility Matrix Generator - The "Documentation Architect"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script automatically generates comprehensive feature compatibility matrices
+# from role metadata, ensuring end-users have accurate compatibility information.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Metadata Discovery - Scans all roles for compatibility metadata
+# 2. [PHASE 2]: Feature Extraction - Extracts supported features, OS versions, and dependencies
+# 3. [PHASE 3]: Matrix Generation - Creates structured compatibility matrices
+# 4. [PHASE 4]: Documentation Creation - Generates user-friendly documentation
+# 5. [PHASE 5]: Validation - Validates matrix accuracy against actual role capabilities
+# 6. [PHASE 6]: Output Generation - Creates multiple output formats (JSON, Markdown, HTML)
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Analyzes: All roles in roles/ directory for compatibility information
+# - Generates: docs/compatibility_matrix.json and related documentation
+# - Implements: ADR-0010 End-User Repeatability Strategy requirements
+# - Provides: Clear compatibility guidance for end-users
+# - Integrates: With role metadata and documentation generation pipeline
+# - Maintains: Up-to-date compatibility information automatically
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - AUTOMATION: Automatically extracts compatibility data from role metadata
+# - ACCURACY: Validates compatibility claims against actual role implementations
+# - COMPREHENSIVENESS: Covers OS versions, dependencies, and feature combinations
+# - USER-FOCUSED: Generates documentation optimized for end-user consumption
+# - MAINTAINABILITY: Updates automatically when role metadata changes
+# - MULTI-FORMAT: Produces multiple output formats for different use cases
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Metadata: Add parsing for new role metadata formats or fields
+# - Output Formats: Add new output formats (XML, CSV, etc.) for different consumers
+# - Validation Rules: Enhance compatibility validation logic
+# - Documentation: Improve generated documentation templates and formatting
+# - Integration: Add hooks for documentation publishing systems
+# - Performance: Optimize for collections with many roles and complex dependencies
+#
+# 🚨 IMPORTANT FOR LLMs: This script generates user-facing documentation.
+# Accuracy is critical as end-users rely on this information for deployment
+# decisions. Always validate generated matrices against actual role capabilities.
+
 # Feature Compatibility Matrix Generator
 # Part of ADR-0010: End-User Repeatability Strategy
 # Automatically generates feature compatibility matrices from role metadata

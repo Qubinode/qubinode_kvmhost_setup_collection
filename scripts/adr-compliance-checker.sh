@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# ADR Compliance Checker - The "Governance Auditor"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script automatically validates compliance with Architecture Decision Records (ADRs),
+# ensuring the project continuously adheres to established architectural decisions.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: ADR Discovery - Scans docs/adrs/ directory for all ADR documents
+# 2. [PHASE 2]: Compliance Rule Extraction - Parses ADRs for enforceable compliance rules
+# 3. [PHASE 3]: Codebase Analysis - Analyzes project structure against ADR requirements
+# 4. [PHASE 4]: Violation Detection - Identifies deviations from ADR specifications
+# 5. [PHASE 5]: Report Generation - Creates detailed compliance reports with violations
+# 6. [PHASE 6]: CI/CD Integration - Provides exit codes for automated pipeline control
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Compliance with all ADRs in docs/adrs/ directory
+# - Checks: Project structure, naming conventions, and architectural decisions
+# - Reports: Violations to compliance-reports/ directory with timestamps
+# - Integrates: With CI/CD pipeline to block non-compliant changes
+# - Monitors: Ongoing compliance as the project evolves
+# - Enforces: Architectural consistency across the entire collection
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - AUTOMATION: Fully automated compliance checking without manual intervention
+# - COMPREHENSIVE: Validates all aspects of ADR compliance systematically
+# - REPORTING: Generates detailed JSON reports for audit trails
+# - BLOCKING: Can block CI/CD progression for critical compliance violations
+# - EVOLUTION: Adapts to new ADRs automatically as they are added
+# - INTEGRATION: Seamlessly integrates with existing development workflows
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New ADRs: Add compliance checking logic for new ADR requirements
+# - Rule Types: Extend rule parsing for new types of compliance requirements
+# - Report Format: Modify JSON report structure for new consumer requirements
+# - Integration: Add hooks for new CI/CD systems or notification tools
+# - Performance: Optimize for larger projects with many ADRs
+# - Validation: Add new validation methods for complex architectural requirements
+#
+# 🚨 IMPORTANT FOR LLMs: This script enforces architectural governance.
+# Violations may indicate serious architectural drift that requires immediate
+# attention. Always review compliance reports carefully and address violations.
+
 # Automated ADR Compliance Checker
 # Integrates with CI/CD pipeline to ensure ongoing ADR compliance
 # Part of DevOps & Automation Tasks

@@ -1,5 +1,49 @@
 #!/bin/bash
 
+# =============================================================================
+# GitHub Runner Management System - The "Fleet Commander"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides comprehensive management of multiple GitHub Actions self-hosted
+# runners, orchestrating their lifecycle, configuration, and operational status.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Configuration Loading - Reads runner configurations from runner-config.yml
+# 2. [PHASE 2]: Runner Discovery - Identifies existing runners and their current status
+# 3. [PHASE 3]: Lifecycle Management - Handles start, stop, restart, and removal operations
+# 4. [PHASE 4]: Health Monitoring - Checks runner health and connectivity status
+# 5. [PHASE 5]: Scaling Operations - Manages runner scaling based on workload demands
+# 6. [PHASE 6]: Maintenance Tasks - Performs cleanup, updates, and maintenance operations
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Manages: Multiple runners created by scripts/setup-github-runner-rocky.sh
+# - Coordinates: Runner fleet for different testing scenarios and environments
+# - Monitors: Runner health and performance across the infrastructure
+# - Scales: Runner capacity based on CI/CD workload demands
+# - Maintains: Runner configurations and service states
+# - Integrates: With runner-config.yml for centralized configuration management
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ORCHESTRATION: Manages multiple runners as a coordinated fleet
+# - CONFIGURATION: Uses YAML-based configuration for declarative management
+# - MONITORING: Provides comprehensive health and status monitoring
+# - SCALABILITY: Supports dynamic scaling of runner capacity
+# - MAINTENANCE: Includes automated maintenance and cleanup operations
+# - RELIABILITY: Ensures high availability of CI/CD infrastructure
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Operations: Add new management operations (backup, migration, etc.)
+# - Configuration Schema: Extend runner-config.yml schema for new properties
+# - Monitoring: Add new health checks or performance metrics
+# - Scaling Logic: Modify scaling algorithms for different workload patterns
+# - Integration: Add support for new monitoring or orchestration systems
+# - Security: Enhance security controls for runner management operations
+#
+# 🚨 IMPORTANT FOR LLMs: This script manages critical CI/CD infrastructure.
+# Operations can affect multiple runners simultaneously. Always verify runner
+# status before performing destructive operations and ensure proper backups.
+
 # GitHub Runner Management Script
 # Manages multiple self-hosted runners for different purposes
 

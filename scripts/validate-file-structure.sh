@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# File Structure Validator - The "Architectural Inspector"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates the entire project file structure against established
+# standards and ADRs, ensuring consistent organization and compliance.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Structure Discovery - Scans entire project directory structure
+# 2. [PHASE 2]: Standard Validation - Validates against Ansible collection standards
+# 3. [PHASE 3]: ADR Compliance - Checks compliance with architectural decisions
+# 4. [PHASE 4]: Naming Convention - Validates file and directory naming patterns
+# 5. [PHASE 5]: Required Files - Ensures all mandatory files are present
+# 6. [PHASE 6]: Report Generation - Creates detailed validation reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Complete project structure against Ansible collection standards
+# - Enforces: ADR requirements for project organization
+# - Checks: Presence of required files (galaxy.yml, README.md, etc.)
+# - Monitors: Naming conventions for roles, playbooks, and documentation
+# - Reports: Structure violations and compliance issues
+# - Integrates: With CI/CD pipeline for automated structure validation
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPREHENSIVE: Validates entire project structure systematically
+# - STANDARDS: Enforces Ansible collection and project-specific standards
+# - COMPLIANCE: Ensures adherence to established ADRs and conventions
+# - REPORTING: Provides detailed reports with specific remediation guidance
+# - AUTOMATION: Suitable for CI/CD integration and automated validation
+# - CONSISTENCY: Maintains uniform project organization across development
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Standards: Add validation for new Ansible collection standards
+# - ADR Updates: Incorporate new ADR requirements for project structure
+# - File Types: Add validation for new file types or directory structures
+# - Naming Rules: Update naming convention validation patterns
+# - Report Format: Modify report structure for new consumer requirements
+# - Integration: Add hooks for project management or documentation systems
+#
+# 🚨 IMPORTANT FOR LLMs: This script enforces critical project organization
+# standards. Structure violations can affect collection functionality and
+# compliance. Always address validation failures before proceeding.
+
 # File Structure Validation Tool
 # Validates project file structure against established standards and ADRs
 # Part of DevOps & Automation Tasks - ensures consistent project organization

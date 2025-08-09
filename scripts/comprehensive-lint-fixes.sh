@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Comprehensive Lint Fix Engine - The "Code Repair Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script applies comprehensive ansible-lint fixes for known issues,
+# systematically resolving common code quality violations across the collection.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Issue Identification - Scans for known ansible-lint violation patterns
+# 2. [PHASE 2]: Backup Creation - Creates safety backups before applying fixes
+# 3. [PHASE 3]: Systematic Fixes - Applies fixes in dependency-aware order
+# 4. [PHASE 4]: Validation - Verifies fixes don't break functionality
+# 5. [PHASE 5]: Rollback Capability - Provides rollback if fixes cause issues
+# 6. [PHASE 6]: Report Generation - Documents all changes made
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Fixes: Known ansible-lint violations across all roles and playbooks
+# - Coordinates: With ansible_lint_toolkit.sh for comprehensive code quality
+# - Maintains: Code quality standards without breaking functionality
+# - Integrates: With CI/CD pipeline for automated code maintenance
+# - Preserves: Original functionality while improving code quality
+# - Documents: All changes for audit and review purposes
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SAFETY: Creates backups before making any changes
+# - SYSTEMATIC: Applies fixes in logical order to avoid conflicts
+# - COMPREHENSIVE: Handles multiple categories of lint violations
+# - VALIDATION: Ensures fixes don't break existing functionality
+# - ROLLBACK: Provides ability to undo changes if needed
+# - DOCUMENTATION: Logs all changes for transparency and audit
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Violations: Add fix patterns for new ansible-lint rules
+# - Fix Logic: Improve fix algorithms for better accuracy
+# - Validation: Add new validation checks for fix correctness
+# - Backup Strategy: Modify backup and rollback mechanisms
+# - Integration: Add hooks for code review or approval systems
+# - Performance: Optimize fix application for large collections
+#
+# 🚨 IMPORTANT FOR LLMs: This script modifies Ansible code automatically.
+# It creates backups, but always run in a version-controlled environment.
+# Review changes carefully before committing to ensure functionality is preserved.
+
 # comprehensive-lint-fixes.sh - Comprehensive ansible-lint fixes for known issues
 
 echo "🔧 Applying comprehensive ansible-lint fixes..."

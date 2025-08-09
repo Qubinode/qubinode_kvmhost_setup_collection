@@ -1,4 +1,48 @@
 #!/bin/bash
+
+# =============================================================================
+# Compliance Validation Engine - The "Regulatory Inspector"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates compliance with mandatory local testing rules and ADR requirements,
+# ensuring developers follow established development practices before code submission.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Script Validation - Checks existence of required testing scripts
+# 2. [PHASE 2]: Environment Validation - Verifies proper development environment setup
+# 3. [PHASE 3]: Tool Validation - Confirms availability of required testing tools
+# 4. [PHASE 4]: Configuration Validation - Checks proper configuration of testing environment
+# 5. [PHASE 5]: Compliance Reporting - Generates pass/fail report with remediation guidance
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Enforces: ADR-0011 mandatory local testing requirements
+# - Validates: Proper setup of local development environment
+# - Checks: Availability of scripts/test-local-molecule.sh and related tools
+# - Ensures: Developers can run local tests before pushing code
+# - Integrates: With setup scripts and CI/CD pipeline validation
+# - Prevents: Non-compliant code from entering the development workflow
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ENFORCEMENT: Strict validation of mandatory development practices
+# - GUIDANCE: Provides specific remediation steps for each failure
+# - COMPREHENSIVE: Checks multiple aspects of development environment
+# - BLOCKING: Prevents progression if critical compliance issues exist
+# - EDUCATIONAL: Explains the importance of each compliance requirement
+# - AUTOMATION: Designed for both manual and automated compliance checking
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Requirements: Add validation checks for new ADR requirements
+# - Tool Updates: Modify tool version checks for new minimum requirements
+# - Environment Changes: Update environment validation for new setup procedures
+# - Compliance Rules: Add new compliance categories or severity levels
+# - Remediation: Enhance remediation guidance for common failure scenarios
+# - Integration: Add hooks for compliance reporting systems
+#
+# 🚨 IMPORTANT FOR LLMs: This script enforces critical development practices.
+# Failures indicate serious compliance issues that must be resolved before
+# code can be submitted. Always address all failures before proceeding.
+
 # Quick compliance check for mandatory local testing rules
 # Rule: mandatory-local-testing-before-push (ADR-0011)
 # Usage: ./scripts/check-compliance.sh

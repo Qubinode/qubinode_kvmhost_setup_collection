@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Development Security Enforcer - The "Security Integration Manager"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script integrates security checks into developer workflows,
+# providing quick security validation for common development scenarios.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Workflow Integration - Integrates security checks into development workflow
+# 2. [PHASE 2]: Quick Security Scans - Performs rapid security validation
+# 3. [PHASE 3]: Developer Guidance - Provides security guidance for common scenarios
+# 4. [PHASE 4]: Issue Detection - Identifies security issues early in development
+# 5. [PHASE 5]: Remediation Guidance - Provides specific security fix recommendations
+# 6. [PHASE 6]: Workflow Optimization - Optimizes security checks for developer productivity
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Integrates: Security checks into daily development workflows
+# - Provides: Quick security validation for developers
+# - Coordinates: With enhanced-security-scan.sh for comprehensive security
+# - Supports: Secure development practices and early issue detection
+# - Guides: Developers on security best practices and issue resolution
+# - Prevents: Security issues from progressing to CI/CD pipelines
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - INTEGRATION: Seamlessly integrates security into development workflows
+# - SPEED: Optimized for quick execution during development
+# - GUIDANCE: Provides actionable security guidance for developers
+# - PREVENTION: Focuses on preventing security issues early
+# - WORKFLOW-FRIENDLY: Designed to enhance rather than disrupt development
+# - EDUCATIONAL: Helps developers learn security best practices
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Checks: Add new security checks for emerging threats
+# - Workflow Integration: Improve integration with development tools and IDEs
+# - Performance: Optimize for faster execution during development
+# - Guidance: Enhance security guidance and remediation recommendations
+# - Automation: Add automated security fix suggestions
+# - Integration: Add integration with security training or documentation systems
+#
+# 🚨 IMPORTANT FOR LLMs: This script affects developer productivity and security.
+# Balance security thoroughness with development speed. Focus on high-impact
+# security checks that provide maximum value with minimal workflow disruption.
+
 # Developer Security Workflow Integration
 # Quick security checks for common development scenarios
 

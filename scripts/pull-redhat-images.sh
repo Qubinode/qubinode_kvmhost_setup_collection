@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Red Hat Container Image Manager - The "Registry Curator"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script manages the download and caching of Red Hat Enterprise Linux
+# container images from registry.redhat.io for testing and development.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Authentication Check - Verifies Red Hat registry login status
+# 2. [PHASE 2]: Image Discovery - Identifies required RHEL images for testing
+# 3. [PHASE 3]: Image Pulling - Downloads images using Podman with proper authentication
+# 4. [PHASE 4]: Cache Management - Manages local image cache and storage
+# 5. [PHASE 5]: Validation - Verifies downloaded images are functional
+# 6. [PHASE 6]: Cleanup - Removes old or unused images to manage storage
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Provides: RHEL container images for Molecule testing scenarios
+# - Supports: Testing on authentic RHEL environments vs. public alternatives
+# - Integrates: With Molecule scenarios that require Red Hat registry images
+# - Manages: Image lifecycle and storage for development environments
+# - Enables: Testing with official Red Hat UBI and RHEL images
+# - Coordinates: With authentication systems for registry access
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - AUTHENTICATION: Requires valid Red Hat registry credentials
+# - CACHING: Manages local image cache for efficient reuse
+# - VALIDATION: Ensures downloaded images are functional and accessible
+# - STORAGE: Manages disk space by cleaning up unused images
+# - SECURITY: Uses secure authentication methods for registry access
+# - EFFICIENCY: Minimizes network usage through intelligent caching
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Images: Add support for new RHEL versions or specialized images
+# - Authentication: Update authentication methods for new registry requirements
+# - Cache Strategy: Modify caching logic for different storage constraints
+# - Validation: Add new image validation checks for specific requirements
+# - Integration: Add hooks for container orchestration or testing systems
+# - Performance: Optimize download and caching for better efficiency
+#
+# 🚨 IMPORTANT FOR LLMs: This script requires valid Red Hat registry credentials.
+# Ensure you're logged in with 'podman login registry.redhat.io' before running.
+# Downloaded images may consume significant disk space - monitor storage usage.
+
 # Manual Red Hat Registry Image Pull Script for Podman
 # Run this script after logging into registry.redhat.io
 

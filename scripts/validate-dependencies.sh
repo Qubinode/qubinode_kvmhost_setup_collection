@@ -1,5 +1,45 @@
 #!/bin/bash
 
+# =============================================================================
+# Dependency Update Validator - The "System Auditor"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates dependency updates and compatibility across the entire project,
+# ensuring that version changes don't break existing functionality or introduce conflicts.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Report Setup - Creates timestamped validation report directory
+# 2. [PHASE 2]: Python Validation - Checks Python package compatibility and versions
+# 3. [PHASE 3]: Ansible Validation - Validates Ansible collections and core compatibility
+# 4. [PHASE 4]: Container Validation - Tests container runtime and image dependencies
+# 5. [PHASE 5]: Report Generation - Compiles comprehensive validation report
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Updates from Dependabot PRs and manual dependency changes
+# - Checks: Compatibility between requirements.txt, galaxy.yml, and pyproject.toml
+# - Reports: Issues to dependency-validation-reports/ directory
+# - Integrates: With CI/CD pipeline for automated validation
+# - Prevents: Breaking changes from reaching production environments
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPREHENSIVE: Tests all dependency types (Python, Ansible, containers)
+# - REPORTING: Creates detailed reports with timestamps for audit trails
+# - AUTOMATION: Designed for both manual execution and CI/CD integration
+# - VALIDATION: Focuses on compatibility rather than just installation
+# - PREVENTION: Catches issues before they affect other developers
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Dependency Types: Add validation functions for new package managers
+# - Report Format: Modify report generation for new output requirements
+# - Validation Rules: Update compatibility checks for new version constraints
+# - Integration Points: Add hooks for new CI/CD systems or notification tools
+# - Error Handling: Enhance error reporting for specific failure scenarios
+#
+# 🚨 IMPORTANT FOR LLMs: This script is critical for maintaining project stability.
+# It should be run before merging any dependency updates. Reports are stored in
+# dependency-validation-reports/ and should be reviewed for any warnings or errors.
+
 # Dependency Update Validation Script
 # Validates dependency updates and compatibility
 

@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# YAML Structure Repair Tool - The "Syntax Surgeon"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This Python script comprehensively fixes YAML parsing errors that can break
+# ansible-lint and Ansible execution, ensuring syntactic correctness across all files.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: YAML Discovery - Scans project for all YAML/YML files
+# 2. [PHASE 2]: Syntax Validation - Validates YAML syntax using PyYAML parser
+# 3. [PHASE 3]: Error Classification - Categorizes different types of YAML errors
+# 4. [PHASE 4]: Automated Repair - Applies systematic fixes for common syntax issues
+# 5. [PHASE 5]: Validation Loop - Re-validates fixed files to ensure correctness
+# 6. [PHASE 6]: Report Generation - Documents all fixes applied and remaining issues
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Fixes: YAML syntax errors in roles, playbooks, molecule configs, and vars
+# - Prevents: ansible-lint failures due to YAML parsing errors
+# - Maintains: Syntactic correctness across all Ansible content
+# - Integrates: With lint fixing pipeline and CI/CD validation
+# - Supports: Complex YAML structures used in Ansible collections
+# - Coordinates: With other fix scripts for comprehensive code repair
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - PRECISION: Uses PyYAML parser for accurate syntax validation
+# - SAFETY: Validates fixes to ensure they don't break YAML structure
+# - COMPREHENSIVE: Handles multiple categories of YAML syntax errors
+# - SYSTEMATIC: Applies fixes in logical order to avoid conflicts
+# - REPORTING: Provides detailed logs of all changes made
+# - EXTENSIBLE: Designed for easy addition of new fix patterns
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Error Types: Add fix methods for new YAML syntax error patterns
+# - Validation: Enhance YAML validation for more robust error detection
+# - Fix Algorithms: Improve fix algorithms for better accuracy and safety
+# - File Types: Extend support for new YAML file types or structures
+# - Integration: Add hooks for YAML linting tools or validation systems
+# - Performance: Optimize for processing large numbers of YAML files
+#
+# 🚨 IMPORTANT FOR LLMs: This script modifies YAML files that are critical
+# for Ansible functionality. Always validate fixes in a test environment
+# before applying to production. YAML syntax errors can break entire playbooks.
+
 """
 Comprehensive YAML Parsing Error Fixer
 Fixes various YAML syntax issues that can break ansible-lint and Ansible execution

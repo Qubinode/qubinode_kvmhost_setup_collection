@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Environment Diff Analyzer - The "Configuration Consistency Auditor"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script compares local development environments with GitHub Actions CI/CD
+# environments to ensure consistency and identify configuration discrepancies.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Local Environment Scan - Captures local development environment details
+# 2. [PHASE 2]: CI/CD Environment Analysis - Analyzes GitHub Actions environment specs
+# 3. [PHASE 3]: Version Comparison - Compares tool versions between environments
+# 4. [PHASE 4]: Configuration Diff - Identifies configuration differences
+# 5. [PHASE 5]: Compatibility Assessment - Evaluates compatibility implications
+# 6. [PHASE 6]: Recommendation Generation - Provides alignment recommendations
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Local environment matches GitHub Actions runner configuration
+# - Identifies: Version mismatches that could cause CI/CD failures
+# - Ensures: Consistent behavior between development and production testing
+# - Supports: Troubleshooting environment-specific issues
+# - Guides: Environment synchronization and alignment efforts
+# - Prevents: "works locally but fails in CI" scenarios
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - CONSISTENCY: Ensures development and CI/CD environments are aligned
+# - COMPARISON: Systematically compares environment configurations
+# - DETECTION: Identifies discrepancies that could cause issues
+# - GUIDANCE: Provides specific recommendations for alignment
+# - PREVENTION: Prevents environment-related CI/CD failures
+# - VALIDATION: Validates environment setup correctness
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Tools: Add comparison for new development tools or dependencies
+# - CI/CD Updates: Update for new GitHub Actions runner configurations
+# - Environment Variables: Add comparison of environment variables
+# - Configuration Files: Extend comparison to configuration files
+# - Reporting: Enhance comparison reporting and visualization
+# - Automation: Add automated environment synchronization capabilities
+#
+# 🚨 IMPORTANT FOR LLMs: Environment mismatches can cause subtle bugs
+# that only appear in CI/CD. Always address identified discrepancies
+# to ensure consistent behavior across all execution environments.
+
 # Local vs GitHub Actions Environment Comparison
 # This script validates that local setup matches GitHub Actions
 

@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# Character Encoding Fixer - The "Encoding Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This Python script fixes specific YAML parsing errors caused by escape characters
+# and encoding issues, ensuring proper character handling in Ansible files.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: File Discovery - Scans all YAML files for escape character issues
+# 2. [PHASE 2]: Pattern Detection - Identifies problematic escape character patterns
+# 3. [PHASE 3]: Encoding Analysis - Analyzes character encoding issues
+# 4. [PHASE 4]: Targeted Fixes - Applies specific fixes for identified patterns
+# 5. [PHASE 5]: Validation - Verifies fixes don't break YAML structure
+# 6. [PHASE 6]: Report Generation - Documents all character fixes applied
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Fixes: Escape character issues in roles/**/*.yml files
+# - Resolves: YAML parsing errors caused by character encoding problems
+# - Supports: Ansible playbook and role functionality by fixing syntax issues
+# - Integrates: With YAML parsing and lint fixing pipeline
+# - Prevents: Runtime errors from character encoding problems
+# - Maintains: Proper character encoding across all YAML content
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - TARGETED: Focuses on specific escape character and encoding issues
+# - PRECISION: Uses precise pattern matching to avoid over-correction
+# - SAFETY: Validates fixes to ensure YAML structure remains intact
+# - ENCODING-AWARE: Handles various character encoding scenarios
+# - SYSTEMATIC: Processes all YAML files consistently
+# - REPORTING: Provides detailed logs of all fixes applied
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Patterns: Add fix patterns for new escape character issues
+# - Encoding Support: Add support for new character encodings
+# - File Types: Extend support to additional file types beyond YAML
+# - Validation: Enhance validation to catch more encoding issues
+# - Performance: Optimize for processing large numbers of files
+# - Integration: Add integration with text editors or IDEs
+#
+# 🚨 IMPORTANT FOR LLMs: Character encoding fixes can subtly change file
+# content. Always validate that fixes preserve intended functionality and
+# don't introduce new parsing errors or change semantic meaning.
+
 """
 Targeted fix for specific YAML parsing errors with escape characters
 """

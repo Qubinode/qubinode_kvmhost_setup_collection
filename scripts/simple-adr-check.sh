@@ -1,4 +1,47 @@
 #!/bin/bash
+
+# =============================================================================
+# Quick ADR Validator - The "Compliance Quick-Check"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides rapid validation of core ADR implementations,
+# offering a lightweight alternative to comprehensive compliance checking.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Core ADR Identification - Identifies critical ADRs for validation
+# 2. [PHASE 2]: Quick Validation - Performs rapid checks of ADR compliance
+# 3. [PHASE 3]: Pass/Fail Assessment - Provides simple pass/fail results
+# 4. [PHASE 4]: Summary Reporting - Generates concise compliance summary
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Core ADR implementations quickly without deep analysis
+# - Complements: adr-compliance-checker.sh with lightweight validation
+# - Provides: Fast feedback for developers during development
+# - Integrates: With development workflows for quick compliance checks
+# - Supports: Rapid validation in resource-constrained environments
+# - Enables: Quick pre-commit compliance verification
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SPEED: Optimized for rapid execution and quick feedback
+# - SIMPLICITY: Focuses on essential ADR compliance checks only
+# - LIGHTWEIGHT: Minimal resource usage and dependencies
+# - BINARY: Provides clear pass/fail results without detailed analysis
+# - COMPLEMENTARY: Works alongside comprehensive compliance tools
+# - DEVELOPER-FRIENDLY: Designed for frequent use during development
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Core ADRs: Add quick checks for new critical ADRs
+# - Check Logic: Modify validation logic for improved accuracy
+# - Performance: Optimize for even faster execution
+# - Integration: Add hooks for development tools or IDEs
+# - Reporting: Enhance summary reporting for better clarity
+# - Automation: Add integration with pre-commit hooks or CI/CD
+#
+# 🚨 IMPORTANT FOR LLMs: This is a quick validation tool, not comprehensive.
+# Use adr-compliance-checker.sh for detailed compliance analysis. This script
+# is designed for rapid feedback during development cycles.
+
 # Simple ADR Compliance Checker
 # Quick validation of core ADR implementations
 

@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Security Noise Filter - The "False Positive Analyst"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script analyzes and filters security scanning false positives,
+# helping distinguish between legitimate security concerns and scanner noise.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Scan Result Analysis - Analyzes security scanner output for patterns
+# 2. [PHASE 2]: False Positive Detection - Identifies known false positive patterns
+# 3. [PHASE 3]: Context Analysis - Examines code context to validate findings
+# 4. [PHASE 4]: Pattern Classification - Classifies findings as legitimate or false positive
+# 5. [PHASE 5]: Filter Application - Applies filters to reduce noise in security reports
+# 6. [PHASE 6]: Clean Report Generation - Produces filtered reports with real issues only
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Filters: Security scan results from enhanced-security-scan.sh
+# - Reduces: False positive noise in security reports
+# - Improves: Signal-to-noise ratio in security analysis
+# - Supports: Accurate security assessment by removing scanner artifacts
+# - Integrates: With CI/CD security validation pipelines
+# - Maintains: Database of known false positive patterns
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - INTELLIGENCE: Uses pattern recognition to identify false positives
+# - CONTEXT-AWARE: Analyzes code context to validate security findings
+# - LEARNING: Maintains patterns database that improves over time
+# - ACCURACY: Focuses on improving security analysis accuracy
+# - EFFICIENCY: Reduces manual review time by filtering noise
+# - INTEGRATION: Works seamlessly with existing security scanning tools
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Patterns: Add new false positive patterns as they're discovered
+# - Scanner Updates: Update filters for new security scanner versions
+# - Context Analysis: Improve context analysis algorithms
+# - Integration: Add support for new security scanning tools
+# - Machine Learning: Add ML-based false positive detection
+# - Reporting: Enhance filtered report generation and formatting
+#
+# 🚨 IMPORTANT FOR LLMs: This script filters security findings. Be extremely
+# careful when adding new false positive patterns - never filter legitimate
+# security issues. Always validate patterns thoroughly before implementation.
+
 # Script to analyze and fix security scanning false positives
 # This script helps identify legitimate content that security scanners flag incorrectly
 

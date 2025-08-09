@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# SELinux CI Configuration Manager - The "Security Policy Coordinator"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script configures SELinux Python bindings and policies for CI/CD environments,
+# ensuring Ansible can interact with SELinux in containerized testing scenarios.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Environment Detection - Identifies CI/CD environment and SELinux status
+# 2. [PHASE 2]: Binding Installation - Installs SELinux Python bindings for Ansible
+# 3. [PHASE 3]: Policy Configuration - Configures SELinux policies for CI operations
+# 4. [PHASE 4]: Container Integration - Sets up SELinux for containerized testing
+# 5. [PHASE 5]: Validation - Verifies SELinux integration works correctly
+# 6. [PHASE 6]: Fallback Configuration - Provides fallback options for restricted environments
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Enables: Ansible SELinux modules to function in CI/CD environments
+# - Configures: SELinux policies for GitHub Actions runners and containers
+# - Supports: Testing of SELinux-related roles and tasks in CI pipelines
+# - Integrates: With container runtimes (Podman/Docker) for SELinux context
+# - Provides: Fallback configurations for environments without SELinux
+# - Coordinates: With setup-github-runner-rocky.sh for complete runner setup
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPATIBILITY: Works across different CI/CD environments and containers
+# - SECURITY: Maintains SELinux security while enabling CI functionality
+# - FALLBACK: Provides graceful degradation when SELinux is unavailable
+# - INTEGRATION: Seamlessly integrates with existing CI/CD workflows
+# - VALIDATION: Ensures SELinux configuration works before proceeding
+# - FLEXIBILITY: Adapts to different SELinux enforcement modes and policies
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Environments: Add support for new CI/CD platforms or containers
+# - SELinux Updates: Update for new SELinux versions or policy changes
+# - Binding Methods: Add new methods for installing SELinux Python bindings
+# - Policy Updates: Modify SELinux policies for new security requirements
+# - Integration: Add support for new container runtimes or orchestration
+# - Troubleshooting: Add diagnostic capabilities for SELinux issues
+#
+# 🚨 IMPORTANT FOR LLMs: SELinux configuration affects system security.
+# Changes to SELinux policies can impact system security posture. Always
+# test in isolated environments and validate security implications.
+
 # SELinux Setup for CI/CD Environments
 # Handles SELinux Python bindings installation and configuration for containerized CI
 

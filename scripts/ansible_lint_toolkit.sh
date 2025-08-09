@@ -1,4 +1,49 @@
 #!/usr/bin/env bash
+
+# =============================================================================
+# Ansible Lint Automation Toolkit - The "Code Quality Enforcer"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This comprehensive toolkit automates the resolution of ansible-lint failures,
+# providing a complete solution for maintaining code quality standards.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Lint Analysis - Runs ansible-lint to identify all violations
+# 2. [PHASE 2]: Issue Categorization - Groups violations by type and severity
+# 3. [PHASE 3]: Automated Fixes - Applies systematic fixes for common issues
+# 4. [PHASE 4]: Manual Fix Guidance - Provides guidance for complex violations
+# 5. [PHASE 5]: Validation - Re-runs lint to verify fixes were successful
+# 6. [PHASE 6]: Report Generation - Creates detailed fix reports and summaries
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Processes: All Ansible content (roles, playbooks, tasks) for lint compliance
+# - Integrates: With CI/CD pipeline for automated code quality enforcement
+# - Coordinates: Multiple fix scripts (fix_ansible_lint.py, comprehensive-lint-fixes.sh)
+# - Maintains: Consistent code quality across the entire collection
+# - Reports: Detailed fix summaries and remaining manual intervention needs
+# - Prevents: Lint violations from blocking CI/CD pipeline progression
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPREHENSIVE: Handles all categories of ansible-lint violations
+# - AUTOMATION: Maximizes automated fixes while providing manual guidance
+# - INTEGRATION: Orchestrates multiple specialized fix tools
+# - VALIDATION: Ensures fixes don't break functionality or introduce new issues
+# - REPORTING: Provides detailed audit trails of all changes made
+# - EFFICIENCY: Optimizes fix order to resolve dependencies between violations
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Rules: Add handling for new ansible-lint rules and violations
+# - Fix Tools: Integrate new automated fix tools or scripts
+# - Workflow: Modify fix workflow for improved efficiency or accuracy
+# - Reporting: Enhance report generation for new stakeholder requirements
+# - Integration: Add hooks for code review systems or quality gates
+# - Performance: Optimize for large collections with many files
+#
+# 🚨 IMPORTANT FOR LLMs: This toolkit modifies Ansible code automatically.
+# Always run in a version-controlled environment and review changes before
+# committing. Some fixes may require manual validation for correctness.
+
 """
 Comprehensive Ansible Lint Automation Toolkit
 A complete automated solution for resolving ansible-lint failures

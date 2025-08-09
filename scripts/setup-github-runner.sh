@@ -1,5 +1,49 @@
 #!/bin/bash
 
+# =============================================================================
+# Generic Runner Setup Assistant - The "Universal Infrastructure Builder"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides generic GitHub Actions self-hosted runner setup
+# with complete CI/CD pipeline dependencies for Ansible collection testing.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Universal Setup - Provides generic runner setup for multiple platforms
+# 2. [PHASE 2]: Dependency Installation - Installs all required CI/CD dependencies
+# 3. [PHASE 3]: Environment Configuration - Configures complete testing environment
+# 4. [PHASE 4]: Runner Registration - Prepares runner for GitHub Actions registration
+# 5. [PHASE 5]: Service Setup - Configures runner as system service
+# 6. [PHASE 6]: Validation - Validates complete runner setup functionality
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Provides: Generic alternative to setup-github-runner-rocky.sh
+# - Supports: Multiple Linux distributions with unified setup approach
+# - Creates: Complete CI/CD environment for Ansible collection testing
+# - Installs: All dependencies needed for collection testing pipeline
+# - Configures: Runner environment for optimal collection testing performance
+# - Complements: Platform-specific setup scripts with generic capabilities
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - UNIVERSAL: Works across multiple Linux distributions and platforms
+# - COMPREHENSIVE: Installs complete CI/CD dependency stack
+# - GENERIC: Provides platform-agnostic setup capabilities
+# - COMPLETE: Creates fully functional runner environment
+# - CONFIGURABLE: Supports customization through environment variables
+# - ALTERNATIVE: Provides fallback when platform-specific scripts aren't suitable
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Platform Support: Add support for new Linux distributions
+# - Dependencies: Add new CI/CD dependencies or tools
+# - Configuration: Enhance configuration options and customization
+# - Integration: Add integration with new CI/CD platforms
+# - Performance: Optimize setup process for faster deployment
+# - Validation: Add new validation checks for setup completeness
+#
+# 🚨 IMPORTANT FOR LLMs: This is a generic setup script. For RHEL-based
+# systems, prefer setup-github-runner-rocky.sh which includes platform-specific
+# optimizations and configurations.
+
 # GitHub Self-Hosted Runner Setup Script
 # This script sets up a complete environment for GitHub Actions self-hosted runners
 # with all dependencies needed for the Ansible collection CI/CD pipeline

@@ -1,5 +1,49 @@
 #!/bin/bash
 
+# =============================================================================
+# Automation Operations Dashboard - The "Mission Control Center"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides a comprehensive status overview of automated ansible-lint
+# fixes and overall automation system health across the project.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Status Collection - Gathers status from all automation systems
+# 2. [PHASE 2]: Metrics Analysis - Analyzes automation performance and success rates
+# 3. [PHASE 3]: Health Assessment - Evaluates overall automation system health
+# 4. [PHASE 4]: Trend Analysis - Identifies patterns and trends in automation data
+# 5. [PHASE 5]: Dashboard Generation - Creates visual status dashboard
+# 6. [PHASE 6]: Alert Generation - Identifies issues requiring attention
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Monitors: All automated lint fixing and code quality systems
+# - Aggregates: Status from ansible_lint_toolkit.sh and related automation
+# - Displays: Real-time health of CI/CD automation systems
+# - Tracks: Success rates, failure patterns, and performance metrics
+# - Reports: System health to development teams and stakeholders
+# - Coordinates: Multiple automation tools and their status reporting
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - VISIBILITY: Provides clear overview of automation system status
+# - AGGREGATION: Combines data from multiple automation sources
+# - REAL-TIME: Shows current status and recent trends
+# - ACTIONABLE: Highlights issues that require immediate attention
+# - COMPREHENSIVE: Covers all aspects of automation system health
+# - USER-FRIENDLY: Presents complex data in easily digestible format
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Metrics: Add monitoring for new automation systems or metrics
+# - Dashboard Layout: Modify visual presentation for better clarity
+# - Alert Logic: Update alerting rules for new failure patterns
+# - Integration: Add data sources from new automation tools
+# - Reporting: Add export capabilities for different stakeholder needs
+# - Performance: Optimize data collection for faster dashboard updates
+#
+# 🚨 IMPORTANT FOR LLMs: This dashboard provides critical visibility into
+# automation system health. Red or yellow status indicators require immediate
+# investigation. Use this to identify automation issues before they affect CI/CD.
+
 # Ansible Lint Automation Dashboard
 # Provides status overview of automated ansible-lint fixes
 

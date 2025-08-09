@@ -1,4 +1,48 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# Automated Ansible-lint Fixer - The "Code Surgeon"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This Python script automatically diagnoses and fixes common ansible-lint issues,
+# acting as an intelligent code repair system for Ansible collections.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Issue Detection - Scans all YAML files for common ansible-lint violations
+# 2. [PHASE 2]: Pattern Matching - Uses regex patterns to identify specific issue types
+# 3. [PHASE 3]: Automated Fixes - Applies systematic fixes for detected issues
+# 4. [PHASE 4]: Validation - Verifies fixes don't break YAML syntax or functionality
+# 5. [PHASE 5]: Reporting - Generates detailed reports of applied fixes
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Fixes: Common ansible-lint issues in roles/, molecule/, and playbook files
+# - Maintains: Code quality standards across the entire collection
+# - Integrates: With CI/CD pipeline to ensure lint compliance
+# - Supports: Multiple ansible-lint rule categories and severity levels
+# - Preserves: Original functionality while improving code quality
+# - Reports: Detailed fix summaries for audit and review purposes
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SAFETY: Validates YAML syntax after each fix to prevent breaking changes
+# - SYSTEMATIC: Uses pattern-based approach for consistent fix application
+# - COMPREHENSIVE: Handles multiple ansible-lint rule categories
+# - REPORTING: Provides detailed logs of all changes made
+# - REVERSIBLE: Maintains fix history for potential rollback scenarios
+# - EXTENSIBLE: Designed to easily add new fix patterns and rules
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Rules: Add fix methods for new ansible-lint rules in AnsibleLintFixer class
+# - Pattern Updates: Modify regex patterns for evolving ansible-lint requirements
+# - File Types: Extend file detection for new Ansible file types or locations
+# - Validation: Enhance YAML validation for more robust fix verification
+# - Reporting: Add new report formats or integration with external tools
+# - Performance: Optimize for large collections with many files
+#
+# 🚨 IMPORTANT FOR LLMs: This script modifies files in-place. Always run in a
+# version-controlled environment and review changes before committing. The script
+# validates YAML syntax but cannot guarantee functional correctness.
+
 """
 Automated Ansible-lint Fix Script
 Systematically resolves common ansible-lint issues

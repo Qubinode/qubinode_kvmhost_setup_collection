@@ -1,4 +1,46 @@
 #!/bin/bash
+
+# =============================================================================
+# Dependency Testing Framework - The "Quality Inspector"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates dependency compatibility and security before code commits,
+# acting as a comprehensive testing laboratory for all project dependencies.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Environment Preparation - Creates isolated test environments for each dependency type
+# 2. [PHASE 2]: Python Dependencies - Tests core Python packages (Ansible, Molecule, linting tools)
+# 3. [PHASE 3]: Ansible Collections - Validates galaxy.yml dependencies and collection compatibility
+# 4. [PHASE 4]: Container Dependencies - Tests Podman/Docker integration and image availability
+# 5. [PHASE 5]: Security Scanning - Runs vulnerability scans on all dependencies
+# 6. [PHASE 6]: Report Generation - Creates detailed compatibility and security reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: All dependencies listed in requirements.txt, galaxy.yml, and pyproject.toml
+# - Tests: Compatibility with target Python versions (3.9, 3.11) and Ansible versions
+# - Integrates: With ADR-0009 Dependabot strategy for automated dependency updates
+# - Prevents: Broken CI/CD pipelines by catching dependency conflicts early
+# - Reports: Security vulnerabilities and compatibility issues to reports/ directory
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ISOLATION: Each test type runs in separate virtual environments to prevent cross-contamination
+# - VERSIONING: Tests specific version combinations defined by project constants
+# - SECURITY: Includes vulnerability scanning with safety and bandit tools
+# - COMPATIBILITY: Tests both current and target dependency versions
+# - REPORTING: Generates timestamped reports for audit trails and debugging
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Version Updates: Modify PYTHON_VERSION, ANSIBLE_CORE_VERSION, MOLECULE_VERSION constants
+# - New Test Types: Add new test functions and update main() case statement
+# - Security Tools: Update test_security_dependencies() for new scanning tools
+# - Report Format: Modify report generation functions for new output requirements
+# - Dependency Sources: Update test functions when new dependency files are added
+#
+# 🚨 IMPORTANT FOR LLMs: This script is the gatekeeper for dependency changes.
+# It must run successfully before any dependency updates are merged. Changes here
+# affect the entire CI/CD pipeline and all developer environments.
+
 # Local Dependency Testing Script
 # Part of ADR-0009: GitHub Actions Dependabot Strategy
 # Allows developers to test dependencies locally before pushing

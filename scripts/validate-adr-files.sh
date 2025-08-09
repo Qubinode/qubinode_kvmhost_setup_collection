@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# ADR Document Validator - The "Architecture Documentation Auditor"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates ADR implementation files and documentation consistency,
+# ensuring architectural decisions are properly documented and implemented.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: ADR Discovery - Scans for all ADR documents and implementation files
+# 2. [PHASE 2]: Implementation Validation - Verifies ADR implementations exist
+# 3. [PHASE 3]: Documentation Consistency - Checks consistency between ADRs and code
+# 4. [PHASE 4]: Progress Analysis - Analyzes implementation progress against ADRs
+# 5. [PHASE 5]: Gap Identification - Identifies missing implementations or documentation
+# 6. [PHASE 6]: Report Generation - Creates detailed validation and progress reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: ADR documents in docs/adr/ directory for completeness
+# - Checks: Implementation files match ADR specifications
+# - Analyzes: Progress of ADR implementation across the project
+# - Identifies: Gaps between architectural decisions and actual implementation
+# - Reports: ADR compliance status and implementation progress
+# - Coordinates: With adr-compliance-checker.sh for comprehensive governance
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - DOCUMENTATION: Focuses on ADR document quality and consistency
+# - IMPLEMENTATION: Validates that ADRs are actually implemented in code
+# - PROGRESS: Tracks implementation progress over time
+# - GOVERNANCE: Ensures architectural decisions are properly documented
+# - CONSISTENCY: Maintains alignment between decisions and implementation
+# - REPORTING: Provides detailed analysis for architectural review
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New ADRs: Add validation for new ADR documents and implementations
+# - Validation Rules: Extend validation logic for new ADR requirements
+# - Progress Tracking: Enhance progress analysis and reporting capabilities
+# - Integration: Add integration with documentation generation systems
+# - Reporting: Modify report formats for new stakeholder requirements
+# - Automation: Add automated ADR synchronization and validation
+#
+# 🚨 IMPORTANT FOR LLMs: This script validates critical architectural
+# documentation. Inconsistencies between ADRs and implementation can indicate
+# architectural drift or incomplete implementation of decisions.
+
 # ADR Implementation File Validation Script
 # Based on compare_adr_progress findings - helps identify and organize implementation files
 

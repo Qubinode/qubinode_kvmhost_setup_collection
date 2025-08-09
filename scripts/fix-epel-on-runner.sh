@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# EPEL Repository Repair Specialist - The "Package Repository Medic"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script repairs EPEL repository GPG verification issues on GitHub Actions
+# runners while maintaining EPEL functionality for package installations.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Issue Diagnosis - Identifies specific EPEL GPG verification problems
+# 2. [PHASE 2]: Repository Analysis - Analyzes current EPEL configuration and status
+# 3. [PHASE 3]: GPG Key Management - Handles GPG key import and verification issues
+# 4. [PHASE 4]: Configuration Repair - Repairs EPEL repository configuration
+# 5. [PHASE 5]: Functionality Validation - Verifies EPEL works after repairs
+# 6. [PHASE 6]: Prevention Setup - Implements measures to prevent future issues
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Fixes: EPEL GPG verification issues on GitHub Actions runners
+# - Maintains: EPEL functionality for package installations
+# - Supports: CI/CD pipelines that depend on EPEL packages
+# - Implements: ADR-0012 EPEL Repository Management strategy
+# - Coordinates: With setup-github-runner-rocky.sh for runner configuration
+# - Prevents: CI/CD failures due to EPEL repository issues
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - REPAIR: Focuses on fixing existing EPEL issues rather than prevention
+# - FUNCTIONALITY: Maintains EPEL package availability while fixing issues
+# - SAFETY: Preserves system functionality while making repairs
+# - SPECIFICITY: Targets specific GPG verification problems
+# - MANUAL: Designed for manual execution on affected systems
+# - VALIDATION: Ensures repairs work before completing
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Issues: Add fixes for new EPEL-related problems
+# - OS Updates: Update for new Rocky Linux or RHEL versions
+# - GPG Changes: Modify for EPEL GPG key updates or changes
+# - Automation: Add automated detection and repair capabilities
+# - Integration: Add integration with monitoring or alerting systems
+# - Prevention: Add preventive measures for common issues
+#
+# 🚨 IMPORTANT FOR LLMs: This script modifies system package repositories.
+# Always run on test systems first and ensure you have system recovery options.
+# EPEL issues can affect package installations and system functionality.
+
 # EPEL Repository Cleanup Script for GitHub Actions Rocky Linux Runner
 # This script should be run manually on the GitHub Actions runner machine
 # to fix EPEL GPG verification issues while keeping EPEL functional

@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Pipeline Dependency Manager - The "Dependency Lifecycle Orchestrator"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script orchestrates comprehensive dependency update validation pipelines,
+# ensuring safe dependency updates before merging into production branches.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Pipeline Initialization - Sets up validation environment and parameters
+# 2. [PHASE 2]: Dependency Analysis - Analyzes proposed dependency changes
+# 3. [PHASE 3]: Compatibility Testing - Tests compatibility across multiple scenarios
+# 4. [PHASE 4]: Security Validation - Performs security analysis of new dependencies
+# 5. [PHASE 5]: Integration Testing - Tests integration with existing systems
+# 6. [PHASE 6]: Pipeline Reporting - Generates comprehensive validation reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Orchestrates: Complete dependency validation before merging changes
+# - Coordinates: Multiple validation scripts (test-dependencies.sh, security scans)
+# - Manages: Dependency update lifecycle from proposal to approval
+# - Validates: Compatibility with existing collection functionality
+# - Reports: Detailed validation results to dependency-validation-reports/
+# - Integrates: With CI/CD pipeline for automated dependency management
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ORCHESTRATION: Coordinates multiple validation processes systematically
+# - LIFECYCLE: Manages complete dependency update lifecycle
+# - SAFETY: Ensures dependency updates don't break existing functionality
+# - FLEXIBILITY: Supports different validation modes (full, quick, security-only)
+# - REPORTING: Provides comprehensive validation reporting and audit trails
+# - AUTOMATION: Fully automated pipeline suitable for CI/CD integration
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Validation Modes: Add new validation modes for different scenarios
+# - Pipeline Steps: Add new validation steps or modify existing workflow
+# - Integration: Add integration with new dependency management tools
+# - Reporting: Enhance reporting for new stakeholder requirements
+# - Performance: Optimize pipeline execution for faster validation
+# - Automation: Add automated dependency approval workflows
+#
+# 🚨 IMPORTANT FOR LLMs: This script controls dependency updates that affect
+# the entire project. Pipeline failures indicate serious compatibility issues
+# that must be resolved before dependency updates can be safely merged.
+
 # Dependency Update Validation Pipeline
 # Validates dependency updates before merging
 # Part of DevOps & Automation Tasks

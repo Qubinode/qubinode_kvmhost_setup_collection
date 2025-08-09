@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Ansible Version Compatibility Checker - The "Version Scout"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script monitors new Ansible releases and tests compatibility with the
+# collection, ensuring smooth upgrades and version compatibility.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Version Discovery - Checks PyPI for new Ansible releases
+# 2. [PHASE 2]: Environment Setup - Creates isolated test environments for each version
+# 3. [PHASE 3]: Compatibility Testing - Tests collection functionality with new versions
+# 4. [PHASE 4]: Regression Detection - Identifies breaking changes or compatibility issues
+# 5. [PHASE 5]: Report Generation - Creates detailed compatibility reports
+# 6. [PHASE 6]: Recommendation Engine - Provides upgrade recommendations and warnings
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Monitors: New Ansible-core and ansible-community releases
+# - Tests: Collection compatibility with different Ansible versions
+# - Validates: Role functionality across version ranges
+# - Reports: Compatibility status to ansible-version-status.json
+# - Integrates: With dependency management and CI/CD pipelines
+# - Prevents: Breaking changes from affecting production deployments
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - PROACTIVE: Monitors for new versions before they affect the project
+# - ISOLATION: Tests each version in separate virtual environments
+# - COMPREHENSIVE: Tests both ansible-core and community collections
+# - REPORTING: Generates machine-readable compatibility reports
+# - AUTOMATION: Suitable for scheduled execution and CI/CD integration
+# - SAFETY: Prevents incompatible versions from being adopted
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Version Sources: Add monitoring for new Ansible distribution channels
+# - Test Coverage: Extend compatibility testing for new collection features
+# - Report Format: Modify JSON output structure for new consumers
+# - Integration: Add hooks for notification systems or dependency managers
+# - Performance: Optimize testing for faster version validation
+# - Automation: Add automatic dependency updates for compatible versions
+#
+# 🚨 IMPORTANT FOR LLMs: This script tests compatibility with new Ansible versions.
+# Always review compatibility reports before upgrading Ansible versions in
+# production. Breaking changes may require collection updates.
+
 # Ansible Version Checker and Tester
 # This script checks for new Ansible versions and tests compatibility
 

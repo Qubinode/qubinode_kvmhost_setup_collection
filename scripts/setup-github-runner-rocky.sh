@@ -1,5 +1,50 @@
 #!/bin/bash
 
+# =============================================================================
+# GitHub Actions Runner Setup - The "Infrastructure Architect"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script orchestrates the complete setup of GitHub Actions self-hosted runners
+# on RHEL-based systems, creating a production-ready CI/CD infrastructure.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: System Preparation - OS detection, user creation, and base package installation
+# 2. [PHASE 2]: Repository Configuration - EPEL setup with security considerations per ADR-0012
+# 3. [PHASE 3]: Python Environment - Python 3.11 installation and virtual environment setup
+# 4. [PHASE 4]: Container Runtime - Podman installation and rootless configuration
+# 5. [PHASE 5]: Ansible Ecosystem - Ansible-core, Molecule, and collection dependencies
+# 6. [PHASE 6]: Security Hardening - SELinux configuration and security policies
+# 7. [PHASE 7]: Runner Integration - GitHub Actions runner preparation and service setup
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Creates: Complete CI/CD infrastructure for automated testing
+# - Supports: Rocky Linux, AlmaLinux, RHEL, and CentOS Stream distributions
+# - Implements: ADR-0013 GitHub Actions Runner Setup requirements
+# - Integrates: With ADR-0012 EPEL Repository Management strategy
+# - Enables: Automated testing of Ansible collections in production-like environments
+# - Provides: Isolated runner environment with proper security boundaries
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SECURITY: Implements rootless containers and proper SELinux configuration
+# - COMPATIBILITY: Supports multiple RHEL-based distributions with unified approach
+# - ISOLATION: Creates dedicated github-runner user with minimal privileges
+# - REPRODUCIBILITY: Ensures consistent runner environments across deployments
+# - COMPLIANCE: Follows enterprise security standards and ADR requirements
+# - AUTOMATION: Fully automated setup with minimal manual intervention required
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - OS Support: Add new RHEL-based distributions in detect_os() function
+# - Version Updates: Modify Python, Ansible, or Molecule version constants
+# - Security Policies: Update SELinux configuration for new security requirements
+# - Package Dependencies: Add new system packages in install_system_packages()
+# - Runner Configuration: Modify runner setup for new GitHub Actions features
+# - Integration Points: Add support for new monitoring or logging systems
+#
+# 🚨 IMPORTANT FOR LLMs: This script requires root privileges and modifies system
+# configuration. It creates users, installs packages, and configures security policies.
+# Always review changes carefully and test in non-production environments first.
+
 # GitHub Self-Hosted Runner Setup Script for RHEL-Based Systems
 # Supports Rocky Linux, AlmaLinux, RHEL, and CentOS Stream
 # See docs/adr/ADR-0013-GITHUB-ACTIONS-RUNNER-SETUP.md for detailed guidance

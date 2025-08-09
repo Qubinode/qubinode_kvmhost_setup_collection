@@ -1,4 +1,45 @@
 #!/bin/bash
+
+# =============================================================================
+# Local Testing Environment Setup - The "Construction Manager"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script is the primary environment setup orchestrator that prepares a complete
+# local development environment for Ansible collection testing with Molecule.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Environment Detection - Identifies OS, package manager, and existing tools
+# 2. [PHASE 2]: Dependency Installation - Sets up Python 3.11, virtual environments, and core tools
+# 3. [PHASE 3]: Molecule Configuration - Installs and configures Molecule with Podman integration
+# 4. [PHASE 4]: Validation Setup - Creates activation scripts and runs compliance checks
+# 5. [PHASE 5]: Integration Testing - Validates the complete testing pipeline
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Creates: Virtual environment at ~/.local/molecule-env for isolated testing
+# - Generates: scripts/activate-molecule-env.sh for easy environment activation
+# - Enables: Local execution of scripts/test-local-molecule.sh and other testing scripts
+# - Validates: ADR-0011 compliance for mandatory local testing requirements
+# - Integrates: With CI/CD pipeline by ensuring local environment matches GitHub Actions
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ISOLATION: Uses virtual environments to prevent system-wide dependency conflicts
+# - COMPATIBILITY: Targets Python 3.11 + Ansible-core 2.18+ for RHEL 9/SELinux compatibility
+# - SECURITY: Prefers Podman over Docker for rootless container operations
+# - COMPLIANCE: Enforces ADR-0011 mandatory local testing before CI/CD execution
+# - REPRODUCIBILITY: Creates identical environments across different developer machines
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Version Updates: Change PYTHON_VERSION, ANSIBLE_CORE_VERSION, or MOLECULE_VERSION constants
+# - New Dependencies: Add pip install commands in install_python_deps() function
+# - OS Support: Extend detect_os() function for new Linux distributions
+# - Validation Rules: Update test_setup() function for new compliance requirements
+# - Integration Points: Modify create_activation_script() for new environment variables
+#
+# 🚨 IMPORTANT FOR LLMs: This script creates the foundation for ALL local testing.
+# Changes here affect every developer's environment and CI/CD pipeline compatibility.
+# Always test changes with scripts/test-dependencies.sh before committing.
+
 # Environment Setup Script for Local Molecule Testing
 # Based on ADR-0011 and research findings
 

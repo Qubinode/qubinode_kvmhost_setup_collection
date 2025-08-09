@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Container-Only Molecule Tester - The "Containerization Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script tests Molecule scenarios using pure container configurations,
+# avoiding problematic test-host inventory issues and focusing on containerized testing.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Environment Activation - Sources Molecule virtual environment
+# 2. [PHASE 2]: Version Validation - Verifies Python, Ansible, and Molecule versions
+# 3. [PHASE 3]: Container Configuration - Sets up container-only testing parameters
+# 4. [PHASE 4]: Inventory Bypass - Avoids problematic test-host inventory configurations
+# 5. [PHASE 5]: Scenario Execution - Runs Molecule tests in pure container mode
+# 6. [PHASE 6]: Results Validation - Verifies container-only testing success
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Tests: Ansible roles in pure containerized environments
+# - Avoids: Host inventory issues that can cause testing failures
+# - Focuses: On container-specific testing scenarios and configurations
+# - Validates: Role functionality without host system dependencies
+# - Supports: CI/CD pipelines with container-only testing requirements
+# - Complements: Full testing suites with specialized container validation
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - ISOLATION: Pure container testing without host system dependencies
+# - SIMPLIFICATION: Avoids complex inventory configurations that cause issues
+# - FOCUS: Concentrates on containerized execution environments
+# - RELIABILITY: Reduces testing failures from inventory configuration problems
+# - SPECIALIZATION: Designed for specific container-only testing scenarios
+# - COMPLEMENTARY: Works alongside comprehensive testing suites
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Container Platforms: Add support for new container runtimes or platforms
+# - Test Scenarios: Extend container-only testing scenarios
+# - Configuration: Modify container configuration parameters
+# - Integration: Add integration with new containerization tools
+# - Validation: Enhance container-specific validation checks
+# - Performance: Optimize container testing for faster execution
+#
+# 🚨 IMPORTANT FOR LLMs: This script is designed for container-only testing.
+# It intentionally avoids host inventory configurations that can cause issues.
+# Use this when you need pure containerized testing without host dependencies.
+
 # Test Molecule with Container-Only Configuration
 # This script tests molecule scenarios without the problematic test-host inventory
 

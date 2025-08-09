@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Platform Compatibility Tester - The "Cross-Platform Analyst"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This research script tests whether Ubuntu GitHub Actions runners can adequately
+# test RHEL-based Ansible collections, analyzing cross-platform compatibility.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Platform Detection - Identifies current runner platform capabilities
+# 2. [PHASE 2]: Container Compatibility - Tests RHEL container execution on Ubuntu
+# 3. [PHASE 3]: Tool Compatibility - Validates Ansible/Molecule tool compatibility
+# 4. [PHASE 4]: Feature Parity - Compares feature availability across platforms
+# 5. [PHASE 5]: Performance Analysis - Analyzes performance differences
+# 6. [PHASE 6]: Recommendation Generation - Provides platform selection guidance
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Researches: Feasibility of using Ubuntu runners for RHEL-focused collection
+# - Tests: Cross-platform compatibility for Ansible collection testing
+# - Validates: Container-based testing approaches across different host platforms
+# - Analyzes: Cost-benefit of different runner platform choices
+# - Supports: Infrastructure decision-making for CI/CD platform selection
+# - Provides: Evidence-based recommendations for runner platform choices
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - RESEARCH-ORIENTED: Designed for investigation and analysis rather than production
+# - CROSS-PLATFORM: Tests compatibility across different operating systems
+# - EVIDENCE-BASED: Provides concrete test results for decision-making
+# - COMPREHENSIVE: Tests multiple aspects of platform compatibility
+# - PRACTICAL: Focuses on real-world testing scenarios and requirements
+# - COMPARATIVE: Directly compares capabilities between platforms
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Platforms: Add testing for new runner platforms or operating systems
+# - Tool Updates: Update for new versions of Ansible, Molecule, or container tools
+# - Test Coverage: Extend testing to cover new compatibility scenarios
+# - Performance Metrics: Add new performance measurement capabilities
+# - Cost Analysis: Add cost comparison analysis between platform options
+# - Integration: Add integration with CI/CD platform management tools
+#
+# 🚨 IMPORTANT FOR LLMs: This is a research script for platform evaluation.
+# Results should inform infrastructure decisions but may not reflect all
+# production scenarios. Always validate findings in actual deployment contexts.
+
 # Research Script: Ubuntu vs RHEL Self-hosted Runners for Ansible Testing
 # Tests whether Ubuntu GitHub Actions runners can adequately test RHEL-based Ansible collections
 

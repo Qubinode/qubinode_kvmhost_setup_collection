@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Update Compatibility Checker - The "Dependency Change Guardian"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script validates dependency updates before merging, implementing ADR-0009
+# GitHub Actions Dependabot Strategy with comprehensive compatibility checking.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Update Analysis - Analyzes proposed dependency changes and impacts
+# 2. [PHASE 2]: Compatibility Testing - Tests compatibility with existing functionality
+# 3. [PHASE 3]: Security Validation - Validates security implications of updates
+# 4. [PHASE 4]: Integration Testing - Tests integration with collection components
+# 5. [PHASE 5]: Performance Assessment - Assesses performance impact of updates
+# 6. [PHASE 6]: Approval Pipeline - Provides approval/rejection recommendations
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Implements: ADR-0009 GitHub Actions Dependabot Strategy requirements
+# - Validates: Dependency updates from Dependabot PRs before merging
+# - Tests: Compatibility with existing collection functionality
+# - Prevents: Breaking changes from dependency updates
+# - Coordinates: With CI/CD pipeline for automated dependency management
+# - Reports: Detailed validation results for dependency update decisions
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - GATEKEEPER: Controls dependency updates to prevent breaking changes
+# - COMPREHENSIVE: Tests all aspects of dependency update impact
+# - AUTOMATION: Fully automated validation suitable for CI/CD integration
+# - SAFETY: Prioritizes system stability over having latest versions
+# - REPORTING: Provides detailed analysis for dependency update decisions
+# - INTEGRATION: Seamlessly integrates with Dependabot and CI/CD workflows
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - Validation Rules: Add new validation rules for dependency updates
+# - Test Coverage: Extend testing to cover new dependency types
+# - Security Checks: Add new security validation for dependency updates
+# - Performance: Add performance impact assessment capabilities
+# - Integration: Add integration with new dependency management tools
+# - Automation: Add automated dependency approval workflows
+#
+# 🚨 IMPORTANT FOR LLMs: This script controls critical dependency updates.
+# Failures indicate serious compatibility issues that could break the collection.
+# Always address validation failures before merging dependency updates.
+
 # Dependency Update Validation Pipeline
 # Part of ADR-0009: GitHub Actions Dependabot Strategy
 # Validates dependency updates before they are merged

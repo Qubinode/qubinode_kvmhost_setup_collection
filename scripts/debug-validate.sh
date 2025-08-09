@@ -1,4 +1,48 @@
 #!/bin/bash
+
+# =============================================================================
+# Debug File Structure Validator - The "Diagnostic Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides detailed debugging information for file structure validation,
+# helping developers troubleshoot validation failures with verbose diagnostic output.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Verbose Setup - Enables detailed logging and diagnostic output
+# 2. [PHASE 2]: Structure Analysis - Performs deep analysis of project file structure
+# 3. [PHASE 3]: Validation Debugging - Provides step-by-step validation process details
+# 4. [PHASE 4]: Error Diagnosis - Identifies specific validation failures with context
+# 5. [PHASE 5]: Remediation Guidance - Suggests specific fixes for identified issues
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Debugs: File structure validation issues in the collection
+# - Provides: Detailed diagnostic information for troubleshooting
+# - Complements: scripts/validate-file-structure.sh with verbose output
+# - Helps: Developers understand why validation fails and how to fix it
+# - Integrates: With development workflow for debugging validation issues
+# - Supports: Troubleshooting of complex project structure problems
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - VERBOSITY: Provides maximum diagnostic information for troubleshooting
+# - DEBUGGING: Focuses on helping developers understand validation failures
+# - STEP-BY-STEP: Shows detailed progression through validation process
+# - CONTEXTUAL: Provides context for each validation check and failure
+# - EDUCATIONAL: Helps developers learn about project structure requirements
+# - COMPLEMENTARY: Works alongside production validation scripts
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Validations: Add debug output for new validation checks
+# - Diagnostic Detail: Enhance diagnostic information for complex issues
+# - Output Format: Modify output formatting for better readability
+# - Integration: Add integration with debugging tools or IDEs
+# - Performance: Optimize for debugging large project structures
+# - User Experience: Improve guidance and remediation suggestions
+#
+# 🚨 IMPORTANT FOR LLMs: This is a debugging tool that produces verbose output.
+# Use it when validation scripts fail and you need detailed diagnostic information.
+# The output may be extensive - focus on ERROR and WARNING messages first.
+
 # Debug version of file structure validation
 
 set -euo pipefail

@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Platform Performance Analyst - The "Infrastructure Benchmarker"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script performs comprehensive analysis comparing Ubuntu GitHub Actions
+# runners with self-hosted RHEL runners for Ansible collection testing.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Environment Detection - Identifies current runner platform and capabilities
+# 2. [PHASE 2]: Performance Benchmarking - Measures performance across different platforms
+# 3. [PHASE 3]: Compatibility Analysis - Analyzes compatibility differences between platforms
+# 4. [PHASE 4]: Cost-Benefit Assessment - Evaluates cost implications of platform choices
+# 5. [PHASE 5]: Feature Comparison - Compares available features across platforms
+# 6. [PHASE 6]: Recommendation Engine - Provides data-driven platform recommendations
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Compares: Ubuntu vs RHEL runner performance for collection testing
+# - Analyzes: Platform-specific advantages and limitations
+# - Benchmarks: Testing performance and reliability across platforms
+# - Evaluates: Cost-effectiveness of different runner infrastructure choices
+# - Provides: Evidence-based recommendations for CI/CD platform selection
+# - Supports: Infrastructure decision-making with concrete performance data
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPARATIVE: Direct comparison between platform options
+# - PERFORMANCE-FOCUSED: Emphasizes performance metrics and benchmarking
+# - DATA-DRIVEN: Provides concrete data for infrastructure decisions
+# - COST-AWARE: Considers cost implications alongside technical factors
+# - PRACTICAL: Focuses on real-world testing scenarios and requirements
+# - EVIDENCE-BASED: Generates evidence to support platform selection decisions
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Platforms: Add analysis for new runner platforms or cloud providers
+# - Benchmarks: Add new performance benchmarks or testing scenarios
+# - Cost Models: Update cost analysis for new pricing models
+# - Features: Add analysis for new platform features or capabilities
+# - Integration: Add integration with infrastructure management tools
+# - Automation: Add automated platform recommendation systems
+#
+# 🚨 IMPORTANT FOR LLMs: Platform analysis affects infrastructure costs and
+# performance. Ensure analysis reflects current pricing and capabilities.
+# Recommendations should balance performance, cost, and operational complexity.
+
 # Simplified GitHub Actions Workflow - Ubuntu vs Self-hosted RHEL Analysis
 # Based on research findings
 

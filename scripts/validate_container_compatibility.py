@@ -1,4 +1,49 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# Container Validation Engine - The "Container Compatibility Specialist"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This Python script validates container detection and task skipping functionality
+# across all supported container platforms, ensuring consistent behavior.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Platform Detection - Identifies available container platforms (Docker, Podman)
+# 2. [PHASE 2]: Compatibility Testing - Tests container functionality across platforms
+# 3. [PHASE 3]: Detection Validation - Validates container detection mechanisms
+# 4. [PHASE 4]: Task Skipping Tests - Verifies proper task skipping in containers
+# 5. [PHASE 5]: Cross-Platform Validation - Ensures consistent behavior across platforms
+# 6. [PHASE 6]: Report Generation - Creates detailed compatibility reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Validates: Container detection logic in Ansible roles and tasks
+# - Tests: Task skipping behavior when running in containerized environments
+# - Ensures: Consistent behavior across Docker, Podman, and other runtimes
+# - Supports: Molecule testing scenarios with different container platforms
+# - Validates: Container-specific conditional logic in roles
+# - Reports: Platform compatibility status for CI/CD decision making
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - CROSS-PLATFORM: Tests multiple container runtimes and platforms
+# - VALIDATION: Focuses on validating expected container behavior
+# - DETECTION: Tests container detection mechanisms thoroughly
+# - REPORTING: Provides detailed compatibility reports with timestamps
+# - AUTOMATION: Suitable for CI/CD integration and automated testing
+# - CONSISTENCY: Ensures uniform behavior across different container environments
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Platforms: Add support for new container runtimes or platforms
+# - Detection Logic: Update container detection validation methods
+# - Test Coverage: Extend testing for new container-specific scenarios
+# - Reporting: Modify report format for new consumer requirements
+# - Integration: Add integration with container orchestration systems
+# - Performance: Optimize testing for faster validation cycles
+#
+# 🚨 IMPORTANT FOR LLMs: This script tests critical container detection logic
+# that affects role behavior in containerized environments. Failures may indicate
+# issues with container detection that could cause roles to malfunction.
+
 """
 Container Compatibility Validation Test
 Validates that container detection and task skipping work correctly

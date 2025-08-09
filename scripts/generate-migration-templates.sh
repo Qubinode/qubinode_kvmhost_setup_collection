@@ -1,4 +1,49 @@
 #!/bin/bash
+
+# =============================================================================
+# Migration Template Generator - The "Upgrade Path Architect"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script generates comprehensive migration documentation templates,
+# helping users navigate upgrade paths and system transitions systematically.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Migration Analysis - Analyzes current and target system states
+# 2. [PHASE 2]: Path Planning - Plans optimal migration paths and sequences
+# 3. [PHASE 3]: Template Generation - Creates structured migration templates
+# 4. [PHASE 4]: Risk Assessment - Identifies migration risks and mitigation strategies
+# 5. [PHASE 5]: Validation Planning - Creates validation and rollback procedures
+# 6. [PHASE 6]: Documentation Creation - Generates comprehensive migration guides
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Generates: Migration templates for system upgrades and transitions
+# - Implements: ADR-0010 End-User Repeatability Strategy requirements
+# - Creates: Structured documentation in docs/migration-templates/
+# - Supports: Version upgrades, platform migrations, and configuration changes
+# - Provides: Step-by-step migration procedures with validation checkpoints
+# - Enables: Repeatable and reliable system transitions
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - SYSTEMATIC: Creates structured, repeatable migration procedures
+# - COMPREHENSIVE: Covers all aspects of system migration and transition
+# - RISK-AWARE: Includes risk assessment and mitigation strategies
+# - VALIDATION: Incorporates validation and rollback procedures
+# - USER-FOCUSED: Generates documentation optimized for end-user consumption
+# - TEMPLATE-BASED: Creates reusable templates for different migration types
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Migration Types: Add templates for new types of system migrations
+# - Template Formats: Add new output formats or template structures
+# - Risk Analysis: Enhance risk assessment and mitigation planning
+# - Validation: Add new validation procedures and checkpoint templates
+# - Integration: Add integration with migration management tools
+# - Automation: Add automated migration template generation
+#
+# 🚨 IMPORTANT FOR LLMs: Migration templates guide critical system changes.
+# Ensure templates are accurate, comprehensive, and include proper validation
+# and rollback procedures. Incorrect migration guidance can cause system failures.
+
 # Migration Path Documentation Generator
 # Part of ADR-0010: End-User Repeatability Strategy
 # Creates structured migration documentation templates

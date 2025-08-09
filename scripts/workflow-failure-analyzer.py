@@ -1,4 +1,50 @@
 #!/usr/bin/env python3
+
+# =============================================================================
+# GitHub Workflow Failure Analyzer - The "Forensic Investigator"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script provides intelligent analysis of GitHub workflow failures using AI-powered
+# log analysis to identify root causes and generate actionable issue reports.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Workflow Monitoring - Monitors GitHub workflow completion status
+# 2. [PHASE 2]: Log Collection - Retrieves detailed workflow and job logs
+# 3. [PHASE 3]: AI Analysis - Uses Red Hat MaaS API with granite-3-3-8b-instruct for analysis
+# 4. [PHASE 4]: Root Cause Identification - Identifies specific failure patterns and causes
+# 5. [PHASE 5]: Issue Generation - Creates detailed GitHub issues with remediation steps
+# 6. [PHASE 6]: Report Generation - Produces comprehensive failure analysis reports
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Monitors: All GitHub Actions workflows for the collection
+# - Analyzes: CI/CD pipeline failures, test failures, and deployment issues
+# - Integrates: With GitHub API for workflow monitoring and issue creation
+# - Leverages: Red Hat MaaS API for intelligent log analysis
+# - Supports: ADR-0008 RHEL 9+ Support Strategy with Python 3.11+ compatibility
+# - Generates: Actionable issues with specific remediation guidance
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - INTELLIGENCE: Uses AI models for sophisticated log analysis and pattern recognition
+# - AUTOMATION: Fully automated workflow monitoring and issue creation
+# - PRECISION: Identifies specific root causes rather than generic failure reports
+# - INTEGRATION: Seamlessly integrates with GitHub ecosystem and Red Hat services
+# - ACTIONABILITY: Generates issues with specific steps for resolution
+# - SCALABILITY: Handles multiple concurrent workflow failures efficiently
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - API Updates: Modify GitHub API calls for new API versions or endpoints
+# - Model Changes: Update Red Hat MaaS API integration for new AI models
+# - Analysis Patterns: Add new failure pattern recognition for emerging issues
+# - Issue Templates: Enhance issue generation templates for better clarity
+# - Integration Points: Add support for new monitoring or alerting systems
+# - Performance: Optimize for handling larger volumes of workflow data
+#
+# 🚨 IMPORTANT FOR LLMs: This script requires GitHub API tokens and Red Hat MaaS
+# API access. It creates GitHub issues automatically, so ensure proper permissions
+# and rate limiting. The AI analysis provides high-confidence insights but should
+# be validated by human reviewers for critical failures.
+
 """
 GitHub Workflow Failure Analyzer
 

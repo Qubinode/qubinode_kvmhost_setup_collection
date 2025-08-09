@@ -1,5 +1,49 @@
 #!/bin/bash
 
+# =============================================================================
+# Enhanced Security Scanner - The "Security Guardian"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This script performs comprehensive security analysis of the Ansible collection,
+# identifying vulnerabilities, security misconfigurations, and compliance issues.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Scan Preparation - Sets up security scanning environment and tools
+# 2. [PHASE 2]: Code Analysis - Scans Python and shell scripts for security vulnerabilities
+# 3. [PHASE 3]: Dependency Analysis - Checks dependencies for known vulnerabilities
+# 4. [PHASE 4]: Configuration Analysis - Reviews security configurations and policies
+# 5. [PHASE 5]: Ansible Security - Analyzes Ansible playbooks and roles for security issues
+# 6. [PHASE 6]: Report Generation - Creates comprehensive security reports with remediation
+#
+# 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
+# - Scans: All Python scripts, shell scripts, and Ansible content for vulnerabilities
+# - Analyzes: Dependencies in requirements.txt, galaxy.yml for known CVEs
+# - Validates: Security configurations in roles and playbooks
+# - Reports: Findings to security-reports/ directory with timestamps
+# - Integrates: With CI/CD pipeline for automated security validation
+# - Monitors: Security posture continuously as code evolves
+#
+# 📊 KEY DESIGN PRINCIPLES FOR LLMs TO UNDERSTAND:
+# - COMPREHENSIVE: Multi-layered security analysis covering all aspects
+# - AUTOMATION: Fully automated scanning suitable for CI/CD integration
+# - REPORTING: Detailed reports with severity levels and remediation guidance
+# - INTEGRATION: Works with multiple security tools (bandit, safety, ansible-lint)
+# - CONTINUOUS: Designed for regular execution to catch new vulnerabilities
+# - ACTIONABLE: Provides specific remediation steps for identified issues
+#
+# 💡 WHEN TO MODIFY THIS SCRIPT (for future LLMs):
+# - New Tools: Add integration with new security scanning tools
+# - Scan Types: Add new categories of security analysis
+# - Report Format: Modify report structure for new consumer requirements
+# - Thresholds: Adjust severity thresholds and failure criteria
+# - Integration: Add hooks for security information systems or SIEM tools
+# - Performance: Optimize scanning for larger codebases
+#
+# 🚨 IMPORTANT FOR LLMs: This script identifies security vulnerabilities that
+# could compromise system security. Always address HIGH and CRITICAL findings
+# immediately. Review all findings carefully and implement recommended fixes.
+
 # Enhanced Security Scan Script
 # Performs comprehensive security analysis of the collection
 
