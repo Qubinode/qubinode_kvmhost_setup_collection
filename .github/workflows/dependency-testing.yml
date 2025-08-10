@@ -124,25 +124,15 @@ jobs:
           echo "test-scope=${TEST_SCOPE}" >> $GITHUB_OUTPUT
           
           # Python dependency matrix
-          PYTHON_MATRIX='{"include":[
-            {"python-version":"3.11","name":"current"},
-            {"python-version":"3.12","name":"next"}
-          ]}'
+          PYTHON_MATRIX='{"include":[{"python-version":"3.11","name":"current"},{"python-version":"3.12","name":"next"}]}'
           echo "python-matrix=${PYTHON_MATRIX}" >> $GITHUB_OUTPUT
           
-          # Ansible dependency matrix  
-          ANSIBLE_MATRIX='{"include":[
-            {"ansible-core":"2.17","name":"current"},
-            {"ansible-core":"2.18","name":"next"}
-          ]}'
+          # Ansible dependency matrix
+          ANSIBLE_MATRIX='{"include":[{"ansible-core":"2.17","name":"current"},{"ansible-core":"2.18","name":"next"}]}'
           echo "ansible-matrix=${ANSIBLE_MATRIX}" >> $GITHUB_OUTPUT
           
           # Docker image matrix for Molecule
-          DOCKER_MATRIX='{"include":[
-            {"image":"registry.redhat.io/ubi9-init:9.6-1751962289","name":"rhel-9"},
-            {"image":"docker.io/rockylinux/rockylinux:9-ubi-init","name":"rocky-9"},
-            {"image":"docker.io/almalinux/9-init:9.6-20250712","name":"alma-9"}
-          ]}'
+          DOCKER_MATRIX='{"include":[{"image":"registry.redhat.io/ubi9-init:9.6-1751962289","name":"rhel-9"},{"image":"docker.io/rockylinux/rockylinux:9-ubi-init","name":"rocky-9"},{"image":"docker.io/almalinux/9-init:9.6-20250712","name":"alma-9"}]}'
           echo "docker-matrix=${DOCKER_MATRIX}" >> $GITHUB_OUTPUT
 
   python-dependency-test:
