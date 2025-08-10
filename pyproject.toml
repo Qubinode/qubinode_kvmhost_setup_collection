@@ -26,7 +26,7 @@ classifiers = [
 keywords = ["ansible", "kvm", "virtualization", "rhel", "rocky", "centos"]
 requires-python = ">=3.11"
 dependencies = [
-    "ansible-core>=2.18.0,<2.19.0",
+    "ansible-core>=2.18.0,<2.20.0",
     "ansible-lint>=6.0.0",
     "molecule>=25.6.0",
     "molecule-podman",
