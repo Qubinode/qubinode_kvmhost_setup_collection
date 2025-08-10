@@ -1,4 +1,6 @@
 version: 2
+# Note: Ansible collections are monitored by .github/workflows/ansible-collection-updates.yml
+# since Dependabot doesn't natively support Ansible Galaxy dependencies
 updates:
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
@@ -53,7 +55,7 @@ updates:
       - "dependencies"
       - "python"
 
-  # Ansible Galaxy dependencies
+  # Git submodules (for any git-based dependencies)
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
@@ -67,4 +69,4 @@ updates:
       include: "scope"
     labels:
       - "dependencies"
-      - "ansible"
+      - "git-submodules"

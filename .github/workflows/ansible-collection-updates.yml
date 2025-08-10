@@ -1,0 +1,155 @@
+name: Ansible Collection Updates
+
+# =============================================================================
+# Ansible Collection Update Automation - The "Collection Updater"
+# =============================================================================
+#
+# 🎯 PURPOSE FOR LLMs:
+# This workflow automatically checks for and creates PRs for Ansible collection
+# updates, filling the gap where Dependabot doesn't support Ansible Galaxy.
+#
+# 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
+# 1. [PHASE 1]: Scheduled Check - Runs weekly to check for collection updates
+# 2. [PHASE 2]: Version Comparison - Compares current vs latest Galaxy versions
+# 3. [PHASE 3]: PR Creation - Creates automated PRs for available updates
+# 4. [PHASE 4]: Integration - Integrates with existing automation workflows
+# 5. [PHASE 5]: Notification - Notifies maintainers of available updates
+# 6. [PHASE 6]: Validation - Ensures updates don't break existing functionality
+
+on:
+  schedule:
+    # Run every Friday at 10:00 AM ET (after Dependabot week)
+    - cron: '0 14 * * 5'  # 14:00 UTC = 10:00 AM ET
+  workflow_dispatch:
+    inputs:
+      create_pr:
+        description: 'Create PR if updates are available'
+        required: false
+        default: true
+        type: boolean
+      force_check:
+        description: 'Force check even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-ansible-updates:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install required tools
+        run: |
+          echo "🔧 Installing required tools for Ansible collection checking..."
+
+          # Install jq (usually available in Ubuntu runners)
+          sudo apt-get update && sudo apt-get install -y jq curl
+
+          # Install yq from GitHub releases (more reliable than package managers)
+          echo "📥 Installing yq from GitHub releases..."
+          YQ_VERSION=$(curl -s https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r '.tag_name')
+          echo "Installing yq version: $YQ_VERSION"
+
+          sudo wget -qO /usr/local/bin/yq \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          sudo chmod +x /usr/local/bin/yq
+
+          # Verify installations
+          echo "✅ Tool versions:"
+          yq --version
+          jq --version
+          curl --version
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for Ansible collection updates
+        id: check_updates
+        run: |
+          echo "🔍 Checking for Ansible collection updates..."
+          
+          # Run the update checker
+          if ./scripts/check-ansible-updates.sh; then
+            echo "updates_available=false" >> $GITHUB_OUTPUT
+            echo "✅ All collections are up to date"
+          else
+            echo "updates_available=true" >> $GITHUB_OUTPUT
+            echo "🔄 Updates are available"
+          fi
+
+      - name: Create update PR
+        if: steps.check_updates.outputs.updates_available == 'true' && (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
+        run: |
+          echo "📝 Creating update PR..."
+          ./scripts/check-ansible-updates.sh --create-pr
+
+      - name: Create issue if PR creation fails
+        if: failure() && steps.check_updates.outputs.updates_available == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🔄 Ansible Collection Updates Available';
+            const body = `## Ansible Collection Updates Available
+            
+            The automated Ansible collection update check found available updates, but failed to create a PR automatically.
+            
+            **Action Required:**
+            1. Run the update checker locally: \`./scripts/check-ansible-updates.sh\`
+            2. Review the available updates
+            3. Create a manual PR with: \`./scripts/check-ansible-updates.sh --create-pr\`
+            
+            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            This issue was created automatically by the Ansible Collection Updates workflow.`;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['dependencies', 'ansible', 'automation']
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 📊 Ansible Collection Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ steps.check_updates.outputs.updates_available }}" == "true" ]]; then
+            echo "🔄 **Updates Available**: Ansible collections have updates available" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Review the created PR for collection updates" >> $GITHUB_STEP_SUMMARY
+            echo "- Test the updates in a development environment" >> $GITHUB_STEP_SUMMARY
+            echo "- Merge the PR to update collections" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **All Up to Date**: All Ansible collections are current" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No action required - all collections are using the latest versions." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Checked Files:**" >> $GITHUB_STEP_SUMMARY
+          echo "- \`requirements.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`roles/kvmhost_setup/collection/requirements.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Schedule**: This workflow runs every Friday at 10:00 AM ET" >> $GITHUB_STEP_SUMMARY
