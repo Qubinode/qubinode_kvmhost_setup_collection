@@ -6,6 +6,9 @@ kvmhost_pip_packages:
   - openshift # OpenShift CLI
 
 # Remote user configuration for XRDP
+# WARNING: Change these default values in production!
 xrdp_remote_user: remoteuser
-xrdp_remote_user_password: changeme
+# SECURITY: Override this variable in your inventory or group_vars
+# Example: xrdp_remote_user_password: "{{ vault_xrdp_password }}"
+xrdp_remote_user_password: "{{ xrdp_remote_user_password | default('CHANGE_ME_IN_PRODUCTION') }}"
 configure_bridge: false
