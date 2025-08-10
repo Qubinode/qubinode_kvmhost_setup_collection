@@ -4,7 +4,7 @@ ansible-core==2.18.7
 ansible-lint==25.6.1
 anyio==4.9.0
 attrs==25.3.0
-Authlib==1.6.0
+Authlib==1.6.1
 bandit==1.8.6
 black==25.1.0
 bracex==2.6
