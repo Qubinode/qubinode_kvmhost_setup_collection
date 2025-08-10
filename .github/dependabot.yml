@@ -12,9 +12,10 @@ updates:
       timezone: "America/New_York"
     open-pull-requests-limit: 5
     reviewers:
-      - "qubinode/maintainers"
+      - "tosin2013"
+      - "flyemsafe"
     assignees:
-      - "qubinode/maintainers"
+      - "tosin2013"
     commit-message:
       prefix: "ci"
       include: "scope"
