@@ -112,7 +112,7 @@ Reports are generated in the `security-reports/` directory:
 
 2. **Weekly security review**: Run comprehensive scan
    ```bash
-   ./scripts/enhanced-dependency-scanner.sh --format json --output-dir ./security-reports/
+   ./scripts/enhanced-dependency-scanner.sh --format json --report-dir ./security-reports/
    ```
 
 3. **Before releases**: Full security audit
