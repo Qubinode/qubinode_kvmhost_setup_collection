@@ -28,14 +28,22 @@ jobs:
       - name: Get tag
         id: tag
         run: |
-          if [ "${{ github.event_name }}" = "workflow_call" ]; then
+          echo "Event name: ${{ github.event_name }}"
+          echo "Inputs tag: ${{ inputs.tag }}"
+          echo "GITHUB_REF: $GITHUB_REF"
+
+          if [ "${{ github.event_name }}" = "workflow_call" ] && [ -n "${{ inputs.tag }}" ]; then
             # Use tag from workflow_call input
             TAG="${{ inputs.tag }}"
             echo "Using workflow_call tag: $TAG"
-          else
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             # Extract tag from push event
             TAG=${GITHUB_REF#refs/tags/}
             echo "Using push event tag: $TAG"
+          else
+            echo "❌ Unable to determine tag from event or inputs"
+            echo "Event: ${{ github.event_name }}, GITHUB_REF: $GITHUB_REF, inputs.tag: ${{ inputs.tag }}"
+            exit 1
           fi
 
           # Strip 'v' prefix if present
@@ -81,13 +89,13 @@ jobs:
           grep 'version:' build/src/galaxy.yml
 
           # Update galaxy.yml version in the build directory (this is what gets built)
-          sed -i "s/version: \"[^\"]*\"/version: \"$VERSION_NUMBER\"/" build/src/galaxy.yml
+          sed -i "s|version: \"[^\"]*\"|version: \"$VERSION_NUMBER\"|" build/src/galaxy.yml
 
           echo "✅ Updated build/src/galaxy.yml version:"
           grep 'version:' build/src/galaxy.yml
 
           # Also update the root galaxy.yml for consistency
-          sed -i "s/version: \"[^\"]*\"/version: \"$VERSION_NUMBER\"/" galaxy.yml
+          sed -i "s|version: \"[^\"]*\"|version: \"$VERSION_NUMBER\"|" galaxy.yml
 
           # Verify the change was applied correctly
           if grep -q "version: \"$VERSION_NUMBER\"" build/src/galaxy.yml; then
