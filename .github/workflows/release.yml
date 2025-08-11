@@ -40,6 +40,17 @@ jobs:
           pip install --upgrade ansible
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      - name: Copy files and directories to source
+        run: |
+          ls -lath .
+          mkdir -p build/src
+          cp $files build/src
+          cp -rf $directories build/src
+          mkdir -p release/
+        env:
+          files: README.md LICENSE ansible.cfg galaxy.yml
+          directories: inventories roles meta
+
       - name: Sync galaxy.yml version with release tag
         run: |
           echo "🔄 Synchronizing galaxy.yml version with release tag..."
@@ -48,17 +59,20 @@ jobs:
           # Remove 'v' prefix if present
           VERSION_NUMBER=$(echo "$RELEASE_VERSION" | sed 's/^v//')
 
-          echo "📋 Current galaxy.yml version:"
-          grep 'version:' galaxy.yml
+          echo "📋 Current build/src/galaxy.yml version:"
+          grep 'version:' build/src/galaxy.yml
 
-          # Update galaxy.yml version to match the release tag
+          # Update galaxy.yml version in the build directory (this is what gets built)
+          sed -i "s/version: \"[^\"]*\"/version: \"$VERSION_NUMBER\"/" build/src/galaxy.yml
+
+          echo "✅ Updated build/src/galaxy.yml version:"
+          grep 'version:' build/src/galaxy.yml
+
+          # Also update the root galaxy.yml for consistency
           sed -i "s/version: \"[^\"]*\"/version: \"$VERSION_NUMBER\"/" galaxy.yml
 
-          echo "✅ Updated galaxy.yml version:"
-          grep 'version:' galaxy.yml
-
           # Verify the change was applied correctly
-          if grep -q "version: \"$VERSION_NUMBER\"" galaxy.yml; then
+          if grep -q "version: \"$VERSION_NUMBER\"" build/src/galaxy.yml; then
             echo "✅ Version synchronization successful: $VERSION_NUMBER"
           else
             echo "❌ Version synchronization failed!"
@@ -77,17 +91,6 @@ jobs:
           else
             echo "ℹ️ galaxy.yml version already synchronized"
           fi
-
-      - name: Copy files and directories to source
-        run: |
-          ls -lath .
-          mkdir -p build/src
-          cp $files build/src
-          cp -rf $directories build/src
-          mkdir -p release/
-        env:
-          files: README.md LICENSE ansible.cfg galaxy.yml
-          directories: inventories roles meta
 
       - name: Build Ansible Collection
         run: ansible-galaxy collection build build/src --force
