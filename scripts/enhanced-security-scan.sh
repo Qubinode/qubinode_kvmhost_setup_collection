@@ -47,7 +47,8 @@
 # Enhanced Security Scan Script
 # Performs comprehensive security analysis of the collection
 
-set -euo pipefail
+# Use pipefail but don't exit on errors (let script handle them gracefully)
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -155,15 +156,17 @@ check_file_permissions() {
     
     # Check for world-writable files
     WORLD_WRITABLE=$(find "$PROJECT_ROOT" -type f -perm -002 2>/dev/null | grep -v ".git" | wc -l)
+    WORLD_WRITABLE=${WORLD_WRITABLE:-0}  # Default to 0 if empty
     if [[ $WORLD_WRITABLE -gt 0 ]]; then
         log_warning "Found $WORLD_WRITABLE world-writable files"
         ((WARNINGS_FOUND++))
     else
         log_success "No world-writable files found"
     fi
-    
+
     # Check for executable scripts
     EXECUTABLE_COUNT=$(find "$PROJECT_ROOT/scripts" -type f -executable 2>/dev/null | wc -l)
+    EXECUTABLE_COUNT=${EXECUTABLE_COUNT:-0}  # Default to 0 if empty
     log_info "Found $EXECUTABLE_COUNT executable scripts"
 }
 
