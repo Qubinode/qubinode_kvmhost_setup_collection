@@ -9,6 +9,12 @@ on:
         description: 'Release tag (e.g., v0.9.2)'
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.9.2)'
+        required: true
+        type: string
 
 permissions:
   contents: write  # Required to create releases and access repository content
@@ -33,9 +39,9 @@ jobs:
           echo "GITHUB_REF: $GITHUB_REF"
 
           if [ -n "${{ inputs.tag }}" ]; then
-            # Use tag from workflow_call input (inputs.tag is only available in workflow_call)
+            # Use tag from workflow_call or workflow_dispatch input
             TAG="${{ inputs.tag }}"
-            echo "Using workflow_call tag: $TAG"
+            echo "Using input tag: $TAG"
           elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             # Extract tag from push event
             TAG=${GITHUB_REF#refs/tags/}
