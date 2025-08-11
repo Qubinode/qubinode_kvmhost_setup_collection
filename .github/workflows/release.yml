@@ -3,6 +3,12 @@ on:
   push:
     tags:
       - v*
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.9.2)'
+        required: true
+        type: string
 
 permissions:
   contents: write  # Required to create releases and access repository content
@@ -21,10 +27,22 @@ jobs:
 
       - name: Get tag
         id: tag
-        uses: dawidd6/action-get-tag@v1
-        with:
-          # Optionally strip `v` prefix
-          strip_v: true
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_call" ]; then
+            # Use tag from workflow_call input
+            TAG="${{ inputs.tag }}"
+            echo "Using workflow_call tag: $TAG"
+          else
+            # Extract tag from push event
+            TAG=${GITHUB_REF#refs/tags/}
+            echo "Using push event tag: $TAG"
+          fi
+
+          # Strip 'v' prefix if present
+          TAG_STRIPPED=$(echo "$TAG" | sed 's/^v//')
+
+          echo "tag=$TAG_STRIPPED" >> $GITHUB_OUTPUT
+          echo "full_tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Use tag
         run: echo ${{steps.tag.outputs.tag}}

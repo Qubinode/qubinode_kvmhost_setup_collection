@@ -200,9 +200,14 @@ jobs:
           
           git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
           git push origin "v$NEW_VERSION"
-          
+
           echo "✅ Release tag v$NEW_VERSION created and pushed"
-          echo "🚀 Automated release workflow will now deploy to Galaxy"
+          echo "🚀 Triggering release workflow..."
+
+      - name: Trigger release workflow
+        uses: ./.github/workflows/release.yml
+        with:
+          tag: "v${{ needs.validate-inputs.outputs.version }}"
 
   dry-run-summary:
     needs: [validate-inputs, pre-release-validation]
