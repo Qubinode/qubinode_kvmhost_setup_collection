@@ -47,6 +47,10 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write  # Required to push commits and create releases
+  actions: read    # Required to read workflow status
+
 env:
   PYTHON_VERSION: "3.11"
 
