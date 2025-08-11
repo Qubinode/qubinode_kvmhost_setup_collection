@@ -182,17 +182,27 @@ jobs:
           UPDATE_TYPE="${{ needs.check-dependency-update.outputs.update_type }}"
           
           # Create tag message based on update type
-          case "$UPDATE_TYPE" in
-            "security")
-              TAG_MESSAGE="v$NEW_VERSION: Automated security update"$'\n\n'"Security dependency updates applied and tested."$'\n'"All vulnerability checks passed."$'\n'"Automated release triggered by successful CI/CD pipeline."
-              ;;
-            "ansible-module")
-              TAG_MESSAGE="v$NEW_VERSION: Automated Ansible module update"$'\n\n'"Ansible modules and collections updated to latest versions."$'\n'"All ansible-test validations passed."$'\n'"Automated release triggered by successful CI/CD pipeline."
-              ;;
-            *)
-              TAG_MESSAGE="v$NEW_VERSION: Automated dependency update"$'\n\n'"Dependencies updated to latest stable versions."$'\n'"All tests passed successfully."$'\n'"Automated release triggered by successful CI/CD pipeline."
-              ;;
-          esac
+          echo "Creating tag message for $UPDATE_TYPE update..."
+
+          if [ "$UPDATE_TYPE" = "security" ]; then
+            TAG_MESSAGE="v$NEW_VERSION: Automated security update
+
+Security dependency updates applied and tested.
+All vulnerability checks passed.
+Automated release triggered by successful CI/CD pipeline."
+          elif [ "$UPDATE_TYPE" = "ansible-module" ]; then
+            TAG_MESSAGE="v$NEW_VERSION: Automated Ansible module update
+
+Ansible modules and collections updated to latest versions.
+All ansible-test validations passed.
+Automated release triggered by successful CI/CD pipeline."
+          else
+            TAG_MESSAGE="v$NEW_VERSION: Automated dependency update
+
+Dependencies updated to latest stable versions.
+All tests passed successfully.
+Automated release triggered by successful CI/CD pipeline."
+          fi
           
           # Create and push tag
           git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
