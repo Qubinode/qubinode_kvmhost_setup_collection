@@ -118,6 +118,7 @@ jobs:
             git config --local user.name "GitHub Action"
             git add galaxy.yml
             git commit -m "chore: sync galaxy.yml version to $VERSION_NUMBER for release $RELEASE_VERSION"
+            git pull --rebase origin main || true
             git push
             echo "✅ Version synchronization committed to repository"
           else
