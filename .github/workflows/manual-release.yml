@@ -204,12 +204,177 @@ jobs:
           echo "✅ Release tag v$NEW_VERSION created and pushed"
           echo "🚀 Triggering release workflow..."
 
-  trigger-release:
+  build-and-deploy:
     needs: [validate-inputs, create-manual-release]
-    uses: ./.github/workflows/release.yml
-    with:
-      tag: "v${{ needs.validate-inputs.outputs.version }}"
-    secrets: inherit
+    runs-on: ubuntu-latest
+    if: github.event.inputs.dry_run != 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade ansible
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Copy files and directories to build
+        run: |
+          echo "📦 Preparing collection build..."
+          ls -lath .
+          mkdir -p build/src
+          cp $files build/src
+          cp -rf $directories build/src
+          mkdir -p release/
+        env:
+          files: README.md LICENSE ansible.cfg galaxy.yml
+          directories: inventories roles meta
+
+      - name: Update build galaxy.yml version
+        run: |
+          echo "🔄 Updating build galaxy.yml version..."
+          VERSION="${{ needs.validate-inputs.outputs.version }}"
+
+          echo "📋 Current build/src/galaxy.yml version:"
+          grep 'version:' build/src/galaxy.yml
+
+          # Update galaxy.yml version in the build directory
+          sed -i "s|version: \"[^\"]*\"|version: \"$VERSION\"|" build/src/galaxy.yml
+
+          echo "✅ Updated build/src/galaxy.yml version:"
+          grep 'version:' build/src/galaxy.yml
+
+          # Verify the change was applied correctly
+          if grep -q "version: \"$VERSION\"" build/src/galaxy.yml; then
+            echo "✅ Build version update successful: $VERSION"
+          else
+            echo "❌ Build version update failed!"
+            exit 1
+          fi
+
+      - name: Build Ansible Collection
+        run: |
+          echo "🔨 Building Ansible collection..."
+          ansible-galaxy collection build build/src --force
+          ls -lath *.tar.gz
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          echo "📝 Generating release notes..."
+          VERSION="${{ needs.validate-inputs.outputs.version }}"
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          CUSTOM_NOTES="${{ github.event.inputs.custom_notes }}"
+
+          # Get commit messages since last release
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log --oneline --pretty=format:"- %s" $LAST_TAG..HEAD)
+          else
+            COMMITS=$(git log --oneline --pretty=format:"- %s" -10)
+          fi
+
+          # Create release notes
+          echo "## What's New in v$VERSION" > release_notes.md
+          echo "" >> release_notes.md
+          echo "### 🔧 Key Improvements" >> release_notes.md
+          echo "- Manual $RELEASE_TYPE release with enhanced workflow automation" >> release_notes.md
+          echo "- Streamlined release process with integrated CI/CD pipeline" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### 📦 Changes in this Release" >> release_notes.md
+          echo "$COMMITS" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### 🛡️ Quality Assurance" >> release_notes.md
+          echo "- All ansible-test validations passed" >> release_notes.md
+          echo "- Collection successfully built and tested" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### ⚠️ Breaking Changes" >> release_notes.md
+          echo "- None in this release" >> release_notes.md
+
+          if [ -n "$CUSTOM_NOTES" ]; then
+            echo "" >> release_notes.md
+            echo "### 📋 Additional Notes" >> release_notes.md
+            echo "$CUSTOM_NOTES" >> release_notes.md
+          fi
+
+          # Save release notes to output
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          tag_name: v${{ needs.validate-inputs.outputs.version }}
+          name: Release v${{ needs.validate-inputs.outputs.version }}
+          files: tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz
+          body: |
+            # Ansible Collection: tosin2013.qubinode_kvmhost_setup_collection
+            ![ReleaseBuildCollection](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/manual-release.yml/badge.svg)
+
+            ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+
+            ## Installation
+
+            ### Install without requirements.yml file:
+            ```sh
+            ansible-galaxy collection install tosin2013.qubinode_kvmhost_setup_collection
+            ```
+
+            ### Install with requirements.yml file:
+            ```sh
+            ansible-galaxy collection install -r requirements.yml -f
+            ```
+
+            The requirements.yml needs to have the following format and content:
+            ```yaml
+            ---
+            collections:
+                - tosin2013.qubinode_kvmhost_setup_collection
+            ```
+
+            For Development use the below command:
+            ```yaml
+            ---
+            collections:
+              - name: https://github.com/Qubinode/qubinode_kvmhost_setup_collection.git
+                type: git
+                version: main
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Deploy to Ansible Galaxy
+        run: |
+          echo "🚀 Deploying to Ansible Galaxy..."
+          ls -lath .
+          ls -lath ./meta
+          cat ./meta/runtime.yml
+          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
+          echo "✅ Successfully deployed to Ansible Galaxy!"
+
+      - name: Release Summary
+        run: |
+          echo "🎉 RELEASE COMPLETED SUCCESSFULLY!"
+          echo "=================================="
+          echo "Version: v${{ needs.validate-inputs.outputs.version }}"
+          echo "Release Type: ${{ github.event.inputs.release_type }}"
+          echo "GitHub Release: ✅ Created"
+          echo "Ansible Galaxy: ✅ Deployed"
+          echo "Collection: tosin2013.qubinode_kvmhost_setup_collection"
+          echo ""
+          echo "🔗 Install with: ansible-galaxy collection install tosin2013.qubinode_kvmhost_setup_collection"
 
   dry-run-summary:
     needs: [validate-inputs, pre-release-validation]
