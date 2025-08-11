@@ -40,6 +40,44 @@ jobs:
           pip install --upgrade ansible
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      - name: Sync galaxy.yml version with release tag
+        run: |
+          echo "🔄 Synchronizing galaxy.yml version with release tag..."
+          RELEASE_VERSION="${{ steps.tag.outputs.tag }}"
+
+          # Remove 'v' prefix if present
+          VERSION_NUMBER=$(echo "$RELEASE_VERSION" | sed 's/^v//')
+
+          echo "📋 Current galaxy.yml version:"
+          grep 'version:' galaxy.yml
+
+          # Update galaxy.yml version to match the release tag
+          sed -i "s/version: \"[^\"]*\"/version: \"$VERSION_NUMBER\"/" galaxy.yml
+
+          echo "✅ Updated galaxy.yml version:"
+          grep 'version:' galaxy.yml
+
+          # Verify the change was applied correctly
+          if grep -q "version: \"$VERSION_NUMBER\"" galaxy.yml; then
+            echo "✅ Version synchronization successful: $VERSION_NUMBER"
+          else
+            echo "❌ Version synchronization failed!"
+            exit 1
+          fi
+
+          # Commit the version sync back to repository (if changed)
+          if ! git diff --quiet galaxy.yml; then
+            echo "📝 Committing version synchronization..."
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add galaxy.yml
+            git commit -m "chore: sync galaxy.yml version to $VERSION_NUMBER for release $RELEASE_VERSION"
+            git push
+            echo "✅ Version synchronization committed to repository"
+          else
+            echo "ℹ️ galaxy.yml version already synchronized"
+          fi
+
       - name: Copy files and directories to source
         run: |
           ls -lath .
