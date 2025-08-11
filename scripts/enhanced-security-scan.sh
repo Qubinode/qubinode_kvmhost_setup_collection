@@ -81,18 +81,21 @@ main() {
     check_file_permissions
     check_secrets_exposure
     check_dependency_vulnerabilities
-    
+
     # Generate summary
     generate_security_summary
     
     log_info "Security scan completed"
     
-    # Exit with appropriate code
+    # Debug output
+    log_info "Final counts - Issues: $ISSUES_FOUND, Warnings: $WARNINGS_FOUND"
+
+    # Exit with appropriate code - only fail on actual security issues, not warnings
     if [[ $ISSUES_FOUND -gt 0 ]]; then
         log_error "Security issues found: $ISSUES_FOUND"
         exit 1
     else
-        log_success "No security issues found"
+        log_success "No security issues found (Warnings: $WARNINGS_FOUND are informational)"
         exit 0
     fi
 }
