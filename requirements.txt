@@ -39,7 +39,7 @@ sphinx-rtd-theme
 
 # Automation and CI/CD helpers
 wheel
-setuptools>=45,<75.0.0
+setuptools>=78.1.1
 pip-tools
 
 # Updated dependencies to fix security vulnerabilities
