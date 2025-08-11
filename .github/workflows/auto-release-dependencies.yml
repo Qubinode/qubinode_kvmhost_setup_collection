@@ -185,27 +185,27 @@ jobs:
           echo "Creating tag message for $UPDATE_TYPE update..."
 
           if [ "$UPDATE_TYPE" = "security" ]; then
-            TAG_MESSAGE="v$NEW_VERSION: Automated security update
-
-Security dependency updates applied and tested.
-All vulnerability checks passed.
-Automated release triggered by successful CI/CD pipeline."
+            echo "v$NEW_VERSION: Automated security update" > tag_message.txt
+            echo "" >> tag_message.txt
+            echo "Security dependency updates applied and tested." >> tag_message.txt
+            echo "All vulnerability checks passed." >> tag_message.txt
+            echo "Automated release triggered by successful CI/CD pipeline." >> tag_message.txt
           elif [ "$UPDATE_TYPE" = "ansible-module" ]; then
-            TAG_MESSAGE="v$NEW_VERSION: Automated Ansible module update
-
-Ansible modules and collections updated to latest versions.
-All ansible-test validations passed.
-Automated release triggered by successful CI/CD pipeline."
+            echo "v$NEW_VERSION: Automated Ansible module update" > tag_message.txt
+            echo "" >> tag_message.txt
+            echo "Ansible modules and collections updated to latest versions." >> tag_message.txt
+            echo "All ansible-test validations passed." >> tag_message.txt
+            echo "Automated release triggered by successful CI/CD pipeline." >> tag_message.txt
           else
-            TAG_MESSAGE="v$NEW_VERSION: Automated dependency update
-
-Dependencies updated to latest stable versions.
-All tests passed successfully.
-Automated release triggered by successful CI/CD pipeline."
+            echo "v$NEW_VERSION: Automated dependency update" > tag_message.txt
+            echo "" >> tag_message.txt
+            echo "Dependencies updated to latest stable versions." >> tag_message.txt
+            echo "All tests passed successfully." >> tag_message.txt
+            echo "Automated release triggered by successful CI/CD pipeline." >> tag_message.txt
           fi
           
           # Create and push tag
-          git tag -a "v$NEW_VERSION" -m "$TAG_MESSAGE"
+          git tag -a "v$NEW_VERSION" -F tag_message.txt
           git push origin "v$NEW_VERSION"
           
           echo "✅ Created and pushed tag v$NEW_VERSION"
