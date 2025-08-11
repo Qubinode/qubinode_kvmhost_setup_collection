@@ -204,10 +204,12 @@ jobs:
           echo "✅ Release tag v$NEW_VERSION created and pushed"
           echo "🚀 Triggering release workflow..."
 
-      - name: Trigger release workflow
-        uses: ./.github/workflows/release.yml
-        with:
-          tag: "v${{ needs.validate-inputs.outputs.version }}"
+  trigger-release:
+    needs: [validate-inputs, create-manual-release]
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: "v${{ needs.validate-inputs.outputs.version }}"
+    secrets: inherit
 
   dry-run-summary:
     needs: [validate-inputs, pre-release-validation]
