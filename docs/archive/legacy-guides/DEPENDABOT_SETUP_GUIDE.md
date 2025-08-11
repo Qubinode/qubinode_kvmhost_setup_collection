@@ -1,4 +1,6 @@
-# Dependabot Permissions Setup Guide
+# How to Set Up Dependabot Automation
+
+This guide shows you how to configure Dependabot for automated dependency management in the Qubinode KVM Host Setup Collection.
 
 ## Required Repository Permissions for Dependabot
 

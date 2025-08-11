@@ -1,0 +1,116 @@
+/* Custom CSS for Qubinode KVM Host Setup Collection Documentation */
+
+/* Diátaxis color scheme */
+:root {
+    --tutorials-color: #5cb85c;
+    --howto-color: #5bc0de;
+    --reference-color: #f0ad4e;
+    --explanation-color: #d9534f;
+    --developer-color: #9b59b6;
+}
+
+/* Navigation enhancements */
+.wy-nav-content {
+    max-width: 1200px;
+}
+
+/* Diátaxis section styling */
+.diataxis-tutorials {
+    border-left: 4px solid var(--tutorials-color);
+    padding-left: 1rem;
+}
+
+.diataxis-howto {
+    border-left: 4px solid var(--howto-color);
+    padding-left: 1rem;
+}
+
+.diataxis-reference {
+    border-left: 4px solid var(--reference-color);
+    padding-left: 1rem;
+}
+
+.diataxis-explanation {
+    border-left: 4px solid var(--explanation-color);
+    padding-left: 1rem;
+}
+
+.diataxis-developer {
+    border-left: 4px solid var(--developer-color);
+    padding-left: 1rem;
+}
+
+/* Code block enhancements */
+.highlight {
+    border-radius: 6px;
+    margin: 1em 0;
+}
+
+/* Copy button styling */
+.copybtn {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    color: #6c757d;
+}
+
+.copybtn:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* Table styling */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    white-space: normal;
+}
+
+/* Grid card enhancements */
+.sd-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.sd-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Navigation breadcrumbs */
+.wy-breadcrumbs {
+    margin-bottom: 1.5rem;
+}
+
+/* Search results styling */
+.search-results {
+    margin-top: 1rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .wy-nav-content {
+        margin-left: 0;
+    }
+    
+    .wy-nav-side {
+        left: -300px;
+    }
+    
+    .wy-nav-side.shift {
+        left: 0;
+    }
+}
+
+/* Print styles */
+@media print {
+    .wy-nav-side,
+    .wy-nav-top,
+    .rst-footer-buttons,
+    .copybtn {
+        display: none !important;
+    }
+    
+    .wy-nav-content {
+        margin-left: 0;
+    }
+}
