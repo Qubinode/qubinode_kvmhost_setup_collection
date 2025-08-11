@@ -2,7 +2,7 @@
 
 namespace: tosin2013
 name: qubinode_kvmhost_setup_collection
-version: "0.9.3"
+version: "0.9.4"
 readme: README.md
 authors:
   - Tosin Akinosho (github.com/tosin2013)
