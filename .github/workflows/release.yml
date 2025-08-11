@@ -1,4 +1,19 @@
 name: Release and Deploy collection
+
+# =============================================================================
+# Automated Release Pipeline - Triggered by Tags
+# =============================================================================
+#
+# 🎯 PURPOSE:
+# This workflow handles both manual and automated releases triggered by git tags.
+# It's optimized for dependency updates, security patches, and manual releases.
+#
+# 🚀 TRIGGER SCENARIOS:
+# 1. Automatic: Tag pushed by auto-release-dependencies.yml
+# 2. Manual: Tag pushed by manual-release.yml
+# 3. Direct: Manual tag push (git tag v1.0.0 && git push origin v1.0.0)
+# 4. Workflow Call: Called by other workflows with tag parameter
+
 on:
   push:
     tags:
@@ -140,6 +155,24 @@ jobs:
         run: |
           echo "🤖 Generating intelligent release notes using granite-3-3-8b-instruct..."
 
+          # Detect release type
+          RELEASE_TYPE="manual"
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Check if this is an automatic dependency release
+            RECENT_COMMITS=$(git log --oneline -5 --pretty=format:"%s")
+            if echo "$RECENT_COMMITS" | grep -q "chore: bump version.*update"; then
+              if echo "$RECENT_COMMITS" | grep -q "security"; then
+                RELEASE_TYPE="security"
+              elif echo "$RECENT_COMMITS" | grep -q "ansible-module"; then
+                RELEASE_TYPE="ansible-module"
+              else
+                RELEASE_TYPE="dependency"
+              fi
+            fi
+          fi
+
+          echo "Detected release type: $RELEASE_TYPE"
+
           # Get commit messages since last release
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           if [ -n "$LAST_TAG" ]; then
@@ -155,14 +188,15 @@ jobs:
             CHANGED_FILES=$(git diff --name-only HEAD~10..HEAD | head -20)
           fi
 
-          # Create prompt for granite model
-          cat > release_prompt.txt << 'EOF'
+          # Create prompt for granite model based on release type
+          cat > release_prompt.txt << EOF
           You are an expert technical writer creating release notes for the Qubinode KVM Host Setup Ansible Collection (tosin2013.qubinode_kvmhost_setup_collection).
 
           IMPORTANT CONTEXT:
           - Collection Name: tosin2013.qubinode_kvmhost_setup_collection
           - Current Release Version: ${{ steps.tag.outputs.tag }}
           - Release Date: $(date +"%Y-%m-%d")
+          - Release Type: $RELEASE_TYPE
           - This is a single release, not a changelog with multiple versions
 
           RECENT CHANGES:
