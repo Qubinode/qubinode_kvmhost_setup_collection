@@ -1,9 +1,32 @@
-# Qubinode kvmhost Setup Collection for Ansible
-This Ansible Collection for Virtual Machines Setup provides a set of roles for configuring and managing KVM hosts in baremetal servers using RHEL-based Linux operating systems. This collection can help to simplify the process of deploying and managing virtual machines by automating the setup process.
+# Qubinode KVM Host Setup Collection for Ansible
+
+This Ansible Collection provides a comprehensive set of roles for configuring and managing KVM hosts on bare-metal servers using RHEL-based Linux operating systems. The collection simplifies virtual machine deployment and management through automated setup processes.
 
 ![Build Status](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/ansible-test.yml/badge.svg)
 ![Ansible Lint](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/ansible-lint.yml/badge.svg)
 ![Extra docsite and links](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/actions/workflows/extra-docs-linting.yml/badge.svg)
+
+## 📚 Documentation
+
+This collection uses the [Diátaxis framework](https://diataxis.fr/) for comprehensive, user-focused documentation:
+
+### 🚀 Quick Start
+- **New users**: Start with [Quick Start Guide](docs/diataxis/tutorials/00-quick-start.md)
+- **Learning**: Follow [Your First KVM Host Setup](docs/diataxis/tutorials/01-first-kvm-host-setup.md)
+
+### 📖 Complete Documentation
+- **📚 [Tutorials](docs/diataxis/tutorials/)** - Step-by-step learning guides
+- **🛠️ [How-To Guides](docs/diataxis/how-to-guides/)** - Problem-solving guides
+- **👨‍💻 [Developer Guides](docs/diataxis/how-to-guides/developer/)** - Contribution and development
+- **📖 [Reference](docs/diataxis/reference/)** - Technical specifications
+- **💡 [Explanations](docs/diataxis/explanations/)** - Architecture and design decisions
+
+### 🎯 Find What You Need
+- **Learning the collection?** → [Tutorials](docs/diataxis/tutorials/)
+- **Solving a specific problem?** → [How-To Guides](docs/diataxis/how-to-guides/)
+- **Contributing to the project?** → [Developer Guides](docs/diataxis/how-to-guides/developer/)
+- **Looking up technical details?** → [Reference](docs/diataxis/reference/)
+- **Understanding the design?** → [Explanations](docs/diataxis/explanations/)
 
 
 Role Variables
