@@ -102,7 +102,29 @@ check_ansible_security() {
     
     # Check for hardcoded credentials
     log_info "Scanning for hardcoded credentials..."
-    if grep -r -i "password\|secret\|key" --include="*.yml" --include="*.yaml" roles/ 2>/dev/null | grep -v "# " | grep -v "{{" | head -5; then
+
+    # Look for actual hardcoded values, not just keywords
+    CREDENTIAL_PATTERNS=(
+        "password:\s*['\"]?[^{'\"\s][^'\"]*['\"]?\s*$"  # password: actual_value
+        "secret:\s*['\"]?[^{'\"\s][^'\"]*['\"]?\s*$"    # secret: actual_value
+        "api_key:\s*['\"]?[^{'\"\s][^'\"]*['\"]?\s*$"   # api_key: actual_value
+        "token:\s*['\"]?[^{'\"\s][^'\"]*['\"]?\s*$"     # token: actual_value
+    )
+
+    HARDCODED_FOUND=false
+    for pattern in "${CREDENTIAL_PATTERNS[@]}"; do
+        if grep -r -E "$pattern" --include="*.yml" --include="*.yaml" roles/ 2>/dev/null | \
+           grep -v "# " | \
+           grep -v "{{" | \
+           grep -v ": true\|: false\|: yes\|: no\|: always\|: never\|: on_create" | \
+           grep -v "CHANGE_ME\|changeme\|example\|placeholder" | \
+           grep -v "update_password:\|create_password:\|force_password:" | \
+           head -3; then
+            HARDCODED_FOUND=true
+        fi
+    done
+
+    if [ "$HARDCODED_FOUND" = true ]; then
         log_warning "Potential hardcoded credentials found (check if they're examples)"
         ((WARNINGS_FOUND++))
     else
