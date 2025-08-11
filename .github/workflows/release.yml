@@ -83,29 +83,57 @@ jobs:
 
           # Create prompt for granite model
           cat > release_prompt.txt << 'EOF'
-          You are an expert technical writer creating release notes for an Ansible collection.
+          You are an expert technical writer creating release notes for the Qubinode KVM Host Setup Ansible Collection (tosin2013.qubinode_kvmhost_setup_collection).
 
-          Based on the following commit messages and changed files, generate professional release notes in markdown format.
+          IMPORTANT CONTEXT:
+          - Collection Name: tosin2013.qubinode_kvmhost_setup_collection
+          - Current Release Version: ${{ steps.tag.outputs.tag }}
+          - Release Date: $(date +"%Y-%m-%d")
+          - This is a single release, not a changelog with multiple versions
 
-          COMMIT MESSAGES:
+          RECENT CHANGES:
           $COMMITS
 
-          CHANGED FILES:
+          MODIFIED FILES:
           $CHANGED_FILES
 
-          Please generate release notes with:
-          1. A brief summary of what's new
-          2. Key improvements and features
-          3. Bug fixes and security updates
-          4. Breaking changes (if any)
-          5. Installation instructions
+          Generate ONLY release notes for version ${{ steps.tag.outputs.tag }} with:
 
-          Keep it concise, professional, and focused on user value.
+          ## What's New in v${{ steps.tag.outputs.tag }}
+
+          ### 🔧 Key Improvements
+          [Analyze commits and list actual improvements made]
+
+          ### 🛡️ Security & Dependencies
+          [List any security fixes or dependency updates]
+
+          ### 🐛 Bug Fixes
+          [List any bug fixes from commits]
+
+          ### 📦 Infrastructure & Automation
+          [List workflow, CI/CD, or infrastructure improvements]
+
+          ### ⚠️ Breaking Changes
+          [Only include if there are actual breaking changes]
+
+          REQUIREMENTS:
+          - Use ONLY the actual version number ${{ steps.tag.outputs.tag }}
+          - Use current date $(date +"%Y-%m-%d")
+          - Base content ONLY on the provided commits and files
+          - Use the correct collection name: tosin2013.qubinode_kvmhost_setup_collection
+          - Be specific about what changed, not generic
+          - If no changes in a category, omit that section
+          - Keep it concise and factual
           EOF
 
-          # Replace variables in prompt
-          sed -i "s/\$COMMITS/$COMMITS/g" release_prompt.txt
-          sed -i "s/\$CHANGED_FILES/$CHANGED_FILES/g" release_prompt.txt
+          # Replace variables in prompt with proper escaping
+          COMMITS_ESCAPED=$(echo "$COMMITS" | sed 's/"/\\"/g' | sed 's/$/\\n/' | tr -d '\n')
+          CHANGED_FILES_ESCAPED=$(echo "$CHANGED_FILES" | sed 's/"/\\"/g' | sed 's/$/\\n/' | tr -d '\n')
+          CURRENT_DATE=$(date +"%Y-%m-%d")
+
+          sed -i "s/\$COMMITS/$COMMITS_ESCAPED/g" release_prompt.txt
+          sed -i "s/\$CHANGED_FILES/$CHANGED_FILES_ESCAPED/g" release_prompt.txt
+          sed -i "s/\$(date +\"%Y-%m-%d\")/$CURRENT_DATE/g" release_prompt.txt
 
           # Call granite model API
           if [ -n "${{ secrets.RED_HAT_MAAS_API_KEY }}" ]; then
@@ -113,15 +141,20 @@ jobs:
 
             PROMPT_CONTENT=$(cat release_prompt.txt)
 
+            # Escape the prompt content for JSON
+            PROMPT_JSON=$(echo "$PROMPT_CONTENT" | jq -Rs .)
+
             curl -X POST \
               "https://granite-3-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1/completions" \
               -H "Authorization: Bearer ${{ secrets.RED_HAT_MAAS_API_KEY }}" \
               -H "Content-Type: application/json" \
               -d "{
                 \"model\": \"granite-3-3-8b-instruct\",
-                \"prompt\": \"$PROMPT_CONTENT\",
-                \"max_tokens\": 1000,
-                \"temperature\": 0.2
+                \"prompt\": $PROMPT_JSON,
+                \"max_tokens\": 1500,
+                \"temperature\": 0.1,
+                \"top_p\": 0.9,
+                \"stop\": [\"\\n\\n\\n\"]
               }" \
               --insecure \
               -o ai_response.json
