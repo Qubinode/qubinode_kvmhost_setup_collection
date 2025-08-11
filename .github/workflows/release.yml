@@ -4,6 +4,10 @@ on:
     tags:
       - v*
 
+permissions:
+  contents: write  # Required to create releases and access repository content
+  actions: read    # Required to read workflow status
+
 jobs:
   releaseanddeploy:
     runs-on: ubuntu-latest
@@ -13,7 +17,7 @@ jobs:
         python-version: [3.11]
     steps:
       - name: Checkout code
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
 
       - name: Get tag
         id: tag
