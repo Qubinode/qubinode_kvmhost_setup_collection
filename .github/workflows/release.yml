@@ -32,8 +32,8 @@ jobs:
           echo "Inputs tag: ${{ inputs.tag }}"
           echo "GITHUB_REF: $GITHUB_REF"
 
-          if [ "${{ github.event_name }}" = "workflow_call" ] && [ -n "${{ inputs.tag }}" ]; then
-            # Use tag from workflow_call input
+          if [ -n "${{ inputs.tag }}" ]; then
+            # Use tag from workflow_call input (inputs.tag is only available in workflow_call)
             TAG="${{ inputs.tag }}"
             echo "Using workflow_call tag: $TAG"
           elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
