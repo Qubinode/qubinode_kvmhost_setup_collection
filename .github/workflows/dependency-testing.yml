@@ -470,12 +470,21 @@ jobs:
           pip install ansible-core==${{ matrix.ansible-core }}.*
           ansible --version
           
-      - name: Test galaxy.yml dependencies
+      - name: Test requirements.yml dependencies
         run: |
           source venv-ansible-${{ matrix.name }}/bin/activate
-          # Test that all dependencies in galaxy.yml can be installed
-          if [[ -f galaxy.yml ]]; then
-            ansible-galaxy collection install -r galaxy.yml
+          # Test that all dependencies in requirements.yml can be installed
+          if [[ -f requirements.yml ]]; then
+            echo "Installing collections and roles from requirements.yml..."
+            ansible-galaxy install -r requirements.yml
+            echo "✅ Successfully installed dependencies from requirements.yml"
+
+            echo "📋 Installed collections:"
+            ansible-galaxy collection list
+            echo "📋 Installed roles:"
+            ansible-galaxy role list
+          else
+            echo "❌ requirements.yml not found, skipping dependency installation"
           fi
           
       - name: Test role dependencies
