@@ -159,37 +159,77 @@ check_adr_0002_compliance() {
     local adr_id="0002"
     local compliance_status="COMPLIANT"
     local issues=()
-    
+
     log_info "Checking ADR-0002: Role Architecture Standards compliance" >&2
-    
+
+    # Define exceptions for legitimate roles that predate naming conventions or are external
+    local naming_exceptions=(
+        "edge_hosts_validate"  # Legacy role documented in ADR-0002, predates naming convention
+    )
+
+    # Define exceptions for external roles that don't follow internal structure
+    local structure_exceptions=(
+        "linux-system-roles.network"  # External role from linux-system-roles collection
+        "linux-system-roles.storage"  # External role from linux-system-roles collection
+    )
+
     if [[ -d "$PROJECT_ROOT/roles" ]]; then
         for role_dir in "$PROJECT_ROOT/roles"/*; do
             if [[ -d "$role_dir" ]]; then
                 local role_name=$(basename "$role_dir")
-                
+
                 # Skip if it's just a config file
                 if [[ "$role_name" == "role_config.yml" ]]; then
                     continue
                 fi
-                
-                # Check required directories
-                for required_dir in "tasks" "defaults" "meta"; do
-                    if [[ ! -d "$role_dir/$required_dir" ]]; then
-                        compliance_status="NON_COMPLIANT"
-                        issues+=("Role $role_name missing required directory: $required_dir")
+
+                # Check if role is exempt from structure requirements
+                local structure_exempt=false
+                for exception in "${structure_exceptions[@]}"; do
+                    if [[ "$role_name" == "$exception" ]]; then
+                        structure_exempt=true
+                        break
                     fi
                 done
-                
-                # Check required files
-                for required_file in "tasks/main.yml" "defaults/main.yml" "meta/main.yml"; do
-                    if [[ ! -f "$role_dir/$required_file" ]]; then
-                        compliance_status="NON_COMPLIANT"
-                        issues+=("Role $role_name missing required file: $required_file")
+
+                # Only check structure for non-exempt roles
+                if [[ "$structure_exempt" == false ]]; then
+                    # Check required directories
+                    for required_dir in "tasks" "defaults" "meta"; do
+                        if [[ ! -d "$role_dir/$required_dir" ]]; then
+                            compliance_status="NON_COMPLIANT"
+                            issues+=("Role $role_name missing required directory: $required_dir")
+                        fi
+                    done
+
+                    # Check required files
+                    for required_file in "tasks/main.yml" "defaults/main.yml" "meta/main.yml"; do
+                        if [[ ! -f "$role_dir/$required_file" ]]; then
+                            compliance_status="NON_COMPLIANT"
+                            issues+=("Role $role_name missing required file: $required_file")
+                        fi
+                    done
+                fi
+
+                # Check for proper role naming (with exceptions)
+                local naming_exempt=false
+                for exception in "${naming_exceptions[@]}"; do
+                    if [[ "$role_name" == "$exception" ]]; then
+                        naming_exempt=true
+                        break
                     fi
                 done
-                
-                # Check for proper role naming (should start with kvmhost_)
-                if [[ ! "$role_name" =~ ^kvmhost_ ]] && [[ ! "$role_name" =~ ^swygue_ ]]; then
+
+                # Also exempt external roles from naming convention
+                for exception in "${structure_exceptions[@]}"; do
+                    if [[ "$role_name" == "$exception" ]]; then
+                        naming_exempt=true
+                        break
+                    fi
+                done
+
+                if [[ "$naming_exempt" == false ]] && [[ ! "$role_name" =~ ^kvmhost_ ]] && [[ ! "$role_name" =~ ^swygue_ ]]; then
+                    compliance_status="NON_COMPLIANT"
                     issues+=("Role $role_name doesn't follow naming convention (should start with kvmhost_ or swygue_)")
                 fi
             fi
@@ -198,7 +238,7 @@ check_adr_0002_compliance() {
         compliance_status="NON_COMPLIANT"
         issues+=("Roles directory missing")
     fi
-    
+
     echo "$adr_id|$compliance_status|$(IFS=';'; echo "${issues[*]}")"
 }
 
@@ -320,8 +360,8 @@ check_adr_0011_compliance() {
         issues+=("Local testing architectural rules missing")
     fi
     
-    # Check for testing documentation
-    if [[ ! -f "$PROJECT_ROOT/docs/MANDATORY_LOCAL_TESTING.md" ]]; then
+    # Check for testing documentation (now in archive)
+    if [[ ! -f "$PROJECT_ROOT/docs/archive/legacy-guides/MANDATORY_LOCAL_TESTING.md" ]]; then
         compliance_status="NON_COMPLIANT"
         issues+=("Mandatory local testing documentation missing")
     fi
