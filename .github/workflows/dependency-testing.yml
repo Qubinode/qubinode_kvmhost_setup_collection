@@ -42,7 +42,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -100,7 +100,7 @@ jobs:
       docker-matrix: ${{ steps.generate.outputs.docker-matrix }}
       test-scope: ${{ steps.generate.outputs.test-scope }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Generate test matrix
         id: generate
@@ -145,7 +145,7 @@ jobs:
       matrix: ${{ fromJson(needs.dependency-matrix.outputs.python-matrix) }}
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Python ${{ matrix.python-version }}
         run: |
@@ -237,7 +237,7 @@ jobs:
       matrix: ${{ fromJson(needs.dependency-matrix.outputs.ansible-matrix) }}
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
@@ -302,7 +302,7 @@ jobs:
       matrix: ${{ fromJson(needs.dependency-matrix.outputs.docker-matrix) }}
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
@@ -356,7 +356,7 @@ jobs:
     if: always() && (needs.python-dependency-test.result == 'success' || needs.ansible-dependency-test.result == 'success')
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
