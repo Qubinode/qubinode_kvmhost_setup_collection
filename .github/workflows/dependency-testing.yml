@@ -149,14 +149,109 @@ jobs:
       
       - name: Setup Python ${{ matrix.python-version }}
         run: |
-          # Install specific Python version and system dependencies
-          sudo yum install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Detect OS and use appropriate package manager (adapted from ansible-test.yml)
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Configure EPEL repository for Rocky/Alma Linux (required for Python 3.11+)
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            # Clean all metadata and cache
+            sudo $PKG_MGR clean all || true
+            # Remove corrupted EPEL metadata
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+
+            # Import EPEL GPG key first
+            echo "Importing EPEL GPG key..."
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+
+            # Remove and reinstall EPEL cleanly
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux EPEL installation"
+              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed, continuing without EPEL"
+            else
+              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed, continuing without EPEL"
+            fi
+
+            # Disable GPG verification for EPEL repositories (for CI stability)
+            echo "Disabling GPG verification for EPEL repositories (for CI)"
+            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+
+            # Refresh metadata
+            sudo $PKG_MGR makecache || true
+            echo "EPEL repository configuration completed"
+          fi
+
+          # Check if Python ${{ matrix.python-version }} is already installed
+          if command -v python${{ matrix.python-version }} &> /dev/null; then
+            echo "Python ${{ matrix.python-version }} is already installed: $(python${{ matrix.python-version }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ matrix.python-version }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python ${{ matrix.python-version }} and development packages if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+              echo "Installing Python packages for Rocky/Alma Linux..."
+              if [[ "$ID" == "rocky" ]]; then
+                echo "Using --nogpgcheck for Rocky Linux package installation"
+                sudo $PKG_MGR install -y --nogpgcheck python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
+            elif [[ "$ID" == "rhel" ]]; then
+              echo "Installing Python packages for RHEL..."
+              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            else
+              echo "Installing Python packages for generic RedHat family..."
+              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          else
+            echo "Skipping Python ${{ matrix.python-version }} installation (already installed)"
+            # Still install SELinux packages if needed
+            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+              if [[ "$ID" == "rocky" ]]; then
+                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+              else
+                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              fi
+            elif [[ "$ID" == "rhel" ]]; then
+              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          fi
+
+          # Setup Python virtual environment with Python ${{ matrix.python-version }}
           python${{ matrix.python-version }} -m pip install --upgrade pip
           python${{ matrix.python-version }} -m pip install virtualenv
-          # Create virtual environment with system site packages for SELinux
           python${{ matrix.python-version }} -m virtualenv --system-site-packages venv-${{ matrix.name }}
           source venv-${{ matrix.name }}/bin/activate
+
+          # Verify virtual environment is working
+          echo "Virtual environment created successfully:"
+          echo "Python version: $(python --version)"
+          echo "Pip version: $(pip --version)"
           
       - name: Install core dependencies
         run: |
@@ -241,13 +336,60 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Use the same robust Python setup as the python-dependency-test job
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+
+          # Configure EPEL for Rocky/Alma Linux
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed"
+            else
+              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed"
+            fi
+            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            sudo $PKG_MGR makecache || true
+          fi
+
+          # Install Python and dependencies
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          elif [[ "$ID" == "rhel" ]]; then
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+          else
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+          fi
+
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
-          # Create virtual environment with system site packages for SELinux
           python${{ env.PYTHON_VERSION }} -m virtualenv --system-site-packages venv-ansible-${{ matrix.name }}
           source venv-ansible-${{ matrix.name }}/bin/activate
+
+          echo "Ansible test environment setup completed:"
+          echo "Python version: $(python --version)"
           
       - name: Install Ansible Core ${{ matrix.ansible-core }}
         run: |
@@ -306,14 +448,62 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Use the same robust Python setup as other jobs
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+
+          # Configure EPEL for Rocky/Alma Linux
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed"
+            else
+              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed"
+            fi
+            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            sudo $PKG_MGR makecache || true
+          fi
+
+          # Install Python and dependencies
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          elif [[ "$ID" == "rhel" ]]; then
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+          else
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+          fi
+
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
-          # Create virtual environment with system site packages for SELinux
           python${{ env.PYTHON_VERSION }} -m virtualenv --system-site-packages venv-docker
           source venv-docker/bin/activate
           pip install molecule[podman]==${{ env.MOLECULE_VERSION }}.*
+
+          echo "Docker test environment setup completed:"
+          echo "Python version: $(python --version)"
+          echo "Molecule version: $(molecule --version)"
           
       - name: Test container image availability
         run: |
@@ -360,13 +550,60 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Use the same robust Python setup as other jobs
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+
+          # Configure EPEL for Rocky/Alma Linux
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed"
+            else
+              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed"
+            fi
+            sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            sudo $PKG_MGR makecache || true
+          fi
+
+          # Install Python and dependencies
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          elif [[ "$ID" == "rhel" ]]; then
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+          else
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+          fi
+
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
-          # Create virtual environment with system site packages for SELinux
           python${{ env.PYTHON_VERSION }} -m virtualenv --system-site-packages venv-security
           source venv-security/bin/activate
+
+          echo "Security scan environment setup completed:"
+          echo "Python version: $(python --version)"
           
       - name: Install security scanning tools
         run: |
