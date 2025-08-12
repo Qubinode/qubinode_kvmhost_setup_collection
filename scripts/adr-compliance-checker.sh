@@ -9,7 +9,7 @@
 # ensuring the project continuously adheres to established architectural decisions.
 #
 # 🧠 ARCHITECTURE OVERVIEW FOR AI ASSISTANTS:
-# 1. [PHASE 1]: ADR Discovery - Scans docs/adrs/ directory for all ADR documents
+# 1. [PHASE 1]: ADR Discovery - Scans docs/archive/adrs/ directory for all ADR documents
 # 2. [PHASE 2]: Compliance Rule Extraction - Parses ADRs for enforceable compliance rules
 # 3. [PHASE 3]: Codebase Analysis - Analyzes project structure against ADR requirements
 # 4. [PHASE 4]: Violation Detection - Identifies deviations from ADR specifications
@@ -17,7 +17,7 @@
 # 6. [PHASE 6]: CI/CD Integration - Provides exit codes for automated pipeline control
 #
 # 🔧 HOW IT CONNECTS TO QUBINODE KVMHOST SETUP COLLECTION:
-# - Validates: Compliance with all ADRs in docs/adrs/ directory
+# - Validates: Compliance with all ADRs in docs/archive/adrs/ directory
 # - Checks: Project structure, naming conventions, and architectural decisions
 # - Reports: Violations to compliance-reports/ directory with timestamps
 # - Integrates: With CI/CD pipeline to block non-compliant changes
@@ -55,7 +55,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Configuration
 COMPLIANCE_REPORT_DIR="$PROJECT_ROOT/compliance-reports"
-ADR_DIR="$PROJECT_ROOT/docs/adrs"
+ADR_DIR="$PROJECT_ROOT/docs/archive/adrs"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 REPORT_FILE="$COMPLIANCE_REPORT_DIR/adr-compliance-$TIMESTAMP.json"
 

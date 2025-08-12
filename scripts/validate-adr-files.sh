@@ -97,10 +97,10 @@ check_implementation "kvmhost_user_config role" "roles/kvmhost_user_config" "dir
 echo "📚 Checking Documentation Files..."
 echo "=================================="
 
-# Check documentation implementations (ADR-0010)
-check_implementation "Role interface documentation" "docs/role_interface_standards.md" "file"
-check_implementation "Variable naming conventions" "docs/variable_naming_conventions.md" "file"
-check_implementation "Migration guide" "docs/migration_guide.md" "file"
+# Check documentation implementations (ADR-0010) - Now in archive
+check_implementation "Role interface documentation" "docs/archive/legacy-guides/role_interface_standards.md" "file"
+check_implementation "Variable naming conventions" "docs/archive/legacy-guides/variable_naming_conventions.md" "file"
+check_implementation "Migration guide" "docs/archive/legacy-guides/migration_guide.md" "file"
 
 echo "⚙️  Checking Configuration Management Files..."
 echo "=============================================="

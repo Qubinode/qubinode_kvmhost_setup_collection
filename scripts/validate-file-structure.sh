@@ -221,25 +221,25 @@ validate_documentation_structure() {
     validate_file "CONTRIBUTING.md" "Contributing guidelines"
     validate_file "LICENSE" "License file"
     
-    # ADR documentation (ADR-0010)
-    validate_directory "docs/adrs" "ADR documentation directory"
-    validate_file "docs/adrs/README.md" "ADR index/README" "false" || true
+    # ADR documentation (ADR-0010) - Now in archive
+    validate_directory "docs/archive/adrs" "ADR documentation directory (archived)"
+    validate_file "docs/archive/adrs/README.md" "ADR index/README (archived)" "false" || true
     
-    # Role documentation (ADR-0002)
-    validate_file "docs/role_interface_standards.md" "Role interface standards"
-    validate_file "docs/variable_naming_conventions.md" "Variable naming conventions"
-    validate_file "docs/migration_guide.md" "Migration guide"
+    # Role documentation (ADR-0002) - Now in archive
+    validate_file "docs/archive/legacy-guides/role_interface_standards.md" "Role interface standards (archived)"
+    validate_file "docs/archive/legacy-guides/variable_naming_conventions.md" "Variable naming conventions (archived)"
+    validate_file "docs/archive/legacy-guides/migration_guide.md" "Migration guide (archived)"
+
+    # Testing documentation (ADR-0011) - Now in archive
+    validate_file "docs/archive/legacy-guides/MANDATORY_LOCAL_TESTING.md" "Mandatory local testing guide (archived)"
     
-    # Testing documentation (ADR-0011)
-    validate_file "docs/MANDATORY_LOCAL_TESTING.md" "Mandatory local testing guide"
-    
-    # Count ADR files
-    if [[ -d "$PROJECT_ROOT/docs/adrs" ]]; then
-        local adr_count=$(find "$PROJECT_ROOT/docs/adrs" -name "adr-*.md" | wc -l)
+    # Count ADR files (now in archive)
+    if [[ -d "$PROJECT_ROOT/docs/archive/adrs" ]]; then
+        local adr_count=$(find "$PROJECT_ROOT/docs/archive/adrs" -name "adr-*.md" | wc -l)
         if [[ $adr_count -gt 0 ]]; then
-            log_pass "Found $adr_count ADR files in docs/adrs"
+            log_pass "Found $adr_count ADR files in docs/archive/adrs (archived)"
         else
-            log_warning "No ADR files found in docs/adrs directory"
+            log_warning "No ADR files found in docs/archive/adrs directory"
         fi
     fi
 }

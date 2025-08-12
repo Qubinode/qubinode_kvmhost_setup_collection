@@ -4,7 +4,8 @@ on:
   pull_request:
     paths:
       - 'roles/**'
-      - 'docs/adrs/**'
+      - 'docs/archive/adrs/**'
+      - 'docs/diataxis/**'
       - 'molecule/**'
       - '.github/**'
       - 'scripts/**'
