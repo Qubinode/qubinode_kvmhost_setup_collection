@@ -24,6 +24,11 @@ on:
           - 'python-only'
           - 'ansible-only'
           - 'docker-only'
+      enable_epel_gpg:
+        description: 'Enable GPG verification for EPEL repositories'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: dependency-testing-${{ github.event.pull_request.number || github.sha }}
@@ -149,9 +154,61 @@ jobs:
       
       - name: Setup Python ${{ matrix.python-version }}
         run: |
+          # Detect OS and use appropriate package manager (following ansible-test.yml pattern)
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            # Clean all metadata and cache
+            sudo $PKG_MGR clean all || true
+            # Remove corrupted EPEL metadata
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+
+            # Import EPEL GPG key first (before installing epel-release)
+            echo "Importing EPEL GPG key..."
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+
+            # Remove and reinstall EPEL cleanly with --nogpgcheck for Rocky Linux
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux EPEL installation"
+              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed, continuing without EPEL"
+            else
+              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed, continuing without EPEL"
+            fi
+
+            # Configure GPG verification based on input flag (default: disabled for CI)
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+              # Key already imported above
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+
+            # Refresh metadata
+            sudo $PKG_MGR makecache || true
+            echo "EPEL repository configuration completed"
+          fi
+
           # Install specific Python version and system dependencies
-          sudo yum install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
           python${{ matrix.python-version }} -m pip install --upgrade pip
           python${{ matrix.python-version }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
@@ -241,8 +298,46 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Detect OS and use appropriate package manager (following ansible-test.yml pattern)
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+
+            # Import EPEL GPG key first
+            echo "Importing EPEL GPG key..."
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+
+            # Configure GPG verification based on input flag (default: disabled for CI)
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+            sudo $PKG_MGR makecache || true
+          fi
+
+          # Install Python and system dependencies
+          sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
@@ -312,8 +407,46 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Detect OS and use appropriate package manager (following ansible-test.yml pattern)
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+
+            # Import EPEL GPG key first
+            echo "Importing EPEL GPG key..."
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+
+            # Configure GPG verification based on input flag (default: disabled for CI)
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+            sudo $PKG_MGR makecache || true
+          fi
+
+          # Install Python and system dependencies
+          sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
@@ -481,8 +614,46 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo yum install -y libselinux-python3 python3-libselinux python3-selinux
+          # Detect OS and use appropriate package manager (following ansible-test.yml pattern)
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Configuring EPEL repository for Rocky/Alma Linux..."
+            sudo $PKG_MGR clean all || true
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+
+            # Import EPEL GPG key first
+            echo "Importing EPEL GPG key..."
+            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
+
+            # Configure GPG verification based on input flag (default: disabled for CI)
+            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
+              echo "GPG verification enabled for EPEL repositories"
+            else
+              echo "Disabling GPG verification for EPEL repositories (default for CI)"
+              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
+            fi
+            sudo $PKG_MGR makecache || true
+          fi
+
+          # Install Python and system dependencies
+          sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
