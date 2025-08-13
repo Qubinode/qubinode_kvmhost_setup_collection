@@ -620,15 +620,20 @@ jobs:
           PULL_SUCCESS=0
           PULL_TOTAL=${#IMAGES[@]}
 
+          # Temporarily disable exit on error for container pulls (following scripts/emergency-cleanup-containers.sh pattern)
+          set +e
           for image in "${IMAGES[@]}"; do
             echo "Pulling $image..."
-            if podman pull "$image"; then
+            if podman pull "$image" 2>/dev/null; then
               echo "✅ Successfully pulled $image"
               ((PULL_SUCCESS++))
             else
               echo "⚠️ Failed to pull $image - may cause test failures"
+              # Continue without exiting (following existing pattern)
             fi
           done
+          # Re-enable exit on error
+          set -e
 
           echo "🎯 Container registry setup complete!"
           echo "Successfully pulled: $PULL_SUCCESS/$PULL_TOTAL images"
