@@ -102,13 +102,29 @@ jobs:
             echo "EPEL cleanup completed"
           fi
 
-          # Install Python packages with appropriate flags
-          if [[ "$ID" == "rocky" ]]; then
-            echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
           else
-            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
           fi
+
+          # Install Python packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run ADR compliance checker
@@ -190,13 +206,29 @@ jobs:
             echo "EPEL cleanup completed"
           fi
 
-          # Install Python packages with appropriate flags
-          if [[ "$ID" == "rocky" ]]; then
-            echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
           else
-            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
           fi
+
+          # Install Python packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run dependency validation pipeline
@@ -251,13 +283,35 @@ jobs:
             echo "EPEL cleanup completed"
           fi
 
-          # Install Python packages and tools with appropriate flags
-          if [[ "$ID" == "rocky" ]]; then
-            echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
           else
-            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
           fi
+
+          # Install Python packages and tools only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+            # Still install jq if needed
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck jq 2>/dev/null || true
+            else
+              sudo $PKG_MGR install -y jq 2>/dev/null || true
+            fi
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run Ansible collection security check

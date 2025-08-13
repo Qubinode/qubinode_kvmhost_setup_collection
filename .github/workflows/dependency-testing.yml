@@ -183,9 +183,37 @@ jobs:
             echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
-          # Install specific Python version and system dependencies
-          sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ matrix.python-version }} &> /dev/null; then
+            echo "Python ${{ matrix.python-version }} is already installed: $(python${{ matrix.python-version }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ matrix.python-version }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python and development packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ matrix.python-version }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          else
+            echo "Python ${{ matrix.python-version }} already installed, skipping installation"
+            # Still install SELinux packages if needed
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel 2>/dev/null || true
+            else
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel 2>/dev/null || true
+            fi
+          fi
+
+          # Setup Python environment
           python${{ matrix.python-version }} -m pip install --upgrade pip
           python${{ matrix.python-version }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
@@ -304,9 +332,37 @@ jobs:
             echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
-          # Install Python and system dependencies
-          sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python and development packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+            # Still install SELinux packages if needed
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel 2>/dev/null || true
+            else
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel 2>/dev/null || true
+            fi
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
@@ -405,9 +461,37 @@ jobs:
             echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
-          # Install Python and system dependencies
-          sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python and development packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+            # Still install SELinux packages if needed
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel 2>/dev/null || true
+            else
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel 2>/dev/null || true
+            fi
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
@@ -604,9 +688,37 @@ jobs:
             echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
-          # Install Python and system dependencies
-          sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          sudo $PKG_MGR install -y libselinux-python3 python3-libselinux python3-selinux
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python and development packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+            # Still install SELinux packages if needed
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel 2>/dev/null || true
+            else
+              sudo $PKG_MGR install -y python3-libselinux libselinux-devel 2>/dev/null || true
+            fi
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
