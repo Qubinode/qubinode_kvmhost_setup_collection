@@ -247,11 +247,46 @@ jobs:
           ansible --version
           ansible-galaxy --version
           
+      - name: Install system dependencies for container testing
+        run: |
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+
+          # Install podman if not already available (following ansible-test.yml pattern)
+          if ! command -v podman &> /dev/null; then
+            echo "Installing podman container runtime..."
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck podman
+            else
+              sudo $PKG_MGR install -y podman
+            fi
+          else
+            echo "Podman already installed: $(podman --version)"
+          fi
+
       - name: Test Molecule installation
         run: |
           source venv-${{ matrix.name }}/bin/activate
-          pip install molecule[podman]==${{ env.MOLECULE_VERSION }}.*
+          # Install molecule and podman driver separately (following ansible-test.yml pattern)
+          pip install "molecule>=${{ env.MOLECULE_VERSION }}" molecule-podman
           molecule --version
+
+          # Verify podman driver is available
+          echo "Checking molecule drivers:"
+          molecule drivers || echo "Failed to list drivers"
           
       - name: Test additional dependencies
         run: |
@@ -508,13 +543,31 @@ jobs:
             fi
           fi
 
+          # Install system dependencies for container testing
+          if ! command -v podman &> /dev/null; then
+            echo "Installing podman container runtime..."
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck podman
+            else
+              sudo $PKG_MGR install -y podman
+            fi
+          else
+            echo "Podman already installed: $(podman --version)"
+          fi
+
           # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
           python${{ env.PYTHON_VERSION }} -m pip install virtualenv
           # Create virtual environment with system site packages for SELinux
           python${{ env.PYTHON_VERSION }} -m virtualenv --system-site-packages venv-docker
           source venv-docker/bin/activate
-          pip install molecule[podman]==${{ env.MOLECULE_VERSION }}.*
+          # Install molecule and podman driver separately (following ansible-test.yml pattern)
+          pip install "molecule>=${{ env.MOLECULE_VERSION }}" molecule-podman
+
+          echo "Container test environment setup completed:"
+          echo "Python version: $(python --version)"
+          echo "Molecule version: $(molecule --version)"
+          echo "Podman version: $(podman --version)"
           
       - name: Setup container registries and pre-pull images
         env:
@@ -635,6 +688,17 @@ jobs:
         run: |
           source venv-docker/bin/activate
           echo "🧪 Testing basic molecule functionality..."
+
+          # Verify container runtime (following ansible-test.yml pattern)
+          echo "🔍 Container runtime verification:"
+          podman version
+          podman info | grep -E "(graphDriverName|runRoot|imageStore)" || echo "Podman info check completed"
+          echo ""
+
+          # Verify molecule drivers
+          echo "🔍 Molecule driver verification:"
+          molecule drivers
+          echo ""
 
           # Test molecule list command
           echo "📋 Available molecule scenarios:"
