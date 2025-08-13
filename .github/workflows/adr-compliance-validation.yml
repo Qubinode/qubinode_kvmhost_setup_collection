@@ -74,13 +74,40 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          # Detect OS and use appropriate package installation method
-          . /etc/os-release
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Skip EPEL configuration to avoid GPG verification failures
+          # Use pip-based installations where possible
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Skipping EPEL configuration for Rocky/Alma Linux to avoid GPG issues"
+            # Clean any existing EPEL metadata that might cause issues
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed"
+          fi
+
+          # Install Python packages with appropriate flags
           if [[ "$ID" == "rocky" ]]; then
             echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
           else
-            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
           fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
@@ -135,13 +162,40 @@ jobs:
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          # Detect OS and use appropriate package installation method
-          . /etc/os-release
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Skip EPEL configuration to avoid GPG verification failures
+          # Use pip-based installations where possible
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Skipping EPEL configuration for Rocky/Alma Linux to avoid GPG issues"
+            # Clean any existing EPEL metadata that might cause issues
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed"
+          fi
+
+          # Install Python packages with appropriate flags
           if [[ "$ID" == "rocky" ]]; then
             echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
           else
-            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
           fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
@@ -169,13 +223,40 @@ jobs:
       
       - name: Setup scanning tools
         run: |
-          # Detect OS and use appropriate package installation method
-          . /etc/os-release
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
+          fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Skip EPEL configuration to avoid GPG verification failures
+          # Use pip-based installations where possible
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Skipping EPEL configuration for Rocky/Alma Linux to avoid GPG issues"
+            # Clean any existing EPEL metadata that might cause issues
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed"
+          fi
+
+          # Install Python packages and tools with appropriate flags
           if [[ "$ID" == "rocky" ]]; then
             echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
           else
-            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
           fi
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
