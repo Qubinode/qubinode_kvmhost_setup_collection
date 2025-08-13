@@ -171,39 +171,16 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          # Skip EPEL configuration in dependency testing pipeline due to GPG verification failures
+          # Dependencies will be installed via pip instead of system packages where possible
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Configuring EPEL repository for Rocky/Alma Linux..."
-            # Clean all metadata and cache
-            sudo $PKG_MGR clean all || true
-            # Remove corrupted EPEL metadata
+            echo "Skipping EPEL configuration for Rocky/Alma Linux in dependency testing pipeline"
+            echo "Using pip-based installations to avoid EPEL GPG verification issues"
+            # Clean any existing EPEL metadata that might cause issues
             sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
-
-            # Import EPEL GPG key first (before installing epel-release)
-            echo "Importing EPEL GPG key..."
-            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
-
-            # Remove and reinstall EPEL cleanly with --nogpgcheck for Rocky Linux
+            # Remove any existing EPEL repositories to prevent conflicts
             sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
-            if [[ "$ID" == "rocky" ]]; then
-              echo "Using --nogpgcheck for Rocky Linux EPEL installation"
-              sudo $PKG_MGR install -y --nogpgcheck epel-release || echo "EPEL installation failed, continuing without EPEL"
-            else
-              sudo $PKG_MGR install -y epel-release || echo "EPEL installation failed, continuing without EPEL"
-            fi
-
-            # Configure GPG verification based on input flag (default: disabled for CI)
-            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
-              echo "GPG verification enabled for EPEL repositories"
-              # Key already imported above
-            else
-              echo "Disabling GPG verification for EPEL repositories (default for CI)"
-              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            fi
-
-            # Refresh metadata
-            sudo $PKG_MGR makecache || true
-            echo "EPEL repository configuration completed"
+            echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
           # Install specific Python version and system dependencies
@@ -315,24 +292,16 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          # Skip EPEL configuration in dependency testing pipeline due to GPG verification failures
+          # Dependencies will be installed via pip instead of system packages where possible
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Configuring EPEL repository for Rocky/Alma Linux..."
-            sudo $PKG_MGR clean all || true
+            echo "Skipping EPEL configuration for Rocky/Alma Linux in dependency testing pipeline"
+            echo "Using pip-based installations to avoid EPEL GPG verification issues"
+            # Clean any existing EPEL metadata that might cause issues
             sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
-
-            # Import EPEL GPG key first
-            echo "Importing EPEL GPG key..."
-            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
-
-            # Configure GPG verification based on input flag (default: disabled for CI)
-            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
-              echo "GPG verification enabled for EPEL repositories"
-            else
-              echo "Disabling GPG verification for EPEL repositories (default for CI)"
-              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            fi
-            sudo $PKG_MGR makecache || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
           # Install Python and system dependencies
@@ -424,24 +393,16 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          # Skip EPEL configuration in dependency testing pipeline due to GPG verification failures
+          # Dependencies will be installed via pip instead of system packages where possible
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Configuring EPEL repository for Rocky/Alma Linux..."
-            sudo $PKG_MGR clean all || true
+            echo "Skipping EPEL configuration for Rocky/Alma Linux in dependency testing pipeline"
+            echo "Using pip-based installations to avoid EPEL GPG verification issues"
+            # Clean any existing EPEL metadata that might cause issues
             sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
-
-            # Import EPEL GPG key first
-            echo "Importing EPEL GPG key..."
-            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
-
-            # Configure GPG verification based on input flag (default: disabled for CI)
-            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
-              echo "GPG verification enabled for EPEL repositories"
-            else
-              echo "Disabling GPG verification for EPEL repositories (default for CI)"
-              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            fi
-            sudo $PKG_MGR makecache || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
           # Install Python and system dependencies
@@ -631,24 +592,16 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux (following ansible-test.yml pattern)
+          # Skip EPEL configuration in dependency testing pipeline due to GPG verification failures
+          # Dependencies will be installed via pip instead of system packages where possible
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-            echo "Configuring EPEL repository for Rocky/Alma Linux..."
-            sudo $PKG_MGR clean all || true
+            echo "Skipping EPEL configuration for Rocky/Alma Linux in dependency testing pipeline"
+            echo "Using pip-based installations to avoid EPEL GPG verification issues"
+            # Clean any existing EPEL metadata that might cause issues
             sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
-
-            # Import EPEL GPG key first
-            echo "Importing EPEL GPG key..."
-            sudo rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9 2>/dev/null || true
-
-            # Configure GPG verification based on input flag (default: disabled for CI)
-            if [[ "${{ github.event.inputs.enable_epel_gpg }}" == "true" ]]; then
-              echo "GPG verification enabled for EPEL repositories"
-            else
-              echo "Disabling GPG verification for EPEL repositories (default for CI)"
-              sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/epel*.repo 2>/dev/null || true
-            fi
-            sudo $PKG_MGR makecache || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed - using pip for Python dependencies"
           fi
 
           # Install Python and system dependencies
