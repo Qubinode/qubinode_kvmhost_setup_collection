@@ -1,0 +1,12 @@
+# Molecule dependency requirements
+# This file is referenced by molecule.yml for galaxy dependencies
+
+collections:
+  - name: community.general
+    version: ">=7.0.0"
+  - name: containers.podman
+    version: ">=1.10.0"
+  - name: ansible.posix
+    version: ">=1.5.0"
+
+roles: []

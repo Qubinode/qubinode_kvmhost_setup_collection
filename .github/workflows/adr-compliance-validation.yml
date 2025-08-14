@@ -45,7 +45,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Run file structure validation
         run: |
@@ -70,18 +70,61 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          # Detect OS and use appropriate package installation method
-          . /etc/os-release
-          if [[ "$ID" == "rocky" ]]; then
-            echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          else
-            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
           fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Skip EPEL configuration to avoid GPG verification failures
+          # Use pip-based installations where possible
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Skipping EPEL configuration for Rocky/Alma Linux to avoid GPG issues"
+            # Clean any existing EPEL metadata that might cause issues
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed"
+          fi
+
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run ADR compliance checker
@@ -131,18 +174,61 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
-          # Detect OS and use appropriate package installation method
-          . /etc/os-release
-          if [[ "$ID" == "rocky" ]]; then
-            echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
-          else
-            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
           fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Skip EPEL configuration to avoid GPG verification failures
+          # Use pip-based installations where possible
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Skipping EPEL configuration for Rocky/Alma Linux to avoid GPG issues"
+            # Clean any existing EPEL metadata that might cause issues
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed"
+          fi
+
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python packages only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run dependency validation pipeline
@@ -165,18 +251,67 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Setup scanning tools
         run: |
-          # Detect OS and use appropriate package installation method
-          . /etc/os-release
-          if [[ "$ID" == "rocky" ]]; then
-            echo "Using --nogpgcheck for Rocky Linux package installation"
-            sudo yum install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
-          else
-            sudo yum install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+          # Detect OS and use appropriate package manager
+          if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            echo "Detected OS: $NAME ($ID)"
           fi
+
+          # Determine package manager
+          if command -v dnf &> /dev/null; then
+            PKG_MGR="dnf"
+          elif command -v yum &> /dev/null; then
+            PKG_MGR="yum"
+          else
+            echo "Error: No suitable package manager found"
+            exit 1
+          fi
+          echo "Using package manager: $PKG_MGR"
+
+          # Skip EPEL configuration to avoid GPG verification failures
+          # Use pip-based installations where possible
+          if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Skipping EPEL configuration for Rocky/Alma Linux to avoid GPG issues"
+            # Clean any existing EPEL metadata that might cause issues
+            sudo rm -rf /var/cache/dnf/epel* /var/cache/yum/epel* 2>/dev/null || true
+            # Remove any existing EPEL repositories to prevent conflicts
+            sudo $PKG_MGR remove -y epel-release 2>/dev/null || true
+            echo "EPEL cleanup completed"
+          fi
+
+          # Check if Python version is already installed (following ansible-test.yml pattern)
+          if command -v python${{ env.PYTHON_VERSION }} &> /dev/null; then
+            echo "Python ${{ env.PYTHON_VERSION }} is already installed: $(python${{ env.PYTHON_VERSION }} --version)"
+            PYTHON_INSTALLED=true
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} not found, will install"
+            PYTHON_INSTALLED=false
+          fi
+
+          # Install Python packages and tools only if needed
+          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
+            echo "Installing Python ${{ env.PYTHON_VERSION }} and development packages..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            else
+              sudo $PKG_MGR install -y python${{ env.PYTHON_VERSION }} python${{ env.PYTHON_VERSION }}-devel python${{ env.PYTHON_VERSION }}-pip jq
+            fi
+          else
+            echo "Python ${{ env.PYTHON_VERSION }} already installed, skipping installation"
+            # Still install jq if needed
+            if [[ "$ID" == "rocky" ]]; then
+              sudo $PKG_MGR install -y --nogpgcheck jq 2>/dev/null || true
+            else
+              sudo $PKG_MGR install -y jq 2>/dev/null || true
+            fi
+          fi
+
+          # Setup Python environment
           python${{ env.PYTHON_VERSION }} -m pip install --upgrade pip
       
       - name: Run Ansible collection security check

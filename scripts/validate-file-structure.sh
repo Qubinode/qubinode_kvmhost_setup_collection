@@ -157,29 +157,51 @@ validate_role_structure() {
 
     log_info "Validating role: $role_name"
 
-    # Check main role directory
-    validate_directory "$role_dir" "Role $role_name directory"
+    # Define exceptions for external roles that don't follow internal structure
+    local structure_exceptions=(
+        "linux-system-roles.network"  # External role from linux-system-roles collection
+        "linux-system-roles.storage"  # External role from linux-system-roles collection
+    )
 
-    # Check required role subdirectories
-    validate_directory "$role_dir/tasks" "Role $role_name tasks directory"
-    validate_directory "$role_dir/defaults" "Role $role_name defaults directory"
-    validate_directory "$role_dir/meta" "Role $role_name meta directory"
+    # Check if role is exempt from structure requirements
+    local structure_exempt=false
+    for exception in "${structure_exceptions[@]}"; do
+        if [[ "$role_name" == "$exception" ]]; then
+            structure_exempt=true
+            log_info "Role $role_name is external - skipping structure validation"
+            break
+        fi
+    done
 
-    # Check optional role subdirectories (don't fail on missing optional dirs)
-    validate_directory "$role_dir/handlers" "Role $role_name handlers directory" "false" || true
-    validate_directory "$role_dir/templates" "Role $role_name templates directory" "false" || true
-    validate_directory "$role_dir/files" "Role $role_name files directory" "false" || true
-    validate_directory "$role_dir/vars" "Role $role_name vars directory" "false" || true
+    # Only validate structure for non-exempt roles
+    if [[ "$structure_exempt" == false ]]; then
+        # Check main role directory
+        validate_directory "$role_dir" "Role $role_name directory"
 
-    # Check required role files
-    validate_file "$role_dir/tasks/main.yml" "Role $role_name main tasks file"
-    validate_file "$role_dir/defaults/main.yml" "Role $role_name defaults file"
-    validate_file "$role_dir/meta/main.yml" "Role $role_name meta file"
-    validate_file "$role_dir/README.md" "Role $role_name README" "false" || true
+        # Check required role subdirectories
+        validate_directory "$role_dir/tasks" "Role $role_name tasks directory"
+        validate_directory "$role_dir/defaults" "Role $role_name defaults directory"
+        validate_directory "$role_dir/meta" "Role $role_name meta directory"
 
-    # Check content quality
-    validate_file_content "$role_dir/tasks/main.yml" "Role $role_name main tasks" 5
-    validate_file_content "$role_dir/defaults/main.yml" "Role $role_name defaults" 3
+        # Check optional role subdirectories (don't fail on missing optional dirs)
+        validate_directory "$role_dir/handlers" "Role $role_name handlers directory" "false" || true
+        validate_directory "$role_dir/templates" "Role $role_name templates directory" "false" || true
+        validate_directory "$role_dir/files" "Role $role_name files directory" "false" || true
+        validate_directory "$role_dir/vars" "Role $role_name vars directory" "false" || true
+
+        # Check required role files
+        validate_file "$role_dir/tasks/main.yml" "Role $role_name main tasks file"
+        validate_file "$role_dir/defaults/main.yml" "Role $role_name defaults file"
+        validate_file "$role_dir/meta/main.yml" "Role $role_name meta file"
+        validate_file "$role_dir/README.md" "Role $role_name README" "false" || true
+
+        # Check content quality
+        validate_file_content "$role_dir/tasks/main.yml" "Role $role_name main tasks" 5
+        validate_file_content "$role_dir/defaults/main.yml" "Role $role_name defaults" 3
+    else
+        # For external roles, just check that the directory exists
+        validate_directory "$role_dir" "External role $role_name directory"
+    fi
 }
 
 # Function to validate Molecule structure (ADR-0005, ADR-0012, ADR-0013)
