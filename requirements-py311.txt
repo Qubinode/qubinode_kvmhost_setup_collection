@@ -20,7 +20,7 @@ distro==1.9.0
 dparse==0.6.4
 enrich==1.2.7
 execnet==2.1.1
-filelock==3.16.1
+filelock==3.19.1
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
