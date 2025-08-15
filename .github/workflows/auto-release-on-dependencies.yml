@@ -231,6 +231,17 @@ jobs:
           git config --local user.name "GitHub Action"
           git add galaxy.yml Makefile
           git commit -m "chore: bump version to $NEW_VERSION for dependency updates"
+
+          # Pull latest changes to handle race conditions (in case main was updated during workflow)
+          echo "🔄 Pulling latest changes to avoid push conflicts..."
+          git pull --rebase origin main || {
+            echo "⚠️ Rebase conflict detected - attempting to resolve automatically"
+            git rebase --abort
+            git pull --no-rebase origin main
+            git push
+            exit 0
+          }
+
           git push
 
       - name: Create release tag
