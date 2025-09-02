@@ -1,4 +1,4 @@
-FROM docker.io/rockylinux/rockylinux:9-ubi-init
+FROM docker.io/rockylinux/rockylinux:10-ubi-init
 
 # Install required packages
 RUN dnf install -y sudo python3 python3-pip openssh-clients podman slirp4netns && \
