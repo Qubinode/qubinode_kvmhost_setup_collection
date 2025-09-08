@@ -193,7 +193,7 @@ jobs:
       
       - name: Create Pull Request
         if: steps.check_packages.outputs.packages_ready == 'true' && steps.check_pr.outputs.pr_exists == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { data: pr } = await github.rest.pulls.create({
@@ -254,7 +254,7 @@ jobs:
       
       - name: Create status issue
         if: steps.check_packages.outputs.packages_ready == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             // Check if status issue already exists
