@@ -103,7 +103,7 @@ jobs:
 
       - name: Create issue if PR creation fails
         if: failure() && steps.check_updates.outputs.updates_available == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const title = '🔄 Ansible Collection Updates Available';
