@@ -54,7 +54,7 @@ jobs:
       
       - name: Upload file structure report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: file-structure-validation-report
           path: |
@@ -134,7 +134,7 @@ jobs:
       
       - name: Upload compliance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: adr-compliance-reports
           path: compliance-reports/
@@ -238,7 +238,7 @@ jobs:
       
       - name: Upload dependency validation reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dependency-validation-reports
           path: dependency-validation-reports/
@@ -322,7 +322,7 @@ jobs:
           ./scripts/ansible-collection-security-check.sh
       
       - name: Upload security scan results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: enhanced-security-scan-results
