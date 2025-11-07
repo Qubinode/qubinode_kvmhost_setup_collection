@@ -342,6 +342,27 @@ jobs:
         run: |
           echo "🔧 Setting up container registry access for CI environment..."
           
+          # Ensure podman configuration directory exists and is properly configured
+          mkdir -p ~/.config/containers
+          
+          # Create a clean containers.conf file to avoid TOML parsing errors
+          cat > ~/.config/containers/containers.conf << 'PODMAN_CONF'
+          [containers]
+          log_driver = "journald"
+          log_size_max = 100m
+          pids_limit = 2048
+          
+          [engine]
+          cgroup_manager = "systemd"
+          events_logger = "journald"
+          runtime = "crun"
+          
+          [network]
+          default_network = "podman"
+          PODMAN_CONF
+          
+          echo "✅ Podman configuration file created"
+          
           # Setup Red Hat Registry Service Account authentication
           echo "Setting up Red Hat Registry authentication..."
           RED_HAT_ACCESS=false
