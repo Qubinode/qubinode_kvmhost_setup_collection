@@ -364,7 +364,7 @@ jobs:
           
           # Debug: Check if API key is available (without exposing it)
           if [ -z "$GALAXY_API_KEY" ]; then
-            echo "❌ ERROR: ANSIBLE_GALAXY_API_KEY secret is empty or not set"
+            echo "❌ ERROR: GALAXY_API_KEY secret is empty or not set"
             echo "Please check GitHub repository secrets at:"
             echo "https://github.com/Qubinode/qubinode_kvmhost_setup_collection/settings/secrets/actions"
             exit 1
@@ -376,7 +376,7 @@ jobs:
           ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz --api-key "$GALAXY_API_KEY"
           echo "✅ Successfully deployed to Ansible Galaxy!"
         env:
-          GALAXY_API_KEY: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
 
       - name: Release Summary
         run: |
