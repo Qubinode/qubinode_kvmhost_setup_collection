@@ -13,7 +13,11 @@
         kvmhost_os_major_version: "{{ ansible_distribution_major_version }}"
         kvmhost_os_full_version: "{{ ansible_distribution_version }}"
         kvmhost_os_is_rhel_compatible: "{{ ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux'] }}"
-        kvmhost_is_centos_stream: "{{ 'CentOS Stream' in ansible_distribution_version or 'Stream' in ansible_distribution }}"
+        kvmhost_is_centos_stream: >-
+          {{
+            ansible_distribution == 'CentOS' and
+            ('Stream' in ansible_distribution_version or 'stream' in ansible_distribution_version)
+          }}
 
     - name: Set RHEL version-specific facts
       ansible.builtin.set_fact:
@@ -123,7 +127,7 @@
         kvmhost_packages_base.rhel10_container_safe if (
           kvmhost_is_rhel10 and is_container_environment | default(false)
         ) else
-        kvmhost_packages_base.centos_stream10 if kvmhost_is_centos_stream10 else
+        kvmhost_packages_base.centos_stream10 if (kvmhost_is_centos_stream10 | default(false)) else
         kvmhost_packages_base.rhel10 if kvmhost_is_rhel10 else
         kvmhost_packages_base.rhel9 if kvmhost_is_rhel9 else
         kvmhost_packages_base.rhel8 if kvmhost_is_rhel8 else
@@ -158,7 +162,7 @@
 - name: Set current OS service list
   ansible.builtin.set_fact:
     kvmhost_services_current: >-
-      {{ kvmhost_services.centos_stream10 if kvmhost_is_centos_stream10 else
+      {{ kvmhost_services.centos_stream10 if (kvmhost_is_centos_stream10 | default(false)) else
         kvmhost_services.rhel10 if kvmhost_is_rhel10 else
         kvmhost_services.rhel9 if kvmhost_is_rhel9 else
         kvmhost_services.rhel8 if kvmhost_is_rhel8 else
@@ -191,7 +195,7 @@
 - name: Set current OS firewall service list
   ansible.builtin.set_fact:
     kvmhost_firewall_services_current: >-
-      {{ kvmhost_firewall_services.centos_stream10 if kvmhost_is_centos_stream10 else
+      {{ kvmhost_firewall_services.centos_stream10 if (kvmhost_is_centos_stream10 | default(false)) else
         kvmhost_firewall_services.rhel10 if kvmhost_is_rhel10 else
         kvmhost_firewall_services.rhel9 if kvmhost_is_rhel9 else
         kvmhost_firewall_services.rhel8 if kvmhost_is_rhel8 else
@@ -221,7 +225,7 @@
 - name: Set current OS repository configuration
   ansible.builtin.set_fact:
     kvmhost_repos_current: >-
-      {{ kvmhost_repos.centos_stream10 if kvmhost_is_centos_stream10 else
+      {{ kvmhost_repos.centos_stream10 if (kvmhost_is_centos_stream10 | default(false)) else
         kvmhost_repos.rhel10 if kvmhost_is_rhel10 else
         kvmhost_repos.rhel9 if kvmhost_is_rhel9 else
         kvmhost_repos.rhel8 if kvmhost_is_rhel8 else
@@ -239,6 +243,9 @@
       This role supports RHEL/CentOS/CentOS Stream/Rocky/AlmaLinux versions 8, 9, and 10 only.
     success_msg: |
       OS compatibility confirmed: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }} is supported.
-      {{ 'CentOS Stream 10 detected - next-generation platform support enabled!' if kvmhost_is_centos_stream10 else '' }}
+      {{
+        'CentOS Stream 10 detected - next-generation platform support enabled!'
+        if kvmhost_is_centos_stream10 else ''
+      }}
   tags:
     - rhel_validation
