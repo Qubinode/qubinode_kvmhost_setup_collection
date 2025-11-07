@@ -1,0 +1,16 @@
+---
+release_summary: |
+  Pipeline testing release to validate automated Galaxy publishing with proper API key configuration.
+  This release tests the improved GitHub Actions workflow debugging and Galaxy API integration.
+
+minor_changes:
+  - "Enhanced Galaxy API key debugging in release workflows"
+  - "Improved error handling for automated Galaxy publishing"
+  - "Added comprehensive secret validation in GitHub Actions"
+  - "Validated manual Galaxy publishing workflow"
+
+testing:
+  - "Confirmed CentOS Stream 10 molecule testing continues to work"
+  - "Validated ansible-core 2.19 compatibility remains stable"
+  - "Tested Galaxy API key integration and error reporting"
+  - "Verified collection build and publish process"
