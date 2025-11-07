@@ -343,10 +343,12 @@ jobs:
           echo "🔧 Setting up container registry access for CI environment..."
           
           # Ensure podman configuration directory exists and is properly configured
-          mkdir -p ~/.config/containers
+          # Remove any existing corrupted configuration
+          rm -f /home/github-runner/.config/containers/containers.conf
+          mkdir -p /home/github-runner/.config/containers
           
           # Create a clean containers.conf file to avoid TOML parsing errors
-          cat > ~/.config/containers/containers.conf << 'PODMAN_CONF'
+          cat > /home/github-runner/.config/containers/containers.conf << 'PODMAN_CONF'
           [containers]
           log_driver = "journald"
           log_size_max = 100m
@@ -362,6 +364,16 @@ jobs:
           PODMAN_CONF
           
           echo "✅ Podman configuration file created"
+          
+          # Verify the configuration file was created correctly
+          echo "🔍 Verifying containers.conf file:"
+          if [ -f "/home/github-runner/.config/containers/containers.conf" ]; then
+            echo "File exists. Content:"
+            cat /home/github-runner/.config/containers/containers.conf
+            echo "File size: $(wc -c < /home/github-runner/.config/containers/containers.conf) bytes"
+          else
+            echo "❌ File not found!"
+          fi
           
           # Setup Red Hat Registry Service Account authentication
           echo "Setting up Red Hat Registry authentication..."
