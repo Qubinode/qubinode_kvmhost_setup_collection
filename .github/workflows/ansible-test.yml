@@ -502,6 +502,8 @@ jobs:
           export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           # Handle SELinux gracefully in containerized environments
           export ANSIBLE_SELINUX_SPECIAL_FS=""
+          # ansible-core 2.19 compatibility - allow broken conditionals in molecule-podman
+          export ANSIBLE_ALLOW_BROKEN_CONDITIONALS=True
           
           # Verify ansible-core version compatibility
           ansible_version=$(ansible --version | head -1 | cut -d' ' -f3 | cut -d']' -f1)
