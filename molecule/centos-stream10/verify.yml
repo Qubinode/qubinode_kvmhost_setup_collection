@@ -1,0 +1,91 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Verify OS version detection
+      ansible.builtin.assert:
+        that:
+          - kvmhost_os_family is defined
+          - kvmhost_os_major_version is defined
+          - kvmhost_os_full_version is defined
+          - kvmhost_is_rhel10 is defined
+          - kvmhost_is_centos_stream is defined
+          - kvmhost_is_centos_stream10 is defined
+        success_msg: "OS version detection working correctly"
+        fail_msg: "OS version detection failed"
+
+    - name: Verify CentOS Stream 10 detection
+      ansible.builtin.assert:
+        that:
+          - kvmhost_os_family == "CentOS"
+          - kvmhost_os_major_version == "10"
+          - kvmhost_is_rhel10 == true
+          - kvmhost_is_centos_stream == true
+          - kvmhost_is_centos_stream10 == true
+        success_msg: "CentOS Stream 10 correctly detected"
+        fail_msg: "CentOS Stream 10 detection failed"
+
+    - name: Verify package lists are set
+      ansible.builtin.assert:
+        that:
+          - kvmhost_packages_current is defined
+          - kvmhost_packages_current | length > 0
+        success_msg: "Package lists configured correctly"
+        fail_msg: "Package lists not configured"
+
+    - name: Verify service lists are set
+      ansible.builtin.assert:
+        that:
+          - kvmhost_services_current is defined
+          - kvmhost_services_current | length > 0
+        success_msg: "Service lists configured correctly"
+        fail_msg: "Service lists not configured"
+
+    - name: Verify repository configuration
+      ansible.builtin.assert:
+        that:
+          - kvmhost_repos_current is defined
+        success_msg: "Repository configuration set correctly"
+        fail_msg: "Repository configuration not set"
+
+    - name: Verify Python version (CentOS Stream 10 has Python 3.12)
+      ansible.builtin.command: python3 --version
+      register: python_version
+      changed_when: false
+
+    - name: Assert Python 3.12 is available
+      ansible.builtin.assert:
+        that:
+          - "'Python 3.12' in python_version.stdout"
+        success_msg: "Python 3.12 confirmed on CentOS Stream 10"
+        fail_msg: "Python 3.12 not found on CentOS Stream 10"
+
+    - name: Verify systemd is running
+      ansible.builtin.command: systemctl --version
+      register: systemd_version
+      changed_when: false
+
+    - name: Assert systemd is working
+      ansible.builtin.assert:
+        that:
+          - systemd_version.rc == 0
+          - "'systemd' in systemd_version.stdout"
+        success_msg: "systemd is working correctly"
+        fail_msg: "systemd is not working"
+
+    - name: Check if EPEL repository configuration exists (skip in container)
+      ansible.builtin.stat:
+        path: /etc/yum.repos.d/epel.repo
+      register: epel_repo_check
+      when: not (is_container_environment | default(false))
+
+    - name: Verify EPEL repository (only if not in container)
+      ansible.builtin.assert:
+        that:
+          - epel_repo_check.stat.exists
+        success_msg: "EPEL repository configured"
+        fail_msg: "EPEL repository not configured"
+      when: 
+        - not (is_container_environment | default(false))
+        - epel_repo_check is defined

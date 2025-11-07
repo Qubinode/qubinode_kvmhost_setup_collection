@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: "Include kvmhost_setup role"
+      ansible.builtin.include_role:
+        name: kvmhost_setup
+      vars:
+        # Override for testing - don't actually install heavy packages in containers
+        kvmhost_skip_package_installation: false
+        # Enable testing mode for container environments
+        kvmhost_container_testing_mode: true

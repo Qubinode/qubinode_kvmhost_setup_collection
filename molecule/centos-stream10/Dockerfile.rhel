@@ -1,0 +1,65 @@
+# Molecule managed Dockerfile for RHEL-based containers
+# This template supports RHEL 9, RHEL 10, Rocky Linux, AlmaLinux, and compatible distributions
+
+# Molecule Jinja2 template for base image
+{% if item.registry is defined %}
+FROM {{ item.registry.url }}/{{ item.image }}
+{% else %}
+FROM {{ item.image }}
+{% endif %}
+
+# Install essential packages using dnf (RHEL package manager)
+RUN if [ $(command -v dnf) ]; then \
+        dnf update -y && \
+        dnf install -y \
+            python3 \
+            python3-pip \
+            sudo \
+            bash \
+            ca-certificates \
+            iproute \
+            openssh-clients \
+            systemd \
+            procps-ng \
+            which \
+            tar \
+            gzip \
+        && dnf clean all; \
+    elif [ $(command -v yum) ]; then \
+        yum update -y && \
+        yum install -y \
+            python3 \
+            python3-pip \
+            sudo \
+            bash \
+            ca-certificates \
+            iproute \
+            openssh-clients \
+            systemd \
+            procps-ng \
+            which \
+            tar \
+            gzip \
+        && yum clean all; \
+    fi
+
+# Create molecule user with sudo privileges
+RUN useradd -m -s /bin/bash molecule && \
+    echo "molecule ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/molecule && \
+    chmod 0440 /etc/sudoers.d/molecule
+
+# Set up Python symlinks if needed
+RUN if [ ! -e /usr/bin/python ]; then ln -sf /usr/bin/python3 /usr/bin/python; fi
+
+# Install Ansible and required collections for testing
+# Note: ansible-core>=2.18.0 required for Python 3.11 + SELinux compatibility
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install 'ansible-core>=2.18.0,<2.19.0' requests && \
+    ansible-galaxy collection install ansible.posix community.general community.libvirt fedora.linux_system_roles ansible.netcommon && \
+    ansible-galaxy role install linux-system-roles.network || true
+
+# Set working directory
+WORKDIR /tmp
+
+# Default command for systemd init
+CMD ["/usr/sbin/init"]

@@ -178,7 +178,8 @@ jobs:
         run: |
           source venv-py311/bin/activate
           # Use ansible-core 2.18+ for Python 3.11 compatibility (fixes SELinux binding issues)
-          pip install ansible-lint>=6.0.0 bandit>=1.7.0 "ansible-core>=2.18.0,<2.19.0"
+          # Support up to 2.19 for CentOS Stream 10 Python 3.12 compatibility
+          pip install ansible-lint>=6.0.0 bandit>=1.7.0 "ansible-core>=2.18.0,<2.20.0"
       - name: Install required Ansible collections and roles
         run: |
           source venv-py311/bin/activate
@@ -207,7 +208,8 @@ jobs:
     strategy:
       matrix:
         # Use ansible-core 2.18+ for Python 3.11 compatibility (2.17 has SELinux binding issues)
-        ansible-version: ["2.18"]
+        # ansible-core 2.19 adds enhanced Python 3.12 support for CentOS Stream 10
+        ansible-version: ["2.18", "2.19"]
         python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v5
@@ -403,7 +405,7 @@ jobs:
             echo "🔄 Replacing Red Hat registry images with public alternatives..."
             
             # Create temporary molecule configs with public images
-            for scenario in default idempotency validation ci; do
+            for scenario in default idempotency validation ci centos-stream10; do
               if [[ -f "molecule/$scenario/molecule.yml" ]]; then
                 echo "Updating molecule/$scenario/molecule.yml..."
                 cp "molecule/$scenario/molecule.yml" "molecule/$scenario/molecule.yml.backup"
@@ -428,11 +430,13 @@ jobs:
               "docker.io/almalinux/9-init:9.6-20250712" 
               "registry.redhat.io/ubi9-init:9.6-1751962289"
               "registry.redhat.io/ubi10-init:10.0-1751895590"
+              "quay.io/centos/centos:stream10"
             )
           else
             IMAGES=(
               "docker.io/rockylinux/rockylinux:9-ubi-init"
               "docker.io/almalinux/9-init:9.6-20250712"
+              "quay.io/centos/centos:stream10"
             )
           fi
           
