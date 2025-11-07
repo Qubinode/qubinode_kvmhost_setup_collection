@@ -13,12 +13,14 @@
         kvmhost_os_major_version: "{{ ansible_distribution_major_version }}"
         kvmhost_os_full_version: "{{ ansible_distribution_version }}"
         kvmhost_os_is_rhel_compatible: "{{ ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux'] }}"
+        kvmhost_is_centos_stream: "{{ 'CentOS Stream' in ansible_distribution_version or 'Stream' in ansible_distribution }}"
 
     - name: Set RHEL version-specific facts
       ansible.builtin.set_fact:
         kvmhost_is_rhel8: "{{ kvmhost_os_major_version == '8' and kvmhost_os_is_rhel_compatible }}"
         kvmhost_is_rhel9: "{{ kvmhost_os_major_version == '9' and kvmhost_os_is_rhel_compatible }}"
         kvmhost_is_rhel10: "{{ kvmhost_os_major_version == '10' and kvmhost_os_is_rhel_compatible }}"
+        kvmhost_is_centos_stream10: "{{ kvmhost_os_major_version == '10' and kvmhost_is_centos_stream }}"
 
     - name: Set package manager facts based on OS version
       ansible.builtin.set_fact:
@@ -33,9 +35,11 @@
           - Distribution: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
           - Major Version: {{ kvmhost_os_major_version }}
           - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible }}
+          - CentOS Stream: {{ kvmhost_is_centos_stream }}
           - RHEL 8: {{ kvmhost_is_rhel8 }}
           - RHEL 9: {{ kvmhost_is_rhel9 }}
           - RHEL 10: {{ kvmhost_is_rhel10 }}
+          - CentOS Stream 10: {{ kvmhost_is_centos_stream10 }}
           - Package Manager: {{ kvmhost_package_manager }}
           - Python: {{ kvmhost_python_executable }}
 
@@ -91,6 +95,24 @@
         # Note: iproute is pre-installed in RHEL 10 UBI containers
         - python3-lxml  # Available in ubi-10-for-x86_64-appstream-rpms
         # NetworkManager-libnm is available but not the full NetworkManager package
+      centos_stream10:
+        # CentOS Stream 10 packages - optimized for next-gen platform
+        - libvirt
+        - libvirt-daemon-kvm
+        - qemu-kvm
+        - virt-manager
+        - virt-install
+        - libguestfs-tools
+        - iproute
+        - NetworkManager
+        - cockpit
+        - cockpit-machines
+        - python3-libvirt
+        - python3-lxml
+        - guestfs-tools
+        # CentOS Stream 10 specific packages
+        - python3.12  # Explicit Python 3.12 support
+        - podman      # Enhanced container support
   tags:
     - rhel_packages
 
@@ -101,6 +123,7 @@
         kvmhost_packages_base.rhel10_container_safe if (
           kvmhost_is_rhel10 and is_container_environment | default(false)
         ) else
+        kvmhost_packages_base.centos_stream10 if kvmhost_is_centos_stream10 else
         kvmhost_packages_base.rhel10 if kvmhost_is_rhel10 else
         kvmhost_packages_base.rhel9 if kvmhost_is_rhel9 else
         kvmhost_packages_base.rhel8 if kvmhost_is_rhel8 else
@@ -124,13 +147,19 @@
         - libvirtd
         - NetworkManager
         - cockpit.socket
+      centos_stream10:
+        - libvirtd
+        - NetworkManager
+        - cockpit.socket
+        - podman.socket  # Enhanced container service support
   tags:
     - rhel_services
 
 - name: Set current OS service list
   ansible.builtin.set_fact:
     kvmhost_services_current: >-
-      {{ kvmhost_services.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_services.centos_stream10 if kvmhost_is_centos_stream10 else
+        kvmhost_services.rhel10 if kvmhost_is_rhel10 else
         kvmhost_services.rhel9 if kvmhost_is_rhel9 else
         kvmhost_services.rhel8 if kvmhost_is_rhel8 else
         kvmhost_services.rhel9 }}
@@ -152,13 +181,18 @@
         - libvirt
         - cockpit
         - ssh
+      centos_stream10:
+        - libvirt
+        - cockpit
+        - ssh
   tags:
     - rhel_firewall
 
 - name: Set current OS firewall service list
   ansible.builtin.set_fact:
     kvmhost_firewall_services_current: >-
-      {{ kvmhost_firewall_services.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_firewall_services.centos_stream10 if kvmhost_is_centos_stream10 else
+        kvmhost_firewall_services.rhel10 if kvmhost_is_rhel10 else
         kvmhost_firewall_services.rhel9 if kvmhost_is_rhel9 else
         kvmhost_firewall_services.rhel8 if kvmhost_is_rhel8 else
         kvmhost_firewall_services.rhel9 }}
@@ -177,13 +211,18 @@
       rhel10:
         epel: epel-release
         codeready: codeready-builder-for-rhel-10-x86_64-rpms
+      centos_stream10:
+        epel: epel-release
+        # CentOS Stream 10 uses CRB (CodeReady Builder) equivalent
+        crb: crb
   tags:
     - rhel_repos
 
 - name: Set current OS repository configuration
   ansible.builtin.set_fact:
     kvmhost_repos_current: >-
-      {{ kvmhost_repos.rhel10 if kvmhost_is_rhel10 else
+      {{ kvmhost_repos.centos_stream10 if kvmhost_is_centos_stream10 else
+        kvmhost_repos.rhel10 if kvmhost_is_rhel10 else
         kvmhost_repos.rhel9 if kvmhost_is_rhel9 else
         kvmhost_repos.rhel8 if kvmhost_is_rhel8 else
         kvmhost_repos.rhel9 }}
@@ -193,12 +232,13 @@
 - name: Verify RHEL version compatibility
   ansible.builtin.assert:
     that:
-      - kvmhost_os_is_rhel_compatible
+      - kvmhost_os_is_rhel_compatible or kvmhost_is_centos_stream
       - kvmhost_os_major_version|int >= 8
     fail_msg: |
       Unsupported operating system: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
-      This role supports RHEL/CentOS/Rocky/AlmaLinux versions 8, 9, and 10 only.
+      This role supports RHEL/CentOS/CentOS Stream/Rocky/AlmaLinux versions 8, 9, and 10 only.
     success_msg: |
       OS compatibility confirmed: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }} is supported.
+      {{ 'CentOS Stream 10 detected - next-generation platform support enabled!' if kvmhost_is_centos_stream10 else '' }}
   tags:
     - rhel_validation

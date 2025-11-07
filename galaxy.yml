@@ -2,13 +2,13 @@
 
 namespace: tosin2013
 name: qubinode_kvmhost_setup_collection
-version: "0.9.26"
+version: "0.9.27"
 readme: README.md
 authors:
   - Tosin Akinosho (github.com/tosin2013)
   - Rodrique Heron (github.com/flyemsafe)
 description: This Ansible Collection for Virtual Machines Setup provides a set of roles for configuring and managing KVM
-  hosts in baremetal servers using RHEL-based Linux operating systems.
+  hosts in baremetal servers using RHEL-based Linux operating systems, including RHEL 8/9/10, CentOS Stream 10, Rocky Linux, and AlmaLinux.
 license_file: LICENSE
 tags:
   # tags so people can search for collections https://galaxy.ansible.com/search
