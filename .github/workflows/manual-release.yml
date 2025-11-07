@@ -361,7 +361,7 @@ jobs:
           ls -lath .
           ls -lath ./meta
           cat ./meta/runtime.yml
-          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz --api-key ${{ secrets.GALAXY_API_KEY }}
+          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz --api-key ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
           echo "✅ Successfully deployed to Ansible Galaxy!"
 
       - name: Release Summary
