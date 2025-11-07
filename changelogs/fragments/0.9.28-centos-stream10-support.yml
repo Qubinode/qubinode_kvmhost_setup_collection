@@ -1,0 +1,29 @@
+---
+release_summary: |
+  Major release adding CentOS Stream 10 support and ansible-core 2.19 compatibility.
+  This release provides comprehensive testing coverage for the latest RHEL 10 upstream
+  features through CentOS Stream 10, enhanced ansible-core compatibility, and improved
+  CI/CD pipeline reliability.
+
+major_changes:
+  - "Added CentOS Stream 10 molecule testing scenario for upstream RHEL 10 validation"
+  - "Implemented ansible-core 2.19 support with enhanced Python 3.12 compatibility"
+  - "Enhanced test matrix to cover both ansible-core 2.18 and 2.19 across all scenarios"
+  - "Added comprehensive systemd support for CentOS Stream 10 containers"
+
+minor_changes:
+  - "Updated GitHub Actions workflow to pre-pull CentOS Stream 10 container images"
+  - "Added ANSIBLE_ALLOW_BROKEN_CONDITIONALS environment variable for molecule-podman compatibility"
+  - "Enhanced security compliance validation per ADR-0012 requirements"
+  - "Improved container registry fallback logic for public image scenarios"
+
+bugfixes:
+  - "Fixed ansible-core 2.19 conditional validation issues in molecule-podman destroy tasks"
+  - "Resolved TOML parsing errors in podman containers.conf configuration"
+  - "Updated deprecated ansible callback plugin configuration for ansible-core 2.19"
+
+testing:
+  - "Added CentOS Stream 10 verification tests for OS detection and Python 3.12 support"
+  - "Enhanced molecule test coverage with 10 total test combinations (2 ansible versions × 5 OS scenarios)"
+  - "Validated security-enhanced container testing with capability-specific configurations"
+  - "Confirmed systemd functionality in CentOS Stream 10 containers"
