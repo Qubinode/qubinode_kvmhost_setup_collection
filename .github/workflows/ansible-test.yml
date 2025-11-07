@@ -347,21 +347,16 @@ jobs:
           rm -f /home/github-runner/.config/containers/containers.conf
           mkdir -p /home/github-runner/.config/containers
           
-          # Create a clean containers.conf file to avoid TOML parsing errors
-          cat > /home/github-runner/.config/containers/containers.conf << 'PODMAN_CONF'
+          # Create a minimal containers.conf file to avoid TOML parsing errors
+          # Use a very basic configuration that's known to work with podman
+          cat > /home/github-runner/.config/containers/containers.conf << 'EOF'
           [containers]
-          log_driver = "journald"
-          log_size_max = 100m
-          pids_limit = 2048
           
           [engine]
           cgroup_manager = "systemd"
-          events_logger = "journald"
-          runtime = "crun"
           
           [network]
-          default_network = "podman"
-          PODMAN_CONF
+          EOF
           
           echo "✅ Podman configuration file created"
           
