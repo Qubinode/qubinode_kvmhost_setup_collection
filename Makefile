@@ -1,5 +1,5 @@
 # echo "Dont forget to update the version in galaxy.yml and README.md"
-TAG=0.9.26
+TAG=0.9.30
 
 create-release:
 	git tag -a v${TAG} -m "Creating v${TAG} release"
