@@ -19,11 +19,17 @@
     - name: Extract OS information from parsed lines
       ansible.builtin.set_fact:
         os_release_id: >-
-          {{ (os_release_lines | select('match', '^ID=') | first | default('ID=unknown') | regex_replace('^ID=', '') | regex_replace('\"', '')) }}
+          {{ (os_release_lines | select('match', '^ID=') | first |
+             default('ID=unknown') | regex_replace('^ID=', '') |
+             regex_replace('\"', '')) }}
         os_release_version_id: >-
-          {{ (os_release_lines | select('match', '^VERSION_ID=') | first | default('VERSION_ID=unknown') | regex_replace('^VERSION_ID=', '') | regex_replace('\"', '')) }}
+          {{ (os_release_lines | select('match', '^VERSION_ID=') | first |
+             default('VERSION_ID=unknown') | regex_replace('^VERSION_ID=', '') |
+             regex_replace('\"', '')) }}
         os_release_name: >-
-          {{ (os_release_lines | select('match', '^NAME=') | first | default('NAME=unknown') | regex_replace('^NAME=', '') | regex_replace('\"', '')) }}
+          {{ (os_release_lines | select('match', '^NAME=') | first |
+             default('NAME=unknown') | regex_replace('^NAME=', '') |
+             regex_replace('\"', '')) }}
 
     - name: Set OS family facts with enhanced CentOS Stream 10 detection
       ansible.builtin.set_fact:
