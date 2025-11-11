@@ -1,18 +1,52 @@
 # OS Detection and Version Facts
 # Based on ADR-0008: RHEL 9/10 Support Strategy
 
-- name: Detect OS family and version
+- name: Read OS release file for enhanced detection
+  ansible.builtin.slurp:
+    src: /etc/os-release
+  register: os_release_content
+
+- name: Parse OS information from /etc/os-release
   ansible.builtin.set_fact:
-    kvmhost_os_family: "{{ ansible_distribution }}"
-    kvmhost_os_major_version: "{{ ansible_distribution_major_version }}"
-    kvmhost_os_full_version: "{{ ansible_distribution_version }}"
-    kvmhost_os_is_rhel_compatible: "{{ ansible_distribution in supported_os_families }}"
+    os_release_id: "{{ (os_release_content.content | b64decode | regex_search('ID=(.+)', '\\1'))[0] | regex_replace('\"', '') }}"
+    os_release_version_id: "{{ (os_release_content.content | b64decode | regex_search('VERSION_ID=(.+)', '\\1'))[0] | regex_replace('\"', '') }}"
+    os_release_name: "{{ (os_release_content.content | b64decode | regex_search('NAME=(.+)', '\\1'))[0] | regex_replace('\"', '') }}"
+
+- name: Detect OS family and version with enhanced CentOS Stream 10 detection
+  ansible.builtin.set_fact:
+    kvmhost_os_family: >-
+      {{
+        'CentOS' if (os_release_id == 'centos' or 'CentOS Stream' in os_release_name) else
+        ansible_distribution
+      }}
+    kvmhost_os_major_version: >-
+      {{
+        os_release_version_id if (os_release_id == 'centos' and ansible_distribution == 'Fedora') else
+        ansible_distribution_major_version
+      }}
+    kvmhost_os_full_version: >-
+      {{
+        os_release_version_id if (os_release_id == 'centos' and ansible_distribution == 'Fedora') else
+        ansible_distribution_version
+      }}
+    kvmhost_os_is_rhel_compatible: >-
+      {{
+        (os_release_id == 'centos') or
+        (ansible_distribution in supported_os_families)
+      }}
+    kvmhost_is_centos_stream: >-
+      {{
+        (os_release_id == 'centos' and 'Stream' in os_release_name) or
+        (ansible_distribution == 'CentOS' and
+         ('Stream' in ansible_distribution_version or 'stream' in ansible_distribution_version))
+      }}
 
 - name: Set RHEL version-specific facts
   ansible.builtin.set_fact:
     kvmhost_is_rhel8: "{{ kvmhost_os_major_version == '8' and kvmhost_os_is_rhel_compatible }}"
     kvmhost_is_rhel9: "{{ kvmhost_os_major_version == '9' and kvmhost_os_is_rhel_compatible }}"
     kvmhost_is_rhel10: "{{ kvmhost_os_major_version == '10' and kvmhost_os_is_rhel_compatible }}"
+    kvmhost_is_centos_stream10: "{{ kvmhost_os_major_version == '10' and kvmhost_is_centos_stream }}"
 
 - name: Set package manager facts based on OS version
   ansible.builtin.set_fact:

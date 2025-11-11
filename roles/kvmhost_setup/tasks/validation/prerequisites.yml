@@ -13,12 +13,12 @@
 - name: Check OS distribution
   ansible.builtin.assert:
     that:
-      - ansible_distribution in ['RedHat', 'Rocky']
-      - ansible_distribution_major_version | int >= 8
+      - kvmhost_os_is_rhel_compatible or kvmhost_is_centos_stream
+      - kvmhost_os_major_version | int >= 8
     fail_msg: |
-      Unsupported distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}
-      This role requires RedHat or Rocky Linux 8 or later
-    success_msg: OS distribution is supported
+      Unsupported distribution: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
+      This role requires RHEL/CentOS/CentOS Stream/Rocky/AlmaLinux 8 or later
+    success_msg: OS distribution is supported ({{ kvmhost_os_family }} {{ kvmhost_os_full_version }})
 
 - name: Check for virtualization support
   ansible.builtin.command: grep -E 'svm|vmx' /proc/cpuinfo

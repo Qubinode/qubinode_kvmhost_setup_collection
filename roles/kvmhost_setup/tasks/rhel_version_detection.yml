@@ -7,16 +7,44 @@
     - os_facts
 
   block:
-    - name: Set OS family facts
+    - name: Read OS release file for enhanced detection
+      ansible.builtin.slurp:
+        src: /etc/os-release
+      register: os_release_content
+
+    - name: Parse OS information from /etc/os-release
       ansible.builtin.set_fact:
-        kvmhost_os_family: "{{ ansible_distribution }}"
-        kvmhost_os_major_version: "{{ ansible_distribution_major_version }}"
-        kvmhost_os_full_version: "{{ ansible_distribution_version }}"
-        kvmhost_os_is_rhel_compatible: "{{ ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux'] }}"
+        os_release_id: "{{ (os_release_content.content | b64decode | regex_search('ID=(.+)', '\\1'))[0] | regex_replace('\"', '') }}"
+        os_release_version_id: "{{ (os_release_content.content | b64decode | regex_search('VERSION_ID=(.+)', '\\1'))[0] | regex_replace('\"', '') }}"
+        os_release_name: "{{ (os_release_content.content | b64decode | regex_search('NAME=(.+)', '\\1'))[0] | regex_replace('\"', '') }}"
+
+    - name: Set OS family facts with enhanced CentOS Stream 10 detection
+      ansible.builtin.set_fact:
+        kvmhost_os_family: >-
+          {{
+            'CentOS' if (os_release_id == 'centos' or 'CentOS Stream' in os_release_name) else
+            ansible_distribution
+          }}
+        kvmhost_os_major_version: >-
+          {{
+            os_release_version_id if (os_release_id == 'centos' and ansible_distribution == 'Fedora') else
+            ansible_distribution_major_version
+          }}
+        kvmhost_os_full_version: >-
+          {{
+            os_release_version_id if (os_release_id == 'centos' and ansible_distribution == 'Fedora') else
+            ansible_distribution_version
+          }}
+        kvmhost_os_is_rhel_compatible: >-
+          {{
+            (os_release_id == 'centos') or
+            (ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux'])
+          }}
         kvmhost_is_centos_stream: >-
           {{
-            ansible_distribution == 'CentOS' and
-            ('Stream' in ansible_distribution_version or 'stream' in ansible_distribution_version)
+            (os_release_id == 'centos' and 'Stream' in os_release_name) or
+            (ansible_distribution == 'CentOS' and
+             ('Stream' in ansible_distribution_version or 'stream' in ansible_distribution_version))
           }}
 
     - name: Set RHEL version-specific facts

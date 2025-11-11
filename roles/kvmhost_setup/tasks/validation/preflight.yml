@@ -64,12 +64,12 @@
     - name: Check RHEL/CentOS/Rocky/AlmaLinux version compatibility
       ansible.builtin.assert:
         that:
-          - ansible_distribution in ['RedHat', 'CentOS', 'Rocky', 'AlmaLinux']
-          - ansible_distribution_major_version in ['8', '9', '10']
+          - kvmhost_os_is_rhel_compatible or kvmhost_is_centos_stream
+          - kvmhost_os_major_version in ['8', '9', '10']
         fail_msg: >-
-          Unsupported OS: {{ ansible_distribution }} {{ ansible_distribution_version }}.
-          Supported: RHEL/CentOS/Rocky/AlmaLinux 8/9/10
-        success_msg: "OS compatibility confirmed: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          Unsupported OS: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}.
+          Supported: RHEL/CentOS/CentOS Stream/Rocky/AlmaLinux 8/9/10
+        success_msg: "OS compatibility confirmed: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}"
 
     - name: Check kernel version for KVM support
       ansible.builtin.shell: |

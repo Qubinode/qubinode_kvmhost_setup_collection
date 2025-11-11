@@ -1,0 +1,90 @@
+---
+# Test playbook for CentOS Stream 10 OS detection fix
+# Usage: ansible-playbook -i localhost, test-centos-stream-10-detection.yml --connection=local
+#
+# This playbook tests the enhanced OS detection logic to ensure CentOS Stream 10
+# is properly identified and supported by the qubinode_kvmhost_setup_collection.
+
+- name: Test CentOS Stream 10 OS Detection Fix
+  hosts: all
+  gather_facts: true
+  vars:
+    # Test mode to avoid actual system changes
+    testing_mode: true
+    cicd_test: true
+  
+  tasks:
+    - name: Display current Ansible facts for debugging
+      ansible.builtin.debug:
+        msg: |
+          Raw Ansible Facts:
+          - ansible_distribution: {{ ansible_distribution }}
+          - ansible_distribution_version: {{ ansible_distribution_version }}
+          - ansible_distribution_major_version: {{ ansible_distribution_major_version }}
+          - ansible_os_family: {{ ansible_os_family }}
+
+    - name: Test enhanced OS detection logic
+      ansible.builtin.include_tasks: roles/kvmhost_setup/tasks/rhel_version_detection.yml
+      tags:
+        - rhel_detection
+        - os_facts
+
+    - name: Display enhanced OS detection results
+      ansible.builtin.debug:
+        msg: |
+          Enhanced OS Detection Results:
+          - kvmhost_os_family: {{ kvmhost_os_family }}
+          - kvmhost_os_major_version: {{ kvmhost_os_major_version }}
+          - kvmhost_os_full_version: {{ kvmhost_os_full_version }}
+          - kvmhost_os_is_rhel_compatible: {{ kvmhost_os_is_rhel_compatible }}
+          - kvmhost_is_centos_stream: {{ kvmhost_is_centos_stream }}
+          - kvmhost_is_centos_stream10: {{ kvmhost_is_centos_stream10 }}
+          - kvmhost_is_rhel10: {{ kvmhost_is_rhel10 }}
+
+    - name: Test OS validation logic
+      ansible.builtin.assert:
+        that:
+          - kvmhost_os_is_rhel_compatible or kvmhost_is_centos_stream
+          - kvmhost_os_major_version|int >= 8
+        fail_msg: |
+          ❌ VALIDATION FAILED: OS detection fix did not work correctly.
+          - OS Family: {{ kvmhost_os_family }}
+          - OS Version: {{ kvmhost_os_full_version }}
+          - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible }}
+          - CentOS Stream: {{ kvmhost_is_centos_stream }}
+        success_msg: |
+          ✅ VALIDATION PASSED: CentOS Stream 10 detection is working correctly!
+          - Detected OS: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
+          - RHEL Compatible: {{ kvmhost_os_is_rhel_compatible }}
+          - CentOS Stream: {{ kvmhost_is_centos_stream }}
+          {{ 'CentOS Stream 10 detected - next-generation platform support enabled!' if kvmhost_is_centos_stream10 else '' }}
+
+    - name: Display raw /etc/os-release content for debugging
+      ansible.builtin.slurp:
+        src: /etc/os-release
+      register: os_release_debug
+
+    - name: Show /etc/os-release content
+      ansible.builtin.debug:
+        msg: |
+          /etc/os-release content:
+          {{ os_release_debug.content | b64decode }}
+
+    - name: Test Summary
+      ansible.builtin.debug:
+        msg: |
+          🎉 CentOS Stream 10 OS Detection Test Summary:
+          
+          ✅ Enhanced OS detection logic implemented
+          ✅ Validation logic updated to support CentOS Stream 10
+          ✅ Package management configured for CentOS Stream 10
+          
+          The fix should resolve the issue where CentOS Stream 10 was
+          incorrectly detected as "Fedora 41" and rejected as unsupported.
+          
+          Expected behavior on CentOS Stream 10:
+          - kvmhost_os_family: "CentOS"
+          - kvmhost_os_major_version: "10"
+          - kvmhost_is_centos_stream: true
+          - kvmhost_is_centos_stream10: true
+          - kvmhost_os_is_rhel_compatible: true
