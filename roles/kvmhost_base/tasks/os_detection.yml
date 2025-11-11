@@ -9,13 +9,13 @@
 - name: Parse OS information from /etc/os-release
   ansible.builtin.set_fact:
     os_release_id: >-
-      {{ (os_release_content.content | b64decode | 
+      {{ (os_release_content.content | b64decode |
          regex_search('ID=(.+)', '\\1'))[0] | regex_replace('\"', '') }}
     os_release_version_id: >-
-      {{ (os_release_content.content | b64decode | 
+      {{ (os_release_content.content | b64decode |
          regex_search('VERSION_ID=(.+)', '\\1'))[0] | regex_replace('\"', '') }}
     os_release_name: >-
-      {{ (os_release_content.content | b64decode | 
+      {{ (os_release_content.content | b64decode |
          regex_search('NAME=(.+)', '\\1'))[0] | regex_replace('\"', '') }}
 
 - name: Detect OS family and version with enhanced CentOS Stream 10 detection
