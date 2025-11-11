@@ -719,6 +719,93 @@ jobs:
           podman logout --all 2>/dev/null || true
           echo "✅ Registry cleanup completed"
 
+  centos-stream10-test:
+    needs: lint
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Display OS information
+        run: |
+          echo "🧪 CentOS Stream 10 OS Detection Test"
+          echo "====================================="
+          echo "This job validates our enhanced OS detection fix"
+          echo "for CentOS Stream 10 containers that were previously"
+          echo "misidentified as Fedora 41."
+          echo ""
+          if [ -f /etc/os-release ]; then
+            echo "📋 Host OS Release Information:"
+            cat /etc/os-release | grep -E '^(NAME|VERSION|ID|PRETTY_NAME)=' | sed 's/^/   /'
+          fi
+          echo "====================================="
+
+      - name: Setup Python 3.11 environment
+        run: |
+          # Use same setup as main test job but simplified
+          if [ -f /etc/os-release ]; then
+            source /etc/os-release
+            PKG_MGR="dnf"
+            if [[ "$ID" == "ubuntu" ]]; then
+              PKG_MGR="apt-get"
+            fi
+          fi
+          
+          # Install Python 3.11 if not available
+          if ! command -v python3.11 &> /dev/null; then
+            echo "Installing Python 3.11..."
+            if [[ "$PKG_MGR" == "apt-get" ]]; then
+              sudo apt-get update
+              sudo apt-get install -y python3.11 python3.11-venv python3.11-dev
+            else
+              sudo $PKG_MGR install -y python3.11 python3.11-pip python3.11-devel
+            fi
+          fi
+          
+          # Setup virtual environment
+          python3.11 -m pip install --upgrade pip
+          python3.11 -m pip install virtualenv
+          python3.11 -m virtualenv venv-centos10
+          source venv-centos10/bin/activate
+          
+          # Install required packages
+          pip install "ansible-core>=2.18.0,<2.20.0" "molecule>=6.0.0" molecule-podman
+
+      - name: Run CentOS Stream 10 Molecule test
+        timeout-minutes: 25
+        run: |
+          source venv-centos10/bin/activate
+          
+          echo "🧪 Testing CentOS Stream 10 OS detection..."
+          echo "This test validates that CentOS Stream 10 is correctly"
+          echo "identified as 'CentOS' instead of 'Fedora 41'"
+          echo ""
+          
+          # Set environment variables for molecule-podman compatibility
+          export ANSIBLE_ALLOW_BROKEN_CONDITIONALS=True
+          export ANSIBLE_PYTHON_INTERPRETER=auto_silent
+          export ANSIBLE_SELINUX_SPECIAL_FS=""
+          
+          # Run the CentOS Stream 10 specific scenario
+          echo "🚀 Running molecule test for centos-stream10 scenario..."
+          if molecule test --scenario-name centos-stream10; then
+            echo "✅ CentOS Stream 10 OS detection test PASSED!"
+            echo "🎉 CentOS Stream 10 is correctly identified and supported"
+          else
+            echo "❌ CentOS Stream 10 OS detection test FAILED!"
+            echo "🔍 This indicates an issue with the OS detection logic"
+            exit 1
+          fi
+
+      - name: Cleanup CentOS Stream 10 test containers
+        if: always()
+        run: |
+          source venv-centos10/bin/activate || true
+          echo "🧹 Cleaning up CentOS Stream 10 test containers..."
+          export ANSIBLE_ALLOW_BROKEN_CONDITIONALS=True
+          molecule destroy --scenario-name centos-stream10 || true
+          podman container prune -f || true
+          echo "✅ CentOS Stream 10 test cleanup completed"
+
   version-monitoring:
     runs-on: ubuntu-latest
     permissions:
@@ -919,7 +1006,7 @@ jobs:
           ./scripts/emergency-cleanup-containers.sh
 
   release:
-    needs: [test, version-monitoring, security]
+    needs: [test, centos-stream10-test, version-monitoring, security]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
