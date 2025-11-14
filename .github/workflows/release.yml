@@ -134,7 +134,8 @@ jobs:
             git add galaxy.yml
             git commit -m "chore: sync galaxy.yml version to $VERSION_NUMBER for release $RELEASE_VERSION"
             git pull --rebase origin main || true
-            git push
+            # Push from detached HEAD to main branch
+            git push origin HEAD:main
             echo "✅ Version synchronization committed to repository"
           else
             echo "ℹ️ galaxy.yml version already synchronized"
