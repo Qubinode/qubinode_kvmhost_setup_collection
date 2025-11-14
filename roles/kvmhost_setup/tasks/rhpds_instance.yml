@@ -9,29 +9,29 @@
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       ❌ FATAL: Remote Desktop (enable_vnc: true) is NOT supported on RHEL 10
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      
+
       Platform: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
-      
+
       🔴 WHY THIS FAILED:
       RHEL 10 / CentOS Stream 10 deprecates the X.Org display server and removes
       VNC/X11-based remote access packages (tigervnc-server, xrdp).
-      
+
       The new RDP-based architecture (gnome-remote-desktop) is currently BLOCKED
       by Red Hat Bugzilla 2271661: SELinux incompatibility in enforcing mode.
-      
+
       🔒 SECURITY-FIRST PRINCIPLE:
       This collection prioritizes KVM hypervisor security and will NOT disable
       SELinux. SELinux provides sVirt isolation for virtual machines, which is
       essential for secure multi-tenant virtualization.
-      
+
       📋 WORKAROUND:
       Set 'enable_vnc: false' in your inventory for RHEL 10 hosts.
-      
+
       📚 REFERENCES:
       - ADR-0015: Remote Desktop Architecture Decision
       - Red Hat BZ 2271661: gnome-remote-desktop SELinux incompatibility
       - RHEL 10 will be supported when the SELinux policy is fixed upstream
-      
+
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   when:
     - enable_vnc | default(true) | bool

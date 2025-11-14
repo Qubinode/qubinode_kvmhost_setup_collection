@@ -23,6 +23,9 @@ exclude_paths:
   - molecule/*/prepare.yml
   - molecule/*/converge.yml
   - molecule/*/verify.yml
+  # Exclude local test playbooks (not part of collection)
+  - test-remote-desktop-*.yml
+  - configure_remote_desktop.yml
 
 skip_list:
   - var-naming
