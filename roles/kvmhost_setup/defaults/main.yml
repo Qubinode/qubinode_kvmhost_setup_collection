@@ -11,6 +11,54 @@ lib_virt_setup: true
 # Set to true to enable cockpit
 enable_cockpit: true
 
+# Remote Desktop Configuration (Phase 2 - Platform-Aware)
+# ========================================================
+
+# Set to true to enable remote desktop (VNC/RDP)
+# On RHEL 8/9: Uses tigervnc-server and xrdp (X11-based)
+# On RHEL 10: Uses gnome-remote-desktop (Wayland-native RDP)
+# See ADR-0015 for details
+enable_remote_desktop: true
+
+# Legacy variable (backward compatibility)
+# DEPRECATED: Use enable_remote_desktop instead
+enable_vnc: "{{ enable_remote_desktop | default(true) }}"
+
+# RHEL 10 RDP Configuration
+# ========================================================
+# Credentials for gnome-remote-desktop (RHEL 10 only)
+# SECURITY: These should be overridden in your inventory with vault-encrypted values
+# Example: ansible-vault encrypt_string 'MySecurePassword123!' --name 'rhel10_rdp_password'
+
+rhel10_rdp_user: "rdp-admin"
+rhel10_rdp_password: "{{ vault_rhel10_rdp_password | default('ChangeMe123!') }}"
+
+# WARNING: Default password is insecure! Override this in your inventory:
+# vars:
+#   vault_rhel10_rdp_password: !vault |
+#     $ANSIBLE_VAULT;1.1;AES256
+#     [your encrypted password here]
+
+# RHEL 10 SELinux Override (Development/Testing Only)
+# ========================================================
+# Set to true to bypass SELinux policy validation and install gnome-remote-desktop
+# even when BZ 2271661 fix is not detected.
+#
+# ⚠️  WARNING: This is a SECURITY RISK for production KVM hypervisors!
+# Only use this for:
+#   - Development/testing environments
+#   - Lab systems
+#   - Non-production workloads
+#
+# This flag allows installation even when SELinux is in enforcing mode without
+# the required policy fix. This may result in gnome-remote-desktop connection
+# failures due to SELinux denials.
+#
+# For production deployments, wait for the SELinux policy fix or set SELinux
+# to permissive mode manually (not recommended).
+
+force_gnome_remote_desktop_el10: false
+
 # Configure the user bash shell login prompt
 # This will overwrite your existing .bashrc, .vimrc and other terminal configuration files
 configure_shell: true

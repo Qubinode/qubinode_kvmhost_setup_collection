@@ -1,8 +1,57 @@
+# ============================================================
+# Phase 1: RHEL 10 Remote Desktop Fail-Fast Protection
+# Per ADR-0015: Remote Desktop Architecture Decision
+# ============================================================
+
+- name: Fail fast on RHEL 10 (Remote Desktop is not yet supported)
+  ansible.builtin.fail:
+    msg: |
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      ❌ FATAL: Remote Desktop (enable_vnc: true) is NOT supported on RHEL 10
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      
+      Platform: {{ kvmhost_os_family }} {{ kvmhost_os_full_version }}
+      
+      🔴 WHY THIS FAILED:
+      RHEL 10 / CentOS Stream 10 deprecates the X.Org display server and removes
+      VNC/X11-based remote access packages (tigervnc-server, xrdp).
+      
+      The new RDP-based architecture (gnome-remote-desktop) is currently BLOCKED
+      by Red Hat Bugzilla 2271661: SELinux incompatibility in enforcing mode.
+      
+      🔒 SECURITY-FIRST PRINCIPLE:
+      This collection prioritizes KVM hypervisor security and will NOT disable
+      SELinux. SELinux provides sVirt isolation for virtual machines, which is
+      essential for secure multi-tenant virtualization.
+      
+      📋 WORKAROUND:
+      Set 'enable_vnc: false' in your inventory for RHEL 10 hosts.
+      
+      📚 REFERENCES:
+      - ADR-0015: Remote Desktop Architecture Decision
+      - Red Hat BZ 2271661: gnome-remote-desktop SELinux incompatibility
+      - RHEL 10 will be supported when the SELinux policy is fixed upstream
+      
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  when:
+    - enable_vnc | default(true) | bool
+    - kvmhost_os_major_version | int >= 10
+  tags:
+    - remote_desktop
+    - security
+    - adr_0015
+
+# ============================================================
+# RHEL 8/9 Remote Desktop Setup (VNC/X11)
+# ============================================================
+
 - name: Install Server with GUI group
   ansible.builtin.dnf:
     name: "@Server with GUI"
     state: present
   become: true
+  when:
+    - enable_vnc | default(true) | bool
 
 - name: Enable EPEL repository using DNF module (ADR-0001 compliant)
   ansible.builtin.dnf:
@@ -58,13 +107,20 @@
     - ansible_os_family == "RedHat"
     - ansible_distribution in ["Rocky", "AlmaLinux"]
 
-- name: Install tigervnc-server and xrdp packages
+- name: Install tigervnc-server and xrdp packages (RHEL 8/9 only)
   ansible.builtin.dnf:
     name:
       - tigervnc-server
       - xrdp
     state: present
   become: true
+  when:
+    - enable_vnc | default(true) | bool
+    - kvmhost_os_major_version | int < 10
+  tags:
+    - remote_desktop
+    - vnc
+    - adr_0015
 
 - name: Enable and start xrdp service
   ansible.builtin.systemd:
@@ -72,14 +128,26 @@
     enabled: true
     state: started
   become: true
+  when:
+    - enable_vnc | default(true) | bool
+    - kvmhost_os_major_version | int < 10
+  tags:
+    - remote_desktop
+    - vnc
 
-- name: Configure firewall
+- name: Configure firewall for RDP (port 3389)
   ansible.posix.firewalld:
     port: 3389/tcp
     permanent: true
     state: enabled
     immediate: true
   become: true
+  when:
+    - enable_vnc | default(true) | bool
+    - kvmhost_os_major_version | int < 10
+  tags:
+    - remote_desktop
+    - firewall
 
 - name: Install RHEL/Fedora Web Console (Cockpit)
   ansible.builtin.include_role:

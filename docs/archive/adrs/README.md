@@ -17,7 +17,10 @@ This directory contains the architectural decision records for the Qubinode KVM 
 | [ADR-0009](adr-0009-github-actions-dependabot-auto-updates-strategy.md) | GitHub Actions Dependabot Auto-Updates Strategy | Accepted | 2024-07-11 | DevOps |
 | [ADR-0010](adr-0010-end-user-repeatability-and-solution-reproducibility-strategy.md) | End-User Repeatability and Solution Reproducibility Strategy | Accepted | 2024-07-11 | Quality |
 | [ADR-0011](adr-0011-local-molecule-testing-validation-before-cicd.md) | Local Molecule Testing Validation Before CI/CD | Proposed | 2025-01-12 | Testing |
-| [ADR-0014](ADR-0014-ANSIBLE-GALAXY-AUTOMATED-RELEASE-STRATEGY.md) | Ansible Galaxy Automated Release Strategy | Proposed | 2025-01-09 | DevOps |
+| [ADR-0012](adr-0012-init-container-vs-regular-container-molecule-testing.md) | Init Container vs Regular Container Molecule Testing | Accepted | 2024-07-11 | Testing |
+| [ADR-0013](adr-0013-molecule-systemd-configuration-best-practices.md) | Molecule Systemd Configuration Best Practices | Accepted | 2024-07-11 | Testing |
+| [ADR-0014](../adr/ADR-0014-ANSIBLE-GALAXY-AUTOMATED-RELEASE-STRATEGY.md) | Ansible Galaxy Automated Release Strategy | Proposed | 2025-01-09 | DevOps |
+| [ADR-0015](adr-0015-remote-desktop-architecture.md) | Remote Desktop Architecture Decision (VNC to RDP Migration) | Accepted | 2025-11-14 | Security |
 
 ## ADR Categories
 
@@ -42,6 +45,9 @@ This directory contains the architectural decision records for the Qubinode KVM 
 ### Compatibility
 - **ADR-0008**: Defines multi-version support strategy for RHEL 8, 9, and 10
 
+### Security
+- **ADR-0015**: Establishes secure remote desktop migration strategy from VNC/X11 to RDP/Wayland for RHEL 10 with SELinux-first approach
+
 ### DevOps
 - **ADR-0009**: Implements automated dependency management with GitHub Dependabot
 - **ADR-0014**: Establishes automated release strategy for Ansible Galaxy deployment
@@ -50,7 +56,7 @@ This directory contains the architectural decision records for the Qubinode KVM 
 - **ADR-0010**: Establishes comprehensive end-user repeatability and solution reproducibility standards
 
 ## Status Summary
-- **Accepted**: 10 ADRs
+- **Accepted**: 13 ADRs
 - **Proposed**: 2 ADRs
 - **Deprecated**: 0 ADRs
 

@@ -84,18 +84,37 @@
   ansible.builtin.include_tasks: rocky_linux.yml
   when: enable_cockpit|bool and (ansible_distribution == "Rocky")
 
+# ============================================================
+# Remote Desktop Configuration (Phase 2 - Platform-Aware)
+# ============================================================
+# Uses new platform-aware remote desktop orchestrator
+# - RHEL 8/9: VNC/X11 stack (tigervnc-server, xrdp)
+# - RHEL 10: RDP/Wayland stack (gnome-remote-desktop)
+# Related: ADR-0015 - Remote Desktop Architecture Decision
+
+- name: Configure Remote Desktop (Platform-Aware)
+  ansible.builtin.include_tasks: configure_remote_desktop.yml
+  when:
+    - enable_remote_desktop | default(enable_vnc | default(false)) | bool
+    - enable_cockpit | bool
+  tags:
+    - remote_desktop
+    - adr_0015
+
+# Legacy RHPDS-specific tasks (retained for backward compatibility)
 - name: Run the next task if GUID is set
   ansible.builtin.debug:
     msg: "GUID is set and its value is {{ lookup('env', 'GUID', default='') }}"
   when: lookup('env', 'GUID', default='') != ""
 
-- name: Setup xRDP on RHPDS
-  ansible.builtin.include_tasks: rhpds_instance.yml
-  when: enable_cockpit|bool and lookup('env', 'GUID', default='') != ""
-
-- name: Setup Remote User for XRDP
+- name: Setup Remote User for XRDP (RHPDS only)
   ansible.builtin.include_tasks: configure_remote_user.yml
-  when: enable_cockpit|bool and lookup('env', 'GUID', default='') != ""
+  when:
+    - enable_cockpit | bool
+    - enable_remote_desktop | default(enable_vnc | default(false)) | bool
+    - lookup('env', 'GUID', default='') != ""
+  tags:
+    - rhpds
 
 - name: Configure EPEL repository for container environments
   block:
