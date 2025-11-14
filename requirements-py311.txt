@@ -55,7 +55,7 @@ Pygments==2.19.2
 pytest==8.4.1
 pytest-ansible==25.8.0
 pytest-plus==0.8.1
-pytest-sugar==1.0.0
+pytest-sugar==1.1.1
 pytest-testinfra==10.2.2
 pytest-xdist==3.8.0
 PyYAML==6.0.2
