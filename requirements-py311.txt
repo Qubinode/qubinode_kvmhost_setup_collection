@@ -55,13 +55,13 @@ Pygments==2.19.2
 pytest==8.4.1
 pytest-ansible==25.8.0
 pytest-plus==0.8.1
-pytest-sugar==1.0.0
+pytest-sugar==1.1.1
 pytest-testinfra==10.2.2
 pytest-xdist==3.8.0
 PyYAML==6.0.2
 referencing==0.36.2
 regex==2025.7.34
-requests==2.32.4
+requests==2.32.5
 resolvelib==1.2.0
 rich==14.1.0
 rpds-py==0.26.0
