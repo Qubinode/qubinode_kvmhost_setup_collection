@@ -66,7 +66,8 @@
       - item.ifcfg_type |length != 0
       - item.subnet |length != 0
       - item.mask |length != 0
-      - item.mask_prefix | int
+      - item.mask_prefix is defined
+      - item.mask_prefix | int >= 0
       - item.gateway |length != 0
       - item.ifcfg_bootproto |length != 0
       - item.bridge_slave_dev |length != 0

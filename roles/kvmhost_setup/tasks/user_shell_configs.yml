@@ -2,16 +2,14 @@
   ansible.builtin.file:
     path: "{{ user_homedir }}/.config"
     state: directory
-    owner: "{{ item }}"
-    group: "{{ item }}"
+    owner: "{{ shell_user }}"
+    group: "{{ shell_user }}"
     mode: "0755"
-  with_items: "{{ users }}"
 
 - name: Deploy startship config for current user
   ansible.builtin.copy:
     src: "{{ starship_config }}"
     dest: "{{ user_homedir }}/.config/starship.toml"
-    owner: "{{ item }}"
-    group: "{{ item }}"
+    owner: "{{ shell_user }}"
+    group: "{{ shell_user }}"
     mode: "0644"
-  with_items: "{{ users }}"

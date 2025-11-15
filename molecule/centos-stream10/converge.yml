@@ -13,3 +13,6 @@
         kvmhost_skip_package_installation: false
         # Enable testing mode for container environments
         kvmhost_container_testing_mode: true
+        # Disable features that require GUI or KVM in container
+        enable_remote_desktop: false
+        lib_virt_setup: false
