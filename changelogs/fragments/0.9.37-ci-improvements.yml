@@ -1,0 +1,25 @@
+---
+release_summary: |
+  CI/CD reliability improvements and CentOS Stream 10 testing enhancements.
+  This release focuses on improving the GitHub Actions pipeline stability,
+  fixing Galaxy dependency management, and adding environment parity across test jobs.
+
+minor_changes:
+  - "Consolidated Galaxy dependencies into declarative requirements.yml files"
+  - "Added SELinux setup step for CentOS Stream 10 test job environment parity"
+  - "Enhanced dependency verification with early failure detection"
+  - "Improved idempotent temp directory creation in shell configuration"
+  - "Added DeepWiki AI-powered documentation integration"
+  - "Updated ADR-0008 with RHEL 10 remote desktop fail-fast protection"
+
+bugfixes:
+  - "Fixed centos-stream10-test job failures by moving hardcoded role to requirements.yml"
+  - "Resolved missing SELinux setup causing environment inconsistencies"
+  - "Fixed ansible-lint exclusions and trailing whitespace issues"
+  - "Corrected Galaxy dependency installation verification"
+
+ci_improvements:
+  - "Aligned centos-stream10-test job with ADR-0005 and ADR-0011 standards"
+  - "Added verification checks for Galaxy collection and role installations"
+  - "Improved environment parity between test and centos-stream10-test jobs"
+  - "Enhanced CI/CD workflow reliability for CentOS Stream 10 testing"
