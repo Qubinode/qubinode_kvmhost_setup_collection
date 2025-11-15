@@ -151,13 +151,13 @@
       Red Hat Bugzilla 2271661 documents an incompatibility between
       gnome-remote-desktop's "Remote Login" mode and SELinux when
       operating in enforcing mode.
-      
+
       Current System State:
       - SELinux Status: {{ ansible_selinux.status | default('unknown') }}
       - SELinux Mode: {{ ansible_selinux.mode | default('unknown') }}
       - SELinux Policy: {{ selinux_policy_version }}
       - BZ 2271661 Fix: NOT DETECTED
-      
+
       🔐 SECURITY-FIRST PRINCIPLE:
       This collection prioritizes KVM hypervisor security and will
       NOT disable SELinux as a workaround. SELinux provides sVirt
@@ -171,13 +171,13 @@
       ✅ RESOLUTION:
       The SELinux policy fix will be included in a future selinux-policy
       update. To enable remote desktop when the fix is available:
-      
+
       1. Update the selinux-policy package:
          sudo dnf update selinux-policy
-      
+
       2. Verify the updated version is installed:
          rpm -q selinux-policy
-      
+
       3. Re-run this playbook. The SELinux check will pass automatically
          when the fixed policy version (>= 40.25.0) is detected.
 
@@ -185,7 +185,7 @@
 
       Option 1 (Disable remote desktop):
          enable_remote_desktop: false
-      
+
       Option 2 (Force installation - DEV/TEST ONLY):
          force_gnome_remote_desktop_el10: true
 
@@ -196,7 +196,7 @@
       - Red Hat Bugzilla 2271661: gnome-remote-desktop SELinux issue
       - ADR-0015: Remote Desktop Architecture Decision
       - FINDINGS.md: Section 5.0 - SELinux Integration Failure
-      
+
       ════════════════════════════════════════════════════════════════
   when:
     - not el10_rdp_selinux_fix_applied
@@ -251,14 +251,18 @@
 
       Proceeding with gnome-remote-desktop configuration...
   when:
-    - el10_rdp_selinux_fix_applied or not selinux_is_enforcing or (force_gnome_remote_desktop_el10 | default(false) | bool)
+    - >
+      el10_rdp_selinux_fix_applied or not selinux_is_enforcing or
+      (force_gnome_remote_desktop_el10 | default(false) | bool)
   tags:
     - rdp
 
 - name: Include gnome-remote-desktop setup tasks
   ansible.builtin.include_tasks: setup_gnome_remote_desktop.yml
   when:
-    - el10_rdp_selinux_fix_applied or not selinux_is_enforcing or (force_gnome_remote_desktop_el10 | default(false) | bool)
+    - >
+      el10_rdp_selinux_fix_applied or not selinux_is_enforcing or
+      (force_gnome_remote_desktop_el10 | default(false) | bool)
   tags:
     - rdp
     - gnome_remote_desktop
