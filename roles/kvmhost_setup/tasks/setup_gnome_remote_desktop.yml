@@ -194,12 +194,12 @@
   ansible.builtin.debug:
     msg: |
       ✅ Step 4/5: System Services Enabled
-      
+
       Services Started and Enabled:
       - graphical.target: Set as default boot target
       - gdm.service: {{ 'Started' if gdm_service.changed else 'Already running' }}
       - gnome-remote-desktop.service: {{ 'Started' if grd_service.changed else 'Already running' }}
-      
+
       System is configured to boot to graphical mode.
   tags:
     - services
@@ -224,7 +224,7 @@
   ansible.builtin.debug:
     msg: |
       ✅ Step 5/5: Firewall Configuration Complete
-      
+
       Firewall Rules:
       - Service: rdp (port 3389/tcp)
       - State: ENABLED
@@ -243,31 +243,31 @@
       ════════════════════════════════════════════════════════════════
       ✅ RHEL 10 Remote Desktop Setup Complete
       ════════════════════════════════════════════════════════════════
-      
+
       Technology: gnome-remote-desktop (Wayland-native RDP)
       Protocol: Remote Desktop Protocol (RDP)
       Port: 3389/tcp
-      
+
       Authentication:
       - Username: {{ rhel10_rdp_user }}
       - Password: [configured - use your vault password]
-      
+
       Connection Instructions:
       1. Use any RDP client (Windows Remote Desktop, FreeRDP, Remmina, etc.)
       2. Connect to: {{ ansible_fqdn | default(ansible_hostname) }}:3389
       3. Authenticate with the configured credentials
-      
+
       Security:
       - TLS Encryption: Enabled (self-signed certificate)
       - SELinux: {{ ansible_selinux.mode | default('unknown') }}
       - Firewall: Configured (port 3389/tcp open)
-      
+
       Services Status:
       - gdm.service: {{ gdm_service.state | default('running') }}
       - gnome-remote-desktop.service: {{ grd_service.state | default('running') }}
-      
+
       ════════════════════════════════════════════════════════════════
-      
+
       📚 For more information, see:
       - ADR-0015: Remote Desktop Architecture Decision
       - RHEL 10 Documentation: "Enabling remote access via RDP"
