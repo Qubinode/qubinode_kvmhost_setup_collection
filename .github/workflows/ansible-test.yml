@@ -774,13 +774,22 @@ jobs:
         run: |
           source venv-centos10/bin/activate
           
-          # Install collection dependencies
+          # Install collection and role dependencies from requirements file
           ansible-galaxy install -r molecule/centos-stream10/requirements.yml
           
-          # Install required role dependencies
-          ansible-galaxy role install linux-system-roles.cockpit
+          # Verify installations
+          echo "📋 Installed collections:"
+          ansible-galaxy collection list | grep -E "(containers\.podman|community\.general|ansible\.posix)" || true
+          echo "📋 Installed roles:"
+          ansible-galaxy role list | grep "linux-system-roles.cockpit" || true
           
           echo "✅ Ansible Galaxy dependencies installed"
+
+      - name: Setup SELinux for CI environment
+        run: |
+          source venv-centos10/bin/activate
+          # Use our comprehensive SELinux setup script for environment parity (ADR-0011)
+          ./scripts/setup-selinux-for-ci.sh python3.11
 
       - name: Run CentOS Stream 10 Molecule test
         timeout-minutes: 25

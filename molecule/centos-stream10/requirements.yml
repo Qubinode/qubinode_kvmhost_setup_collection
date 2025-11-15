@@ -7,3 +7,6 @@ collections:
     version: ">=7.0.0"
   - name: ansible.posix
     version: ">=1.5.0"
+
+roles:
+  - name: linux-system-roles.cockpit
