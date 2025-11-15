@@ -1,0 +1,26 @@
+---
+release_summary: |
+  Major feature release: Platform-aware remote desktop architecture with full RHEL 8/9/10 support.
+
+major_changes:
+  - "Platform-aware remote desktop orchestrator with automatic OS version detection"
+  - "RHEL 8/9: Production-ready VNC/X11 stack (tigervnc-server + xrdp)"
+  - "RHEL 10: Code-ready RDP/Wayland stack (gnome-remote-desktop)"
+  - "Complete 5-step gnome-remote-desktop automation for RHEL 10"
+  - "SELinux policy validation with fail-fast protection for RHEL 10"
+
+new_features:
+  - "configure_remote_desktop.yml - Platform-aware orchestration layer"
+  - "remote_desktop_el8_el9.yml - VNC/X11 implementation for RHEL 8/9"
+  - "remote_desktop_el10.yml - RDP/Wayland implementation for RHEL 10"
+  - "setup_gnome_remote_desktop.yml - Complete gnome-remote-desktop automation"
+  - "ADR-0015: Remote Desktop Architecture decision record"
+
+security_improvements:
+  - "SELinux policy validation for RHEL 10"
+  - "Vault-encrypted RDP credential support"
+  - "no_log protection on credential operations"
+
+testing:
+  - "Phase 1 and Phase 2 remote desktop test suites"
+  - "Rocky Linux 9.6 validation (all tests passed)"
