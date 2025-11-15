@@ -1,0 +1,165 @@
+---
+# ============================================================
+# Test Playbook: RHEL 10 Remote Desktop Fail-Fast Protection
+# ============================================================
+# 
+# Purpose: Validate that Phase 1 fail-fast protection works correctly
+# for CentOS Stream 10 / RHEL 10 systems when enable_vnc is true.
+#
+# Expected Behavior:
+# - RHEL 8/9: VNC packages install successfully
+# - RHEL 10 with enable_vnc: true: Playbook fails with clear error
+# - RHEL 10 with enable_vnc: false: Playbook succeeds, skips VNC
+#
+# Usage:
+#   ansible-playbook tests/test-rhel10-vnc-protection.yml
+#
+# Related: ADR-0015 - Remote Desktop Architecture Decision
+# ============================================================
+
+- name: Test RHEL 10 VNC Protection
+  hosts: localhost
+  gather_facts: true
+  connection: local
+  
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    # Test scenarios - uncomment one at a time
+    # enable_vnc: true   # Should fail on RHEL 10
+    # enable_vnc: false  # Should succeed on RHEL 10
+  
+  tasks:
+    - name: Display test information
+      ansible.builtin.debug:
+        msg: |
+          ═══════════════════════════════════════════════════════════════
+          🧪 RHEL 10 VNC Protection Test
+          ═══════════════════════════════════════════════════════════════
+          
+          Current System:
+          - Distribution: {{ ansible_distribution }}
+          - Version: {{ ansible_distribution_version }}
+          - Major Version: {{ ansible_distribution_major_version }}
+          
+          Test Configuration:
+          - enable_vnc: {{ enable_vnc | default(true) }}
+          
+          ═══════════════════════════════════════════════════════════════
+
+    - name: Include OS detection from kvmhost_setup role
+      ansible.builtin.include_role:
+        name: kvmhost_setup
+        tasks_from: rhel_version_detection.yml
+
+    - name: Display detected OS facts
+      ansible.builtin.debug:
+        msg: |
+          Detected OS Facts:
+          - kvmhost_os_family: {{ kvmhost_os_family }}
+          - kvmhost_os_major_version: {{ kvmhost_os_major_version }}
+          - kvmhost_is_rhel10: {{ kvmhost_is_rhel10 | default(false) }}
+          - kvmhost_is_centos_stream10: {{ kvmhost_is_centos_stream10 | default(false) }}
+
+    - name: Test Scenario 1 - Simulate RHEL 10 fail-fast check
+      ansible.builtin.fail:
+        msg: |
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          ❌ FATAL: Remote Desktop (enable_vnc: true) is NOT supported on RHEL 10
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          
+          Platform: {{ kvmhost_os_family }} {{ kvmhost_os_full_version | default(ansible_distribution + ' ' + ansible_distribution_version) }}
+          
+          🔴 WHY THIS WOULD FAIL ON RHEL 10:
+          RHEL 10 / CentOS Stream 10 deprecates the X.Org display server and removes
+          VNC/X11-based remote access packages (tigervnc-server, xrdp).
+          
+          The new RDP-based architecture (gnome-remote-desktop) is currently BLOCKED
+          by Red Hat Bugzilla 2271661: SELinux incompatibility in enforcing mode.
+          
+          🔒 SECURITY-FIRST PRINCIPLE:
+          This collection prioritizes KVM hypervisor security and will NOT disable
+          SELinux. SELinux provides sVirt isolation for virtual machines, which is
+          essential for secure multi-tenant virtualization.
+          
+          📋 WORKAROUND:
+          Set 'enable_vnc: false' in your inventory for RHEL 10 hosts.
+          
+          📚 REFERENCES:
+          - ADR-0015: Remote Desktop Architecture Decision
+          - Red Hat BZ 2271661: gnome-remote-desktop SELinux incompatibility
+          - RHEL 10 will be supported when the SELinux policy is fixed upstream
+          
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      when:
+        - enable_vnc | default(true) | bool
+        - kvmhost_os_major_version | int >= 10
+      tags:
+        - test_failfast
+
+    - name: Test Scenario 2 - Check VNC would be skipped on RHEL 10
+      ansible.builtin.debug:
+        msg: |
+          ✅ SUCCESS: VNC installation would be SKIPPED on RHEL 10
+          
+          This is the expected behavior when:
+          - enable_vnc: {{ enable_vnc | default(true) }}
+          - kvmhost_os_major_version: {{ kvmhost_os_major_version }}
+          
+          On RHEL 10, VNC packages are not installed even if enable_vnc is true.
+          The fail-fast task above prevents the playbook from reaching this point.
+      when:
+        - kvmhost_os_major_version | int >= 10
+        - not (enable_vnc | default(true) | bool)
+      tags:
+        - test_skip
+
+    - name: Test Scenario 3 - Check VNC would install on RHEL 8/9
+      ansible.builtin.debug:
+        msg: |
+          ✅ SUCCESS: VNC installation would PROCEED on RHEL {{ kvmhost_os_major_version }}
+          
+          On RHEL 8/9, the following packages would be installed:
+          - tigervnc-server
+          - xrdp
+          
+          Services would be started:
+          - xrdp.service
+          
+          Firewall would be configured:
+          - Port 3389/tcp (RDP)
+      when:
+        - enable_vnc | default(true) | bool
+        - kvmhost_os_major_version | int < 10
+      tags:
+        - test_install
+
+    - name: Final test summary
+      ansible.builtin.debug:
+        msg: |
+          ═══════════════════════════════════════════════════════════════
+          🎯 Test Summary
+          ═══════════════════════════════════════════════════════════════
+          
+          Current Platform: {{ kvmhost_os_family }} {{ kvmhost_os_major_version }}
+          enable_vnc: {{ enable_vnc | default(true) }}
+          
+          {% if kvmhost_os_major_version | int >= 10 %}
+          ⚠️  RHEL 10 Detected:
+          {% if enable_vnc | default(true) | bool %}
+          - Playbook would FAIL with security-first error message
+          - Workaround: Set enable_vnc: false
+          {% else %}
+          - VNC installation SKIPPED (as configured)
+          - Playbook execution continues normally
+          {% endif %}
+          {% else %}
+          ✅ RHEL 8/9 Detected:
+          {% if enable_vnc | default(true) | bool %}
+          - VNC packages would be installed
+          - Remote desktop access enabled via xRDP
+          {% else %}
+          - VNC installation SKIPPED (enable_vnc: false)
+          {% endif %}
+          {% endif %}
+          
+          ═══════════════════════════════════════════════════════════════

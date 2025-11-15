@@ -1,0 +1,62 @@
+---
+# ============================================================
+# RHEL 8/9 Remote Desktop Setup (VNC/X11)
+# ============================================================
+#
+# Technology: tigervnc-server + xrdp (X11-based)
+# Supported: RHEL 8.x, RHEL 9.x, Rocky 8.x, Rocky 9.x
+#
+# Related: ADR-0015 - Remote Desktop Architecture Decision
+# ============================================================
+
+- name: Install Server with GUI group (RHEL 8/9)
+  ansible.builtin.dnf:
+    name: "@Server with GUI"
+    state: present
+  become: true
+  tags:
+    - packages
+    - gui
+
+- name: Install VNC and RDP packages (RHEL 8/9)
+  ansible.builtin.dnf:
+    name:
+      - tigervnc-server
+      - xrdp
+    state: present
+  become: true
+  tags:
+    - packages
+    - vnc
+
+- name: Enable and start xrdp service
+  ansible.builtin.systemd:
+    name: xrdp
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - services
+
+- name: Configure firewall for RDP (port 3389)
+  ansible.posix.firewalld:
+    port: 3389/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true
+  tags:
+    - firewall
+
+- name: Display RHEL 8/9 VNC setup complete message
+  ansible.builtin.debug:
+    msg: |
+      ✅ RHEL {{ kvmhost_os_major_version }} Remote Desktop Setup Complete
+      
+      Technology: VNC/X11 (xRDP)
+      Port: 3389/tcp
+      Status: Service enabled and started
+      
+      Connection: Use RDP client to connect to this host on port 3389
+  tags:
+    - summary

@@ -1,0 +1,279 @@
+---
+# ============================================================
+# Five-Step gnome-remote-desktop Configuration for RHEL 10
+# ============================================================
+#
+# Purpose: Complete automation of RHEL 10 RDP using gnome-remote-desktop
+# Based on: Red Hat RHEL 10 Documentation - "Enabling remote access via RDP"
+#
+# Architecture: Wayland-native RDP (no X11 dependency)
+# Security: Requires SELinux policy fix (BZ 2271661) for enforcing mode
+#
+# Implementation Steps:
+#   1. Install required packages
+#   2. Generate RDP TLS certificate
+#   3. Configure gnome-remote-desktop via grdctl
+#   4. Enable and start system services  
+#   5. Configure firewall
+#
+# Related: ADR-0015 - Remote Desktop Architecture Decision
+# ============================================================
+
+# ============================================================
+# STEP 1: Install Required Packages
+# ============================================================
+
+- name: Install RHEL 10 RDP packages
+  ansible.builtin.dnf:
+    name:
+      - "@Server with GUI"         # Graphical environment
+      - gnome-remote-desktop        # RDP server for Wayland
+      - freerdp                     # Provides winpr-makecert utility
+    state: present
+  become: true
+  register: rdp_package_install
+  tags:
+    - packages
+    - rdp
+
+- name: Display package installation results
+  ansible.builtin.debug:
+    msg: |
+      ✅ Step 1/5: Package Installation Complete
+      
+      Installed Packages:
+      - @Server with GUI (graphical environment)
+      - gnome-remote-desktop (Wayland-native RDP server)
+      - freerdp (certificate generation utility)
+      
+      Status: {{ 'Packages installed' if rdp_package_install.changed else 'Already present' }}
+  tags:
+    - packages
+
+# ============================================================
+# STEP 2: Generate RDP TLS Certificate
+# ============================================================
+
+- name: Create directory for RDP certificate
+  ansible.builtin.file:
+    path: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop
+    state: directory
+    owner: gnome-remote-desktop
+    group: gnome-remote-desktop
+    mode: '0700'
+  become: true
+  tags:
+    - certificates
+    - rdp
+
+- name: Check if RDP TLS certificate already exists
+  ansible.builtin.stat:
+    path: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.crt
+  register: rdp_cert_check
+  tags:
+    - certificates
+
+- name: Generate self-signed RDP TLS certificate
+  ansible.builtin.shell:
+    cmd: |
+      su - gnome-remote-desktop -s /bin/bash -c \
+      'winpr-makecert -silent -rdp \
+      -path /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop \
+      tls'
+    creates: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.crt
+  become: true
+  register: cert_generation
+  tags:
+    - certificates
+    - rdp
+
+- name: Display certificate generation results
+  ansible.builtin.debug:
+    msg: |
+      ✅ Step 2/5: TLS Certificate Generation Complete
+      
+      Certificate Location: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/
+      - tls.crt (certificate)
+      - tls.key (private key)
+      
+      Status: {{ 'Generated new certificate' if cert_generation.changed else 'Certificate already exists' }}
+  tags:
+    - certificates
+
+# ============================================================
+# STEP 3: Configure gnome-remote-desktop via grdctl
+# ============================================================
+
+- name: Set RDP TLS key path via grdctl
+  ansible.builtin.command:
+    cmd: grdctl --system rdp set-tls-key /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.key
+  become: true
+  changed_when: true  # grdctl does not provide idempotent feedback
+  tags:
+    - configuration
+    - rdp
+
+- name: Set RDP TLS certificate path via grdctl
+  ansible.builtin.command:
+    cmd: grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.crt
+  become: true
+  changed_when: true
+  tags:
+    - configuration
+    - rdp
+
+- name: Set RDP system credentials via grdctl (non-interactive)
+  ansible.builtin.command:
+    cmd: grdctl --system rdp set-credentials {{ rhel10_rdp_user }} {{ rhel10_rdp_password }}
+  become: true
+  changed_when: true
+  no_log: true  # Protect credentials from console/log output
+  tags:
+    - configuration
+    - rdp
+    - credentials
+
+- name: Enable RDP 'Remote Login' system mode
+  ansible.builtin.command:
+    cmd: grdctl --system rdp enable
+  become: true
+  changed_when: true
+  register: rdp_enable
+  tags:
+    - configuration
+    - rdp
+
+- name: Display grdctl configuration results
+  ansible.builtin.debug:
+    msg: |
+      ✅ Step 3/5: grdctl Configuration Complete
+      
+      Configuration Applied:
+      - TLS Key: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.key
+      - TLS Cert: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.crt
+      - RDP Credentials: Configured for user '{{ rhel10_rdp_user }}'
+      - Remote Login Mode: ENABLED
+      
+      Note: Credentials are stored securely and not logged.
+  tags:
+    - configuration
+
+# ============================================================
+# STEP 4: Enable and Start System Services
+# ============================================================
+
+- name: Set system default target to graphical
+  ansible.builtin.systemd:
+    name: graphical.target
+    enabled: true
+  become: true
+  tags:
+    - services
+
+- name: Enable and start GDM service
+  ansible.builtin.systemd:
+    name: gdm.service
+    state: started
+    enabled: true
+  become: true
+  register: gdm_service
+  tags:
+    - services
+
+- name: Enable and start gnome-remote-desktop service
+  ansible.builtin.systemd:
+    name: gnome-remote-desktop.service
+    state: started
+    enabled: true
+  become: true
+  register: grd_service
+  tags:
+    - services
+    - rdp
+
+- name: Display service enablement results
+  ansible.builtin.debug:
+    msg: |
+      ✅ Step 4/5: System Services Enabled
+      
+      Services Started and Enabled:
+      - graphical.target: Set as default boot target
+      - gdm.service: {{ 'Started' if gdm_service.changed else 'Already running' }}
+      - gnome-remote-desktop.service: {{ 'Started' if grd_service.changed else 'Already running' }}
+      
+      System is configured to boot to graphical mode.
+  tags:
+    - services
+
+# ============================================================
+# STEP 5: Configure Firewall
+# ============================================================
+
+- name: Allow RDP service in firewalld (port 3389)
+  ansible.posix.firewalld:
+    service: rdp
+    permanent: true
+    state: enabled
+    immediate: true
+  become: true
+  register: firewall_rdp
+  tags:
+    - firewall
+    - rdp
+
+- name: Display firewall configuration results
+  ansible.builtin.debug:
+    msg: |
+      ✅ Step 5/5: Firewall Configuration Complete
+      
+      Firewall Rules:
+      - Service: rdp (port 3389/tcp)
+      - State: ENABLED
+      - Permanent: Yes
+      - Status: {{ 'Rule added' if firewall_rdp.changed else 'Already configured' }}
+  tags:
+    - firewall
+
+# ============================================================
+# Final Summary
+# ============================================================
+
+- name: Display RHEL 10 RDP setup completion summary
+  ansible.builtin.debug:
+    msg: |
+      ════════════════════════════════════════════════════════════════
+      ✅ RHEL 10 Remote Desktop Setup Complete
+      ════════════════════════════════════════════════════════════════
+      
+      Technology: gnome-remote-desktop (Wayland-native RDP)
+      Protocol: Remote Desktop Protocol (RDP)
+      Port: 3389/tcp
+      
+      Authentication:
+      - Username: {{ rhel10_rdp_user }}
+      - Password: [configured - use your vault password]
+      
+      Connection Instructions:
+      1. Use any RDP client (Windows Remote Desktop, FreeRDP, Remmina, etc.)
+      2. Connect to: {{ ansible_fqdn | default(ansible_hostname) }}:3389
+      3. Authenticate with the configured credentials
+      
+      Security:
+      - TLS Encryption: Enabled (self-signed certificate)
+      - SELinux: {{ ansible_selinux.mode | default('unknown') }}
+      - Firewall: Configured (port 3389/tcp open)
+      
+      Services Status:
+      - gdm.service: {{ gdm_service.state | default('running') }}
+      - gnome-remote-desktop.service: {{ grd_service.state | default('running') }}
+      
+      ════════════════════════════════════════════════════════════════
+      
+      📚 For more information, see:
+      - ADR-0015: Remote Desktop Architecture Decision
+      - RHEL 10 Documentation: "Enabling remote access via RDP"
+      
+      ════════════════════════════════════════════════════════════════
+  tags:
+    - summary
+    - rdp

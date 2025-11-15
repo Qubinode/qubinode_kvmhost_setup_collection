@@ -1,0 +1,55 @@
+---
+# ============================================================
+# Remote Desktop Configuration Orchestrator
+# ============================================================
+#
+# Purpose: Platform-aware remote desktop setup
+# - RHEL 8/9: VNC/X11 stack (tigervnc-server, xrdp)
+# - RHEL 10: RDP/Wayland stack (gnome-remote-desktop)
+#
+# Related: ADR-0015 - Remote Desktop Architecture Decision
+# ============================================================
+
+- name: Display remote desktop configuration info
+  ansible.builtin.debug:
+    msg: |
+      ═══════════════════════════════════════════════════════════════
+      🖥️  Remote Desktop Configuration
+      ═══════════════════════════════════════════════════════════════
+      Platform: {{ kvmhost_os_family }} {{ kvmhost_os_major_version }}
+      Remote Desktop Enabled: {{ enable_remote_desktop | default(enable_vnc | default(true)) }}
+      
+      {% if kvmhost_os_major_version | int < 10 %}
+      Technology Stack: VNC/X11 (RHEL 8/9)
+      - Packages: tigervnc-server, xrdp
+      - Protocol: RDP over X11
+      - Port: 3389/tcp
+      {% else %}
+      Technology Stack: RDP/Wayland (RHEL 10)
+      - Package: gnome-remote-desktop
+      - Protocol: Native RDP (Wayland)
+      - Port: 3389/tcp
+      - SELinux Check: Required (BZ 2271661)
+      {% endif %}
+      ═══════════════════════════════════════════════════════════════
+  tags:
+    - remote_desktop
+    - adr_0015
+
+- name: Include RHEL 8/9 remote desktop tasks (VNC/X11)
+  ansible.builtin.include_tasks: remote_desktop_el8_el9.yml
+  when: kvmhost_os_major_version | int < 10
+  tags:
+    - remote_desktop
+    - vnc
+    - rhel8
+    - rhel9
+
+- name: Include RHEL 10 remote desktop tasks (RDP/Wayland)
+  ansible.builtin.include_tasks: remote_desktop_el10.yml
+  when: kvmhost_os_major_version | int >= 10
+  tags:
+    - remote_desktop
+    - rdp
+    - rhel10
+    - wayland

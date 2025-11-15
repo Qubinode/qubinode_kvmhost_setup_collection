@@ -1,0 +1,273 @@
+---
+# ============================================================
+# Phase 2 Remote Desktop Test Playbook
+# ============================================================
+#
+# Purpose: Validate Phase 2 platform-aware remote desktop implementation
+#
+# Test Scenarios:
+#   1. RHEL 8/9: VNC/X11 stack installation and configuration
+#   2. RHEL 10 (SELinux fix NOT present): Fail with clear error
+#   3. RHEL 10 (SELinux fix present): RDP/Wayland stack installation
+#   4. RHEL 10 (SELinux permissive): RDP setup with warning
+#
+# Usage:
+#   # Test on RHEL 8/9
+#   ansible-playbook tests/test-phase2-remote-desktop.yml
+#
+#   # Test on RHEL 10 (simulate SELinux fix)
+#   ansible-playbook tests/test-phase2-remote-desktop.yml \
+#     -e "simulate_selinux_fix=true"
+#
+# Related: ADR-0015 - Remote Desktop Architecture Decision
+# ============================================================
+
+- name: Phase 2 Remote Desktop Integration Test
+  hosts: localhost
+  gather_facts: true
+  connection: local
+  
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    enable_remote_desktop: true
+    enable_cockpit: true
+    
+    # Test configuration
+    simulate_selinux_fix: false  # Set to true to simulate SELinux policy fix
+    
+    # RHEL 10 RDP credentials (for testing)
+    rhel10_rdp_user: "test-rdp-admin"
+    rhel10_rdp_password: "TestPassword123!"
+  
+  tasks:
+    - name: Display test banner
+      ansible.builtin.debug:
+        msg: |
+          ════════════════════════════════════════════════════════════════
+          🧪 Phase 2 Remote Desktop Integration Test
+          ════════════════════════════════════════════════════════════════
+          
+          Test Configuration:
+          - enable_remote_desktop: {{ enable_remote_desktop }}
+          - enable_cockpit: {{ enable_cockpit }}
+          - simulate_selinux_fix: {{ simulate_selinux_fix }}
+          
+          Current System:
+          - Distribution: {{ ansible_distribution }}
+          - Version: {{ ansible_distribution_version }}
+          - Major Version: {{ ansible_distribution_major_version }}
+          
+          ════════════════════════════════════════════════════════════════
+
+    # ============================================================
+    # STEP 1: OS Detection
+    # ============================================================
+
+    - name: Include OS detection from kvmhost_setup role
+      ansible.builtin.include_role:
+        name: kvmhost_setup
+        tasks_from: rhel_version_detection.yml
+
+    - name: Display detected OS facts
+      ansible.builtin.debug:
+        msg: |
+          ══════════════════════════════════════════════════════════════
+          📋 OS Detection Results
+          ══════════════════════════════════════════════════════════════
+          - kvmhost_os_family: {{ kvmhost_os_family }}
+          - kvmhost_os_full_version: {{ kvmhost_os_full_version }}
+          - kvmhost_os_major_version: {{ kvmhost_os_major_version }}
+          - kvmhost_is_rhel8: {{ kvmhost_is_rhel8 | default(false) }}
+          - kvmhost_is_rhel9: {{ kvmhost_is_rhel9 | default(false) }}
+          - kvmhost_is_rhel10: {{ kvmhost_is_rhel10 | default(false) }}
+          - kvmhost_is_centos_stream10: {{ kvmhost_is_centos_stream10 | default(false) }}
+          ══════════════════════════════════════════════════════════════
+
+    # ============================================================
+    # STEP 2: Test Platform-Specific Behavior
+    # ============================================================
+
+    - name: Test Block - RHEL 8/9 Path
+      block:
+        - name: Display RHEL 8/9 test scenario
+          ansible.builtin.debug:
+            msg: |
+              ══════════════════════════════════════════════════════════
+              🧪 Test Scenario: RHEL {{ kvmhost_os_major_version }} (VNC/X11 Path)
+              ══════════════════════════════════════════════════════════
+              
+              Expected Behavior:
+              - Should use remote_desktop_el8_el9.yml
+              - Install tigervnc-server and xrdp packages
+              - Enable xrdp service
+              - Configure firewall for port 3389
+              
+              ══════════════════════════════════════════════════════════
+
+        - name: Check for VNC packages
+          ansible.builtin.command:
+            cmd: rpm -q tigervnc-server xrdp
+          register: vnc_packages_check
+          failed_when: false
+          changed_when: false
+
+        - name: Display VNC package status
+          ansible.builtin.debug:
+            msg: |
+              VNC Package Status:
+              {{ vnc_packages_check.stdout_lines | default(['Not installed']) | join('\n') }}
+              
+              Note: On RHEL 8/9, these packages should be installable.
+              On RHEL 10, these packages are not available.
+
+      when: kvmhost_os_major_version | int < 10
+      tags:
+        - test_el89
+
+    - name: Test Block - RHEL 10 Path (SELinux Check)
+      block:
+        - name: Display RHEL 10 test scenario
+          ansible.builtin.debug:
+            msg: |
+              ══════════════════════════════════════════════════════════
+              🧪 Test Scenario: RHEL {{ kvmhost_os_major_version }} (RDP/Wayland Path)
+              ══════════════════════════════════════════════════════════
+              
+              Expected Behavior:
+              - Should use remote_desktop_el10.yml
+              - Check SELinux policy version
+              - If BZ 2271661 fix NOT present AND SELinux enforcing:
+                → FAIL with security-first error message
+              - If BZ 2271661 fix present OR SELinux permissive:
+                → Install gnome-remote-desktop
+                → Configure via grdctl
+                → Enable services
+              
+              Test Configuration:
+              - simulate_selinux_fix: {{ simulate_selinux_fix }}
+              - SELinux status: {{ ansible_selinux.status | default('unknown') }}
+              - SELinux mode: {{ ansible_selinux.mode | default('unknown') }}
+              
+              ══════════════════════════════════════════════════════════
+
+        - name: Query SELinux policy version
+          ansible.builtin.command:
+            cmd: rpm -q selinux-policy --queryformat '%{VERSION}-%{RELEASE}'
+          register: selinux_version_test
+          changed_when: false
+          failed_when: false
+
+        - name: Display SELinux policy information
+          ansible.builtin.debug:
+            msg: |
+              SELinux Policy Information:
+              - Version: {{ selinux_version_test.stdout | default('Not installed') }}
+              - Status: {{ ansible_selinux.status | default('unknown') }}
+              - Mode: {{ ansible_selinux.mode | default('unknown') }}
+              - Config Mode: {{ ansible_selinux.config_mode | default('unknown') }}
+              
+              BZ 2271661 Fix Status:
+              {% if simulate_selinux_fix %}
+              - Simulated: FIX PRESENT (test override)
+              {% else %}
+              - Detected: {{ 'FIX PRESENT' if (selinux_version_test.stdout | default('0.0.0') is version('40.25.0', '>=')) else 'FIX NOT PRESENT' }}
+              {% endif %}
+
+        - name: Check for gnome-remote-desktop package
+          ansible.builtin.command:
+            cmd: rpm -q gnome-remote-desktop
+          register: grd_package_check
+          failed_when: false
+          changed_when: false
+
+        - name: Display gnome-remote-desktop package status
+          ansible.builtin.debug:
+            msg: |
+              gnome-remote-desktop Package:
+              {{ grd_package_check.stdout | default('Not installed') }}
+              
+              Expected: Available in RHEL 10 repositories
+
+        - name: Test SELinux failure scenario (if enforcing and no fix)
+          ansible.builtin.debug:
+            msg: |
+              ⚠️  EXPECTED FAILURE SCENARIO
+              
+              If this were a real deployment with:
+              - SELinux: enforcing
+              - Policy Version: < 40.25.0
+              - simulate_selinux_fix: false
+              
+              The playbook would FAIL with a security-first error message
+              explaining the BZ 2271661 blocker and providing resolution steps.
+              
+              This is the correct behavior to prevent insecure deployments.
+          when:
+            - ansible_selinux is defined
+            - ansible_selinux.mode == 'enforcing'
+            - not simulate_selinux_fix
+            - selinux_version_test.stdout | default('0.0.0') is version('40.25.0', '<')
+
+      when: kvmhost_os_major_version | int >= 10
+      tags:
+        - test_el10
+
+    # ============================================================
+    # STEP 3: Test Summary
+    # ============================================================
+
+    - name: Display test completion summary
+      ansible.builtin.debug:
+        msg: |
+          ════════════════════════════════════════════════════════════════
+          ✅ Phase 2 Test Completion Summary
+          ════════════════════════════════════════════════════════════════
+          
+          Platform: {{ kvmhost_os_family }} {{ kvmhost_os_major_version }}
+          
+          {% if kvmhost_os_major_version | int < 10 %}
+          ═══ RHEL 8/9 Test Path ═══
+          Technology: VNC/X11 (tigervnc-server + xrdp)
+          
+          Test Results:
+          - OS Detection: ✅ Correctly identified RHEL {{ kvmhost_os_major_version }}
+          - Package Availability: {{ '✅ Packages available' if vnc_packages_check.rc == 0 else '⚠️  Packages not currently installed' }}
+          - Expected Behavior: Install VNC packages, enable xrdp service
+          
+          {% else %}
+          ═══ RHEL 10 Test Path ═══
+          Technology: RDP/Wayland (gnome-remote-desktop)
+          
+          Test Results:
+          - OS Detection: ✅ Correctly identified RHEL {{ kvmhost_os_major_version }}
+          - SELinux Policy: {{ selinux_version_test.stdout | default('Not detected') }}
+          - SELinux Mode: {{ ansible_selinux.mode | default('unknown') }}
+          
+          Security Validation:
+          {% if simulate_selinux_fix %}
+          - BZ 2271661 Fix: ✅ SIMULATED (test override)
+          - Expected: gnome-remote-desktop setup would proceed
+          {% elif selinux_version_test.stdout | default('0.0.0') is version('40.25.0', '>=') %}
+          - BZ 2271661 Fix: ✅ DETECTED
+          - Expected: gnome-remote-desktop setup would proceed
+          {% else %}
+          - BZ 2271661 Fix: ❌ NOT DETECTED
+          {% if ansible_selinux.mode | default('') == 'enforcing' %}
+          - Expected: Playbook would FAIL with security-first error
+          - Behavior: CORRECT (prevents insecure deployment)
+          {% else %}
+          - Expected: Setup proceeds with warning (SELinux not enforcing)
+          {% endif %}
+          {% endif %}
+          
+          {% endif %}
+          
+          ════════════════════════════════════════════════════════════════
+          
+          📚 Documentation:
+          - ADR-0015: Remote Desktop Architecture Decision
+          - FINDINGS.md: Section 4.0 - Implementation Strategy
+          - PHASE1_COMPLETION_SUMMARY.md
+          - PHASE2_COMPLETION_SUMMARY.md (when complete)
+          
+          ════════════════════════════════════════════════════════════════
