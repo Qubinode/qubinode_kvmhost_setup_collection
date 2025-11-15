@@ -10,6 +10,9 @@ This Ansible Collection provides a comprehensive set of roles for configuring an
 
 This collection uses the [Diátaxis framework](https://diataxis.fr/) for comprehensive, user-focused documentation:
 
+### 🤖 AI-Powered Documentation
+- **[DeepWiki Documentation](https://deepwiki.com/Qubinode/qubinode_kvmhost_setup_collection)** - Interactive AI-powered documentation with natural language search and context-aware answers
+
 ### 🚀 Quick Start
 - **New users**: Start with [Quick Start Guide](docs/diataxis/tutorials/00-quick-start.md)
 - **Learning**: Follow [Your First KVM Host Setup](docs/diataxis/tutorials/01-first-kvm-host-setup.md)
