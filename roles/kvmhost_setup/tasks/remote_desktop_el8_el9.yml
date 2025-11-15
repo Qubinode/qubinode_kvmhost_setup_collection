@@ -51,11 +51,11 @@
   ansible.builtin.debug:
     msg: |
       ✅ RHEL {{ kvmhost_os_major_version }} Remote Desktop Setup Complete
-      
+
       Technology: VNC/X11 (xRDP)
       Port: 3389/tcp
       Status: Service enabled and started
-      
+
       Connection: Use RDP client to connect to this host on port 3389
   tags:
     - summary

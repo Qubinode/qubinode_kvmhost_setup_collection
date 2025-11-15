@@ -1,4 +1,3 @@
----
 # ============================================================
 # Five-Step gnome-remote-desktop Configuration for RHEL 10
 # ============================================================
@@ -13,7 +12,7 @@
 #   1. Install required packages
 #   2. Generate RDP TLS certificate
 #   3. Configure gnome-remote-desktop via grdctl
-#   4. Enable and start system services  
+#   4. Enable and start system services
 #   5. Configure firewall
 #
 # Related: ADR-0015 - Remote Desktop Architecture Decision
@@ -40,12 +39,12 @@
   ansible.builtin.debug:
     msg: |
       ✅ Step 1/5: Package Installation Complete
-      
+
       Installed Packages:
       - @Server with GUI (graphical environment)
       - gnome-remote-desktop (Wayland-native RDP server)
       - freerdp (certificate generation utility)
-      
+
       Status: {{ 'Packages installed' if rdp_package_install.changed else 'Already present' }}
   tags:
     - packages
@@ -91,11 +90,11 @@
   ansible.builtin.debug:
     msg: |
       ✅ Step 2/5: TLS Certificate Generation Complete
-      
+
       Certificate Location: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/
       - tls.crt (certificate)
       - tls.key (private key)
-      
+
       Status: {{ 'Generated new certificate' if cert_generation.changed else 'Certificate already exists' }}
   tags:
     - certificates
@@ -147,13 +146,13 @@
   ansible.builtin.debug:
     msg: |
       ✅ Step 3/5: grdctl Configuration Complete
-      
+
       Configuration Applied:
       - TLS Key: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.key
       - TLS Cert: /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/tls.crt
       - RDP Credentials: Configured for user '{{ rhel10_rdp_user }}'
       - Remote Login Mode: ENABLED
-      
+
       Note: Credentials are stored securely and not logged.
   tags:
     - configuration
