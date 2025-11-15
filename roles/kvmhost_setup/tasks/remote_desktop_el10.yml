@@ -1,4 +1,3 @@
----
 # ============================================================
 # RHEL 10 Remote Desktop Setup (RDP/Wayland)
 # ============================================================
@@ -22,13 +21,13 @@
       ════════════════════════════════════════════════════════════════
       🔐 RHEL 10 Remote Desktop - Security-First Configuration
       ════════════════════════════════════════════════════════════════
-      
+
       Platform: {{ kvmhost_os_family }} {{ kvmhost_os_major_version }}
       Technology: gnome-remote-desktop (Wayland-native RDP)
-      
+
       Security Check: Validating SELinux policy version...
       Required Fix: Red Hat BZ 2271661
-      
+
       ════════════════════════════════════════════════════════════════
   tags:
     - rhel10
@@ -103,32 +102,32 @@
       ════════════════════════════════════════════════════════════════
       ⚠️  SECURITY OVERRIDE ACTIVE
       ════════════════════════════════════════════════════════════════
-      
+
       force_gnome_remote_desktop_el10: {{ force_gnome_remote_desktop_el10 }}
-      
+
       You have chosen to bypass SELinux policy validation and install
       gnome-remote-desktop despite the BZ 2271661 SELinux incompatibility.
-      
+
       Current System State:
       - SELinux Status: {{ ansible_selinux.status | default('unknown') }}
       - SELinux Mode: {{ ansible_selinux.mode | default('unknown') }}
       - SELinux Policy: {{ selinux_policy_version }}
       - BZ 2271661 Fix: NOT DETECTED
-      
+
       ⚠️  EXPECTED BEHAVIOR:
       - Installation will proceed
       - Services will start
       - RDP connections may FAIL due to SELinux denials
       - Check /var/log/audit/audit.log for AVC denials
-      
+
       🔧 TROUBLESHOOTING:
       If RDP connections fail, you may need to:
       1. Set SELinux to permissive: sudo setenforce 0
       2. Monitor for denials: sudo ausearch -m avc -ts recent
       3. Generate custom policy (advanced)
-      
+
       ⚠️  NOT RECOMMENDED FOR PRODUCTION KVM HYPERVISORS
-      
+
       ════════════════════════════════════════════════════════════════
   when:
     - force_gnome_remote_desktop_el10 | default(false) | bool
@@ -144,10 +143,10 @@
       ════════════════════════════════════════════════════════════════
       🔒 SECURITY VALIDATION FAILED
       ════════════════════════════════════════════════════════════════
-      
+
       Remote Desktop (gnome-remote-desktop) cannot be safely enabled
       on RHEL 10 at this time.
-      
+
       🔴 ROOT CAUSE:
       Red Hat Bugzilla 2271661 documents an incompatibility between
       gnome-remote-desktop's "Remote Login" mode and SELinux when
@@ -165,10 +164,10 @@
       (Secure Virtualization) mandatory access control, which is
       essential for isolating virtual machines from each other and
       from the host system.
-      
+
       Disabling SELinux would create a catastrophic security failure
       for multi-tenant virtualization environments.
-      
+
       ✅ RESOLUTION:
       The SELinux policy fix will be included in a future selinux-policy
       update. To enable remote desktop when the fix is available:
@@ -181,18 +180,18 @@
       
       3. Re-run this playbook. The SELinux check will pass automatically
          when the fixed policy version (>= 40.25.0) is detected.
-      
+
       ⏭️  WORKAROUNDS:
-      
+
       Option 1 (Disable remote desktop):
          enable_remote_desktop: false
       
       Option 2 (Force installation - DEV/TEST ONLY):
          force_gnome_remote_desktop_el10: true
-         
+
          ⚠️  WARNING: This may result in non-functional RDP due to
          SELinux denials. Only use for development/testing!
-      
+
       📚 REFERENCES:
       - Red Hat Bugzilla 2271661: gnome-remote-desktop SELinux issue
       - ADR-0015: Remote Desktop Architecture Decision
@@ -212,13 +211,13 @@
   ansible.builtin.debug:
     msg: |
       ⚠️  WARNING: SELinux is not in enforcing mode
-      
+
       Current Mode: {{ ansible_selinux.mode | default('unknown') }}
-      
+
       gnome-remote-desktop setup will proceed, but for production
       KVM hypervisors, SELinux should be enabled in enforcing mode
       for proper sVirt isolation.
-      
+
       When the SELinux policy fix (BZ 2271661) is available, please:
       1. Update selinux-policy package
       2. Set SELinux to enforcing mode
@@ -237,7 +236,7 @@
   ansible.builtin.debug:
     msg: |
       ✅ SELinux Validation Passed
-      
+
       {% if el10_rdp_selinux_fix_applied %}
       SELinux Policy Fix: DETECTED (version {{ selinux_policy_version }})
       Deployment Mode: PRODUCTION SAFE
@@ -249,7 +248,7 @@
       SELinux Mode: {{ ansible_selinux.mode | default('not enforcing') }}
       Deployment Mode: PERMISSIVE/DISABLED
       {% endif %}
-      
+
       Proceeding with gnome-remote-desktop configuration...
   when:
     - el10_rdp_selinux_fix_applied or not selinux_is_enforcing or (force_gnome_remote_desktop_el10 | default(false) | bool)
