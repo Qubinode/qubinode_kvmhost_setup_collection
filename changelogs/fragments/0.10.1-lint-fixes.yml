@@ -1,0 +1,16 @@
+---
+release_summary: |
+  Patch release fixing ansible-lint errors in Phase 2 remote desktop implementation.
+  This release contains only code style fixes with no functional changes.
+
+bugfixes:
+  - "Fixed 27 ansible-lint errors across remote desktop task files"
+  - "Removed document-start markers (---) per ansible-lint configuration"
+  - "Fixed all trailing spaces in YAML files"
+  - "Fixed line-length violations in when conditions"
+
+code_quality:
+  - "remote_desktop_el10.yml: Fixed 12 lint errors (9 trailing spaces, 2 line-length, 1 document-start)"
+  - "remote_desktop_el8_el9.yml: Fixed 3 lint errors (2 trailing spaces, 1 document-start)"
+  - "setup_gnome_remote_desktop.yml: Fixed 12 lint errors (11 trailing spaces, 1 document-start)"
+  - "All Phase 2 remote desktop tasks now pass ansible-lint validation"
