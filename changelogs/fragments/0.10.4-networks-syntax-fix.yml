@@ -1,0 +1,20 @@
+---
+release_summary: |
+  CRITICAL patch release fixing Ansible syntax error in libvirt network configuration.
+  This bug prevented the Configure libvirt network task from executing due to invalid
+  use of 'with_items' with a 'block' statement.
+
+bugfixes:
+  - "Fixed invalid 'with_items' with 'block' syntax in networks.yml"
+  - "Removed block wrapper and converted to direct task with loop"
+  - "Replaced deprecated 'with_items' with modern 'loop' syntax"
+  - "Added proper 'when' conditions for all libvirt network tasks"
+  - "Simplified variable references to use direct item attributes"
+
+code_quality:
+  - "Modernized loop syntax from with_items to loop"
+  - "Improved when condition structure (list format)"
+  - "Removed unnecessary vars section in favor of direct item references"
+  - "Added consistent when conditions across all network tasks"
+
+known_issues: []
