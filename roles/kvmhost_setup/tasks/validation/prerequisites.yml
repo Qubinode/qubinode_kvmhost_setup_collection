@@ -6,8 +6,8 @@
 
 - name: Check minimum memory requirements
   ansible.builtin.assert:
-    that: ansible_memtotal_mb >= 4096
-    fail_msg: "Minimum 4GB RAM required. Available: {{ ansible_memtotal_mb }}MB"
+    that: ansible_facts['memtotal_mb'] >= 4096
+    fail_msg: "Minimum 4GB RAM required. Available: {{ ansible_facts['memtotal_mb'] }}MB"
     success_msg: System has sufficient memory
 
 - name: Check OS distribution

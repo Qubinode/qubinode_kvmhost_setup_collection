@@ -278,7 +278,21 @@ Every voice is important. If you have something on your mind, create an issue or
 
 ## External requirements
 
-<!-- List any external resources the collection depends on, for example minimum versions of an OS, libraries, or utilities. Do not list other Ansible collections here. -->
+This collection requires the following Python libraries:
+
+### Python Dependencies
+
+- **passlib** (version >= 1.7.4) - Required for password hashing functionality used by the `password_hash` Ansible filter
+  
+  Install using pip:
+  ```bash
+  pip3 install passlib
+  ```
+  
+  Or install all Python dependencies from `requirements.txt`:
+  ```bash
+  pip3 install -r requirements.txt
+  ```
 
 ### Supported connections
 <!-- Optional. If your collection supports only specific connection types (such as HTTPAPI, netconf, or others), list them here. -->

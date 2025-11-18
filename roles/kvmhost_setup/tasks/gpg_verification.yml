@@ -115,7 +115,7 @@
   when:
     - epel_info_check is defined
     - "'epel' in enabled_repos_check.stdout | lower"
-    - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
+    - not (ansible_facts['virtualization_type'] | default('') in ['container', 'docker', 'podman'])
     - not (github_actions_runner | default(false))
   tags:
     - security
@@ -126,8 +126,8 @@
   ansible.builtin.debug:
     msg: Skipping EPEL GPG verification - container environment detected or EPEL not configured
   when:
-    - ansible_virtualization_type | default('') in ['container', 'docker', 'podman'] or "'epel' not in
-      enabled_repos_check.stdout | lower"
+    - ansible_facts['virtualization_type'] | default('') in ['container', 'docker', 'podman'] or 
+      'epel' not in enabled_repos_check.stdout | lower
   tags:
     - security
     - gpg_verification
@@ -140,7 +140,7 @@
     mode: "0644"
   become: true
   when:
-    - not (ansible_virtualization_type | default('') in ['container', 'docker', 'podman'])
+    - not (ansible_facts['virtualization_type'] | default('') in ['container', 'docker', 'podman'])
     - not (cicd_test | default(false))
   tags:
     - security

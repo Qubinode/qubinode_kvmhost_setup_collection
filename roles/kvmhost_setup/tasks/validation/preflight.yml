@@ -11,16 +11,16 @@
     - name: Check minimum memory requirements (8GB)
       ansible.builtin.assert:
         that:
-          - ansible_memtotal_mb >= 8192
-        fail_msg: "Insufficient memory: {{ ansible_memtotal_mb }}MB available, minimum 8GB (8192MB) required"
-        success_msg: "Memory check passed: {{ ansible_memtotal_mb }}MB available"
+          - ansible_facts['memtotal_mb'] >= 8192
+        fail_msg: "Insufficient memory: {{ ansible_facts['memtotal_mb'] }}MB available, minimum 8GB (8192MB) required"
+        success_msg: "Memory check passed: {{ ansible_facts['memtotal_mb'] }}MB available"
 
     - name: Check minimum CPU requirements (4 cores)
       ansible.builtin.assert:
         that:
-          - ansible_processor_vcpus >= 4
-        fail_msg: "Insufficient CPU cores: {{ ansible_processor_vcpus }} available, minimum 4 required"
-        success_msg: "CPU check passed: {{ ansible_processor_vcpus }} cores available"
+          - ansible_facts['processor_vcpus'] >= 4
+        fail_msg: "Insufficient CPU cores: {{ ansible_facts['processor_vcpus'] }} available, minimum 4 required"
+        success_msg: "CPU check passed: {{ ansible_facts['processor_vcpus'] }} cores available"
 
     - name: Check minimum disk space requirements (50GB in /)
       ansible.builtin.assert:
@@ -232,11 +232,11 @@
       Pre-flight validation completed successfully!
 
       System Summary:
-      - OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
-      - Kernel: {{ ansible_kernel }}
-      - Memory: {{ ansible_memtotal_mb }}MB
-      - CPU Cores: {{ ansible_processor_vcpus }}
-      - Architecture: {{ ansible_architecture }}
+      - OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}
+      - Kernel: {{ ansible_facts['kernel'] }}
+      - Memory: {{ ansible_facts['memtotal_mb'] }}MB
+      - CPU Cores: {{ ansible_facts['processor_vcpus'] }}
+      - Architecture: {{ ansible_facts['architecture'] }}
       - Default Network: {{ ansible_default_ipv4.interface | default('N/A') }} -
         {{ ansible_default_ipv4.address | default('N/A') }}
       - Package Manager: {{ ansible_pkg_mgr }}

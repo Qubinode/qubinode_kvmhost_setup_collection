@@ -31,11 +31,11 @@
 - name: Check for minimum system requirements
   ansible.builtin.assert:
     that:
-      - ansible_memtotal_mb >= 2048
+      - ansible_facts['memtotal_mb'] >= 2048
     fail_msg: |
-      Insufficient memory: {{ ansible_memtotal_mb }}MB
+      Insufficient memory: {{ ansible_facts['memtotal_mb'] }}MB
       Minimum requirement: 2048MB
-    success_msg: "Memory requirement satisfied: {{ ansible_memtotal_mb }}MB"
+    success_msg: "Memory requirement satisfied: {{ ansible_facts['memtotal_mb'] }}MB"
 
 - name: Validate test mode vs production requirements
   ansible.builtin.fail:

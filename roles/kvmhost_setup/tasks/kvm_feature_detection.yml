@@ -63,9 +63,9 @@
 - name: Parse CPU capabilities
   ansible.builtin.set_fact:
     cpu_capabilities: "{{ cpu_info_detailed.stdout_lines | select('match', '.*Flags.*') | list }}"
-    cpu_cores: "{{ ansible_processor_cores }}"
-    cpu_threads: "{{ ansible_processor_threads_per_core }}"
-    total_vcpus: "{{ ansible_processor_vcpus }}"
+    cpu_cores: "{{ ansible_facts['processor_cores'] }}"
+    cpu_threads: "{{ ansible_facts['processor_threads_per_core'] }}"
+    total_vcpus: "{{ ansible_facts['processor_vcpus'] }}"
 
 - name: Check for hardware performance features
   ansible.builtin.set_fact:
@@ -77,9 +77,9 @@
 
 - name: Detect memory configuration
   ansible.builtin.set_fact:
-    total_memory_gb: "{{ (ansible_memtotal_mb / 1024) | round(1) }}"
-    recommended_hugepage_size: "{{ '1G' if ansible_memtotal_mb > 8192 else '2M' }}"
-    can_use_large_hugepages: "{{ ansible_memtotal_mb > 8192 }}"
+    total_memory_gb: "{{ (ansible_facts['memtotal_mb'] / 1024) | round(1) }}"
+    recommended_hugepage_size: "{{ '1G' if ansible_facts['memtotal_mb'] > 8192 else '2M' }}"
+    can_use_large_hugepages: "{{ ansible_facts['memtotal_mb'] > 8192 }}"
 
 - name: Check storage performance capabilities
   ansible.builtin.command: lsblk -d -o NAME,ROTA

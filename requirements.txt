@@ -18,6 +18,9 @@ yamllint>=1.28.0
 # Jinja2 templating
 jinja2>=3.0.0
 
+# Password hashing (required for password_hash filter)
+passlib>=1.7.4
+
 # Security tools
 bandit>=1.7.0
 safety>=2.0.0

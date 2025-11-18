@@ -30,28 +30,28 @@
     kvmhost_os_family: >-
       {{
         'CentOS' if (os_release_id == 'centos' or 'CentOS Stream' in os_release_name) else
-        ansible_distribution
+        ansible_facts['distribution']
       }}
     kvmhost_os_major_version: >-
       {{
-        os_release_version_id if (os_release_id == 'centos' and ansible_distribution == 'Fedora') else
-        ansible_distribution_major_version
+        os_release_version_id if (os_release_id == 'centos' and ansible_facts['distribution'] == 'Fedora') else
+        ansible_facts['distribution_major_version']
       }}
     kvmhost_os_full_version: >-
       {{
-        os_release_version_id if (os_release_id == 'centos' and ansible_distribution == 'Fedora') else
-        ansible_distribution_version
+        os_release_version_id if (os_release_id == 'centos' and ansible_facts['distribution'] == 'Fedora') else
+        ansible_facts['distribution_version']
       }}
     kvmhost_os_is_rhel_compatible: >-
       {{
         (os_release_id == 'centos') or
-        (ansible_distribution in supported_os_families)
+        (ansible_facts['distribution'] in supported_os_families)
       }}
     kvmhost_is_centos_stream: >-
       {{
         (os_release_id == 'centos' and 'Stream' in os_release_name) or
-        (ansible_distribution == 'CentOS' and
-         ('Stream' in ansible_distribution_version or 'stream' in ansible_distribution_version))
+        (ansible_facts['distribution'] == 'CentOS' and
+         ('Stream' in ansible_facts['distribution_version'] or 'stream' in ansible_facts['distribution_version']))
       }}
 
 - name: Set RHEL version-specific facts

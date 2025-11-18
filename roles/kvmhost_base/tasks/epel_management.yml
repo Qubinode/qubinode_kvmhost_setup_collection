@@ -15,8 +15,8 @@
           - Enable EPEL: {{ enable_epel | default(true) }}
           - GPG Check: {{ epel_gpg_check | default(false) }}
           - Import GPG Keys: {{ epel_gpg_import_keys | default(true) }}
-          - OS Family: {{ ansible_os_family }}
-          - Distribution: {{ ansible_distribution }}
+          - OS Family: {{ ansible_facts['os_family'] }}
+          - Distribution: {{ ansible_facts['distribution'] }}
 
     - name: Install EPEL repository
       ansible.builtin.package:
@@ -25,8 +25,8 @@
       become: true
       when:
         - enable_epel | default(true)
-        - ansible_os_family == "RedHat"
-        - ansible_distribution in ["Rocky", "AlmaLinux", "CentOS", "RedHat"]
+        - ansible_facts['os_family'] == "RedHat"
+        - ansible_facts['distribution'] in ["Rocky", "AlmaLinux", "CentOS", "RedHat"]
 
     - name: Clean EPEL metadata cache
       ansible.builtin.shell: |
@@ -35,7 +35,7 @@
       become: true
       when:
         - enable_epel | default(true)
-        - ansible_os_family == "RedHat"
+        - ansible_facts['os_family'] == "RedHat"
       changed_when: false
 
     - name: Configure EPEL GPG verification
@@ -49,18 +49,18 @@
         - "/etc/yum.repos.d/epel*.repo"
       when:
         - enable_epel | default(true)
-        - ansible_os_family == "RedHat"
+        - ansible_facts['os_family'] == "RedHat"
       notify: refresh package cache
 
     - name: Import EPEL GPG keys
       ansible.builtin.rpm_key:
-        key: /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
+        key: /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}
         state: present
       become: true
       when:
         - enable_epel | default(true)
         - epel_gpg_import_keys | default(true)
-        - ansible_os_family == "RedHat"
+        - ansible_facts['os_family'] == "RedHat"
       failed_when: false  # Allow failure if GPG key file doesn't exist
 
     - name: Verify EPEL repository status
@@ -72,7 +72,7 @@
       failed_when: false
       when:
         - enable_epel | default(true)
-        - ansible_os_family == "RedHat"
+        - ansible_facts['os_family'] == "RedHat"
 
     - name: Display EPEL repository status
       ansible.builtin.debug:
@@ -86,7 +86,7 @@
           GPG Verification: {{ 'Enabled' if epel_gpg_check | default(false) else 'Disabled' }}
       when:
         - enable_epel | default(true)
-        - ansible_os_family == "RedHat"
+        - ansible_facts['os_family'] == "RedHat"
 
   rescue:
     - name: Handle EPEL installation failure

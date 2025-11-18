@@ -16,18 +16,18 @@
 - name: Validate OS family support
   ansible.builtin.assert:
     that:
-      - ansible_os_family in supported_os_families
-    fail_msg: "Current OS family '{{ ansible_os_family }}' is not in supported list: {{ supported_os_families }}"
-    success_msg: OS family '{{ ansible_os_family }}' is supported
+      - ansible_facts['os_family'] in supported_os_families
+    fail_msg: "Current OS family '{{ ansible_facts['os_family'] }}' is not in supported list: {{ supported_os_families }}"
+    success_msg: OS family '{{ ansible_facts['os_family'] }}' is supported
 
 - name: Validate OS major version support
   ansible.builtin.assert:
     that:
-      - ansible_distribution_major_version in supported_major_versions
+      - ansible_facts['distribution_major_version'] in supported_major_versions
     fail_msg: >
-      Current OS major version '{{ ansible_distribution_major_version }}'
+      Current OS major version '{{ ansible_facts['distribution_major_version'] }}'
       is not in supported list: {{ supported_major_versions }}
-    success_msg: OS major version '{{ ansible_distribution_major_version }}' is supported
+    success_msg: OS major version '{{ ansible_facts['distribution_major_version'] }}' is supported
 
 - name: Validate EPEL configuration (ADR-0001 compliance)
   ansible.builtin.assert:
