@@ -236,6 +236,10 @@ safety-report.json
 # External roles (installed as dependencies, not part of our source)
 roles/linux-system-roles.network/
 roles/linux-system-roles.storage/
+roles/linux-system-roles.cockpit/
+
+# Build artifacts and release tarballs
+*.tar.gz
 
 # Experimental files and drafts not ready for production
 *.experimental
