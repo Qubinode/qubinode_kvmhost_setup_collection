@@ -10,6 +10,29 @@ Qubinode KVM Host Setup Collection Release Notes
 
 .. contents:: Topics
 
+v0.10.5
+=======
+
+Release Summary
+---------------
+Bug fix release addressing critical issues discovered during CentOS Stream 10 testing and preparing for Ansible 2.24 compatibility.
+
+Bugfixes
+--------
+- Fixed broken conditional syntax in gpg_verification.yml causing deployment failures
+- Fixed handler case sensitivity mismatch preventing libvirtd restarts
+- Removed trailing spaces and fixed line length issues for ansible-lint compliance
+
+Minor Changes
+-------------
+- Added passlib>=1.7.4 to requirements.txt and documented in README.md
+- Migrated all deprecated ansible_* variables to ansible_facts dictionary format for Ansible 2.24 compatibility
+- Updated 16 task files across kvmhost_setup and kvmhost_base roles with future-proof variable syntax
+
+Known Issues
+------------
+- None
+
 v1.0.0
 ======
 
