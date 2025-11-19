@@ -12,8 +12,7 @@
   become: true
 
 # Lowercase variant for backward compatibility with tasks that notify "restart libvirtd"
-# noqa: name[casing]
-- name: restart libvirtd
+- name: restart libvirtd  # noqa: name[casing]
   ansible.builtin.systemd:
     name: libvirtd
     state: restarted

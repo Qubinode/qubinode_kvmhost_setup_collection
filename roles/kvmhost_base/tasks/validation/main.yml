@@ -17,7 +17,9 @@
   ansible.builtin.assert:
     that:
       - ansible_facts['os_family'] in supported_os_families
-    fail_msg: "Current OS family '{{ ansible_facts['os_family'] }}' is not in supported list: {{ supported_os_families }}"
+    fail_msg: >-
+      Current OS family '{{ ansible_facts['os_family'] }}'
+      is not in supported list: {{ supported_os_families }}
     success_msg: OS family '{{ ansible_facts['os_family'] }}' is supported
 
 - name: Validate OS major version support

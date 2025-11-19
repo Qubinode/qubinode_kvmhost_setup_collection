@@ -126,7 +126,7 @@
   ansible.builtin.debug:
     msg: Skipping EPEL GPG verification - container environment detected or EPEL not configured
   when:
-    - ansible_facts['virtualization_type'] | default('') in ['container', 'docker', 'podman'] or 
+    - ansible_facts['virtualization_type'] | default('') in ['container', 'docker', 'podman'] or
       'epel' not in enabled_repos_check.stdout | lower
   tags:
     - security

@@ -55,9 +55,11 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: ^GRUB_CMDLINE_LINUX=
-    line: GRUB_CMDLINE_LINUX="hugepages={{ recommended_hugepages }} default_hugepagesz=2M hugepagesz=2M
-      transparent_hugepage=never isolcpus=1-{{ ansible_facts['processor_vcpus'] - 1 }} rcu_nocbs=1-{{ ansible_facts['processor_vcpus'] - 1
-      }}"
+    line: >-
+      GRUB_CMDLINE_LINUX="hugepages={{ recommended_hugepages }}
+      default_hugepagesz=2M hugepagesz=2M transparent_hugepage=never
+      isolcpus=1-{{ ansible_facts['processor_vcpus'] - 1 }}
+      rcu_nocbs=1-{{ ansible_facts['processor_vcpus'] - 1 }}"
     backup: true
   register: grub_config_changed
   when:
