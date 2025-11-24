@@ -40,7 +40,7 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Display OS information
         run: |
           echo "🖥️  Operating System Information:"
@@ -212,7 +212,7 @@ jobs:
         ansible-version: ["2.18", "2.19"]
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Display OS information
@@ -724,7 +724,7 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Display OS information
         run: |
           echo "🧪 CentOS Stream 10 OS Detection Test"
@@ -833,7 +833,7 @@ jobs:
       issues: write
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Check for new Ansible versions and create issue if needed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -872,7 +872,7 @@ jobs:
     needs: lint
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Display OS information
         run: |
           echo "🖥️  Operating System Information (Security Job):"
@@ -1020,7 +1020,7 @@ jobs:
     needs: test
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Emergency container cleanup
         run: |
           echo "🚨 Running emergency cleanup for stuck containers..."
@@ -1035,7 +1035,7 @@ jobs:
       contents: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
