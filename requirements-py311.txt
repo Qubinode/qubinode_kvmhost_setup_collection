@@ -36,7 +36,7 @@ markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 marshmallow==4.0.0
 mdurl==0.1.2
-molecule==25.7.0
+molecule==25.11.1
 molecule-podman==2.0.3
 mypy_extensions==1.1.0
 nltk==3.9.1
