@@ -694,6 +694,9 @@ jobs:
           source venv-docker/bin/activate
           echo "🧪 Testing basic molecule functionality..."
 
+          # Ensure podman is healthy
+          podman system migrate || true
+
           # Verify container runtime (following ansible-test.yml pattern)
           echo "🔍 Container runtime verification:"
           podman version
@@ -731,6 +734,8 @@ jobs:
           echo "Images Successfully Pulled: $PULL_SUCCESS/$PULL_TOTAL" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Available Container Images:" >> $GITHUB_STEP_SUMMARY
+          # Attempt to fix potential podman state issues
+          podman system migrate || true
           podman images --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
