@@ -10,6 +10,7 @@ FROM {{ item.image }}
 
 # Install essential packages using dnf (RHEL package manager)
 RUN if [ $(command -v dnf) ]; then \
+        dnf clean all && \
         dnf update -y && \
         dnf install -y \
             python3 \
@@ -26,6 +27,7 @@ RUN if [ $(command -v dnf) ]; then \
             gzip \
         && dnf clean all; \
     elif [ $(command -v yum) ]; then \
+        yum clean all && \
         yum update -y && \
         yum install -y \
             python3 \
