@@ -85,14 +85,17 @@ main() {
 
 check_python_dependencies() {
     log_info "Checking Python dependencies..."
-    
-    # Check if Python 3.11 is available
-    if command -v python3.11 &> /dev/null; then
+
+    # Check for Python versions (3.12, 3.11, 3.9)
+    if command -v python3.12 &> /dev/null; then
+        PYTHON_VERSION=$(python3.12 --version)
+        log_success "Python 3.12 found: $PYTHON_VERSION"
+    elif command -v python3.11 &> /dev/null; then
         PYTHON_VERSION=$(python3.11 --version)
         log_success "Python 3.11 found: $PYTHON_VERSION"
     elif command -v python3.9 &> /dev/null; then
         PYTHON_VERSION=$(python3.9 --version)
-        log_warning "Python 3.9 found (recommend 3.11): $PYTHON_VERSION"
+        log_warning "Python 3.9 found (recommend 3.11+): $PYTHON_VERSION"
     else
         log_error "No compatible Python version found"
         return 1
@@ -165,7 +168,7 @@ generate_dependency_report() {
   "validation_results": {
     "python": {
       "version": "${PYTHON_VERSION:-unknown}",
-      "status": "$(command -v python3.11 &> /dev/null && echo "ok" || echo "warning")"
+      "status": "$({ command -v python3.12 || command -v python3.11; } &> /dev/null && echo "ok" || echo "warning")"
     },
     "ansible": {
       "installed": $(command -v ansible &> /dev/null && echo "true" || echo "false"),

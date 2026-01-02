@@ -12,7 +12,7 @@ testinfra
 
 # Security tools for CI/CD
 bandit>=1.7.0
-safety>=2.0.0
+safety>=3.7.0
 
 # Container testing (Podman specific)
 molecule-podman

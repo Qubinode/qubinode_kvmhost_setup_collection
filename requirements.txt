@@ -23,7 +23,7 @@ passlib>=1.7.4
 
 # Security tools
 bandit>=1.7.0
-safety>=2.0.0
+safety>=3.7.0
 
 # Development and testing tools
 pre-commit>=2.15.0
