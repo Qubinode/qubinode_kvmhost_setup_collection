@@ -141,6 +141,18 @@ libvirt_services:
   - libvirtd
   - tuned
 
+# Modular libvirt daemons for RHEL 10+ (socket-activated)
+# These replace the monolithic libvirtd on RHEL 10 / CentOS Stream 10
+# Reference: https://libvirt.org/daemons.html#modular-driver-daemons
+libvirt_modular_services:
+  - virtqemud.socket
+  - virtnetworkd.socket
+  - virtstoraged.socket
+  - virtnodedevd.socket
+  - virtsecretd.socket
+  - virtlockd.socket
+  - virtlogd.socket
+
 # synth shell global directory
 synth_shell_dir: /etc
 

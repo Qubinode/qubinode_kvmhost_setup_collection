@@ -189,11 +189,27 @@
         - NetworkManager
         - cockpit.socket
       rhel10:
-        - libvirtd
+        # Modular libvirt daemons (socket-activated) - replaces monolithic libvirtd
+        # Reference: https://libvirt.org/daemons.html#modular-driver-daemons
+        - virtqemud.socket
+        - virtnetworkd.socket
+        - virtstoraged.socket
+        - virtnodedevd.socket
+        - virtsecretd.socket
+        - virtlockd.socket
+        - virtlogd.socket
         - NetworkManager
         - cockpit.socket
       centos_stream10:
-        - libvirtd
+        # Modular libvirt daemons (socket-activated) - replaces monolithic libvirtd
+        # Reference: https://libvirt.org/daemons.html#modular-driver-daemons
+        - virtqemud.socket
+        - virtnetworkd.socket
+        - virtstoraged.socket
+        - virtnodedevd.socket
+        - virtsecretd.socket
+        - virtlockd.socket
+        - virtlogd.socket
         - NetworkManager
         - cockpit.socket
         - podman.socket  # Enhanced container service support

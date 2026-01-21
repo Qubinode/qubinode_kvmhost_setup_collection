@@ -2,13 +2,38 @@
   ansible.builtin.include_tasks: validate.yml
   when: not cicd_test|bool
 
-- name: Enable libvirt services
-  ansible.builtin.service:
+- name: Set libvirt modular daemons fact for RHEL 10+
+  ansible.builtin.set_fact:
+    libvirt_use_modular_daemons: >-
+      {{ (kvmhost_is_centos_stream10 | default(false)) or
+         (kvmhost_is_rhel10 | default(false)) or
+         (kvmhost_os_major_version | default('9') | int >= 10) }}
+
+- name: Enable modular libvirt socket services (RHEL 10+)
+  ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
     state: started
-  with_items: "{{ libvirt_services }}"
-  when: not (ansible_virtualization_type == "container" or cicd_test|bool)
+  loop: "{{ libvirt_modular_services }}"
+  when:
+    - libvirt_use_modular_daemons | bool
+    - not (ansible_virtualization_type == "container" or cicd_test | bool)
+
+- name: Enable legacy libvirt service (RHEL 8/9)
+  ansible.builtin.service:
+    name: libvirtd
+    enabled: true
+    state: started
+  when:
+    - not (libvirt_use_modular_daemons | default(false) | bool)
+    - not (ansible_virtualization_type == "container" or cicd_test | bool)
+
+- name: Enable tuned service (all versions)
+  ansible.builtin.service:
+    name: tuned
+    enabled: true
+    state: started
+  when: not (ansible_virtualization_type == "container" or cicd_test | bool)
 
 - name: Check current tuned profile
   ansible.builtin.command: tuned-adm active
