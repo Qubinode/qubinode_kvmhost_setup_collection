@@ -685,6 +685,7 @@ jobs:
           
           echo "✅ Cleanup completed"
         env:
+          ANSIBLE_ALLOW_BROKEN_CONDITIONALS: "True"
           PY_COLORS: "1"
           ANSIBLE_FORCE_COLOR: "1"
           MOLECULE_NO_LOG: "false"
@@ -819,10 +820,11 @@ jobs:
 
       - name: Cleanup CentOS Stream 10 test containers
         if: always()
+        env:
+          ANSIBLE_ALLOW_BROKEN_CONDITIONALS: "True"
         run: |
           source venv-centos10/bin/activate || true
           echo "🧹 Cleaning up CentOS Stream 10 test containers..."
-          export ANSIBLE_ALLOW_BROKEN_CONDITIONALS=True
           molecule destroy --scenario-name centos-stream10 || true
           podman container prune -f || true
           echo "✅ CentOS Stream 10 test cleanup completed"
