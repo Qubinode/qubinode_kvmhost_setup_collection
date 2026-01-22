@@ -68,12 +68,12 @@ jobs:
             fi
           done
           echo "=================================="
-      - name: Setup Python 3.11 environment
+      - name: Setup Python environment
         run: |
           # Detect OS and use appropriate package manager
           if [ -f /etc/os-release ]; then
             . /etc/os-release
-            echo "Detected OS: $NAME ($ID)"
+            echo "Detected OS: $NAME ($ID) version $VERSION_ID"
           fi
 
           # Determine package manager
@@ -87,7 +87,25 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux
+          # Determine Python version based on OS
+          # CentOS Stream 10 uses Python 3.12, others use Python 3.11
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "CentOS Stream 10 detected - using Python 3.12"
+            PYTHON_CMD="python3"
+            PYTHON_VERSION="3.12"
+            VENV_NAME="venv-py312"
+          else
+            PYTHON_CMD="python3.11"
+            PYTHON_VERSION="3.11"
+            VENV_NAME="venv-py311"
+          fi
+          echo "Python command: $PYTHON_CMD, Version: $PYTHON_VERSION"
+
+          # Export for subsequent steps
+          echo "PYTHON_CMD=$PYTHON_CMD" >> $GITHUB_ENV
+          echo "VENV_NAME=$VENV_NAME" >> $GITHUB_ENV
+
+          # Configure EPEL repository for Rocky/Alma Linux (not needed for CentOS Stream 10)
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
             echo "Configuring EPEL repository for Rocky/Alma Linux..."
             # Clean all metadata and cache
@@ -122,72 +140,56 @@ jobs:
             echo "EPEL repository configuration completed"
           fi
 
-          # Check if Python 3.11 is already installed
-          if command -v python3.11 &> /dev/null; then
-            echo "Python 3.11 is already installed: $(python3.11 --version)"
-            PYTHON_INSTALLED=true
-          else
-            echo "Python 3.11 not found, will install"
-            PYTHON_INSTALLED=false
-          fi
-
-          # Install Python 3.11 and development packages if needed
-          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
-            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              echo "Installing Python packages for Rocky/Alma Linux..."
-              if [[ "$ID" == "rocky" ]]; then
-                echo "Using --nogpgcheck for Rocky Linux package installation"
-                sudo $PKG_MGR install -y --nogpgcheck python3.11 python3.11-devel python3.11-pip
-                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
-              else
-                sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
-                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
-              fi
-            elif [[ "$ID" == "rhel" ]]; then
-              echo "Installing Python packages for RHEL..."
-              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
-              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+          # Install Python and development packages based on OS
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "Installing Python packages for CentOS Stream 10..."
+            # Python 3.12 is default on CentOS Stream 10
+            sudo $PKG_MGR install -y python3-pip python3-devel python3-libselinux libselinux-devel
+          elif [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Installing Python packages for Rocky/Alma Linux..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python3.11 python3.11-devel python3.11-pip || true
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
             else
-              echo "Installing Python packages for generic RedHat family..."
-              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
+              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip || true
               sudo $PKG_MGR install -y python3-libselinux libselinux-devel
             fi
+          elif [[ "$ID" == "rhel" ]]; then
+            echo "Installing Python packages for RHEL..."
+            sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip || true
+            sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
           else
-            echo "Skipping Python 3.11 installation (already installed)"
-            # Still install SELinux packages if needed
-            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              if [[ "$ID" == "rocky" ]]; then
-                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
-              else
-                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
-              fi
-            elif [[ "$ID" == "rhel" ]]; then
-              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            echo "Installing Python packages for generic RedHat family..."
+            # Try Python 3.12 first, fall back to 3.11
+            if sudo $PKG_MGR install -y python3-pip python3-devel 2>/dev/null; then
+              echo "Installed system Python 3"
             else
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip || true
             fi
+            sudo $PKG_MGR install -y python3-libselinux libselinux-devel || true
           fi
 
-          # Setup Python virtual environment with Python 3.11
-          python3.11 -m pip install --upgrade pip
-          python3.11 -m pip install virtualenv
-          python3.11 -m virtualenv venv-py311
-          source venv-py311/bin/activate
+          # Setup Python virtual environment
+          $PYTHON_CMD -m pip install --upgrade pip
+          $PYTHON_CMD -m pip install virtualenv
+          $PYTHON_CMD -m virtualenv $VENV_NAME
+          source $VENV_NAME/bin/activate
       - name: Setup SELinux for CI environment
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Use our comprehensive SELinux setup script
-          ./scripts/setup-selinux-for-ci.sh python3.11
+          ./scripts/setup-selinux-for-ci.sh $PYTHON_CMD
 
       - name: Install lint tools
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Use ansible-core 2.18+ for Python 3.11 compatibility (fixes SELinux binding issues)
           # Support up to 2.19 for CentOS Stream 10 Python 3.12 compatibility
           pip install ansible-lint>=6.0.0 bandit>=1.7.0 "ansible-core>=2.18.0,<2.20.0"
       - name: Install required Ansible collections and roles
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Install collections and roles from main requirements file
           ansible-galaxy install -r requirements.yml
           # Also install from collection-specific requirements
@@ -199,7 +201,7 @@ jobs:
           ansible-galaxy role list
       - name: Run ansible-lint
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Use .ansible-lint config file which excludes external dependency roles
           ansible-lint roles/ --profile=production
 
@@ -247,7 +249,7 @@ jobs:
           # Detect OS and use appropriate package manager
           if [ -f /etc/os-release ]; then
             . /etc/os-release
-            echo "Detected OS: $NAME ($ID)"
+            echo "Detected OS: $NAME ($ID) version $VERSION_ID"
           fi
 
           # Determine package manager
@@ -261,7 +263,26 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux
+          # Determine Python version based on OS
+          # CentOS Stream 10 uses Python 3.12, override matrix.python-version
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "CentOS Stream 10 detected - using Python 3.12 (system default)"
+            PYTHON_CMD="python3"
+            PYTHON_VERSION="3.12"
+            VENV_NAME="venv-py312"
+          else
+            PYTHON_CMD="python${{ matrix.python-version }}"
+            PYTHON_VERSION="${{ matrix.python-version }}"
+            VENV_NAME="venv-py${{ matrix.python-version }}"
+          fi
+          echo "Python command: $PYTHON_CMD, Version: $PYTHON_VERSION"
+
+          # Export for subsequent steps
+          echo "PYTHON_CMD=$PYTHON_CMD" >> $GITHUB_ENV
+          echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_ENV
+          echo "VENV_NAME=$VENV_NAME" >> $GITHUB_ENV
+
+          # Configure EPEL repository for Rocky/Alma Linux (not needed for CentOS Stream 10)
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
             echo "Configuring EPEL repository for Rocky/Alma Linux..."
             sudo $PKG_MGR clean all || true
@@ -281,72 +302,56 @@ jobs:
             sudo $PKG_MGR makecache || true
           fi
 
-          # Check if Python version is already installed
-          if command -v python${{ matrix.python-version }} &> /dev/null; then
-            echo "Python ${{ matrix.python-version }} is already installed: $(python${{ matrix.python-version }} --version)"
-            PYTHON_INSTALLED=true
-          else
-            echo "Python ${{ matrix.python-version }} not found, will install"
-            PYTHON_INSTALLED=false
-          fi
-
-          # Install Python and development packages based on OS if needed
-          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
-            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              echo "Installing Python packages for Rocky/Alma Linux..."
-              if [[ "$ID" == "rocky" ]]; then
-                echo "Using --nogpgcheck for Rocky Linux package installation"
-                sudo $PKG_MGR install -y --nogpgcheck python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
-              else
-                sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
-              fi
-            elif [[ "$ID" == "rhel" ]]; then
-              echo "Installing Python packages for RHEL..."
-              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
-              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+          # Install Python and development packages based on OS
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "Installing Python packages for CentOS Stream 10..."
+            # Python 3.12 is default on CentOS Stream 10
+            sudo $PKG_MGR install -y python3-pip python3-devel python3-libselinux libselinux-devel
+          elif [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Installing Python packages for Rocky/Alma Linux..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip || true
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
             else
-              echo "Installing Python packages for generic RedHat family..."
-              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip
+              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip || true
               sudo $PKG_MGR install -y python3-libselinux libselinux-devel
             fi
+          elif [[ "$ID" == "rhel" ]]; then
+            echo "Installing Python packages for RHEL..."
+            sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip || true
+            sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
           else
-            echo "Skipping Python ${{ matrix.python-version }} installation (already installed)"
-            # Still install SELinux packages if needed
-            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              if [[ "$ID" == "rocky" ]]; then
-                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
-              else
-                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
-              fi
-            elif [[ "$ID" == "rhel" ]]; then
-              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            echo "Installing Python packages for generic RedHat family..."
+            # Try system Python first for CentOS Stream 10 and similar
+            if sudo $PKG_MGR install -y python3-pip python3-devel 2>/dev/null; then
+              echo "Installed system Python 3"
             else
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              sudo $PKG_MGR install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-devel python${{ matrix.python-version }}-pip || true
             fi
+            sudo $PKG_MGR install -y python3-libselinux libselinux-devel || true
           fi
 
-          python${{ matrix.python-version }} -m pip install --upgrade pip
+          $PYTHON_CMD -m pip install --upgrade pip
       - name: Install ansible-core
-        run: python${{ matrix.python-version }} -m pip install ansible-core==${{ matrix.ansible-version }}
+        run: $PYTHON_CMD -m pip install ansible-core==${{ matrix.ansible-version }}
       - name: Setup Python virtual environment for test job
         run: |
           # Create virtual environment for test job
-          python${{ matrix.python-version }} -m pip install virtualenv
-          python${{ matrix.python-version }} -m virtualenv venv-py311
-          source venv-py311/bin/activate
+          $PYTHON_CMD -m pip install virtualenv
+          $PYTHON_CMD -m virtualenv $VENV_NAME
+          source $VENV_NAME/bin/activate
           # Install ansible-core in the virtual environment
           pip install ansible-core==${{ matrix.ansible-version }}
       - name: Setup SELinux for CI environment
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Use our comprehensive SELinux setup script
-          ./scripts/setup-selinux-for-ci.sh python${{ matrix.python-version }}
+          ./scripts/setup-selinux-for-ci.sh $PYTHON_CMD
 
-      - name: Install Molecule with Python 3.11 support
+      - name: Install Molecule
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Updated to Molecule v6.x for current stable release
           pip install "molecule>=6.0.0" molecule-podman
 
@@ -711,7 +716,7 @@ jobs:
           LIBSELINUX_DISABLE_SELINUX_CHECK: "1"
       - name: Install collections for playbook testing
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Ensure collections are available for playbook testing
           ansible-galaxy install -r requirements.yml
           echo "📋 Collections available for playbook testing:"
@@ -721,7 +726,7 @@ jobs:
 
       - name: Run Playbook tests
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Use auto detection for Python interpreter in containers
           export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           # Handle SELinux gracefully in containerized environments
@@ -762,57 +767,74 @@ jobs:
           fi
           echo "====================================="
 
-      - name: Setup Python 3.11 environment
+      - name: Setup Python environment
         run: |
-          # Use same setup as main test job but simplified
+          # Detect OS and determine Python version
           if [ -f /etc/os-release ]; then
             source /etc/os-release
+            echo "Detected OS: $NAME ($ID) version $VERSION_ID"
             PKG_MGR="dnf"
             if [[ "$ID" == "ubuntu" ]]; then
               PKG_MGR="apt-get"
             fi
           fi
-          
-          # Install Python 3.11 if not available
-          if ! command -v python3.11 &> /dev/null; then
-            echo "Installing Python 3.11..."
-            if [[ "$PKG_MGR" == "apt-get" ]]; then
-              sudo apt-get update
-              sudo apt-get install -y python3.11 python3.11-venv python3.11-dev
-            else
-              sudo $PKG_MGR install -y python3.11 python3.11-pip python3.11-devel
+
+          # Determine Python command based on OS
+          # CentOS Stream 10 uses Python 3.12, others use Python 3.11
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "CentOS Stream 10 detected - using Python 3.12 (system default)"
+            PYTHON_CMD="python3"
+            VENV_NAME="venv-centos10"
+            # Install Python dev packages for CentOS Stream 10
+            sudo $PKG_MGR install -y python3-pip python3-devel python3-libselinux || true
+          else
+            PYTHON_CMD="python3.11"
+            VENV_NAME="venv-centos10"
+            # Install Python 3.11 if not available
+            if ! command -v python3.11 &> /dev/null; then
+              echo "Installing Python 3.11..."
+              if [[ "$PKG_MGR" == "apt-get" ]]; then
+                sudo apt-get update
+                sudo apt-get install -y python3.11 python3.11-venv python3.11-dev
+              else
+                sudo $PKG_MGR install -y python3.11 python3.11-pip python3.11-devel || true
+              fi
             fi
           fi
-          
+
+          # Export for subsequent steps
+          echo "PYTHON_CMD=$PYTHON_CMD" >> $GITHUB_ENV
+          echo "VENV_NAME=$VENV_NAME" >> $GITHUB_ENV
+
           # Setup virtual environment
-          python3.11 -m pip install --upgrade pip
-          python3.11 -m pip install virtualenv
-          python3.11 -m virtualenv venv-centos10
-          source venv-centos10/bin/activate
-          
+          $PYTHON_CMD -m pip install --upgrade pip
+          $PYTHON_CMD -m pip install virtualenv
+          $PYTHON_CMD -m virtualenv $VENV_NAME
+          source $VENV_NAME/bin/activate
+
           # Install required packages
           pip install "ansible-core>=2.18.0,<2.20.0" "molecule>=6.0.0" molecule-podman
 
       - name: Install Ansible Galaxy dependencies
         run: |
-          source venv-centos10/bin/activate
-          
+          source $VENV_NAME/bin/activate
+
           # Install collection and role dependencies from requirements file
           ansible-galaxy install -r molecule/centos-stream10/requirements.yml
-          
+
           # Verify installations
           echo "📋 Installed collections:"
           ansible-galaxy collection list | grep -E "(containers\.podman|community\.general|ansible\.posix)" || true
           echo "📋 Installed roles:"
           ansible-galaxy role list | grep "linux-system-roles.cockpit" || true
-          
+
           echo "✅ Ansible Galaxy dependencies installed"
 
       - name: Setup SELinux for CI environment
         run: |
-          source venv-centos10/bin/activate
+          source $VENV_NAME/bin/activate
           # Use our comprehensive SELinux setup script for environment parity (ADR-0011)
-          ./scripts/setup-selinux-for-ci.sh python3.11
+          ./scripts/setup-selinux-for-ci.sh $PYTHON_CMD
 
       - name: Reset Podman state
         run: |
@@ -824,18 +846,18 @@ jobs:
       - name: Run CentOS Stream 10 Molecule test
         timeout-minutes: 25
         run: |
-          source venv-centos10/bin/activate
+          source $VENV_NAME/bin/activate
 
           echo "🧪 Testing CentOS Stream 10 OS detection..."
           echo "This test validates that CentOS Stream 10 is correctly"
           echo "identified as 'CentOS' instead of 'Fedora 41'"
           echo ""
-          
+
           # Set environment variables for molecule-podman compatibility
           export ANSIBLE_ALLOW_BROKEN_CONDITIONALS=True
           export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           export ANSIBLE_SELINUX_SPECIAL_FS=""
-          
+
           # Run the CentOS Stream 10 specific scenario
           echo "🚀 Running molecule test for centos-stream10 scenario..."
           if molecule test --scenario-name centos-stream10; then
@@ -852,7 +874,7 @@ jobs:
         env:
           ANSIBLE_ALLOW_BROKEN_CONDITIONALS: "True"
         run: |
-          source venv-centos10/bin/activate || true
+          source $VENV_NAME/bin/activate || true
           echo "🧹 Cleaning up CentOS Stream 10 test containers..."
           molecule destroy --scenario-name centos-stream10 || true
           podman container prune -f || true
@@ -926,12 +948,12 @@ jobs:
           echo "💻 Hostname: $(hostname)"
           echo "🔒 Security scanning with Python 3.11"
           echo "==============================================="
-      - name: Setup Python 3.11 environment
+      - name: Setup Python environment
         run: |
           # Detect OS and use appropriate package manager
           if [ -f /etc/os-release ]; then
             . /etc/os-release
-            echo "Detected OS: $NAME ($ID)"
+            echo "Detected OS: $NAME ($ID) version $VERSION_ID"
           fi
 
           # Determine package manager
@@ -945,7 +967,25 @@ jobs:
           fi
           echo "Using package manager: $PKG_MGR"
 
-          # Configure EPEL repository for Rocky/Alma Linux
+          # Determine Python version based on OS
+          # CentOS Stream 10 uses Python 3.12, others use Python 3.11
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "CentOS Stream 10 detected - using Python 3.12"
+            PYTHON_CMD="python3"
+            PYTHON_VERSION="3.12"
+            VENV_NAME="venv-py312"
+          else
+            PYTHON_CMD="python3.11"
+            PYTHON_VERSION="3.11"
+            VENV_NAME="venv-py311"
+          fi
+          echo "Python command: $PYTHON_CMD, Version: $PYTHON_VERSION"
+
+          # Export for subsequent steps
+          echo "PYTHON_CMD=$PYTHON_CMD" >> $GITHUB_ENV
+          echo "VENV_NAME=$VENV_NAME" >> $GITHUB_ENV
+
+          # Configure EPEL repository for Rocky/Alma Linux (not needed for CentOS Stream 10)
           if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
             echo "Configuring EPEL repository for Rocky/Alma Linux..."
             sudo $PKG_MGR clean all || true
@@ -965,78 +1005,62 @@ jobs:
             sudo $PKG_MGR makecache || true
           fi
 
-          # Check if Python 3.11 is already installed
-          if command -v python3.11 &> /dev/null; then
-            echo "Python 3.11 is already installed: $(python3.11 --version)"
-            PYTHON_INSTALLED=true
-          else
-            echo "Python 3.11 not found, will install"
-            PYTHON_INSTALLED=false
-          fi
-
-          # Install Python 3.11 and development packages for security scanning if needed
-          if [[ "$PYTHON_INSTALLED" == "false" ]]; then
-            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              echo "Installing Python packages for Rocky/Alma Linux..."
-              if [[ "$ID" == "rocky" ]]; then
-                echo "Using --nogpgcheck for Rocky Linux package installation"
-                sudo $PKG_MGR install -y --nogpgcheck python3.11 python3.11-devel python3.11-pip
-                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
-              else
-                sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
-                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
-              fi
-            elif [[ "$ID" == "rhel" ]]; then
-              echo "Installing Python packages for RHEL..."
-              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
-              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+          # Install Python and development packages based on OS
+          if [[ "$ID" == "centos" ]] && [[ "${VERSION_ID%%.*}" == "10" ]]; then
+            echo "Installing Python packages for CentOS Stream 10..."
+            # Python 3.12 is default on CentOS Stream 10
+            sudo $PKG_MGR install -y python3-pip python3-devel python3-libselinux libselinux-devel
+          elif [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
+            echo "Installing Python packages for Rocky/Alma Linux..."
+            if [[ "$ID" == "rocky" ]]; then
+              echo "Using --nogpgcheck for Rocky Linux package installation"
+              sudo $PKG_MGR install -y --nogpgcheck python3.11 python3.11-devel python3.11-pip || true
+              sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
             else
-              echo "Installing Python packages for generic RedHat family..."
-              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip
+              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip || true
               sudo $PKG_MGR install -y python3-libselinux libselinux-devel
             fi
+          elif [[ "$ID" == "rhel" ]]; then
+            echo "Installing Python packages for RHEL..."
+            sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip || true
+            sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
           else
-            echo "Skipping Python 3.11 installation (already installed)"
-            # Still install SELinux packages if needed
-            if [[ "$ID" == "rocky" ]] || [[ "$ID" == "almalinux" ]]; then
-              if [[ "$ID" == "rocky" ]]; then
-                sudo $PKG_MGR install -y --nogpgcheck python3-libselinux libselinux-devel
-              else
-                sudo $PKG_MGR install -y python3-libselinux libselinux-devel
-              fi
-            elif [[ "$ID" == "rhel" ]]; then
-              sudo $PKG_MGR install -y libselinux-python3 python3-libselinux libselinux-devel
+            echo "Installing Python packages for generic RedHat family..."
+            # Try system Python first for CentOS Stream 10 and similar
+            if sudo $PKG_MGR install -y python3-pip python3-devel 2>/dev/null; then
+              echo "Installed system Python 3"
             else
-              sudo $PKG_MGR install -y python3-libselinux libselinux-devel
+              sudo $PKG_MGR install -y python3.11 python3.11-devel python3.11-pip || true
             fi
+            sudo $PKG_MGR install -y python3-libselinux libselinux-devel || true
           fi
 
           # Setup Python virtual environment
-          python3.11 -m pip install --upgrade pip
-          python3.11 -m pip install virtualenv
-          python3.11 -m virtualenv venv-py311
-          source venv-py311/bin/activate
+          $PYTHON_CMD -m pip install --upgrade pip
+          $PYTHON_CMD -m pip install virtualenv
+          $PYTHON_CMD -m virtualenv $VENV_NAME
+          source $VENV_NAME/bin/activate
       - name: Setup SELinux for CI environment
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Use our comprehensive SELinux setup script
-          ./scripts/setup-selinux-for-ci.sh python3.11
+          ./scripts/setup-selinux-for-ci.sh $PYTHON_CMD
 
       - name: Install security tools
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Updated to latest versions for better security coverage
           pip install ansible-core>=2.17.0 bandit>=1.7.0 safety>=2.0.0
       - name: Run security scan
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           bandit -r roles/ -f txt -ll
           # Additional security check for dependencies
           # Note: safety may fail if external API is down, continue on error
           safety check --json || echo "⚠️ Safety check failed (API might be unavailable)"
       - name: Test dependency security (simple approach)
         run: |
-          source venv-py311/bin/activate
+          source $VENV_NAME/bin/activate
           # Create temp requirements for key dependencies
           echo "ansible-core>=2.18.0,<2.19.0" > temp-requirements.txt
           echo "molecule[podman]>=6.0.0" >> temp-requirements.txt
