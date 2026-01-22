@@ -518,8 +518,9 @@ jobs:
       - name: Run Molecule tests
         timeout-minutes: 45  # Increased timeout for better debugging
         run: |
+          source $VENV_NAME/bin/activate
           echo "🧪 Starting Molecule tests..."
-          
+
           # Set Python interpreter for Ansible (use auto detection for containers)
           export ANSIBLE_PYTHON_INTERPRETER=auto_silent
           # Handle SELinux gracefully in containerized environments
