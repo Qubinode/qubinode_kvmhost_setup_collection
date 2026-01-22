@@ -21,6 +21,9 @@ This directory contains the architectural decision records for the Qubinode KVM 
 | [ADR-0013](adr-0013-molecule-systemd-configuration-best-practices.md) | Molecule Systemd Configuration Best Practices | Accepted | 2024-07-11 | Testing |
 | [ADR-0014](../adr/ADR-0014-ANSIBLE-GALAXY-AUTOMATED-RELEASE-STRATEGY.md) | Ansible Galaxy Automated Release Strategy | Proposed | 2025-01-09 | DevOps |
 | [ADR-0015](adr-0015-remote-desktop-architecture.md) | Remote Desktop Architecture Decision (VNC to RDP Migration) | Accepted | 2025-11-14 | Security |
+| [ADR-0016](adr-0016-modular-libvirt-daemons-rhel10.md) | Modular Libvirt Daemons for RHEL 10 | Accepted | 2025-01-21 | Infrastructure |
+| [ADR-0017](adr-0017-ansible-core-version-support-policy.md) | ansible-core Version Support Policy | Accepted | 2026-01-22 | CI/CD |
+| [ADR-0018](adr-0018-ci-third-party-repo-gpg-strategy.md) | CI/CD Third-Party Repository GPG Verification Strategy | Accepted | 2026-01-22 | CI/CD |
 
 ## ADR Categories
 
@@ -28,9 +31,10 @@ This directory contains the architectural decision records for the Qubinode KVM 
 - **ADR-0002**: Establishes the modular role-based structure for organizing Ansible automation
 - **ADR-0006**: Defines configuration management patterns and variable hierarchy
 
-### Infrastructure  
+### Infrastructure
 - **ADR-0003**: Defines KVM as the virtualization platform for hosting workloads
 - **ADR-0007**: Establishes bridge-based networking architecture for VM connectivity
+- **ADR-0016**: Implements modular libvirt daemons for RHEL 10 with socket-activated services
 
 ### Deployment
 - **ADR-0001**: Standardizes package management approach using DNF module
@@ -52,11 +56,15 @@ This directory contains the architectural decision records for the Qubinode KVM 
 - **ADR-0009**: Implements automated dependency management with GitHub Dependabot
 - **ADR-0014**: Establishes automated release strategy for Ansible Galaxy deployment
 
+### CI/CD
+- **ADR-0017**: Establishes ansible-core version support policy (2.18-2.19) for RHEL 9/10 compatibility
+- **ADR-0018**: Defines strategy for handling third-party repository GPG verification in CI environments
+
 ### Quality
 - **ADR-0010**: Establishes comprehensive end-user repeatability and solution reproducibility standards
 
 ## Status Summary
-- **Accepted**: 13 ADRs
+- **Accepted**: 16 ADRs
 - **Proposed**: 2 ADRs
 - **Deprecated**: 0 ADRs
 

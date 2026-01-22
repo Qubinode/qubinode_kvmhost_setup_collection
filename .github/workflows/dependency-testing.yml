@@ -49,6 +49,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -107,6 +113,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
+
       - name: Generate test matrix
         id: generate
         run: |
@@ -148,10 +160,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.dependency-matrix.outputs.python-matrix) }}
-    
+
     steps:
       - uses: actions/checkout@v5
-      
+
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
+
       - name: Setup Python ${{ matrix.python-version }}
         run: |
           # Detect OS and use appropriate package manager (following ansible-test.yml pattern)
@@ -349,9 +367,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.dependency-matrix.outputs.ansible-matrix) }}
-    
+
     steps:
       - uses: actions/checkout@v5
+
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
 
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
@@ -478,9 +502,15 @@ jobs:
     runs-on: self-hosted
     needs: dependency-matrix
     if: needs.dependency-matrix.outputs.test-scope == 'full' || needs.dependency-matrix.outputs.test-scope == 'docker-only'
-    
+
     steps:
       - uses: actions/checkout@v5
+
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
 
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |
@@ -569,6 +599,13 @@ jobs:
           echo "Molecule version: $(molecule --version)"
           echo "Podman version: $(podman --version)"
           
+      - name: Reset Podman state
+        run: |
+          echo "🔄 Resetting Podman internal state..."
+          podman system migrate || true
+          podman system prune -f || true
+          echo "✅ Podman state reset complete"
+
       - name: Setup container registries and pre-pull images
         env:
           REDHAT_REGISTRY_USERNAME: ${{ secrets.REDHAT_REGISTRY_USERNAME }}
@@ -739,9 +776,15 @@ jobs:
     runs-on: self-hosted
     needs: [python-dependency-test, ansible-dependency-test]
     if: always() && (needs.python-dependency-test.result == 'success' || needs.ansible-dependency-test.result == 'success')
-    
+
     steps:
       - uses: actions/checkout@v5
+
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
 
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         run: |

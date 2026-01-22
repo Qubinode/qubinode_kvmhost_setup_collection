@@ -41,6 +41,11 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v5
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
       - name: Display OS information
         run: |
           echo "🖥️  Operating System Information:"
@@ -215,6 +220,11 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
       - name: Display OS information
         run: |
           echo "🖥️  Operating System Information (Test Job):"
@@ -340,7 +350,14 @@ jobs:
           # Updated to Molecule v6.x for current stable release
           pip install "molecule>=6.0.0" molecule-podman
 
-      - name: Setup container registries and authentication  
+      - name: Reset Podman state
+        run: |
+          echo "🔄 Resetting Podman internal state..."
+          podman system migrate || true
+          podman system prune -f || true
+          echo "✅ Podman state reset complete"
+
+      - name: Setup container registries and authentication
         run: |
           echo "🔧 Setting up container registry access for CI environment..."
           
@@ -726,6 +743,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
       - name: Display OS information
         run: |
           echo "🧪 CentOS Stream 10 OS Detection Test"
@@ -792,11 +814,18 @@ jobs:
           # Use our comprehensive SELinux setup script for environment parity (ADR-0011)
           ./scripts/setup-selinux-for-ci.sh python3.11
 
+      - name: Reset Podman state
+        run: |
+          echo "🔄 Resetting Podman internal state..."
+          podman system migrate || true
+          podman system prune -f || true
+          echo "✅ Podman state reset complete"
+
       - name: Run CentOS Stream 10 Molecule test
         timeout-minutes: 25
         run: |
           source venv-centos10/bin/activate
-          
+
           echo "🧪 Testing CentOS Stream 10 OS detection..."
           echo "This test validates that CentOS Stream 10 is correctly"
           echo "identified as 'CentOS' instead of 'Fedora 41'"
@@ -875,6 +904,11 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v5
+      - name: Fix third-party repository GPG issues
+        run: |
+          # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
+          chmod +x scripts/fix-ci-repo-gpg-issues.sh
+          ./scripts/fix-ci-repo-gpg-issues.sh
       - name: Display OS information
         run: |
           echo "🖥️  Operating System Information (Security Job):"
