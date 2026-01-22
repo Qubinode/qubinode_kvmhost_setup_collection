@@ -69,8 +69,16 @@ Automation and CI/CD
         :link-type: doc
 
         **Set Up Dependabot Automation**
-        
+
         Configure automated dependency management and security updates for the project.
+
+    .. grid-item-card:: 🖥️ GitHub Actions Runner
+        :link: setup-github-actions-runner
+        :link-type: doc
+
+        **Set Up Self-Hosted Runner**
+
+        Configure a CentOS Stream 10 self-hosted runner for CI/CD pipelines.
 
 Developer Guide Characteristics
 -------------------------------
@@ -197,3 +205,4 @@ After setting up your development environment:
    local-testing-requirements
    migrate-molecule-tests
    setup-dependabot-automation
+   setup-github-actions-runner

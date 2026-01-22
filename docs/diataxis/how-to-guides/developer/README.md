@@ -42,6 +42,9 @@ Developer How-To Guides are **contribution-oriented** and designed for:
 - [Testing Framework](testing-framework.md) - Understanding the test architecture
 - [CI/CD Pipeline](cicd-pipeline.md) - GitHub Actions workflow details
 
+### CI/CD Infrastructure
+- [Set Up GitHub Actions Runner](setup-github-actions-runner.md) - Configure CentOS Stream 10 self-hosted runner
+
 ### Advanced Development
 - [Debugging Techniques](debugging-techniques.md) - Troubleshoot development issues
 - [Custom Molecule Scenarios](custom-molecule-scenarios.md) - Advanced testing scenarios
