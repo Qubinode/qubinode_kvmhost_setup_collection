@@ -35,13 +35,36 @@ FIXES_APPLIED=0
 for repo in "${PROBLEM_REPOS[@]}"; do
     REPO_FILE="/etc/yum.repos.d/${repo}.repo"
     if [ -f "$REPO_FILE" ]; then
-        # Check if gpgcheck=1 exists
+        REPO_FIXED=false
+
+        # Check and fix gpgcheck=1 (package signature verification)
         if grep -q "gpgcheck=1" "$REPO_FILE" 2>/dev/null; then
             echo "  📦 Disabling GPG check for ${repo} repository..."
             sudo sed -i 's/gpgcheck=1/gpgcheck=0/g' "$REPO_FILE" 2>/dev/null || true
+            REPO_FIXED=true
+        fi
+
+        # Check and fix repo_gpgcheck=1 (repository metadata signature verification)
+        # This is the setting that causes "repomd.xml GPG signature verification error"
+        if grep -q "repo_gpgcheck=1" "$REPO_FILE" 2>/dev/null; then
+            echo "  📦 Disabling repo metadata GPG check for ${repo} repository..."
+            sudo sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/g' "$REPO_FILE" 2>/dev/null || true
+            REPO_FIXED=true
+        fi
+
+        # If neither gpgcheck nor repo_gpgcheck is set, add repo_gpgcheck=0 to be safe
+        # This handles cases where the default might enable repo_gpgcheck
+        if ! grep -q "repo_gpgcheck" "$REPO_FILE" 2>/dev/null; then
+            echo "  📦 Adding repo_gpgcheck=0 for ${repo} repository..."
+            # Add repo_gpgcheck=0 after the [repo] section header
+            sudo sed -i "/^\[${repo}\]/a repo_gpgcheck=0" "$REPO_FILE" 2>/dev/null || true
+            REPO_FIXED=true
+        fi
+
+        if [ "$REPO_FIXED" = true ]; then
             FIXES_APPLIED=$((FIXES_APPLIED + 1))
         else
-            echo "  ✓ ${repo} repository already has GPG check disabled or not configured"
+            echo "  ✓ ${repo} repository already has GPG checks disabled"
         fi
     fi
 done
