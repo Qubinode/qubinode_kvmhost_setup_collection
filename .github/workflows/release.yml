@@ -291,7 +291,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{steps.tag.outputs.tag}}
           name: Release v${{steps.tag.outputs.tag}}
           files: tosin2013-qubinode_kvmhost_setup_collection-${{steps.tag.outputs.tag}}.tar.gz
