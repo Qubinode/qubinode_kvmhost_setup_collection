@@ -1,0 +1,231 @@
+name: Self-Hosted Runner Cleanup
+
+# Trigger on CI/CD Pipeline failures or manual dispatch
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+
+  workflow_dispatch:
+    inputs:
+      force_full_reset:
+        description: 'Force full Podman reset (destroys all containers/images)'
+        required: false
+        default: false
+        type: boolean
+      cleanup_molecule_only:
+        description: 'Only cleanup molecule state (skip Podman reset)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: runner-cleanup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  cleanup-runner:
+    name: Cleanup Self-Hosted Runner
+    runs-on: self-hosted
+    timeout-minutes: 10
+
+    # Run on failure, or manual trigger, or when force reset is requested
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'failure' ||
+      github.event.workflow_run.conclusion == 'cancelled'
+
+    steps:
+      - name: Display trigger information
+        run: |
+          echo "## Runner Cleanup Triggered"
+          echo ""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Trigger: Manual dispatch"
+            echo "Force full reset: ${{ github.event.inputs.force_full_reset }}"
+            echo "Molecule only: ${{ github.event.inputs.cleanup_molecule_only }}"
+          else
+            echo "Trigger: Workflow run completed"
+            echo "Workflow: ${{ github.event.workflow_run.name }}"
+            echo "Conclusion: ${{ github.event.workflow_run.conclusion }}"
+            echo "Run URL: ${{ github.event.workflow_run.html_url }}"
+          fi
+          echo ""
+
+      - name: Pre-cleanup status
+        run: |
+          echo "### Pre-Cleanup Status"
+          echo ""
+          echo "#### Podman Containers"
+          podman ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" 2>/dev/null || echo "No containers or podman error"
+          echo ""
+          echo "#### Podman Images"
+          podman images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null | head -20 || echo "No images or podman error"
+          echo ""
+          echo "#### Molecule State Directories"
+          ls -la ~/.ansible/tmp/molecule.* 2>/dev/null || echo "No molecule state directories found"
+          echo ""
+          echo "#### Disk Usage"
+          df -h /home /var/lib/containers 2>/dev/null || df -h / | head -5
+
+      - name: Fix Podman internal state
+        if: ${{ github.event.inputs.cleanup_molecule_only != 'true' }}
+        run: |
+          echo "### Fixing Podman Internal State"
+          echo ""
+
+          # Fix the "invalid internal status" error
+          echo "Running podman system migrate..."
+          podman system migrate 2>&1 || echo "Migration completed (may show warnings)"
+
+          echo ""
+          echo "Podman info after migrate:"
+          podman info --format "{{.Host.CgroupsVersion}} cgroupv{{.Host.CgroupsVersion}}" 2>/dev/null || true
+
+      - name: Stop and remove all containers
+        if: ${{ github.event.inputs.cleanup_molecule_only != 'true' }}
+        run: |
+          echo "### Stopping and Removing Containers"
+          echo ""
+
+          # Stop all running containers
+          if podman ps -q 2>/dev/null | grep -q .; then
+            echo "Stopping running containers..."
+            podman stop -a -t 5 2>&1 || true
+          else
+            echo "No running containers to stop"
+          fi
+
+          # Remove all containers (including stopped)
+          if podman ps -aq 2>/dev/null | grep -q .; then
+            echo "Removing all containers..."
+            podman rm -af 2>&1 || true
+          else
+            echo "No containers to remove"
+          fi
+
+      - name: Cleanup molecule state
+        run: |
+          echo "### Cleaning Molecule State"
+          echo ""
+
+          # Remove molecule temporary directories
+          echo "Removing molecule state directories..."
+          rm -rf ~/.ansible/tmp/molecule.* 2>/dev/null && echo "Cleaned ~/.ansible/tmp/molecule.*" || echo "No molecule state in ~/.ansible/tmp/"
+          rm -rf ~/.cache/molecule 2>/dev/null && echo "Cleaned ~/.cache/molecule" || echo "No molecule cache"
+
+          # Clean up any orphaned async directories
+          rm -rf ~/.ansible_async/* 2>/dev/null && echo "Cleaned ~/.ansible_async/" || echo "No async state"
+
+          # Clean up molecule state in common locations
+          for dir in /tmp/molecule* /var/tmp/molecule*; do
+            if [ -d "$dir" ]; then
+              rm -rf "$dir" && echo "Cleaned $dir"
+            fi
+          done
+
+          echo "Molecule state cleanup complete"
+
+      - name: Prune Podman resources
+        if: ${{ github.event.inputs.cleanup_molecule_only != 'true' }}
+        run: |
+          echo "### Pruning Podman Resources"
+          echo ""
+
+          # Prune unused containers, images, networks, and volumes
+          echo "Pruning unused resources..."
+          podman system prune -f 2>&1 || echo "Prune completed (may show warnings)"
+
+          # If force full reset, remove all images too
+          if [ "${{ github.event.inputs.force_full_reset }}" = "true" ]; then
+            echo ""
+            echo "Force full reset requested - removing all images..."
+            podman rmi -af 2>&1 || echo "Image removal completed"
+
+            echo ""
+            echo "Running full system reset..."
+            podman system reset --force 2>&1 || echo "System reset completed"
+          fi
+
+      - name: Clear container storage issues
+        if: ${{ github.event.inputs.cleanup_molecule_only != 'true' }}
+        run: |
+          echo "### Clearing Container Storage Issues"
+          echo ""
+
+          # Fix any overlay storage issues
+          if [ -d ~/.local/share/containers ]; then
+            echo "Checking container storage health..."
+            podman system check 2>&1 || echo "System check completed (may show issues to fix)"
+          fi
+
+          # Reset pause process if needed
+          PAUSE_PID=$(cat /run/user/$(id -u)/libpod/pause.pid 2>/dev/null || true)
+          if [ -n "$PAUSE_PID" ]; then
+            if ! kill -0 "$PAUSE_PID" 2>/dev/null; then
+              echo "Removing stale pause PID file..."
+              rm -f /run/user/$(id -u)/libpod/pause.pid 2>/dev/null || true
+            fi
+          fi
+
+      - name: Post-cleanup status
+        run: |
+          echo "### Post-Cleanup Status"
+          echo ""
+          echo "#### Podman Containers"
+          podman ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" 2>/dev/null || echo "No containers"
+          echo ""
+          echo "#### Podman Images"
+          podman images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null | head -10 || echo "No images"
+          echo ""
+          echo "#### Disk Usage After Cleanup"
+          df -h /home /var/lib/containers 2>/dev/null || df -h / | head -5
+          echo ""
+          echo "#### Podman System Info"
+          podman system info --format "Store: {{.Store.GraphRoot}}, Containers: {{.Store.ContainerStore.Number}}, Images: {{.Store.ImageStore.Number}}" 2>/dev/null || echo "Unable to get system info"
+
+      - name: Verify Podman functionality
+        if: ${{ github.event.inputs.cleanup_molecule_only != 'true' }}
+        run: |
+          echo "### Verifying Podman Functionality"
+          echo ""
+
+          # Test basic podman operations
+          echo "Testing container creation..."
+          if podman run --rm alpine:latest echo "Podman test successful" 2>&1; then
+            echo "Podman is functioning correctly"
+          else
+            echo "WARNING: Podman test failed - manual intervention may be required"
+          fi
+
+          # Cleanup test container
+          podman rmi alpine:latest 2>/dev/null || true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Runner Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "**Trigger:** Manual dispatch" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Trigger:** CI/CD Pipeline ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Failed Run:** [${{ github.event.workflow_run.run_number }}](${{ github.event.workflow_run.html_url }})" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Cleanup Actions Performed" >> $GITHUB_STEP_SUMMARY
+          echo "- Podman system migrate (fix internal state)" >> $GITHUB_STEP_SUMMARY
+          echo "- Removed all containers" >> $GITHUB_STEP_SUMMARY
+          echo "- Cleaned molecule state directories" >> $GITHUB_STEP_SUMMARY
+          echo "- Pruned unused Podman resources" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.force_full_reset }}" = "true" ]; then
+            echo "- **Full system reset performed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The self-hosted runner should now be ready for the next CI/CD run." >> $GITHUB_STEP_SUMMARY
