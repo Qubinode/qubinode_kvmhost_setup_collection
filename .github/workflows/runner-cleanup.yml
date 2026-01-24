@@ -28,16 +28,54 @@ permissions:
   actions: read
 
 jobs:
-  cleanup-runner:
-    name: Cleanup Self-Hosted Runner
-    runs-on: self-hosted
-    timeout-minutes: 10
+  wait-for-jobs:
+    name: Wait for CI/CD Jobs to Complete
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
-    # Run on failure, or manual trigger, or when force reset is requested
+    # Run on failure, or manual trigger
     if: >
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'failure' ||
       github.event.workflow_run.conclusion == 'cancelled'
+
+    steps:
+      - name: Wait for any in-progress CI/CD runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Checking for in-progress CI/CD Pipeline runs..."
+
+          MAX_WAIT=600  # 10 minutes max wait
+          WAIT_INTERVAL=15
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check for in-progress or queued runs of CI/CD Pipeline
+            IN_PROGRESS=$(gh api repos/${{ github.repository }}/actions/workflows/ansible-test.yml/runs \
+              --jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued")] | length' 2>/dev/null || echo "0")
+
+            if [ "$IN_PROGRESS" = "0" ]; then
+              echo "No in-progress CI/CD runs found. Safe to proceed with cleanup."
+              break
+            fi
+
+            echo "Found $IN_PROGRESS in-progress/queued CI/CD run(s). Waiting ${WAIT_INTERVAL}s..."
+            sleep $WAIT_INTERVAL
+            ELAPSED=$((ELAPSED + WAIT_INTERVAL))
+          done
+
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "WARNING: Timeout waiting for CI/CD runs to complete. Proceeding with cleanup anyway."
+          fi
+
+          echo "Wait complete. Elapsed time: ${ELAPSED}s"
+
+  cleanup-runner:
+    name: Cleanup Self-Hosted Runner
+    runs-on: self-hosted
+    needs: wait-for-jobs
+    timeout-minutes: 10
 
     steps:
       - name: Display trigger information
