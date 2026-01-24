@@ -95,16 +95,54 @@
       ignore_errors: true
 
     # Additional workaround for EPEL GPG signature issues in containers
+    # ADR-0018: Disable both gpgcheck and repo_gpgcheck for EPEL repos
     - name: Disable GPG verification for EPEL repositories in containers
       ini_file:
-        path: "{{ item }}"
-        section: epel
-        option: gpgcheck
+        path: "{{ item.path }}"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
         value: "0"
         backup: false
       loop:
-        - /etc/yum.repos.d/epel.repo
-        - /etc/yum.repos.d/epel-next.repo
+        # gpgcheck controls package signature verification
+        - { path: "/etc/yum.repos.d/epel.repo", section: "epel", option: "gpgcheck" }
+        - { path: "/etc/yum.repos.d/epel-next.repo", section: "epel-next", option: "gpgcheck" }
+        # repo_gpgcheck controls repository metadata (repomd.xml) signature verification
+        # This is the setting that causes "GPG signature is not available" errors
+        - { path: "/etc/yum.repos.d/epel.repo", section: "epel", option: "repo_gpgcheck" }
+        - { path: "/etc/yum.repos.d/epel-next.repo", section: "epel-next", option: "repo_gpgcheck" }
+      ignore_errors: true
+      when: ansible_virtualization_type == "container"
+
+    # Handle UBI repository GPG issues in RHEL containers (ADR-0018)
+    - name: Disable repo_gpgcheck for UBI repositories in RHEL containers
+      shell: |
+        for repo_file in /etc/yum.repos.d/ubi*.repo; do
+          if [ -f "$repo_file" ]; then
+            # Add repo_gpgcheck=0 if not present, or change 1 to 0
+            if grep -q "repo_gpgcheck" "$repo_file"; then
+              sed -i 's/repo_gpgcheck=1/repo_gpgcheck=0/g' "$repo_file"
+            else
+              # Add repo_gpgcheck=0 after each section header
+              sed -i 's/^\(\[.*\]\)$/\1\nrepo_gpgcheck=0/' "$repo_file"
+            fi
+            echo "Fixed $repo_file"
+          fi
+        done
+      args:
+        executable: /bin/bash
+      ignore_errors: true
+      changed_when: false
+      when:
+        - ansible_virtualization_type == "container"
+        - ansible_distribution == "RedHat"
+
+    # Clean DNF cache after modifying repo configs to ensure changes take effect
+    - name: Clean DNF cache after repo modifications
+      shell: dnf clean all 2>/dev/null || yum clean all 2>/dev/null || true
+      args:
+        executable: /bin/bash
+      changed_when: false
       ignore_errors: true
       when: ansible_virtualization_type == "container"
 
