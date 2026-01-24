@@ -57,6 +57,17 @@
     - gpg_verification
     - adr_0001
 
+- name: Ensure dnf-plugins-core is installed for config-manager
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+    disablerepo: epel*
+  become: true
+  tags:
+    - security
+    - gpg_verification
+    - adr_0001
+
 - name: Verify DNF configuration compliance
   ansible.builtin.command: dnf config-manager --dump
   register: dnf_config_dump
