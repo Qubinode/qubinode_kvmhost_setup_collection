@@ -40,7 +40,7 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Fix third-party repository GPG issues
         run: |
           # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
@@ -219,7 +219,7 @@ jobs:
         ansible-version: ["2.18", "2.19"]
         python-version: ["3.11"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Fix third-party repository GPG issues
@@ -748,7 +748,7 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Fix third-party repository GPG issues
         run: |
           # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
@@ -887,7 +887,7 @@ jobs:
       issues: write
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Check for new Ansible versions and create issue if needed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -926,7 +926,7 @@ jobs:
     needs: lint
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Fix third-party repository GPG issues
         run: |
           # Fix GPG verification issues for gh-cli and other third-party repos (ADR-0018)
@@ -1081,7 +1081,7 @@ jobs:
     needs: test
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Emergency container cleanup
         run: |
           echo "🚨 Running emergency cleanup for stuck containers..."
@@ -1096,7 +1096,7 @@ jobs:
       contents: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
