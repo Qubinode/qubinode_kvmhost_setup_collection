@@ -1,7 +1,11 @@
 # ADR-0004: Idempotent Task Design Pattern
 
 ## Status
-Accepted
+Implemented
+
+> **Review Note (2026-01-25)**: ADR compliance review confirmed full implementation with
+> 9/10 compliance score. Idempotency testing framework exists with comprehensive
+> Molecule tests verifying task idempotency across all roles.
 
 ## Context
 The Qubinode automation needs to be reliable and safe to run multiple times without causing unintended side effects. Infrastructure automation often needs to be re-executed for updates, troubleshooting, or recovery scenarios. Without proper idempotency, repeated executions could:

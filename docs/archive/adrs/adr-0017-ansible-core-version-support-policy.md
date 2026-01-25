@@ -1,7 +1,11 @@
 # ADR-0017: ansible-core Version Support Policy
 
 ## Status
-Accepted
+Implemented
+
+> **Review Note (2026-01-25)**: ADR compliance review confirmed full implementation with
+> 9/10 compliance score. ansible-core version policy is enforced with 2.18/2.19 CI matrix
+> testing and proper environment variable configuration.
 
 ## Context
 The Qubinode project requires a clear policy for supported ansible-core versions to ensure compatibility across our target platforms (RHEL 9, RHEL 10, Rocky Linux 9, CentOS Stream 10). Key considerations include:

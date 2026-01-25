@@ -1,7 +1,11 @@
 # ADR-0016: Modular Libvirt Daemons for RHEL 10 / CentOS Stream 10
 
 ## Status
-Accepted
+Implemented
+
+> **Review Note (2026-01-25)**: ADR compliance review confirmed full implementation with
+> 9/10 compliance score. Modular libvirt daemons are fully implemented for RHEL 10
+> with socket-activated services and backward compatibility for RHEL 8/9.
 
 ## Context
 

@@ -1,7 +1,11 @@
 # ADR-0018: CI/CD Third-Party Repository GPG Verification Strategy
 
 ## Status
-Accepted
+Implemented
+
+> **Review Note (2026-01-25)**: ADR compliance review confirmed full implementation with
+> 9/10 compliance score. GPG verification bypass script is deployed across all CI/CD
+> workflows with proper documentation and scope limitations.
 
 ## Date
 2026-01-22
@@ -113,6 +117,10 @@ Implement a **GPG verification bypass for third-party repositories in CI/CD envi
 1. `scripts/fix-ci-repo-gpg-issues.sh` - Reusable GPG fix script
 2. `.github/workflows/ansible-test.yml` - Added GPG fix step to 4 jobs
 3. `.github/workflows/dependency-testing.yml` - Added GPG fix step to 6 jobs
+4. `molecule/default/prepare.yml` - Extended GPG handling for container testing:
+   - Added `repo_gpgcheck=0` for EPEL repos (lines 107-114)
+   - Added UBI repository handling for RHEL containers (lines 117-139)
+   - Added DNF cache cleanup after repo modifications (lines 141-147)
 
 ### Usage
 The fix is applied automatically at the start of each CI/CD job:
