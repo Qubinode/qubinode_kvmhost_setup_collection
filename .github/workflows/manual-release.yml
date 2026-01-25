@@ -373,8 +373,10 @@ jobs:
           fi
           
           # Publish to Galaxy
-          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz --api-key "$GALAXY_API_KEY"
-          echo "✅ Successfully deployed to Ansible Galaxy!"
+          # Note: --no-wait is used to work around Galaxy server bug with is_highest column
+          # The collection publishes successfully, but import verification fails due to Galaxy DB issue
+          ansible-galaxy collection publish tosin2013-qubinode_kvmhost_setup_collection-${{ needs.validate-inputs.outputs.version }}.tar.gz --api-key "$GALAXY_API_KEY" --no-wait
+          echo "✅ Collection published to Galaxy (verification skipped due to Galaxy server issue)"
         env:
           GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
 
