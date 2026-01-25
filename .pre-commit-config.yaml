@@ -1,0 +1,111 @@
+# =============================================================================
+# Pre-commit Configuration for Qubinode KVM Host Setup Collection
+# =============================================================================
+# Implements ADR-0011: Local Molecule Testing Validation Before CI/CD
+#
+# Installation:
+#   pip install pre-commit
+#   pre-commit install
+#
+# Manual run:
+#   pre-commit run --all-files
+#
+# Skip hooks (emergency only):
+#   git commit --no-verify -m "message"
+# =============================================================================
+
+default_language_version:
+  python: python3.11
+
+repos:
+  # -----------------------------------------------------------------------------
+  # Standard Pre-commit Hooks
+  # -----------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '^\.ansible/'
+      - id: end-of-file-fixer
+        exclude: '^\.ansible/'
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags used by Ansible
+        exclude: '^(\.ansible/|molecule/.*/molecule\.yml)'
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # -----------------------------------------------------------------------------
+  # Ansible Lint - Code Quality
+  # -----------------------------------------------------------------------------
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v24.10.0
+    hooks:
+      - id: ansible-lint
+        name: ansible-lint
+        description: Run ansible-lint on Ansible files
+        entry: ansible-lint
+        language: python
+        files: \.(yml|yaml)$
+        exclude: '^(\.ansible/|\.github/|molecule/.*/(molecule|prepare|converge|verify|cleanup)\.yml|venv.*/)'
+        args: ['--force-color']
+        additional_dependencies:
+          - ansible-core>=2.18.0
+
+  # -----------------------------------------------------------------------------
+  # YAML Lint - Syntax Validation
+  # -----------------------------------------------------------------------------
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        name: yamllint
+        description: Lint YAML files
+        files: \.(yml|yaml)$
+        exclude: '^(\.ansible/|venv.*/)'
+        args: ['-c', '.yamllint', '--strict']
+
+  # -----------------------------------------------------------------------------
+  # Local Molecule Testing - ADR-0011 Quality Gate (CRITICAL)
+  # -----------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: molecule-syntax-check
+        name: molecule-syntax-check
+        description: Validate Ansible playbook syntax before testing
+        entry: bash -c 'if [ -f test.yml ]; then ansible-playbook --syntax-check test.yml; fi'
+        language: system
+        files: \.(yml|yaml)$
+        exclude: '^(\.ansible/|\.github/|venv.*/)'
+        pass_filenames: false
+        stages: [commit]
+
+      - id: molecule-security-compliance
+        name: molecule-security-compliance
+        description: ADR-0012/0013 security compliance check for Molecule configs
+        entry: scripts/check-molecule-security.sh
+        language: script
+        files: ^molecule/.*molecule\.yml$
+        pass_filenames: false
+        stages: [commit]
+
+      - id: local-molecule-test
+        name: local-molecule-test
+        description: "ADR-0011: Mandatory local Molecule testing before push"
+        entry: scripts/pre-commit-molecule-test.sh
+        language: script
+        files: ^(roles/|playbooks/|molecule/|.*\.yml$)
+        exclude: '^(\.ansible/|\.github/|docs/|venv.*/)'
+        pass_filenames: false
+        stages: [push]  # Run on push, not commit (to avoid slowdown)
+        verbose: true
+
+# =============================================================================
+# Stage Configuration
+# =============================================================================
+# - commit: Fast checks (syntax, lint, security)
+# - push: Full Molecule testing (ADR-0011 enforcement)
+#
+# This allows quick commits while ensuring full validation before push.
+# =============================================================================
