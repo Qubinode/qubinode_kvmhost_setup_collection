@@ -768,7 +768,7 @@ jobs:
           echo "Images Successfully Pulled: $PULL_SUCCESS/$PULL_TOTAL" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Available Container Images:" >> $GITHUB_STEP_SUMMARY
-          podman images --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}" >> $GITHUB_STEP_SUMMARY
+          podman images --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}" >> $GITHUB_STEP_SUMMARY || echo "Unable to list container images (podman error)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   dependency-security-scan:
