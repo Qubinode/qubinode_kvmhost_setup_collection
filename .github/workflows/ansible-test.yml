@@ -190,10 +190,29 @@ jobs:
       - name: Install required Ansible collections and roles
         run: |
           source $VENV_NAME/bin/activate
-          # Install collections and roles from main requirements file
-          ansible-galaxy install -r requirements.yml
-          # Also install from collection-specific requirements
-          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
+          # Install collections and roles from main requirements file with retry logic
+          max_attempts=3
+          attempt=1
+          until ansible-galaxy install -r requirements.yml; do
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Failed to install from requirements.yml after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Attempt $attempt failed, retrying in 30 seconds..."
+            sleep 30
+            attempt=$((attempt + 1))
+          done
+          # Also install from collection-specific requirements with retry logic
+          attempt=1
+          until ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml; do
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Failed to install collections after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Attempt $attempt failed, retrying in 30 seconds..."
+            sleep 30
+            attempt=$((attempt + 1))
+          done
           # Verify installations
           echo "📋 Installed collections:"
           ansible-galaxy collection list

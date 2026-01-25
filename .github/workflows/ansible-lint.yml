@@ -37,7 +37,17 @@ jobs:
 
       - name: Install required Ansible collections
         run: |
-          ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml
+          max_attempts=3
+          attempt=1
+          until ansible-galaxy collection install -r roles/kvmhost_setup/collection/requirements.yml; do
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Failed to install collections after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Attempt $attempt failed, retrying in 30 seconds..."
+            sleep 30
+            attempt=$((attempt + 1))
+          done
 
       - name: Run ansible-lint
         run: |

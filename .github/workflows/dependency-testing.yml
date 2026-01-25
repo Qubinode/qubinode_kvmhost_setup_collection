@@ -309,10 +309,21 @@ jobs:
       - name: Test additional dependencies
         run: |
           source venv-${{ matrix.name }}/bin/activate
-          # Test Ansible collections installation
-          ansible-galaxy collection install community.general
-          ansible-galaxy collection install containers.podman
-          
+          # Test Ansible collections installation with retry logic
+          max_attempts=3
+          for collection in community.general containers.podman; do
+            attempt=1
+            until ansible-galaxy collection install $collection; do
+              if [ $attempt -ge $max_attempts ]; then
+                echo "Failed to install $collection after $max_attempts attempts"
+                exit 1
+              fi
+              echo "Attempt $attempt failed for $collection, retrying in 30 seconds..."
+              sleep 30
+              attempt=$((attempt + 1))
+            done
+          done
+
           # Test linting tools
           pip install ansible-lint yamllint
           ansible-lint --version
