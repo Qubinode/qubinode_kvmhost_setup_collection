@@ -142,26 +142,27 @@ This collection is designed to work with GitHub Actions self-hosted runners on R
 
 ### Recommended Runner Configuration
 
-**🥇 Primary Recommendation: Rocky Linux 9.x**
-- Free and open-source
-- RHEL-compatible without subscription requirements
-- Reliable EPEL repository access
-- Excellent for CI/CD environments
+**🥇 Primary Recommendation: CentOS Stream 10**
+- Tracks RHEL 10 development — tests run against the same packages shipping in RHEL 10
+- Python 3.12 available by default
+- Podman 5.x with cgroup v2 support
+- Modular libvirt daemons (socket-activated) for accurate integration testing
+- Avoids third-party repository GPG issues encountered on Rocky Linux 9
 
 **🥈 Alternative Options:**
-- AlmaLinux 9.x (identical setup to Rocky Linux)
-- RHEL 9.x (requires active subscription)
-- CentOS Stream 9 (rolling release, more maintenance)
+- RHEL 10 (requires active subscription)
+- Rocky Linux 9.x / AlmaLinux 9.x (RHEL 9 compatible, Python 3.11)
+- CentOS Stream 9
 
 ### Quick Setup
 
 ```bash
-# For Rocky Linux, AlmaLinux, RHEL, or CentOS Stream
+# For CentOS Stream 10, RHEL 10, Rocky Linux, or AlmaLinux
 sudo ./scripts/setup-github-runner-rocky.sh
 
 # The script automatically:
 # ✅ Detects your distribution
-# ✅ Installs Python 3.11 and dependencies
+# ✅ Installs Python 3.12 (3.11 on EL9)
 # ✅ Configures EPEL repository
 # ✅ Sets up Podman for testing
 # ✅ Installs Ansible and Molecule
@@ -174,10 +175,11 @@ sudo ./scripts/setup-github-runner-rocky.sh
 | **CPU** | 2 cores | 4+ cores |
 | **RAM** | 4 GB | 8+ GB |
 | **Storage** | 20 GB | 50+ GB |
-| **OS** | RHEL-based 8+ | Rocky Linux 9.x |
+| **OS** | RHEL-based 9+ | CentOS Stream 10 |
 
 For detailed setup instructions and troubleshooting, see:
-- **Setup Guide**: `scripts/README.md`
+- **CentOS Stream 10 Runner Guide**: [docs/diataxis/how-to-guides/developer/setup-github-actions-runner.md](docs/diataxis/how-to-guides/developer/setup-github-actions-runner.md)
+- **Setup Script**: `scripts/setup-github-runner-rocky.sh` (supports CentOS Stream, RHEL, Rocky, AlmaLinux)
 - **Architecture Decision**: `docs/adr/ADR-0013-GITHUB-ACTIONS-RUNNER-SETUP.md`
 
 # Collection directories and files Reference
