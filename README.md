@@ -15,6 +15,7 @@ This collection uses the [Diátaxis framework](https://diataxis.fr/) for compreh
 
 ### 🚀 Quick Start
 - **New users**: Start with [Quick Start Guide](docs/diataxis/tutorials/00-quick-start.md)
+- **Runnable examples**: See [examples/](examples/) for a ready-to-use inventory and playbook
 - **Learning**: Follow [Your First KVM Host Setup](docs/diataxis/tutorials/01-first-kvm-host-setup.md)
 
 ### 📖 Complete Documentation
@@ -41,7 +42,6 @@ Role Variables
 | required_rpm_pakcages | list of packages that will be installed |
 | libvirt_services | libvirt services |
 | libvirt_host_networks | dictionary variable that creates libvirt network xml file. must set the name, mode, and bridge key |
-| libvirt_host_pool | Content Cell  |
 | kvm_host_ipaddr | default value is ansible_default_ipv4.address  |
 | kvm_host_ip | default value is ansible_default_ipv4.address |
 | kvm_host_interface | default value is ansible_default_ipv4.interface |
@@ -106,6 +106,17 @@ The GitHub Actions workflow supports an optional input parameter to control EPEL
 - **Parameter**: `enable_epel_gpg`
 - **Default**: `false`
 - **Description**: Enable GPG verification for EPEL repositories
+
+## Troubleshooting
+
+For networking-specific issues see the full guide: [Troubleshoot Network Issues](docs/diataxis/how-to-guides/troubleshoot-networking.md).
+
+| Symptom | Quick fix |
+|---------|-----------|
+| `virsh` commands fail with "permission denied" | Add your user to the `libvirt` group: `sudo usermod -aG libvirt $USER` and re-login |
+| Bridge interface not created | Verify NetworkManager is running: `sudo systemctl status NetworkManager` |
+| VMs cannot reach external network | Check bridge slave device: `nmcli connection show qubibr0` and confirm the physical NIC is attached |
+| Cockpit unreachable on port 9090 | Open the firewall port: `sudo firewall-cmd --add-service=cockpit --permanent && sudo firewall-cmd --reload` |
 
 ### Troubleshooting EPEL Issues
 
@@ -378,11 +389,15 @@ See [Ansible Using collections](https://docs.ansible.com/ansible/devel/user_guid
 
 ## Release notes
 
-See the [changelog](https://github.com/ansible-collections/REPONAMEHERE/tree/main/CHANGELOG.rst).
+See the [changelog](https://github.com/Qubinode/qubinode_kvmhost_setup_collection/tree/main/CHANGELOG.rst).
 
 ## Roadmap
 
-<!-- Optional. Include the roadmap for this collection, and the proposed release/versioning strategy so users can anticipate the upgrade/update cycle. -->
+- **RHEL 10 GA full support and testing** – validate all roles on RHEL 10 and CentOS Stream 10 with modular libvirt daemons
+- **Complete modular role migration** – move remaining functionality from `kvmhost_setup` into dedicated roles (`kvmhost_base`, `kvmhost_networking`, `kvmhost_libvirt`, `kvmhost_storage`, `kvmhost_cockpit`, `kvmhost_user_config`)
+- **Expanded Molecule test coverage** – add Molecule scenarios for every modular role with Podman-based container testing
+- **Ansible 2.24+ compatibility** – clean up deprecated variables and ensure forward compatibility
+- **Sphinx-based documentation site** – generate a browsable documentation site from in-repo sources
 
 ## More information
 

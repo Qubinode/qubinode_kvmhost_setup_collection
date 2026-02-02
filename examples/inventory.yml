@@ -1,0 +1,14 @@
+---
+all:
+  hosts:
+    kvm-host:
+      ansible_host: 192.168.1.100  # Replace with your host IP
+      ansible_user: admin           # Replace with your SSH user
+      ansible_become: true
+  vars:
+    admin_user: admin
+    kvm_host_ipaddr: "{{ ansible_default_ipv4.address }}"
+    kvm_host_interface: "{{ ansible_default_ipv4.interface }}"
+    kvm_host_gw: "{{ ansible_default_ipv4.gateway }}"
+    kvm_host_netmask: "{{ ansible_default_ipv4.netmask }}"
+    kvm_host_mask_prefix: 24

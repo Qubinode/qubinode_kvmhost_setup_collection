@@ -18,7 +18,6 @@ Role Variables
 | required_rpm_pakcages | list of packages that will be installed |
 | libvirt_services | libvirt services |
 | libvirt_host_networks | dictionary variable that creates libvirt network xml file. must set the name, mode, and bridge key |
-| libvirt_host_pool | Content Cell  |
 | kvm_host_ipaddr | default value is ansible_default_ipv4.address  |
 | kvm_host_ip | default value is ansible_default_ipv4.address |
 | kvm_host_interface | default value is ansible_default_ipv4.interface |

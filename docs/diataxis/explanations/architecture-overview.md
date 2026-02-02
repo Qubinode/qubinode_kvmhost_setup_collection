@@ -32,6 +32,37 @@ The collection implements a layered architecture with clear dependencies:
 └─────────────────────────────────────────┘
 ```
 
+### Network Topology
+
+The collection creates a bridged networking stack that connects VMs to the physical network through NetworkManager:
+
+```
+┌──────────┐  ┌──────────┐        ┌──────────┐
+│   VM 1   │  │   VM 2   │  ...   │   VM N   │
+│ (vnetX)  │  │ (vnetX)  │        │ (vnetX)  │
+└────┬─────┘  └────┬─────┘        └────┬─────┘
+     │              │                   │
+     │    ┌─────────┴───────────────────┘
+     │    │   libvirt networks
+     │    │   (bridge mode / NAT mode)
+┌────┴────┴──────────────────────────────────┐
+│        NetworkManager Bridge               │
+│              (qubibr0)                     │
+│                                            │
+│  ┌──────────────────────────────────────┐  │
+│  │  Bridge Slave: Physical NIC (e.g.   │  │
+│  │  eno1 / ens3 / enp0s25)            │  │
+│  └──────────────────────────────────────┘  │
+└─────────────────┬──────────────────────────┘
+                  │
+          Physical Network / Gateway
+```
+
+- **Bridge mode** (default) – VMs appear as peers on the physical LAN; each VM can obtain a DHCP lease from the upstream router.
+- **NAT mode** – libvirt manages a private subnet and performs NAT for outbound traffic; useful for isolated lab environments.
+
+The bridge name, slave device, and IP settings are all driven by inventory variables (`qubinode_bridge_name`, `kvm_host_interface`, etc.).
+
 ### 3. Configuration-Driven Approach
 The collection uses extensive configuration variables to adapt to different environments without code changes:
 - **Environment Flexibility**: Same code works across dev, staging, production

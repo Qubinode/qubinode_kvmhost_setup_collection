@@ -1,0 +1,83 @@
+---
+# Minimal KVM Host Setup
+# -----------------------
+# Configures a bare-metal RHEL-based server as a KVM hypervisor with
+# networking, storage, and the Cockpit web console.
+#
+# Usage:
+#   ansible-playbook -i examples/inventory.yml examples/setup-kvmhost.yml
+#
+# Override variables on the command line with -e:
+#   ansible-playbook -i examples/inventory.yml examples/setup-kvmhost.yml \
+#     -e admin_user=myuser -e kvm_host_mask_prefix=24
+
+- name: Set up KVM host
+  hosts: all
+  become: true
+
+  vars:
+    # --- User account ---------------------------------------------------
+    # SSH user that will receive libvirt group membership.
+    admin_user: admin
+
+    # --- Network --------------------------------------------------------
+    # Detected automatically from facts; override only when needed.
+    kvm_host_ipaddr: "{{ ansible_default_ipv4.address }}"
+    kvm_host_interface: "{{ ansible_default_ipv4.interface }}"
+    kvm_host_gw: "{{ ansible_default_ipv4.gateway }}"
+    kvm_host_netmask: "{{ ansible_default_ipv4.netmask }}"
+    kvm_host_mask_prefix: 24
+
+    # Bridge name created by NetworkManager for VM traffic.
+    qubinode_bridge_name: qubibr0
+
+    # --- Storage --------------------------------------------------------
+    # Directory backing the default libvirt storage pool.
+    kvm_host_libvirt_dir: /var/lib/libvirt/images
+
+    # --- Features -------------------------------------------------------
+    # Set to false to skip Cockpit web console installation.
+    enable_cockpit: true
+
+    # Set to false to skip bridge creation (useful for testing).
+    configure_bridge: true
+
+    # Set to true when running inside a container or VM for CI/CD.
+    cicd_test: false
+
+  roles:
+    - role: qubinode.qubinode_kvmhost_setup_collection.kvmhost_setup
+
+  tags:
+    - kvmhost
+
+# Headless / CI-friendly setup
+# -----------------------------
+# Skips Cockpit, shell customisation, and performance tuning so the
+# playbook can run inside a container or VM for integration tests.
+#
+# Usage:
+#   ansible-playbook -i examples/inventory.yml examples/setup-kvmhost.yml \
+#     --tags ci
+
+- name: CI-friendly KVM host setup
+  hosts: all
+  become: true
+  tags:
+    - ci
+    - never  # only runs when explicitly requested via --tags ci
+
+  vars:
+    admin_user: admin
+    cicd_test: true
+    enable_cockpit: false
+    configure_shell: false
+    enable_kvm_performance_optimization: false
+    kvm_host_ipaddr: "{{ ansible_default_ipv4.address }}"
+    kvm_host_interface: "{{ ansible_default_ipv4.interface }}"
+    kvm_host_gw: "{{ ansible_default_ipv4.gateway }}"
+    kvm_host_netmask: "{{ ansible_default_ipv4.netmask }}"
+    kvm_host_mask_prefix: 24
+
+  roles:
+    - role: qubinode.qubinode_kvmhost_setup_collection.kvmhost_setup
