@@ -156,13 +156,16 @@ This collection is designed to work with GitHub Actions self-hosted runners on R
 
 ### Quick Setup
 
+**CentOS Stream 10 / RHEL 10** — follow the step-by-step guide:
+[Set Up GitHub Actions Self-Hosted Runner (CentOS Stream 10)](docs/diataxis/how-to-guides/developer/setup-github-actions-runner.md)
+
+**Rocky Linux 9 / AlmaLinux 9 / RHEL 9 / CentOS Stream 9:**
 ```bash
-# For CentOS Stream 10, RHEL 10, Rocky Linux, or AlmaLinux
 sudo ./scripts/setup-github-runner-rocky.sh
 
 # The script automatically:
 # ✅ Detects your distribution
-# ✅ Installs Python 3.12 (3.11 on EL9)
+# ✅ Installs Python 3.11 and dependencies
 # ✅ Configures EPEL repository
 # ✅ Sets up Podman for testing
 # ✅ Installs Ansible and Molecule
