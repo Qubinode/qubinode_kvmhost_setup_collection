@@ -189,7 +189,7 @@ jobs:
             Make the script executable and focused on the specific issues found.
 
       - name: Upload analysis artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: lint-analysis
           path: |
